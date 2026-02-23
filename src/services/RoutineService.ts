@@ -132,6 +132,13 @@ export const RoutineService = {
                 data.ejercicios_programados.sort((a: any, b: any) =>
                     (a.orden_ejecucion || 0) - (b.orden_ejecucion || 0)
                 );
+                data.ejercicios_programados.forEach((ex: any) => {
+                    if (ex.series) {
+                        ex.series.sort((a: any, b: any) =>
+                            (a.numero_serie || 0) - (b.numero_serie || 0)
+                        );
+                    }
+                });
             }
 
             return { data, error: null };

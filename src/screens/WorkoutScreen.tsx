@@ -8,6 +8,8 @@ import {
     ActivityIndicator,
     Modal,
     Alert,
+    KeyboardAvoidingView,
+    Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -372,9 +374,14 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
             </View>
 
             {/* Content */}
-            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                {exercises.length === 0 ? (
-                    <View style={styles.placeholderContainer}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                style={{ flex: 1 }}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
+            >
+                <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+                    {exercises.length === 0 ? (
+                        <View style={styles.placeholderContainer}>
                         <View style={styles.placeholderIconContainer}>
                             <MaterialIcons name="fitness-center" size={40} color={colors.primary} />
                         </View>
@@ -512,23 +519,24 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                 {/* Action Buttons */}
 
 
-                {mode === 'ACTIVE' && navMode !== 'edit' && (
-                    <View style={styles.finishButtonContainer}>
-                        <TouchableOpacity style={styles.finishButton} onPress={handleFinishWorkout} disabled={saving}>
-                            {saving ? (
-                                <ActivityIndicator color={colors.background} />
-                            ) : (
-                                <>
-                                    <MaterialIcons name="check-circle" size={24} color={colors.background} />
-                                    <Text style={styles.finishButtonText}>Finalizar Entrenamiento</Text>
-                                </>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                )}
+                    {mode === 'ACTIVE' && navMode !== 'edit' && (
+                        <View style={styles.finishButtonContainer}>
+                            <TouchableOpacity style={styles.finishButton} onPress={handleFinishWorkout} disabled={saving}>
+                                {saving ? (
+                                    <ActivityIndicator color={colors.background} />
+                                ) : (
+                                    <>
+                                        <MaterialIcons name="check-circle" size={24} color={colors.background} />
+                                        <Text style={styles.finishButtonText}>Finalizar Entrenamiento</Text>
+                                    </>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    )}
 
-                <View style={{ height: 100 }} />
-            </ScrollView>
+                    <View style={{ height: 100 }} />
+                </ScrollView>
+            </KeyboardAvoidingView>
 
             {/* FAB */}
             {isStructureEditable && exercises.length > 0 && (
