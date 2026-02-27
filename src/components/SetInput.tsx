@@ -51,7 +51,7 @@ const SetInput: React.FC<SetInputProps> = ({
             editable={isEditable}
             onChangeText={setLocalValue}
             onBlur={handleBlur}
-            selectTextOnFocus
+            selectTextOnFocus={localValue.length > 0}
         />
     );
 };
