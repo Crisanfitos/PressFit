@@ -219,6 +219,12 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
             fontWeight: 'bold',
             color: colors.text,
         },
+        dayDescription: {
+            fontSize: 14,
+            color: colors.primary,
+            marginTop: 4,
+            fontStyle: 'italic',
+        },
         statusBadge: {
             flexDirection: 'row',
             alignItems: 'center',
@@ -380,6 +386,10 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                 <Text style={styles.dayTitle}>
                     {dayData?.nombre_dia || 'Sin entrenar'}
                 </Text>
+
+                {dayData?.descripcion ? (
+                    <Text style={styles.dayDescription}>{dayData.descripcion}</Text>
+                ) : null}
 
                 {workoutStats?.isCompleted && (
                     <View style={[styles.statusBadge, { backgroundColor: `${colors.statusSuccess}20` }]}>
