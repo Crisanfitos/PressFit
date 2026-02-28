@@ -798,4 +798,21 @@ export const RoutineService = {
             return { data: null, error };
         }
     },
+
+    async updateRoutineDayDescription(dayId: string, descripcion: string): Promise<ServiceResponse<RoutineDay>> {
+        try {
+            const { data, error } = await supabase
+                .from('rutinas_diarias')
+                .update({ descripcion })
+                .eq('id', dayId)
+                .select()
+                .single();
+
+            if (error) throw error;
+            return { data, error: null };
+        } catch (error) {
+            console.error('Error updating routine day description:', error);
+            return { data: null, error };
+        }
+    },
 };
