@@ -299,13 +299,14 @@ export const WorkoutService = {
 
     async updateSet(
         setId: string,
-        updates: { weight?: number; reps?: number; rpe?: number }
+        updates: { weight?: number; reps?: number; rpe?: number; descanso_segundos?: number }
     ): Promise<ServiceResponse<SetData>> {
         try {
             const dbUpdates: any = {};
             if (updates.weight !== undefined) dbUpdates.peso_utilizado = updates.weight;
             if (updates.reps !== undefined) dbUpdates.repeticiones = updates.reps;
             if (updates.rpe !== undefined) dbUpdates.rpe = updates.rpe;
+            if (updates.descanso_segundos !== undefined) dbUpdates.descanso_segundos = updates.descanso_segundos;
 
             const { data, error } = await supabase
                 .from('series')
