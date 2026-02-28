@@ -6,6 +6,9 @@ import {
     StyleSheet,
     TouchableOpacity,
     ScrollView,
+    TextInput,
+    Modal,
+    Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -30,6 +33,8 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
 
     const [routine, setRoutine] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [editingDayId, setEditingDayId] = useState<string | null>(null);
+    const [editDescription, setEditDescription] = useState('');
 
     useEffect(() => {
         if (routineId) {
@@ -80,6 +85,33 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
     const getDayId = (dayName: string) => {
         const day = getDayData(dayName);
         return day?.id;
+    };
+
+    const getDayDescription = (dayName: string) => {
+        const day = getDayData(dayName);
+        return day?.descripcion || '';
+    };
+
+    const handleEditDescription = (dayName: string) => {
+        const dayId = getDayId(dayName);
+        if (!dayId) return;
+        setEditingDayId(dayId);
+        setEditDescription(getDayDescription(dayName));
+    };
+
+    const handleSaveDescription = async () => {
+        if (!editingDayId) return;
+        const { error } = await RoutineService.updateRoutineDayDescription(
+            editingDayId,
+            editDescription.trim()
+        );
+        if (error) {
+            Alert.alert('Error', 'No se pudo guardar la descripción');
+        } else {
+            await loadRoutine();
+        }
+        setEditingDayId(null);
+        setEditDescription('');
     };
 
     const styles = StyleSheet.create({
@@ -144,8 +176,60 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
             color: colors.textSecondary,
             marginTop: 4,
         },
+        dayDescription: {
+            fontSize: 13,
+            color: colors.primary,
+            marginTop: 2,
+            fontStyle: 'italic',
+        },
         dayArrow: {
             padding: 8,
+        },
+        modalOverlay: {
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            justifyContent: 'center',
+            padding: 24,
+        },
+        modalContent: {
+            backgroundColor: colors.surface,
+            borderRadius: 16,
+            padding: 20,
+            borderWidth: 1,
+            borderColor: colors.border,
+        },
+        modalTitle: {
+            fontSize: 18,
+            fontWeight: '600',
+            color: colors.text,
+            marginBottom: 12,
+        },
+        modalInput: {
+            backgroundColor: colors.background,
+            borderRadius: 10,
+            padding: 12,
+            color: colors.text,
+            fontSize: 15,
+            borderWidth: 1,
+            borderColor: colors.border,
+            minHeight: 44,
+        },
+        modalButtons: {
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            marginTop: 16,
+            gap: 12,
+        },
+        modalButtonCancel: {
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+            borderRadius: 10,
+        },
+        modalButtonSave: {
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+            borderRadius: 10,
+            backgroundColor: colors.primary,
         },
         emptyDay: {
             opacity: 0.6,
@@ -184,6 +268,7 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
                         <TouchableOpacity
                             key={dayName}
                             style={[styles.dayCard, exerciseCount === 0 && styles.emptyDay]}
+                            onLongPress={() => handleEditDescription(dayName)}
                             onPress={async () => {
                                 let targetDayId = dayId;
 
@@ -210,6 +295,9 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
                         >
                             <View style={styles.dayInfo}>
                                 <Text style={styles.dayName}>{dayName}</Text>
+                                {getDayDescription(dayName) ? (
+                                    <Text style={styles.dayDescription}>{getDayDescription(dayName)}</Text>
+                                ) : null}
                                 <Text style={styles.dayExercises}>
                                     {exerciseCount > 0
                                         ? `${exerciseCount} ejercicio${exerciseCount > 1 ? 's' : ''}`
@@ -227,6 +315,42 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
                     );
                 })}
             </ScrollView>
+
+            {/* Modal for editing day description */}
+            <Modal
+                visible={editingDayId !== null}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setEditingDayId(null)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Descripción del día</Text>
+                        <TextInput
+                            style={styles.modalInput}
+                            value={editDescription}
+                            onChangeText={setEditDescription}
+                            placeholder="Ej: Día de Piernas - Enfoque cuádriceps"
+                            placeholderTextColor={colors.textSecondary}
+                            autoFocus
+                        />
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity
+                                style={styles.modalButtonCancel}
+                                onPress={() => setEditingDayId(null)}
+                            >
+                                <Text style={{ color: colors.textSecondary }}>Cancelar</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.modalButtonSave}
+                                onPress={handleSaveDescription}
+                            >
+                                <Text style={{ color: '#fff', fontWeight: '600' }}>Guardar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 };
