@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useContext, useEffect, useMemo } from 'react';
 import {
     View,
     Text,
@@ -13,7 +13,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
+import { AuthContext } from '../context/AuthContext';
 import { useExerciseDetailController } from '../controllers/useExerciseDetailController';
+import { PersonalRecordService } from '../services/PersonalRecordService';
 
 const { width } = Dimensions.get('window');
 
@@ -35,7 +37,22 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
     const { exerciseId } = route.params || {};
 
     const { exercise, loading } = useExerciseDetailController(exerciseId);
+    const authContext = useContext(AuthContext);
+    const userId = authContext?.user?.id;
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [personalRecord, setPersonalRecord] = useState<any>(null);
+    const [exerciseHistory, setExerciseHistory] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (userId && exerciseId) {
+            PersonalRecordService.getPersonalRecord(userId, exerciseId).then(({ data }) => {
+                if (data) setPersonalRecord(data);
+            });
+            PersonalRecordService.getExerciseHistory(userId, exerciseId).then(({ data }) => {
+                if (data) setExerciseHistory(data);
+            });
+        }
+    }, [userId, exerciseId]);
 
     const styles = useMemo(
         () =>
@@ -93,6 +110,54 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                     marginTop: 16,
                 },
                 youtubeButtonText: { color: '#FFF', fontSize: 16, fontWeight: '600', marginLeft: 8 },
+                prCard: {
+                    backgroundColor: colors.surface,
+                    borderRadius: 16,
+                    padding: 16,
+                    borderWidth: 1,
+                    borderColor: `${colors.primary}40`,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                },
+                prIconContainer: {
+                    width: 48,
+                    height: 48,
+                    borderRadius: 24,
+                    backgroundColor: `${colors.primary}20`,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: 14,
+                },
+                prWeight: {
+                    fontSize: 22,
+                    fontWeight: '700',
+                    color: colors.text,
+                },
+                prDate: {
+                    fontSize: 12,
+                    color: colors.textSecondary,
+                    marginTop: 2,
+                },
+                historyRow: {
+                    flexDirection: 'row',
+                    paddingVertical: 10,
+                    borderBottomWidth: 1,
+                    borderBottomColor: colors.border,
+                },
+                historyCell: {
+                    flex: 1,
+                    fontSize: 13,
+                    color: colors.text,
+                    textAlign: 'center',
+                },
+                historyHeaderCell: {
+                    flex: 1,
+                    fontSize: 11,
+                    fontWeight: '600',
+                    color: colors.textSecondary,
+                    textAlign: 'center',
+                    textTransform: 'uppercase',
+                },
             }),
         [colors]
     );
@@ -242,6 +307,49 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                         <MaterialIcons name="play-arrow" size={24} color="#FFF" />
                         <Text style={styles.youtubeButtonText}>Ver Video en YouTube</Text>
                     </TouchableOpacity>
+                )}
+
+                {/* Personal Record */}
+                {personalRecord && (
+                    <View style={styles.infoSection}>
+                        <Text style={styles.sectionTitle}>Ó Récord Personal</Text>
+                        <View style={styles.prCard}>
+                            <View style={styles.prIconContainer}>
+                                <MaterialIcons name="emoji-events" size={26} color={colors.primary} />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.prWeight}>
+                                    {personalRecord.peso_maximo} kg × {personalRecord.repeticiones} reps
+                                </Text>
+                                <Text style={styles.prDate}>
+                                    {new Date(personalRecord.fecha_dia).toLocaleDateString()}
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+                )}
+
+                {/* Exercise History */}
+                {exerciseHistory.length > 0 && (
+                    <View style={styles.infoSection}>
+                        <Text style={styles.sectionTitle}>Historial de Sesiones</Text>
+                        <View style={styles.historyRow}>
+                            <Text style={styles.historyHeaderCell}>Fecha</Text>
+                            <Text style={styles.historyHeaderCell}>Peso Máx</Text>
+                            <Text style={styles.historyHeaderCell}>Reps</Text>
+                            <Text style={styles.historyHeaderCell}>Vol.</Text>
+                        </View>
+                        {exerciseHistory.map((entry, i) => (
+                            <View key={i} style={styles.historyRow}>
+                                <Text style={styles.historyCell}>
+                                    {new Date(entry.fecha_dia).toLocaleDateString()}
+                                </Text>
+                                <Text style={styles.historyCell}>{entry.peso_sesion} kg</Text>
+                                <Text style={styles.historyCell}>{entry.reps_totales}</Text>
+                                <Text style={styles.historyCell}>{entry.volumen_sesion}</Text>
+                            </View>
+                        ))}
+                    </View>
                 )}
 
                 <View style={{ height: 40 }} />
