@@ -7,6 +7,8 @@ import ImageViewer from 'react-native-image-zoom-viewer';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { useProgressController } from '../controllers/useProgressController';
+import { UserService } from '../services/UserService';
+import WeightChart from '../components/WeightChart';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -40,6 +42,15 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
     const [editComment, setEditComment] = useState('');
     const [editDate, setEditDate] = useState<Date>(new Date());
     const [saving, setSaving] = useState(false);
+    const [weightHistory, setWeightHistory] = useState<{ id: string; peso: number; created_at: string }[]>([]);
+
+    useEffect(() => {
+        if (user?.id) {
+            UserService.getWeightHistory(user.id).then(({ data }) => {
+                if (data) setWeightHistory(data);
+            });
+        }
+    }, [user?.id]);
 
     const handleAddPhoto = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -208,6 +219,9 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                 </View>
             ) : (
                 <ScrollView style={styles.scrollView}>
+                    {/* Weight Evolution Chart */}
+                    <WeightChart data={weightHistory} colors={colors} />
+
                     {progressPhotos.length === 0 ? (
                         <View style={styles.emptyState}>
                             <MaterialIcons name="photo-camera" size={64} color={colors.textSecondary} />
