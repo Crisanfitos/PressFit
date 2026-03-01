@@ -144,4 +144,21 @@ export const UserService = {
             return { url: null, error };
         }
     },
+
+    async getWeightHistory(userId: string, limit: number = 20): Promise<ServiceResponse<{ id: string; peso: number; created_at: string }[]>> {
+        try {
+            const { data, error } = await supabase
+                .from('historial_peso')
+                .select('id, peso, created_at')
+                .eq('usuario_id', userId)
+                .order('created_at', { ascending: true })
+                .limit(limit);
+
+            if (error) throw error;
+            return { data: data || [], error: null };
+        } catch (error) {
+            console.error('Error fetching weight history:', error);
+            return { data: null, error };
+        }
+    },
 };
