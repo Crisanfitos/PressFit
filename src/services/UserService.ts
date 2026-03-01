@@ -54,6 +54,16 @@ export const UserService = {
 
             if (error) throw error;
 
+            // Insert weight into history for tracking over time
+            if (metrics.weight) {
+                await supabase
+                    .from('historial_peso')
+                    .insert({
+                        usuario_id: userId,
+                        peso: metrics.weight,
+                    });
+            }
+
             // Return data with height converted back to CM for app consistency
             if (data?.altura) {
                 data.altura = data.altura * 100;
