@@ -56,7 +56,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     // Sync Android navigation bar color with the active theme background
     useEffect(() => {
         if (Platform.OS === 'android') {
-            NavigationBar.setBackgroundColorAsync(resolvedTheme.colors.background).catch(() => { });
+            // setBackgroundColorAsync is not supported with edge-to-edge mode (Android 11+, API 30+)
+            // Only call it on older Android versions where edge-to-edge is not enforced
+            const apiLevel = typeof Platform.Version === 'number' ? Platform.Version : parseInt(Platform.Version, 10);
+            if (apiLevel < 30) {
+                NavigationBar.setBackgroundColorAsync(resolvedTheme.colors.background).catch(() => { });
+            }
 
             const isDark = themeMode === 'dark' || (themeMode === 'system' && systemColorScheme === 'dark');
             NavigationBar.setButtonStyleAsync(isDark ? 'light' : 'dark').catch(() => { });
