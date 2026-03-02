@@ -18,12 +18,14 @@ interface RestTimerProps {
 const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, colors }) => {
     const [seconds, setSeconds] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
+    const [isStopped, setIsStopped] = useState(false); // paused, awaiting user confirmation
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const slideAnim = useRef(new Animated.Value(100)).current;
 
     useEffect(() => {
         if (visible) {
             setSeconds(0);
+            setIsStopped(false);
             setIsRunning(true);
             Animated.spring(slideAnim, {
                 toValue: 0,
@@ -38,6 +40,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                 useNativeDriver: true,
             }).start();
             setIsRunning(false);
+            setIsStopped(false);
             setSeconds(0);
         }
     }, [visible]);
@@ -60,11 +63,30 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
         };
     }, [isRunning]);
 
+    // Parar: pausa el cronómetro y muestra botones OK / Reanudar / Descartar
     const handleStop = useCallback(() => {
         setIsRunning(false);
+        setIsStopped(true);
+    }, []);
+
+    // OK: guardar en DB y cerrar
+    const handleConfirm = useCallback(() => {
         onTimerStop(seconds);
+        setIsStopped(false);
         onDismiss();
     }, [seconds, onTimerStop, onDismiss]);
+
+    // Reanudar: continuar el cronómetro
+    const handleResume = useCallback(() => {
+        setIsStopped(false);
+        setIsRunning(true);
+    }, []);
+
+    // Descartar: cerrar sin guardar
+    const handleDiscard = useCallback(() => {
+        setIsStopped(false);
+        onDismiss();
+    }, [onDismiss]);
 
     const formatTime = (totalSeconds: number) => {
         const mins = Math.floor(totalSeconds / 60);
@@ -87,7 +109,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             flexDirection: 'row',
             alignItems: 'center',
             borderWidth: 1,
-            borderColor: colors.primary,
+            borderColor: isStopped ? colors.textSecondary : colors.primary,
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.3,
@@ -106,7 +128,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
         timerText: {
             fontSize: 28,
             fontWeight: '700',
-            color: colors.text,
+            color: isStopped ? colors.textSecondary : colors.text,
             fontVariant: ['tabular-nums'],
             flex: 1,
         },
@@ -114,6 +136,14 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             fontSize: 12,
             color: colors.textSecondary,
             marginTop: -2,
+        },
+        actionButton: {
+            width: 38,
+            height: 38,
+            borderRadius: 10,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginLeft: 6,
         },
         stopButton: {
             paddingHorizontal: 16,
@@ -135,18 +165,53 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
     return (
         <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
             <View style={styles.iconContainer}>
-                <MaterialIcons name="timer" size={22} color={colors.primary} />
+                <MaterialIcons
+                    name={isStopped ? 'timer-off' : 'timer'}
+                    size={22}
+                    color={isStopped ? colors.textSecondary : colors.primary}
+                />
             </View>
             <View style={{ flex: 1 }}>
                 <Text style={styles.timerText}>{formatTime(seconds)}</Text>
-                <Text style={styles.label}>Descanso</Text>
+                <Text style={styles.label}>{isStopped ? 'Pausado' : 'Descanso'}</Text>
             </View>
-            <TouchableOpacity style={styles.stopButton} onPress={handleStop}>
-                <Text style={styles.stopButtonText}>Parar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.dismissButton} onPress={onDismiss}>
-                <MaterialIcons name="close" size={20} color={colors.textSecondary} />
-            </TouchableOpacity>
+
+            {isStopped ? (
+                // Stopped state: OK (green) | Reanudar (primary) | Descartar (red)
+                <>
+                    <TouchableOpacity
+                        style={[styles.actionButton, { backgroundColor: '#22c55e' }]}
+                        onPress={handleConfirm}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                        <MaterialIcons name="check" size={22} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.actionButton, { backgroundColor: colors.primary }]}
+                        onPress={handleResume}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                        <MaterialIcons name="play-arrow" size={22} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.actionButton, { backgroundColor: '#ef4444' }]}
+                        onPress={handleDiscard}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                        <MaterialIcons name="close" size={22} color="#fff" />
+                    </TouchableOpacity>
+                </>
+            ) : (
+                // Running state: Parar | X (dismiss)
+                <>
+                    <TouchableOpacity style={styles.stopButton} onPress={handleStop}>
+                        <Text style={styles.stopButtonText}>Parar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.dismissButton} onPress={onDismiss}>
+                        <MaterialIcons name="close" size={20} color={colors.textSecondary} />
+                    </TouchableOpacity>
+                </>
+            )}
         </Animated.View>
     );
 };
