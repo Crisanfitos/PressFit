@@ -15,6 +15,7 @@ import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { RoutineService } from '../services/RoutineService';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SideDrawer, MenuItem } from '../components/SideDrawer';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const DAY_SIZE = (SCREEN_WIDTH - 48) / 7;
@@ -49,7 +50,16 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
     const [showRoutineSelector, setShowRoutineSelector] = useState(false);
     const [completedDays, setCompletedDays] = useState<Set<string>>(new Set());
     const [inProgressDays, setInProgressDays] = useState<Set<string>>(new Set());
+    const [drawerVisible, setDrawerVisible] = useState(false);
     const dropdownHeight = useState(new Animated.Value(0))[0];
+
+    const drawerMenuItems: MenuItem[] = useMemo(() => [
+        {
+            icon: 'library-books',
+            label: 'Catálogo de Ejercicios',
+            onPress: () => navigation.navigate('ExerciseCatalog'),
+        },
+    ], [navigation]);
 
     // Get current month info
     const year = currentDate.getFullYear();
@@ -268,6 +278,9 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
             padding: 20,
             paddingTop: 10,
         },
+        hamburgerButton: {
+            marginBottom: 12,
+        },
         routineSelector: {
             backgroundColor: colors.surface,
             borderRadius: 16,
@@ -424,6 +437,15 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Header with Routine Selector */}
                 <View style={styles.header}>
+                    {/* Hamburger Menu */}
+                    <TouchableOpacity
+                        style={styles.hamburgerButton}
+                        onPress={() => setDrawerVisible(true)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                        <MaterialIcons name="menu" size={28} color={colors.text} />
+                    </TouchableOpacity>
+
                     {/* Routine Selector Dropdown */}
                     <View style={styles.routineSelector}>
                         <TouchableOpacity
@@ -610,6 +632,12 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                 />
                 <MaterialIcons name="edit" size={28} color={colors.textOnPrimary} />
             </TouchableOpacity>
+
+            <SideDrawer
+                visible={drawerVisible}
+                onClose={() => setDrawerVisible(false)}
+                menuItems={drawerMenuItems}
+            />
         </SafeAreaView>
     );
 };

@@ -25,7 +25,7 @@ const MainNavigator: React.FC = () => {
     const getSwipeEnabled = (route: RouteProp<MainTabParamList, keyof MainTabParamList>) => {
         const routeName = getFocusedRouteNameFromRoute(route) ?? 'MonthlyCalendar';
         // Disabled swipe on detail screens across all subnavigators
-        const disabledScreens = ['Workout', 'WorkoutDay', 'ExerciseLibrary', 'ExerciseDetail', 'RoutineEditor', 'RoutineDetail', 'WeeklyCalendarV2', 'ExerciseTracking'];
+        const disabledScreens = ['Workout', 'WorkoutDay', 'ExerciseLibrary', 'ExerciseDetail', 'RoutineEditor', 'RoutineDetail', 'WeeklyCalendarV2', 'ExerciseTracking', 'ExerciseCatalog'];
         return !disabledScreens.includes(routeName);
     };
 
