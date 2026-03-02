@@ -86,12 +86,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 );
 
                 if (result.type === 'success') {
-                    // Extract the tokens from the URL
-                    const url = new URL(result.url);
-                    const accessToken = url.searchParams.get('access_token');
-                    const refreshToken = url.searchParams.get('refresh_token');
+                    // Extract the params from the URL manually since URL() can fail on custom schemes
+                    const urlStr = result.url;
+                    const queryStr = urlStr.includes('?') ? urlStr.split('?')[1].split('#')[0] : '';
+                    const hashStr = urlStr.includes('#') ? urlStr.split('#')[1] : '';
 
-                    if (accessToken && refreshToken) {
+                    const getParams = (str: string) => {
+                        const params: Record<string, string> = {};
+                        if (!str) return params;
+                        str.split('&').forEach(pair => {
+                            const [key, value] = pair.split('=');
+                            if (key && value) {
+                                params[key] = decodeURIComponent(value);
+                            }
+                        });
+                        return params;
+                    };
+
+                    const queryParams = getParams(queryStr);
+                    const hashParams = getParams(hashStr);
+
+                    const code = queryParams.code || hashParams.code;
+                    const accessToken = queryParams.access_token || hashParams.access_token;
+                    const refreshToken = queryParams.refresh_token || hashParams.refresh_token;
+                    const errorDesc = queryParams.error_description || hashParams.error_description || queryParams.error || hashParams.error;
+
+                    if (errorDesc) {
+                        throw new Error(errorDesc);
+                    }
+
+                    if (code) {
+                        // PKCE Flow
+                        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+                        if (error) throw error;
+                        return data.session;
+                    } else if (accessToken && refreshToken) {
+                        // Implicit Flow
                         const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
                             access_token: accessToken,
                             refresh_token: refreshToken,
