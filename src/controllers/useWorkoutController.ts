@@ -11,6 +11,7 @@ interface Set {
     numero_serie: number;
     repeticiones: number;
     peso_utilizado: number;
+    rpe?: number;
     pending?: boolean;
 }
 
@@ -321,6 +322,7 @@ export const useWorkoutController = (
         let dbField = field;
         if (field === 'weight') dbField = 'peso_utilizado';
         if (field === 'reps') dbField = 'repeticiones';
+        // 'rpe' maps directly to 'rpe' in DB — no renaming needed
 
         setExercises((prev) =>
             prev.map((ex) => ({
