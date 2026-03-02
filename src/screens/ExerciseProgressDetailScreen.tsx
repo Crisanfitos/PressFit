@@ -318,23 +318,39 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
 
                     {chartData.length > 0 ? (
                         <View style={{ marginLeft: -20, alignItems: 'center', width: '100%' }}>
-                            <LineChart
-                                data={chartData}
-                                width={280}
-                                height={200}
-                                color={colors.primary}
-                                thickness={3}
-                                dataPointsColor={colors.primary}
-                                textShiftY={-10}
-                                textShiftX={-5}
-                                textColor={colors.text}
-                                yAxisLabelSuffix=" kg"
-                                yAxisTextStyle={{ color: colors.textSecondary, fontSize: 10 }}
-                                xAxisLabelTextStyle={{ color: colors.textSecondary, fontSize: 10, width: 60 }}
-                                initialSpacing={20}
-                                verticalLinesColor={`${colors.textSecondary}30`}
-                                rulesColor={`${colors.textSecondary}30`}
-                            />
+                            {(() => {
+                                const values = chartData.map(d => d.value);
+                                const minVal = Math.min(...values);
+                                const maxVal = Math.max(...values);
+                                const padding = (maxVal - minVal) * 0.3 || (maxVal * 0.3) || 10;
+
+                                // Set explicit max value to prevent cutting off the top
+                                const calculatedMax = Math.ceil(maxVal + padding);
+                                // For weight, we might not want to start at 0 if the weight is high (e.g. 100kg)
+                                // But for total volume, starting near 0 is often better.
+                                // React-native-gifted-charts uses `maxValue`, `mostNegativeValue` or just `yAxisOffset`/`stepValue`
+                                // The easiest way to just add headroom is to provide `maxValue`
+                                return (
+                                    <LineChart
+                                        data={chartData}
+                                        width={280}
+                                        height={200}
+                                        maxValue={calculatedMax}
+                                        color={colors.primary}
+                                        thickness={3}
+                                        dataPointsColor={colors.primary}
+                                        textShiftY={-10}
+                                        textShiftX={-5}
+                                        textColor={colors.text}
+                                        yAxisLabelSuffix=" kg"
+                                        yAxisTextStyle={{ color: colors.textSecondary, fontSize: 10 }}
+                                        xAxisLabelTextStyle={{ color: colors.textSecondary, fontSize: 10, width: 60 }}
+                                        initialSpacing={20}
+                                        verticalLinesColor={`${colors.textSecondary}30`}
+                                        rulesColor={`${colors.textSecondary}30`}
+                                    />
+                                );
+                            })()}
                         </View>
                     ) : (
                         <Text style={{ color: colors.textSecondary, padding: 20 }}>No hay datos suficientes para la gráfica.</Text>
