@@ -3,7 +3,13 @@
     "allow": [
       "Bash(cd:*)",
       "Bash(npx tsc:*)",
-      "Bash(start:*)"
+      "Bash(start:*)",
+      "Bash(node:*)",
+      "WebSearch",
+      "WebFetch(domain:www.youtube.com)",
+      "WebFetch(domain:www.muscleandstrength.com)",
+      "WebFetch(domain:musclewiki.com)",
+      "WebFetch(domain:weighttraining.guide)"
     ]
   }
 }
