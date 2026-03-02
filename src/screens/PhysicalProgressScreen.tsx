@@ -9,6 +9,8 @@ import { AuthContext } from '../context/AuthContext';
 import { useProgressController } from '../controllers/useProgressController';
 import { UserService } from '../services/UserService';
 import WeightChart from '../components/WeightChart';
+import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -158,9 +160,10 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
         headerText: { fontSize: 18, fontWeight: 'bold', color: colors.text },
         backButton: { padding: 8, marginLeft: -8 },
         scrollView: { flex: 1, padding: 16 },
-        photoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+        photoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 24 },
         photoCard: { width: '48%', aspectRatio: 1, borderRadius: 12, overflow: 'hidden', backgroundColor: colors.surface, position: 'relative' },
         photoImage: { width: '100%', height: '100%' },
+        monthTitle: { fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 12, marginTop: 8 },
         selectedOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(59,130,246,0.4)', alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: colors.primary },
         photoOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 8, backgroundColor: 'rgba(0,0,0,0.5)' },
         photoDate: { fontSize: 12, fontWeight: 'bold', color: '#fff' },
@@ -228,30 +231,52 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                             <Text style={styles.emptyStateText}>No hay fotos de progreso aún</Text>
                         </View>
                     ) : (
-                        <View style={styles.photoGrid}>
-                            {progressPhotos.map((photo, index) => {
-                                const isSelected = selectedIds.has(photo.id);
-                                return (
-                                    <TouchableOpacity
-                                        key={photo.id}
-                                        style={styles.photoCard}
-                                        onPress={() => openViewer(index)}
-                                        onLongPress={() => handleLongPress(photo.id)}
-                                    >
-                                        <Image source={{ uri: photo.url_foto }} style={styles.photoImage} />
-                                        {isSelected && (
-                                            <View style={styles.selectedOverlay}>
-                                                <MaterialIcons name="check-circle" size={32} color="#fff" />
+                        <View>
+                            {(() => {
+                                // Group photos by month
+                                const grouped = progressPhotos.reduce((acc, photo) => {
+                                    // Use created_at if valid, otherwise fallback to current date just in case
+                                    const dateKey = photo.created_at ? format(parseISO(photo.created_at), 'MMMM yyyy', { locale: es }) : 'Desconocido';
+                                    if (!acc[dateKey]) acc[dateKey] = [];
+                                    acc[dateKey].push(photo);
+                                    return acc;
+                                }, {} as Record<string, typeof progressPhotos>);
+
+                                return Object.entries(grouped).map(([month, photosArray]) => {
+                                    const photos = photosArray as typeof progressPhotos;
+                                    return (
+                                        <View key={month}>
+                                            <Text style={styles.monthTitle}>{month.charAt(0).toUpperCase() + month.slice(1)}</Text>
+                                            <View style={styles.photoGrid}>
+                                                {photos.map((photo) => {
+                                                    const globalIndex = progressPhotos.findIndex(p => p.id === photo.id);
+                                                    const isSelected = selectedIds.has(photo.id);
+                                                    return (
+                                                        <TouchableOpacity
+                                                            key={photo.id}
+                                                            style={styles.photoCard}
+                                                            onPress={() => openViewer(globalIndex)}
+                                                            onLongPress={() => handleLongPress(photo.id)}
+                                                        >
+                                                            <Image source={{ uri: photo.url_foto }} style={styles.photoImage} />
+                                                            {isSelected && (
+                                                                <View style={styles.selectedOverlay}>
+                                                                    <MaterialIcons name="check-circle" size={32} color="#fff" />
+                                                                </View>
+                                                            )}
+                                                            <View style={styles.photoOverlay}>
+                                                                <Text style={styles.photoDate}>
+                                                                    {photo.created_at ? format(parseISO(photo.created_at), "d 'de' MMMM", { locale: es }) : ''}
+                                                                </Text>
+                                                            </View>
+                                                        </TouchableOpacity>
+                                                    );
+                                                })}
                                             </View>
-                                        )}
-                                        <View style={styles.photoOverlay}>
-                                            <Text style={styles.photoDate}>
-                                                {new Date(photo.created_at).toLocaleDateString()}
-                                            </Text>
                                         </View>
-                                    </TouchableOpacity>
-                                );
-                            })}
+                                    );
+                                });
+                            })()}
                         </View>
                     )}
                     <View style={{ height: 100 }} />

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { LineChart } from 'react-native-gifted-charts';
 
 interface WeightEntry {
     id: string;
@@ -12,31 +13,53 @@ interface WeightChartProps {
     colors: any;
 }
 
-const CHART_WIDTH = Dimensions.get('window').width - 64;
-const CHART_HEIGHT = 140;
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
-    const chartData = useMemo(() => {
+    const chartDataResult = useMemo(() => {
         if (data.length === 0) return null;
 
-        const weights = data.map((d) => d.peso);
+        // Sort data chronologically first to ensure correct lines
+        const sortedData = [...data].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+        const weights = sortedData.map((d) => d.peso);
         const minW = Math.min(...weights);
         const maxW = Math.max(...weights);
-        const range = maxW - minW || 1;
+        // Add headroom for the top and bottom of the chart
+        const valueRange = maxW - minW;
+        const padding = valueRange > 0 ? valueRange * 0.5 : (maxW * 0.1) || 5;
+
+        const calculatedMax = Math.ceil(maxW + padding);
+        const calculatedMin = Math.max(0, Math.floor(minW - padding));
+        const stepValue = Math.ceil((calculatedMax - calculatedMin) / 4) || 1;
+
+        // Calculate differences
+        const firstWeight = weights[0];
+        const currentWeight = weights[weights.length - 1];
+        const lastWeight = weights.length > 1 ? weights[weights.length - 2] : currentWeight;
+
+        const diffFromStart = currentWeight - firstWeight;
+        const diffFromLast = currentWeight - lastWeight;
 
         return {
-            weights,
-            minW,
-            maxW,
-            range,
-            labels: data.map((d) => {
+            currentWeight,
+            diffFromStart,
+            diffFromLast,
+            calculatedMax,
+            calculatedMin,
+            stepValue,
+            chartPoints: sortedData.map((d) => {
                 const date = new Date(d.created_at);
-                return `${date.getDate()}/${date.getMonth() + 1}`;
+                return {
+                    value: d.peso,
+                    label: `${date.getDate()}/${date.getMonth() + 1}`,
+                    dataPointText: `${d.peso} kg`
+                };
             }),
         };
     }, [data]);
 
-    if (!chartData || data.length === 0) {
+    if (!chartDataResult || data.length === 0) {
         return (
             <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <Text style={[styles.title, { color: colors.text }]}>Evolución de Peso</Text>
@@ -49,60 +72,53 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
         );
     }
 
-    const barWidth = Math.min(32, (CHART_WIDTH - 20) / data.length - 4);
+    const { chartPoints, calculatedMax, calculatedMin, stepValue, currentWeight, diffFromStart, diffFromLast } = chartDataResult;
+    const chartWidth = SCREEN_WIDTH - 120; // Accounting for paddings and y-axis
 
     return (
         <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.headerRow}>
                 <Text style={[styles.title, { color: colors.text }]}>Evolución de Peso</Text>
                 <Text style={[styles.currentWeight, { color: colors.primary }]}>
-                    {chartData.weights[chartData.weights.length - 1]} kg
+                    {currentWeight} kg
                 </Text>
             </View>
 
-            {/* Y-axis labels + bars */}
-            <View style={styles.chartArea}>
-                <View style={styles.yAxis}>
-                    <Text style={[styles.yLabel, { color: colors.textSecondary }]}>{chartData.maxW}</Text>
-                    <Text style={[styles.yLabel, { color: colors.textSecondary }]}>{chartData.minW}</Text>
-                </View>
-                <View style={styles.barsContainer}>
-                    {chartData.weights.map((w, i) => {
-                        const heightPct = ((w - chartData.minW) / chartData.range) * 0.8 + 0.2;
-                        return (
-                            <View key={data[i].id} style={styles.barWrapper}>
-                                <View
-                                    style={[
-                                        styles.bar,
-                                        {
-                                            width: barWidth,
-                                            height: heightPct * CHART_HEIGHT,
-                                            backgroundColor: i === chartData.weights.length - 1 ? colors.primary : `${colors.primary}60`,
-                                            borderRadius: barWidth / 2,
-                                        },
-                                    ]}
-                                />
-                                <Text
-                                    style={[styles.xLabel, { color: colors.textSecondary }]}
-                                    numberOfLines={1}
-                                >
-                                    {chartData.labels[i]}
-                                </Text>
-                            </View>
-                        );
-                    })}
-                </View>
+            {/* Line Chart */}
+            <View style={styles.chartWrapper}>
+                <LineChart
+                    data={chartPoints}
+                    width={chartWidth}
+                    height={200}
+                    maxValue={calculatedMax - calculatedMin}
+                    yAxisOffset={calculatedMin}
+                    stepValue={Math.ceil((calculatedMax - calculatedMin) / 4) || 1}
+                    color={colors.primary}
+                    thickness={3}
+                    dataPointsColor={colors.primary}
+                    textShiftY={-8}
+                    textShiftX={-8}
+                    textColor={colors.text}
+                    yAxisLabelSuffix=" kg"
+                    yAxisTextStyle={{ color: colors.textSecondary, fontSize: 10 }}
+                    xAxisLabelTextStyle={{ color: colors.textSecondary, fontSize: 10, width: 40, textAlign: 'center' }}
+                    yAxisTextNumberOfLines={1}
+                    yAxisLabelWidth={35}
+                    initialSpacing={40}
+                    endSpacing={40}
+                    verticalLinesColor={`${colors.textSecondary}30`}
+                    rulesColor={`${colors.textSecondary}30`}
+                />
             </View>
 
             {/* Trend indicator */}
             {data.length >= 2 && (
                 <View style={styles.trendRow}>
+                    <Text style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 4 }}>
+                        {diffFromStart > 0 ? '+' : ''}{diffFromStart.toFixed(1)} kg desde el primer registro
+                    </Text>
                     <Text style={{ fontSize: 12, color: colors.textSecondary }}>
-                        {(() => {
-                            const diff = chartData.weights[chartData.weights.length - 1] - chartData.weights[0];
-                            const sign = diff > 0 ? '+' : '';
-                            return `${sign}${diff.toFixed(1)} kg desde el primer registro`;
-                        })()}
+                        {diffFromLast > 0 ? '+' : ''}{diffFromLast.toFixed(1)} kg desde el último registro
                     </Text>
                 </View>
             )}
@@ -121,44 +137,21 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: 24,
     },
     title: {
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: 'bold',
     },
     currentWeight: {
         fontSize: 20,
         fontWeight: '700',
     },
-    chartArea: {
-        flexDirection: 'row',
-        height: CHART_HEIGHT + 20,
-    },
-    yAxis: {
-        width: 36,
-        justifyContent: 'space-between',
-        paddingBottom: 16,
-    },
-    yLabel: {
-        fontSize: 10,
-    },
-    barsContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-        justifyContent: 'space-evenly',
-        paddingBottom: 16,
-    },
-    barWrapper: {
+    chartWrapper: {
         alignItems: 'center',
-    },
-    bar: {
-        minHeight: 4,
-    },
-    xLabel: {
-        fontSize: 9,
-        marginTop: 4,
+        width: '100%',
+        marginLeft: -10, // Adjusting for y-axis offset
+        marginBottom: 20,
     },
     emptyState: {
         alignItems: 'center',
@@ -168,7 +161,7 @@ const styles = StyleSheet.create({
     trendRow: {
         borderTopWidth: 1,
         borderTopColor: 'rgba(128,128,128,0.2)',
-        paddingTop: 8,
+        paddingTop: 12,
         marginTop: 8,
     },
 });
