@@ -246,7 +246,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                 setsContainer: { marginTop: 16 },
                 setRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
                 setNumber: { width: 40, fontSize: 16, color: colors.textSecondary, textAlign: 'center' },
-                inputGroup: { flex: 1, marginHorizontal: 4 },
+                inputGroup: { flex: 1, marginHorizontal: 4, alignItems: 'center', justifyContent: 'center' },
                 referenceText: { fontSize: 11, color: colors.primary, textAlign: 'center', marginTop: 4 },
                 deleteSetButton: { padding: 4, marginLeft: 6 },
                 addSetButton: {
