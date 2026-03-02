@@ -385,6 +385,11 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                             {dayName || 'Entrenamiento'}
                             {workout?.fecha_dia ? ` — ${new Date(workout.fecha_dia + 'T00:00:00').getDate()}/${(new Date(workout.fecha_dia + 'T00:00:00').getMonth() + 1).toString().padStart(2, '0')}` : ''}
                         </Text>
+                        {workout?.descripcion ? (
+                            <Text style={{ fontSize: 12, color: colors.primary, fontStyle: 'italic', marginTop: 2 }}>
+                                {workout.descripcion}
+                            </Text>
+                        ) : null}
                     </View>
                 </View>
             </View>

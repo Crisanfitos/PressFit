@@ -182,6 +182,10 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
             marginTop: 2,
             fontStyle: 'italic',
         },
+        editDescButton: {
+            padding: 8,
+            marginRight: 4,
+        },
         dayArrow: {
             padding: 8,
         },
@@ -268,7 +272,6 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
                         <TouchableOpacity
                             key={dayName}
                             style={[styles.dayCard, exerciseCount === 0 && styles.emptyDay]}
-                            onLongPress={() => handleEditDescription(dayName)}
                             onPress={async () => {
                                 let targetDayId = dayId;
 
@@ -304,6 +307,13 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
                                         : 'Sin ejercicios - Toca para añadir'}
                                 </Text>
                             </View>
+                            <TouchableOpacity
+                                style={styles.editDescButton}
+                                onPress={() => handleEditDescription(dayName)}
+                                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            >
+                                <MaterialIcons name="edit" size={18} color={colors.textSecondary} />
+                            </TouchableOpacity>
                             <View style={styles.dayArrow}>
                                 <MaterialIcons
                                     name="chevron-right"
