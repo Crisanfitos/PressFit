@@ -246,7 +246,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                 setsContainer: { marginTop: 16 },
                 setRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
                 setNumber: { width: 40, fontSize: 16, color: colors.textSecondary, textAlign: 'center' },
-                inputGroup: { flex: 1, marginHorizontal: 4 },
+                inputGroup: { flex: 1, marginHorizontal: 4, alignItems: 'center', justifyContent: 'center' },
                 referenceText: { fontSize: 11, color: colors.primary, textAlign: 'center', marginTop: 4 },
                 deleteSetButton: { padding: 4, marginLeft: 6 },
                 addSetButton: {
@@ -474,6 +474,9 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                 <View style={styles.inputGroup}>
                                                     <Text style={styles.referenceText}>REPS</Text>
                                                 </View>
+                                                <View style={[styles.inputGroup, { maxWidth: 60 }]}>
+                                                    <Text style={styles.referenceText}>RPE</Text>
+                                                </View>
                                                 {isStructureEditable && <View style={{ width: 28 }} />}
                                             </View>
 
@@ -505,6 +508,15 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                                     value={set.repeticiones > 0 ? set.repeticiones : ''}
                                                                     placeholder={ghostReps || '-'}
                                                                     onChange={(val) => handleSetChange(set.id, 'reps', val)}
+                                                                    isEditable={isInputEditable}
+                                                                    colors={colors}
+                                                                />
+                                                            </View>
+                                                            <View style={[styles.inputGroup, { maxWidth: 60 }]}>
+                                                                <SetInput
+                                                                    value={set.rpe && set.rpe > 0 ? set.rpe : ''}
+                                                                    placeholder='-'
+                                                                    onChange={(val) => handleSetChange(set.id, 'rpe', val)}
                                                                     isEditable={isInputEditable}
                                                                     colors={colors}
                                                                 />
