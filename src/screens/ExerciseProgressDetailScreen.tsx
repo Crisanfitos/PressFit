@@ -91,7 +91,7 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
         return grouped.map((session) => ({
             value: chartMode === 'peso' ? session.maxWeight : session.totalVolume,
             label: format(parseISO(session.date), 'd MMM', { locale: es }),
-            dataPointText: chartMode === 'peso' ? `${session.maxWeight}kg` : session.totalVolume.toString(),
+            dataPointText: chartMode === 'peso' ? `${session.maxWeight} kg` : `${session.totalVolume} kg`,
             date: session.date
         }));
 
