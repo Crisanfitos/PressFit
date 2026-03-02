@@ -51,7 +51,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
             alignItems: 'center',
         },
         primaryButtonText: {
-            color: colors.background,
+            color: colors.textOnPrimary,
             fontSize: 18,
             fontWeight: 'bold',
         },

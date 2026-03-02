@@ -276,7 +276,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
         stopButtonText: {
             fontSize: 14,
             fontWeight: '600',
-            color: '#fff',
+            color: colors.textOnPrimary,
         },
         dismissButton: {
             padding: 8,
@@ -312,7 +312,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                         onPress={handleResume}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
-                        <MaterialIcons name="play-arrow" size={22} color="#fff" />
+                        <MaterialIcons name="play-arrow" size={22} color={colors.textOnPrimary} />
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[styles.actionButton, { backgroundColor: '#ef4444' }]}

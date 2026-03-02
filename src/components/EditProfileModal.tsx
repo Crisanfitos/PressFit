@@ -125,7 +125,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
         cancelButtonText: { fontSize: 16, fontWeight: '600', color: colors.text },
         saveButton: { flex: 1, padding: 16, borderRadius: 8, backgroundColor: colors.primary, alignItems: 'center' },
         saveButtonDisabled: { opacity: 0.6 },
-        saveButtonText: { fontSize: 16, fontWeight: 'bold', color: themeMode === 'dark' ? colors.background : colors.text },
+        saveButtonText: { fontSize: 16, fontWeight: 'bold', color: colors.textOnPrimary },
     }), [colors, themeMode]);
 
     return (

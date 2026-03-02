@@ -355,7 +355,7 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
                                 style={styles.modalButtonSave}
                                 onPress={handleSaveDescription}
                             >
-                                <Text style={{ color: '#fff', fontWeight: '600' }}>Guardar</Text>
+                                <Text style={{ color: colors.textOnPrimary, fontWeight: '600' }}>Guardar</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

@@ -139,7 +139,7 @@ export const AlertProvider: React.FC<AlertProviderProps> = ({ children }) => {
             fontWeight: '600',
         },
         defaultButtonText: {
-            color: colors.background,
+            color: colors.textOnPrimary,
         },
         cancelButtonText: {
             color: colors.text,

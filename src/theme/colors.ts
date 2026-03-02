@@ -3,6 +3,7 @@ export const palette = {
     primary: '#13ec6d',
     primaryDark: '#0fb854',
     primaryLight: 'rgba(19, 236, 109, 0.2)',
+    primaryText: '#102218',
 
     // Grayscale Dark
     black: '#000000',
@@ -38,22 +39,29 @@ export interface ThemeColors {
     primary: string;
     primaryDark: string;
     primaryLight: string;
+    primaryText: string;
     background: string;
     backgroundDark: string;
     surface: string;
     surfaceHighlight: string;
     text: string;
     textSecondary: string;
+    textOnPrimary: string;
     border: string;
     inputBackground: string;
     statusSuccess: string;
     statusSuccessBg: string;
+    statusSummaryContextText: string;
+    statusSuccessText: string;
     statusWarning: string;
     statusWarningBg: string;
+    statusWarningText: string;
     statusInfo: string;
     statusInfoBg: string;
+    statusInfoText: string;
     statusError: string;
     statusErrorBg: string;
+    statusErrorText: string;
     tabBar: string;
     headerBackground: string;
     // Aliases for compatibility
@@ -74,24 +82,31 @@ export const themes: { dark: Theme; light: Theme } = {
             primary: palette.primary,
             primaryDark: palette.primaryDark,
             primaryLight: palette.primaryLight,
+            primaryText: palette.primaryText,
             background: '#102218',
             backgroundDark: '#102218',
             surface: 'rgba(24, 24, 27, 0.6)',
             surfaceHighlight: palette.zinc800,
             text: palette.white,
             textSecondary: palette.zinc400,
+            textOnPrimary: palette.primaryText,
             border: 'rgba(255, 255, 255, 0.1)',
             inputBackground: palette.zinc900,
 
             // Status
             statusSuccess: palette.success,
             statusSuccessBg: palette.successBg,
+            statusSummaryContextText: palette.primaryText,
+            statusSuccessText: palette.primaryText,
             statusWarning: palette.warning,
             statusWarningBg: palette.warningBg,
+            statusWarningText: '#102218',
             statusInfo: palette.info,
             statusInfoBg: palette.infoBg,
+            statusInfoText: palette.white,
             statusError: palette.error,
             statusErrorBg: palette.errorBg,
+            statusErrorText: palette.white,
 
             // Aliases
             success: palette.success,
@@ -109,6 +124,7 @@ export const themes: { dark: Theme; light: Theme } = {
             primary: '#13ec6d',
             primaryDark: '#059669',
             primaryLight: 'rgba(19, 236, 109, 0.1)',
+            primaryText: '#102218',
 
             background: '#f4f7f5',
             backgroundDark: '#ffffff',
@@ -118,17 +134,23 @@ export const themes: { dark: Theme; light: Theme } = {
 
             text: '#102218',
             textSecondary: '#52525b',
+            textOnPrimary: '#102218',
 
             border: '#e4e4e7',
 
             statusSuccess: '#16a34a',
             statusSuccessBg: '#dcfce7',
+            statusSummaryContextText: '#102218',
+            statusSuccessText: '#ffffff',
             statusWarning: '#ca8a04',
             statusWarningBg: '#fef9c3',
+            statusWarningText: '#ffffff',
             statusInfo: '#2563eb',
             statusInfoBg: '#dbeafe',
+            statusInfoText: '#ffffff',
             statusError: '#dc2626',
             statusErrorBg: '#fee2e2',
+            statusErrorText: '#ffffff',
 
             // Aliases
             success: '#16a34a',
