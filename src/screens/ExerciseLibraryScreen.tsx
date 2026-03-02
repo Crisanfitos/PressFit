@@ -19,7 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
-import { useExerciseController } from '../controllers/useExerciseController';
+import { useExerciseController, FilterKey } from '../controllers/useExerciseController';
 
 const { width } = Dimensions.get('window');
 
@@ -128,9 +128,43 @@ const ExerciseItem: React.FC<ExerciseItemProps> = React.memo(
                         </View>
                     </View>
 
-                    {isExpanded && item.descripcion && (
+                    {isExpanded && (
                         <View style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.border }}>
-                            <Text style={{ color: colors.textSecondary, fontSize: 13, lineHeight: 20 }}>{item.descripcion}</Text>
+                            {item.descripcion ? (
+                                <Text style={{ color: colors.textSecondary, fontSize: 13, lineHeight: 20, marginBottom: 10 }}>{item.descripcion}</Text>
+                            ) : null}
+                            <View style={styles.badgeRow}>
+                                {item.musculos_primarios ? (
+                                    (Array.isArray(item.musculos_primarios)
+                                        ? item.musculos_primarios
+                                        : item.musculos_primarios.split(',').map((s: string) => s.trim()).filter(Boolean)
+                                    ).map((muscle: string, i: number) => (
+                                        <View key={`pm-${i}`} style={[styles.badge, { backgroundColor: `${colors.primary}20` }]}>
+                                            <Text style={[styles.badgeText, { color: colors.primary }]}>{muscle}</Text>
+                                        </View>
+                                    ))
+                                ) : null}
+                                {item.musculos_secundarios ? (
+                                    (Array.isArray(item.musculos_secundarios)
+                                        ? item.musculos_secundarios
+                                        : item.musculos_secundarios.split(',').map((s: string) => s.trim()).filter(Boolean)
+                                    ).map((muscle: string, i: number) => (
+                                        <View key={`sm-${i}`} style={[styles.badge, { backgroundColor: `${colors.statusInfo}20` }]}>
+                                            <Text style={[styles.badgeText, { color: colors.statusInfo }]}>{muscle}</Text>
+                                        </View>
+                                    ))
+                                ) : null}
+                                {item.dificultad ? (
+                                    <View style={[styles.badge, { backgroundColor: `${colors.statusWarning}20` }]}>
+                                        <Text style={[styles.badgeText, { color: colors.statusWarning }]}>{item.dificultad}</Text>
+                                    </View>
+                                ) : null}
+                                {item.categoria ? (
+                                    <View style={[styles.badge, { backgroundColor: `${colors.textSecondary}20` }]}>
+                                        <Text style={[styles.badgeText, { color: colors.textSecondary }]}>{item.categoria}</Text>
+                                    </View>
+                                ) : null}
+                            </View>
                         </View>
                     )}
                 </TouchableOpacity>
@@ -139,6 +173,8 @@ const ExerciseItem: React.FC<ExerciseItemProps> = React.memo(
     },
     (prevProps, nextProps) => prevProps.isSelected === nextProps.isSelected && prevProps.item.id === nextProps.item.id
 );
+
+const SCROLL_TOP_THRESHOLD = 6;
 
 const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigation, route }) => {
     const { theme } = useTheme();
@@ -153,20 +189,45 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
         saving,
         searchQuery,
         setSearchQuery,
-        selectedMuscleGroup,
-        setSelectedMuscleGroup,
+        filters,
+        setFilter,
+        clearFilter,
+        clearAllFilters,
+        hasActiveFilters,
+        filterOptions,
         selectedExercises,
         toggleSelection,
         saveSelection,
-        muscleGroups,
         clearSelection,
     } = useExerciseController(routineDayId, user?.id);
 
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [videoModalVisible, setVideoModalVisible] = useState(false);
     const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
+    const [showFilters, setShowFilters] = useState(true);
 
-    const ALL_KEY = '__ALL__';
+    const flatListRef = useRef<FlatList>(null);
+    const [showScrollTop, setShowScrollTop] = useState(false);
+    const scrollTopOpacity = useRef(new Animated.Value(0)).current;
+
+    const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 10 }).current;
+    const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: Array<{ index: number | null }> }) => {
+        if (viewableItems.length === 0) return;
+        const minIndex = Math.min(...viewableItems.map((v) => v.index ?? 0));
+        setShowScrollTop(minIndex >= SCROLL_TOP_THRESHOLD);
+    }).current;
+
+    useEffect(() => {
+        Animated.timing(scrollTopOpacity, {
+            toValue: showScrollTop ? 1 : 0,
+            duration: 250,
+            useNativeDriver: true,
+        }).start();
+    }, [showScrollTop, scrollTopOpacity]);
+
+    const handleScrollToTop = useCallback(() => {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+    }, []);
 
     const handleClearSearch = () => {
         setSearchQuery('');
@@ -174,9 +235,12 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
         Keyboard.dismiss();
     };
 
-    const handleMuscleGroupPress = (group: string) => {
-        setSelectedMuscleGroup(group === selectedMuscleGroup ? null : group);
-    };
+    const FILTER_ROWS: { key: FilterKey; label: string; options: string[] }[] = useMemo(() => [
+        { key: 'primaryMuscle', label: 'Músculo Principal', options: filterOptions.primaryMuscles },
+        { key: 'secondaryMuscle', label: 'Músculo Secundario', options: filterOptions.secondaryMuscles },
+        { key: 'category', label: 'Categoría', options: filterOptions.categories },
+        { key: 'difficulty', label: 'Dificultad', options: filterOptions.difficulties },
+    ], [filterOptions]);
 
     const handleConfirmSelection = async () => {
         const success = await saveSelection();
@@ -240,7 +304,7 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
                     gap: 12,
                 },
                 searchInput: { flex: 1, color: colors.text, fontSize: 16 },
-                categoriesContainer: { marginBottom: 8, height: 50 },
+                categoriesContainer: { marginBottom: 4 },
                 categoriesScroll: { paddingHorizontal: 16, gap: 8, alignItems: 'center' },
                 categoryChip: {
                     paddingHorizontal: 16,
@@ -313,29 +377,64 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
             </View>
 
             {!isSearchFocused && searchQuery.length === 0 && (
-                <View style={screenStyles.categoriesContainer}>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={screenStyles.categoriesScroll}>
+                <View>
+                    <TouchableOpacity
+                        style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 8 }}
+                        onPress={() => setShowFilters((prev) => !prev)}
+                    >
+                        <MaterialIcons name={showFilters ? 'filter-list-off' : 'filter-list'} size={20} color={colors.textSecondary} />
+                        <Text style={{ color: colors.textSecondary, fontSize: 13, marginLeft: 6, fontWeight: '500' }}>
+                            {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
+                        </Text>
+                        {hasActiveFilters && (
+                            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary, marginLeft: 6 }} />
+                        )}
+                    </TouchableOpacity>
+
+                    {showFilters && FILTER_ROWS.map(({ key, label, options }) => {
+                        if (options.length === 0) return null;
+                        const activeValue = filters[key];
+                        return (
+                            <View key={key} style={{ marginBottom: 6 }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 4 }}>
+                                    <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: '600', flex: 1 }}>{label}</Text>
+                                    {activeValue && (
+                                        <TouchableOpacity onPress={() => clearFilter(key)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                                            <MaterialIcons name="close" size={16} color={colors.textSecondary} />
+                                        </TouchableOpacity>
+                                    )}
+                                </View>
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={screenStyles.categoriesScroll}>
+                                    <TouchableOpacity
+                                        style={[screenStyles.categoryChip, !activeValue && screenStyles.categoryChipSelected]}
+                                        onPress={() => clearFilter(key)}
+                                    >
+                                        <Text style={[screenStyles.categoryText, !activeValue && screenStyles.categoryTextSelected]}>Todos</Text>
+                                    </TouchableOpacity>
+                                    {options.map((option) => (
+                                        <TouchableOpacity
+                                            key={option}
+                                            style={[screenStyles.categoryChip, activeValue === option && screenStyles.categoryChipSelected]}
+                                            onPress={() => setFilter(key, activeValue === option ? null : option)}
+                                        >
+                                            <Text style={[screenStyles.categoryText, activeValue === option && screenStyles.categoryTextSelected]}>
+                                                {option}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
+                            </View>
+                        );
+                    })}
+
+                    {showFilters && hasActiveFilters && (
                         <TouchableOpacity
-                            key="all"
-                            style={[screenStyles.categoryChip, selectedMuscleGroup === ALL_KEY && screenStyles.categoryChipSelected]}
-                            onPress={() => handleMuscleGroupPress(ALL_KEY)}
+                            style={{ alignSelf: 'center', paddingVertical: 6, paddingHorizontal: 16, marginTop: 4, marginBottom: 4 }}
+                            onPress={clearAllFilters}
                         >
-                            <Text style={[screenStyles.categoryText, selectedMuscleGroup === ALL_KEY && screenStyles.categoryTextSelected]}>
-                                Todos
-                            </Text>
+                            <Text style={{ color: colors.primary, fontSize: 13, fontWeight: '600' }}>Limpiar Filtros</Text>
                         </TouchableOpacity>
-                        {muscleGroups.map((group, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                style={[screenStyles.categoryChip, selectedMuscleGroup === group && screenStyles.categoryChipSelected]}
-                                onPress={() => handleMuscleGroupPress(group)}
-                            >
-                                <Text style={[screenStyles.categoryText, selectedMuscleGroup === group && screenStyles.categoryTextSelected]}>
-                                    {group}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
+                    )}
                 </View>
             )}
 
@@ -343,6 +442,7 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
                 <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />
             ) : (
                 <FlatList
+                    ref={flatListRef}
                     data={exercises}
                     renderItem={renderItem}
                     keyExtractor={(item) => item.id}
@@ -352,16 +452,35 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
                     windowSize={5}
                     removeClippedSubviews
                     extraData={selectedExercises}
+                    onViewableItemsChanged={onViewableItemsChanged}
+                    viewabilityConfig={viewabilityConfig}
                     ListEmptyComponent={
-                        !loading && !isSearchFocused && searchQuery.length === 0 && !selectedMuscleGroup ? (
+                        !loading ? (
                             <View style={screenStyles.emptyStateContainer}>
-                                <MaterialIcons name="touch-app" size={48} color={colors.textSecondary} />
-                                <Text style={screenStyles.emptyStateText}>Selecciona un grupo muscular o usa el buscador</Text>
+                                <MaterialIcons name={hasActiveFilters || searchQuery.length > 0 ? 'search-off' : 'touch-app'} size={48} color={colors.textSecondary} />
+                                <Text style={screenStyles.emptyStateText}>
+                                    {hasActiveFilters || searchQuery.length > 0
+                                        ? 'No se encontraron ejercicios con los filtros actuales'
+                                        : 'Usa los filtros o el buscador para encontrar ejercicios'}
+                                </Text>
                             </View>
                         ) : null
                     }
                 />
             )}
+
+            {/* Scroll to top FAB */}
+            <Animated.View
+                style={[
+                    styles.scrollTopFab,
+                    { backgroundColor: colors.primary, opacity: scrollTopOpacity },
+                ]}
+                pointerEvents={showScrollTop ? 'auto' : 'none'}
+            >
+                <TouchableOpacity onPress={handleScrollToTop} style={styles.scrollTopFabInner} activeOpacity={0.8}>
+                    <MaterialIcons name="keyboard-arrow-up" size={28} color={colors.textOnPrimary} />
+                </TouchableOpacity>
+            </Animated.View>
 
             {/* Video Modal - Simplified without YouTube player for now */}
             <Modal visible={videoModalVisible} transparent animationType="fade" onRequestClose={closeVideo}>
@@ -428,6 +547,40 @@ const styles = StyleSheet.create({
     exerciseName: { fontSize: 15, fontWeight: '600', marginBottom: 4 },
     exerciseText: { fontSize: 12 },
     selectionIndicator: { marginLeft: 12 },
+    badgeRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 6,
+    },
+    badge: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    badgeText: {
+        fontSize: 11,
+        fontWeight: '600',
+    },
+    scrollTopFab: {
+        position: 'absolute',
+        bottom: 24,
+        right: 20,
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        elevation: 6,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.25,
+        shadowRadius: 6,
+    },
+    scrollTopFabInner: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
 });
 
 export default ExerciseLibraryScreen;

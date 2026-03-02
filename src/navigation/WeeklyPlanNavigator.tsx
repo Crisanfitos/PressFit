@@ -7,6 +7,7 @@ import ExerciseLibraryScreen from '../screens/ExerciseLibraryScreen';
 import ExerciseDetailScreen from '../screens/ExerciseDetailScreen';
 import RoutineEditorScreen from '../screens/RoutineEditorScreen';
 import RoutineDetailScreen from '../screens/RoutineDetailScreen';
+import ExerciseCatalogScreen from '../screens/ExerciseCatalogScreen';
 
 export type WeeklyPlanStackParamList = {
     MonthlyCalendar: undefined;
@@ -16,6 +17,7 @@ export type WeeklyPlanStackParamList = {
     ExerciseDetail: { exerciseId: string };
     RoutineEditor: undefined;
     RoutineDetail: { routineId: string };
+    ExerciseCatalog: undefined;
 };
 
 const Stack = createNativeStackNavigator<WeeklyPlanStackParamList>();
@@ -30,6 +32,7 @@ const WeeklyPlanNavigator: React.FC = () => {
             <Stack.Screen name="ExerciseDetail" component={ExerciseDetailScreen} />
             <Stack.Screen name="RoutineEditor" component={RoutineEditorScreen} />
             <Stack.Screen name="RoutineDetail" component={RoutineDetailScreen} />
+            <Stack.Screen name="ExerciseCatalog" component={ExerciseCatalogScreen} />
         </Stack.Navigator>
     );
 };
