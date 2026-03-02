@@ -26,7 +26,9 @@ import {
 const TIMER_STORAGE_KEY = '@pressfit_rest_timer_start';
 
 // Interval (ms) at which we re-post the notification while in background to update the displayed time
-const NOTIFICATION_UPDATE_INTERVAL_MS = 10_000;
+// Note: expo-notifications doesn't expose Android's native Chronometer widget, so we simulate
+// a live counter by re-posting every second. This is the best possible with the managed workflow.
+const NOTIFICATION_UPDATE_INTERVAL_MS = 1_000;
 
 interface RestTimerProps {
     visible: boolean;
