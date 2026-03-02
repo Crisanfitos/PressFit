@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator, Alert, Switch } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator, Alert, Switch, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -20,6 +20,25 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const { metrics, progressPhotos, loading, loadingPhotos, uploadingPhoto, updateProfilePhoto, updateMetrics } = useProfileController(user);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [sourceModalVisible, setSourceModalVisible] = useState(false);
+
+    // Custom Alert State
+    const [customAlert, setCustomAlert] = useState<{
+        visible: boolean;
+        type: 'success' | 'error' | 'warning';
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        onCancel?: () => void;
+    }>({
+        visible: false,
+        type: 'success',
+        title: '',
+        message: '',
+        onConfirm: () => { }
+    });
+
+    const closeCustomAlert = () => setCustomAlert(prev => ({ ...prev, visible: false }));
 
     const [profilePhoto, setProfilePhoto] = useState<string | null>(user?.user_metadata?.custom_avatar_url || user?.user_metadata?.avatar_url || null);
 
@@ -29,7 +48,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         }
     }, [user]);
 
-    const handlePhotoSelection = async () => {
+    const handlePhotoSelection = () => {
+        setSourceModalVisible(true);
+    };
+
+    const pickFromGallery = async () => {
+        setSourceModalVisible(false);
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
             allowsEditing: true,
@@ -41,9 +65,64 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             try {
                 const url = await updateProfilePhoto(result.assets[0].uri);
                 if (url) setProfilePhoto(url);
-                Alert.alert('Éxito', 'Foto de perfil actualizada');
+                setCustomAlert({
+                    visible: true,
+                    type: 'success',
+                    title: 'Éxito',
+                    message: 'Foto de perfil actualizada correctamente.',
+                    onConfirm: closeCustomAlert
+                });
             } catch (error) {
-                Alert.alert('Error', 'No se pudo subir la foto');
+                setCustomAlert({
+                    visible: true,
+                    type: 'error',
+                    title: 'Error',
+                    message: 'No se pudo subir la foto de perfil.',
+                    onConfirm: closeCustomAlert
+                });
+            }
+        }
+    };
+
+    const pickFromCamera = async () => {
+        setSourceModalVisible(false);
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+            setCustomAlert({
+                visible: true,
+                type: 'error',
+                title: 'Permiso denegado',
+                message: 'Se necesita acceso a la cámara para tomar una foto de perfil.',
+                onConfirm: closeCustomAlert
+            });
+            return;
+        }
+
+        const result = await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8,
+        });
+
+        if (!result.canceled && result.assets?.[0]?.uri) {
+            try {
+                const url = await updateProfilePhoto(result.assets[0].uri);
+                if (url) setProfilePhoto(url);
+                setCustomAlert({
+                    visible: true,
+                    type: 'success',
+                    title: 'Éxito',
+                    message: 'Foto de perfil actualizada correctamente.',
+                    onConfirm: closeCustomAlert
+                });
+            } catch (error) {
+                setCustomAlert({
+                    visible: true,
+                    type: 'error',
+                    title: 'Error',
+                    message: 'No se pudo subir la foto de perfil.',
+                    onConfirm: closeCustomAlert
+                });
             }
         }
     };
@@ -199,9 +278,100 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         ...data,
                         bodyFatPercentage: data.bodyFatPercentage ?? undefined
                     });
-                    Alert.alert('Éxito', 'Datos actualizados correctamente');
+                    setCustomAlert({
+                        visible: true,
+                        type: 'success',
+                        title: 'Éxito',
+                        message: 'Datos actualizados correctamente.',
+                        onConfirm: closeCustomAlert
+                    });
                 }}
             />
+
+            {/* Source Selection Modal */}
+            <Modal visible={sourceModalVisible} transparent animationType="fade" onRequestClose={() => setSourceModalVisible(false)}>
+                <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 20 }}>
+                    <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 24, borderWidth: 1, borderColor: colors.border, maxWidth: 350, alignSelf: 'center', width: '100%' }}>
+                        <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.text, marginBottom: 16, textAlign: 'center' }}>Cambiar Foto</Text>
+                        <Text style={{ color: colors.textSecondary, textAlign: 'center', marginBottom: 20, fontSize: 14 }}>
+                            Elige de dónde quieres obtener la foto
+                        </Text>
+                        <TouchableOpacity
+                            style={{ flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, backgroundColor: colors.background, marginBottom: 10, borderWidth: 1, borderColor: colors.border }}
+                            onPress={pickFromCamera}
+                        >
+                            <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.primary + '20', justifyContent: 'center', alignItems: 'center', marginRight: 14 }}>
+                                <MaterialIcons name="camera-alt" size={24} color={colors.primary} />
+                            </View>
+                            <View>
+                                <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>Cámara</Text>
+                                <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Tomar una foto ahora</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{ flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, backgroundColor: colors.background, marginBottom: 16, borderWidth: 1, borderColor: colors.border }}
+                            onPress={pickFromGallery}
+                        >
+                            <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.primary + '20', justifyContent: 'center', alignItems: 'center', marginRight: 14 }}>
+                                <MaterialIcons name="photo-library" size={24} color={colors.primary} />
+                            </View>
+                            <View>
+                                <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>Galería</Text>
+                                <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Seleccionar de tus fotos</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <View style={{ flexDirection: 'row' }}>
+                            <TouchableOpacity
+                                style={{ flex: 1, alignItems: 'center', padding: 14, borderRadius: 10, backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border }}
+                                onPress={() => setSourceModalVisible(false)}
+                            >
+                                <Text style={{ fontWeight: '600', color: colors.text }}>Cancelar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Custom Alert Modal */}
+            <Modal visible={customAlert.visible} transparent animationType="fade" onRequestClose={closeCustomAlert}>
+                <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 40 }}>
+                    <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 24, borderWidth: 1, borderColor: colors.border, maxWidth: 350, alignSelf: 'center', width: '100%' }}>
+                        <View style={{
+                            width: 56, height: 56, borderRadius: 28, alignSelf: 'center', justifyContent: 'center', alignItems: 'center', marginBottom: 16,
+                            backgroundColor: customAlert.type === 'success' ? '#dcfce7' : customAlert.type === 'error' ? '#fee2e2' : '#fef3c7'
+                        }}>
+                            <MaterialIcons
+                                name={customAlert.type === 'success' ? 'check' : customAlert.type === 'error' ? 'close' : 'warning'}
+                                size={32}
+                                color={customAlert.type === 'success' ? '#22c55e' : customAlert.type === 'error' ? '#ef4444' : '#f59e0b'}
+                            />
+                        </View>
+                        <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.text, marginBottom: 16, textAlign: 'center' }}>{customAlert.title}</Text>
+                        <Text style={{ fontSize: 16, color: colors.textSecondary, textAlign: 'center', marginBottom: 24, lineHeight: 22 }}>
+                            {customAlert.message}
+                        </Text>
+                        <View style={{ flexDirection: 'row', gap: 12 }}>
+                            {customAlert.type === 'warning' && (
+                                <TouchableOpacity
+                                    style={{ flex: 1, padding: 14, borderRadius: 10, alignItems: 'center', backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border }}
+                                    onPress={customAlert.onCancel}
+                                >
+                                    <MaterialIcons name="close" size={24} color={colors.text} style={{ alignSelf: 'center' }} />
+                                </TouchableOpacity>
+                            )}
+                            <TouchableOpacity
+                                style={{
+                                    flex: 1, padding: 14, borderRadius: 10, alignItems: 'center', backgroundColor: customAlert.type === 'warning' ? '#ef4444' : colors.primary,
+                                    justifyContent: 'center'
+                                }}
+                                onPress={customAlert.onConfirm}
+                            >
+                                <MaterialIcons name="check" size={24} color="#fff" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
 
             <LogoutConfirmationModal
                 visible={showLogoutModal}
