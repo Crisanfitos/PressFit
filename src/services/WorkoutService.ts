@@ -469,8 +469,7 @@ export const WorkoutService = {
                 .eq('ejercicios_programados.ejercicio_id', exerciseId)
                 .eq('ejercicios_programados.rutinas_diarias.rutinas_semanales.usuario_id', userId)
                 .not('ejercicios_programados.rutinas_diarias.fecha_dia', 'is', null)
-                .not('peso_utilizado', 'is', null)
-                .order('ejercicios_programados(rutinas_diarias(fecha_dia))', { ascending: true }); // Note: PostgREST ordering on joined tables has syntax limitations, we will sort in JS to be safe.
+                .not('peso_utilizado', 'is', null);
 
             if (error) throw error;
 
