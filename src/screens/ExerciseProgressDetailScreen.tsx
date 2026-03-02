@@ -328,11 +328,12 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                                 textShiftY={-10}
                                 textShiftX={-5}
                                 textColor={colors.text}
+                                yAxisLabelSuffix={chartMode === 'peso' ? ' kg' : ''}
                                 yAxisTextStyle={{ color: colors.textSecondary, fontSize: 10 }}
                                 xAxisLabelTextStyle={{ color: colors.textSecondary, fontSize: 10, width: 60 }}
                                 initialSpacing={20}
-                                verticalLinesColor={`${colors.border}40`}
-                                rulesColor={`${colors.border}40`}
+                                verticalLinesColor={`${colors.textSecondary}30`}
+                                rulesColor={`${colors.textSecondary}30`}
                             />
                         </View>
                     ) : (
@@ -359,7 +360,7 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                             <Text style={styles.sessionDate}>{format(parseISO(date), "EEEE, d 'de' MMMM yyyy", { locale: es })}</Text>
                         </View>
 
-                        {historyListGroupedByDate[date].map((set) => (
+                        {[...historyListGroupedByDate[date]].sort((a, b) => a.numero_serie - b.numero_serie).map((set) => (
                             <View key={set.id} style={styles.setRow}>
                                 <Text style={styles.setNumber}>Serie {set.numero_serie}</Text>
                                 <Text style={styles.setDetails}>{set.peso_utilizado} kg × {set.repeticiones} reps</Text>
