@@ -26,6 +26,7 @@ interface WorkoutDetails {
     hora_inicio?: string;
     hora_fin?: string;
     completada: boolean;
+    descripcion?: string;
     ejercicios_programados?: ScheduledExercise[];
     [key: string]: any;
 }
