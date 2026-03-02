@@ -9,9 +9,24 @@ import {
     AppStateStatus,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
 import { MaterialIcons } from '@expo/vector-icons';
 
+import {
+    setupNotificationCategory,
+    requestNotificationPermissions,
+    scheduleTimerNotification,
+    cancelTimerNotification,
+    getElapsedSecondsFromStorage,
+    ACTION_OK,
+    ACTION_PAUSE,
+    ACTION_DISCARD,
+} from '../services/TimerNotificationService';
+
 const TIMER_STORAGE_KEY = '@pressfit_rest_timer_start';
+
+// Interval (ms) at which we re-post the notification while in background to update the displayed time
+const NOTIFICATION_UPDATE_INTERVAL_MS = 10_000;
 
 interface RestTimerProps {
     visible: boolean;
@@ -24,58 +39,109 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
     const [seconds, setSeconds] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
     const [isStopped, setIsStopped] = useState(false);
+
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const notifIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const slideAnim = useRef(new Animated.Value(100)).current;
     const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+    const isInBackgroundRef = useRef(false);
 
-    // ─── Persist start time to AsyncStorage so background can be calculated ───
-    const saveStartTime = useCallback(async (startTimestamp: number) => {
-        await AsyncStorage.setItem(TIMER_STORAGE_KEY, String(startTimestamp));
-    }, []);
-
-    const clearStartTime = useCallback(async () => {
-        await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
-    }, []);
-
-    // ─── Recalculate elapsed time from saved start timestamp ───
-    const recalculateFromStorage = useCallback(async () => {
-        try {
-            const saved = await AsyncStorage.getItem(TIMER_STORAGE_KEY);
-            if (saved) {
-                const startTs = parseInt(saved, 10);
-                const elapsed = Math.floor((Date.now() - startTs) / 1000);
-                setSeconds(elapsed > 0 ? elapsed : 0);
-            }
-        } catch (_) { }
-    }, []);
-
-    // ─── AppState listener: recalculate when app returns to foreground ───
+    // ─── One-time setup: permissions + notification category ───
     useEffect(() => {
-        const subscription = AppState.addEventListener('change', async (nextState: AppStateStatus) => {
+        (async () => {
+            await requestNotificationPermissions();
+            await setupNotificationCategory();
+        })();
+    }, []);
+
+    // ─── Handle notification response (user taps action button in drawer/lock screen) ───
+    useEffect(() => {
+        const sub = Notifications.addNotificationResponseReceivedListener(async (response) => {
+            const actionId = response.actionIdentifier;
+
+            if (actionId === ACTION_OK) {
+                // Calculate exact elapsed time and save
+                const elapsed = await getElapsedSecondsFromStorage();
+                await cancelTimerNotification();
+                await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+                onTimerStop(elapsed > 0 ? elapsed : seconds);
+                setIsStopped(false);
+                onDismiss();
+            } else if (actionId === ACTION_PAUSE) {
+                // Pause in-app timer (user brings app back by tapping the notification)
+                setIsRunning(false);
+                setIsStopped(true);
+                await cancelTimerNotification();
+            } else if (actionId === ACTION_DISCARD) {
+                await cancelTimerNotification();
+                await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+                setIsStopped(false);
+                onDismiss();
+            }
+        });
+        return () => sub.remove();
+    }, [seconds, onTimerStop, onDismiss]);
+
+    // ─── AppState listener ───
+    useEffect(() => {
+        const appStateSub = AppState.addEventListener('change', async (nextState: AppStateStatus) => {
             const prev = appStateRef.current;
             appStateRef.current = nextState;
 
-            if (
-                (prev === 'background' || prev === 'inactive') &&
-                nextState === 'active' &&
-                isRunning &&
-                !isStopped
-            ) {
-                // App came back to foreground — recalculate elapsed time
-                await recalculateFromStorage();
+            if (!visible) return;
+
+            if (nextState === 'background' || nextState === 'inactive') {
+                // App going to background — show notification
+                isInBackgroundRef.current = true;
+                if (isRunning && !isStopped) {
+                    const elapsed = await getElapsedSecondsFromStorage();
+                    await scheduleTimerNotification(elapsed);
+
+                    // Update notification every NOTIFICATION_UPDATE_INTERVAL_MS while in background
+                    notifIntervalRef.current = setInterval(async () => {
+                        const e = await getElapsedSecondsFromStorage();
+                        await scheduleTimerNotification(e);
+                    }, NOTIFICATION_UPDATE_INTERVAL_MS);
+                }
+            } else if (nextState === 'active') {
+                // App coming back to foreground
+                isInBackgroundRef.current = false;
+
+                // Stop notification update interval
+                if (notifIntervalRef.current) {
+                    clearInterval(notifIntervalRef.current);
+                    notifIntervalRef.current = null;
+                }
+
+                // Cancel the notification since user is back in app
+                await cancelTimerNotification();
+
+                // Recalculate elapsed time from start timestamp
+                if (
+                    (prev === 'background' || prev === 'inactive') &&
+                    isRunning &&
+                    !isStopped
+                ) {
+                    const elapsed = await getElapsedSecondsFromStorage();
+                    setSeconds(elapsed);
+                }
             }
         });
-        return () => subscription.remove();
-    }, [isRunning, isStopped, recalculateFromStorage]);
 
-    // ─── Visibility: animate slide in/out, start/reset timer ───
+        return () => {
+            appStateSub.remove();
+            if (notifIntervalRef.current) clearInterval(notifIntervalRef.current);
+        };
+    }, [visible, isRunning, isStopped]);
+
+    // ─── Visibility: animate + start/reset timer ───
     useEffect(() => {
         if (visible) {
             const startTs = Date.now();
             setSeconds(0);
             setIsStopped(false);
             setIsRunning(true);
-            saveStartTime(startTs);
+            AsyncStorage.setItem(TIMER_STORAGE_KEY, String(startTs));
             Animated.spring(slideAnim, {
                 toValue: 0,
                 useNativeDriver: true,
@@ -91,11 +157,12 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             setIsRunning(false);
             setIsStopped(false);
             setSeconds(0);
-            clearStartTime();
+            AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+            cancelTimerNotification();
         }
     }, [visible]);
 
-    // ─── Interval while running ───
+    // ─── setInterval while running in foreground ───
     useEffect(() => {
         if (isRunning && !isStopped) {
             intervalRef.current = setInterval(() => {
@@ -114,41 +181,33 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
 
     // ─── Actions ───
 
-    // Parar: pausa, muestra botones
     const handleStop = useCallback(() => {
         setIsRunning(false);
         setIsStopped(true);
     }, []);
 
-    // OK: recalcular tiempo exacto desde AsyncStorage, guardar en DB, cerrar
     const handleConfirm = useCallback(async () => {
-        let finalSeconds = seconds;
-        try {
-            const saved = await AsyncStorage.getItem(TIMER_STORAGE_KEY);
-            if (saved) {
-                const elapsed = Math.floor((Date.now() - parseInt(saved, 10)) / 1000);
-                if (elapsed > 0) finalSeconds = elapsed;
-            }
-        } catch (_) { }
+        // Get exact elapsed from AsyncStorage before clearing
+        const elapsed = await getElapsedSecondsFromStorage();
+        await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+        await cancelTimerNotification();
 
-        await clearStartTime();
-        onTimerStop(finalSeconds);
+        onTimerStop(elapsed > 0 ? elapsed : seconds);
         setIsStopped(false);
         onDismiss();
-    }, [seconds, onTimerStop, onDismiss, clearStartTime]);
+    }, [seconds, onTimerStop, onDismiss]);
 
-    // Reanudar: continuar el cronómetro
     const handleResume = useCallback(() => {
         setIsStopped(false);
         setIsRunning(true);
     }, []);
 
-    // Descartar: cerrar sin guardar
     const handleDiscard = useCallback(async () => {
-        await clearStartTime();
+        await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+        await cancelTimerNotification();
         setIsStopped(false);
         onDismiss();
-    }, [onDismiss, clearStartTime]);
+    }, [onDismiss]);
 
     const formatTime = (totalSeconds: number) => {
         const mins = Math.floor(totalSeconds / 60);
@@ -239,7 +298,6 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             </View>
 
             {isStopped ? (
-                // Stopped: OK (verde) | Reanudar (primary) | Descartar (rojo)
                 <>
                     <TouchableOpacity
                         style={[styles.actionButton, { backgroundColor: '#22c55e' }]}
@@ -264,7 +322,6 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                     </TouchableOpacity>
                 </>
             ) : (
-                // Running: Parar | X (dismiss/discard)
                 <>
                     <TouchableOpacity style={styles.stopButton} onPress={handleStop}>
                         <Text style={styles.stopButtonText}>Parar</Text>
