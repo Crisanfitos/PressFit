@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Alert } from 'react-native';
 import { WorkoutService } from '../services/WorkoutService';
 import { RoutineService } from '../services/RoutineService';
+import { TipoPeso } from '../types/setTypes';
 
 export type WorkoutMode = 'ACTIVE' | 'VIEW' | 'MISSED' | 'PREVIEW' | 'PENDING';
 
@@ -21,6 +22,7 @@ interface Exercise {
     target_sets: number;
     sets: Set[];
     is_routine: boolean;
+    tipo_peso: TipoPeso;
     grupo_muscular?: string;
     imagen_url?: string;
 }
@@ -67,6 +69,7 @@ export const useWorkoutController = (
                         target_sets: 3,
                         sets: ex.series || [],
                         is_routine: true,
+                        tipo_peso: (ex.tipo_peso as TipoPeso) || 'total',
                     }));
                 }
             }
@@ -97,6 +100,7 @@ export const useWorkoutController = (
                             target_sets: 3,
                             sets: setsToUse,
                             is_routine: true,
+                            tipo_peso: (re.tipo_peso as TipoPeso) || 'total',
                         };
                     });
                 }
@@ -384,6 +388,26 @@ export const useWorkoutController = (
         }
     };
 
+    const updateWeightType = async (routineExerciseId: string, exerciseId: string, tipoPeso: TipoPeso) => {
+        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
+        if (!canEdit) return;
+
+        setExercises((prev) =>
+            prev.map((ex) =>
+                ex.id === exerciseId && ex.routine_exercise_id === routineExerciseId
+                    ? { ...ex, tipo_peso: tipoPeso }
+                    : ex
+            )
+        );
+
+        try {
+            await WorkoutService.updateWeightType(routineExerciseId, tipoPeso);
+        } catch (error) {
+            console.error('Failed to update weight type', error);
+            if (workout) loadExercises(routineDayId, workout.id);
+        }
+    };
+
     const finishWorkout = async () => {
         if (!workout || mode !== 'ACTIVE') return false;
         stopTimer();
@@ -412,6 +436,7 @@ export const useWorkoutController = (
         removeExercise,
         addExercise,
         finishWorkout,
+        updateWeightType,
         loadSeriesForExercise,
         reloadExercises: () => loadExercises(routineDayId, workout?.id || null),
     };

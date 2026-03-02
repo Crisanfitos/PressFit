@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { TipoPeso } from '../types/setTypes';
 
 interface SetData {
     id: string;
@@ -14,6 +15,7 @@ interface ScheduledExercise {
     rutina_diaria_id: string;
     ejercicio_id: string;
     orden_ejecucion: number;
+    tipo_peso: TipoPeso;
     ejercicio?: any;
     series?: SetData[];
     [key: string]: any;
@@ -107,6 +109,7 @@ export const WorkoutService = {
                     ejercicio_id: ex.ejercicio_id,
                     orden_ejecucion: ex.orden_ejecucion,
                     notas_sesion: ex.notas_sesion,
+                    tipo_peso: ex.tipo_peso || 'total',
                 }));
 
                 const { data: insertedExercises, error: exercisesError } = await supabase
@@ -459,6 +462,7 @@ export const WorkoutService = {
                     rpe,
                     ejercicios_programados!inner(
                         ejercicio_id,
+                        tipo_peso,
                         rutinas_diarias!inner(
                             id,
                             fecha_dia,
@@ -480,6 +484,7 @@ export const WorkoutService = {
                 peso_utilizado: row.peso_utilizado,
                 repeticiones: row.repeticiones,
                 rpe: row.rpe,
+                tipo_peso: row.ejercicios_programados?.tipo_peso || 'total',
                 fecha: row.ejercicios_programados?.rutinas_diarias?.fecha_dia,
                 rutina_id: row.ejercicios_programados?.rutinas_diarias?.id,
             }))
@@ -489,6 +494,26 @@ export const WorkoutService = {
             return { data: history, error: null };
         } catch (error) {
             console.error('Error fetching exercise history:', error);
+            return { data: null, error };
+        }
+    },
+
+    async updateWeightType(
+        scheduledExerciseId: string,
+        tipoPeso: TipoPeso
+    ): Promise<ServiceResponse<ScheduledExercise>> {
+        try {
+            const { data, error } = await supabase
+                .from('ejercicios_programados')
+                .update({ tipo_peso: tipoPeso })
+                .eq('id', scheduledExerciseId)
+                .select()
+                .single();
+
+            if (error) throw error;
+            return { data, error: null };
+        } catch (error) {
+            console.error('Error updating weight type:', error);
             return { data: null, error };
         }
     },
