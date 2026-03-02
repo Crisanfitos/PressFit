@@ -18,7 +18,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 type PhysicalProgressScreenProps = { navigation: any };
 
 const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigation }) => {
-    const { theme } = useTheme();
+    const { theme, themeMode } = useTheme();
     const { colors } = theme;
     const authContext = useContext(AuthContext);
     const user = authContext?.user;
@@ -377,7 +377,7 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                             <DateTimePicker
                                 value={selectedDate}
                                 mode="date"
-                                display="default"
+                                display="spinner"
                                 onChange={(event, date) => {
                                     setShowDatePicker(false);
                                     if (date) {
@@ -385,6 +385,9 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                                     }
                                 }}
                                 maximumDate={new Date()}
+                                themeVariant={themeMode === 'dark' ? "dark" : "light"}
+                                textColor={colors.text}
+                                accentColor={colors.primary}
                             />
                         )}
 
