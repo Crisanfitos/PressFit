@@ -30,6 +30,9 @@ interface Workout {
     hora_inicio?: string;
     hora_fin?: string;
     completada?: boolean;
+    descripcion?: string;
+    fecha_dia?: string;
+    nombre_dia?: string;
     ejercicios_programados?: any[];
 }
 
