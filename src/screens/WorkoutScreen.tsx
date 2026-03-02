@@ -64,6 +64,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
     const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(null);
     const [restTimerVisible, setRestTimerVisible] = useState(false);
     const [lastCompletedSetId, setLastCompletedSetId] = useState<string | null>(null);
+    const [savedTimerSetIds, setSavedTimerSetIds] = useState<Set<string>>(new Set());
 
     const hasInitializedCollapse = useRef(false);
 
@@ -175,8 +176,14 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
     const handleRestTimerStop = async (seconds: number) => {
         if (lastCompletedSetId && seconds > 0) {
             await WorkoutService.updateSet(lastCompletedSetId, { descanso_segundos: seconds });
+            setSavedTimerSetIds((prev) => new Set(prev).add(lastCompletedSetId));
         }
         setLastCompletedSetId(null);
+    };
+
+    const handleRestTimerDismiss = () => {
+        setRestTimerVisible(false);
+        // Note: does NOT clear lastCompletedSetId save — discard means no save, handled in RestTimer
     };
 
     const handleFinishWorkout = () => {
@@ -530,15 +537,29 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                                     <MaterialIcons name="close" size={20} color={colors.textSecondary} />
                                                                 </TouchableOpacity>
                                                             )}
-                                                            {mode === 'ACTIVE' && navMode !== 'edit' && (
-                                                                <TouchableOpacity
-                                                                    style={{ padding: 4, marginLeft: 4 }}
-                                                                    onPress={() => handleStartRestTimer(set.id)}
-                                                                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                                                                >
-                                                                    <MaterialIcons name="timer" size={18} color={colors.textSecondary} />
-                                                                </TouchableOpacity>
-                                                            )}
+                                                            {mode === 'ACTIVE' && navMode !== 'edit' && (() => {
+                                                                const isActiveTimer = lastCompletedSetId === set.id && restTimerVisible;
+                                                                const isSaved = savedTimerSetIds.has(set.id);
+                                                                const timerColor = isActiveTimer
+                                                                    ? colors.primary
+                                                                    : isSaved
+                                                                        ? '#22c55e'
+                                                                        : colors.textSecondary;
+                                                                return (
+                                                                    <TouchableOpacity
+                                                                        style={{ padding: 4, marginLeft: 4 }}
+                                                                        onPress={() => handleStartRestTimer(set.id)}
+                                                                        disabled={isSaved}
+                                                                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                                                    >
+                                                                        <MaterialIcons
+                                                                            name={isSaved ? 'timer-off' : 'timer'}
+                                                                            size={18}
+                                                                            color={timerColor}
+                                                                        />
+                                                                    </TouchableOpacity>
+                                                                );
+                                                            })()}
                                                         </View>
                                                     );
                                                 })
@@ -621,7 +642,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
             {/* Rest Timer */}
             <RestTimer
                 visible={restTimerVisible}
-                onDismiss={() => setRestTimerVisible(false)}
+                onDismiss={handleRestTimerDismiss}
                 onTimerStop={handleRestTimerStop}
                 colors={colors}
             />
