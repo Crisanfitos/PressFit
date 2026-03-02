@@ -132,7 +132,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             marginTop: 8,
         },
         loginButtonText: {
-            color: colors.background,
+            color: colors.textOnPrimary,
             fontSize: 18,
             fontWeight: 'bold',
         },
@@ -256,7 +256,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                         disabled={loading}
                     >
                         {loading ? (
-                            <ActivityIndicator color={colors.background} />
+                            <ActivityIndicator color={colors.textOnPrimary} />
                         ) : (
                             <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
                         )}

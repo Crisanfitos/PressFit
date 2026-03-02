@@ -86,7 +86,7 @@ const MonthlyProgressScreen: React.FC<MonthlyProgressScreenProps> = ({ navigatio
         summaryLabel: { fontSize: 14, color: colors.textSecondary, marginTop: 4, textAlign: 'center' },
         loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
         speechBubble: { position: 'absolute', bottom: 45, backgroundColor: colors.primary, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, minWidth: 120, alignItems: 'center' },
-        speechBubbleText: { color: '#FFFFFF', fontSize: 11, fontWeight: '600' },
+        speechBubbleText: { color: colors.textOnPrimary, fontSize: 11, fontWeight: '600' },
     }), [colors]);
 
     const formatDate = (dateStr: string | null) => {

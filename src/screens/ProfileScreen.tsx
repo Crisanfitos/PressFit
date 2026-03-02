@@ -108,9 +108,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                             />
                             <View style={styles.cameraIconContainer}>
                                 {uploadingPhoto ? (
-                                    <ActivityIndicator size="small" color={colors.background} />
+                                    <ActivityIndicator size="small" color={colors.textOnPrimary} />
                                 ) : (
-                                    <MaterialIcons name="camera-alt" size={18} color={colors.background} />
+                                    <MaterialIcons name="camera-alt" size={18} color={colors.textOnPrimary} />
                                 )}
                             </View>
                         </TouchableOpacity>

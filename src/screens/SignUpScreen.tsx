@@ -129,7 +129,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
             marginTop: 8,
         },
         signUpButtonText: {
-            color: colors.background,
+            color: colors.textOnPrimary,
             fontSize: 18,
             fontWeight: 'bold',
             display: 'flex',
@@ -279,7 +279,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                             disabled={loading}
                         >
                             {loading ? (
-                                <ActivityIndicator color={colors.background} />
+                                <ActivityIndicator color={colors.textOnPrimary} />
                             ) : (
                                 <Text style={styles.signUpButtonText}>Crear Cuenta</Text>
                             )}

@@ -182,7 +182,7 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
             color: colors.primary,
         },
         toggleTextActive: {
-            color: '#FFFFFF',
+            color: colors.textOnPrimary,
         },
         recommendationCard: {
             backgroundColor: `${colors.primary}15`,

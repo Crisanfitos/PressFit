@@ -168,7 +168,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
             borderRadius: 12,
         },
         activeBadgeText: {
-            color: colors.background,
+            color: colors.textOnPrimary,
             fontSize: 12,
             fontWeight: '600',
         },
@@ -217,7 +217,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
             borderRadius: 12,
         },
         createButtonText: {
-            color: colors.background,
+            color: colors.textOnPrimary,
             fontSize: 16,
             fontWeight: '600',
         },
@@ -298,7 +298,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
             backgroundColor: colors.primary,
         },
         confirmButtonText: {
-            color: colors.background,
+            color: colors.textOnPrimary,
             fontSize: 16,
             fontWeight: '600',
         },
@@ -390,7 +390,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                     style={styles.fab}
                     onPress={() => setShowCreateModal(true)}
                 >
-                    <MaterialIcons name="add" size={28} color={colors.background} />
+                    <MaterialIcons name="add" size={28} color={colors.textOnPrimary} />
                 </TouchableOpacity>
             )}
 

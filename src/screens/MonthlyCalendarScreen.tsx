@@ -564,7 +564,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                                                 { color: colors.text },
                                                 // White text for colored backgrounds
                                                 (dayStyle?.isCompleted || dayStyle?.isInProgress) && { color: '#fff', fontWeight: 'bold' },
-                                                dayStyle?.isToday && !dayStyle?.isCompleted && !dayStyle?.isInProgress && { color: colors.background, fontWeight: 'bold' },
+                                                dayStyle?.isToday && !dayStyle?.isCompleted && !dayStyle?.isInProgress && { color: colors.textOnPrimary, fontWeight: 'bold' },
                                                 dayStyle?.isFuture && { color: colors.textSecondary },
                                             ]}
                                         >
@@ -608,7 +608,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                     colors={[colors.primary, (colors as any).primaryDark || `${colors.primary}DD`]}
                     style={[StyleSheet.absoluteFill, { borderRadius: 30 }]}
                 />
-                <MaterialIcons name="edit" size={28} color={colors.background} />
+                <MaterialIcons name="edit" size={28} color={colors.textOnPrimary} />
             </TouchableOpacity>
         </SafeAreaView>
     );
