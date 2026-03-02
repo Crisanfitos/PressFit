@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, useMemo, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator, Modal, TextInput, Alert, Dimensions } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator, Modal, TextInput, Alert, Dimensions, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -9,6 +9,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useProgressController } from '../controllers/useProgressController';
 import { UserService } from '../services/UserService';
 import WeightChart from '../components/WeightChart';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -32,13 +33,29 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
     const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
     const [comment, setComment] = useState('');
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [uploading, setUploading] = useState(false);
     const [viewerVisible, setViewerVisible] = useState(false);
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [isSelectionMode, setIsSelectionMode] = useState(false);
+    // Custom Alert State
+    const [customAlert, setCustomAlert] = useState<{
+        visible: boolean;
+        type: 'success' | 'error' | 'warning';
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        onCancel?: () => void;
+    }>({
+        visible: false,
+        type: 'success',
+        title: '',
+        message: '',
+        onConfirm: () => { }
+    });
 
-    // Edit modal state
+    const closeCustomAlert = () => setCustomAlert(prev => ({ ...prev, visible: false }));
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [editingPhoto, setEditingPhoto] = useState<any>(null);
     const [editComment, setEditComment] = useState('');
@@ -77,7 +94,21 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
         setModalVisible(false);
         setSelectedImageUri(null);
         if (success) {
-            Alert.alert('Éxito', 'Foto añadida correctamente');
+            setCustomAlert({
+                visible: true,
+                type: 'success',
+                title: 'Éxito',
+                message: 'La foto ha sido añadida correctamente.',
+                onConfirm: closeCustomAlert
+            });
+        } else {
+            setCustomAlert({
+                visible: true,
+                type: 'error',
+                title: 'Error',
+                message: 'Hubo un problema al añadir la foto.',
+                onConfirm: closeCustomAlert
+            });
         }
     };
 
@@ -97,18 +128,37 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
     };
 
     const handleDeleteSelected = () => {
-        Alert.alert('Eliminar fotos', `¿Eliminar ${selectedIds.size} foto(s)?`, [
-            { text: 'Cancelar', style: 'cancel' },
-            {
-                text: 'Eliminar',
-                style: 'destructive',
-                onPress: async () => {
-                    await deletePhotos(Array.from(selectedIds));
-                    setIsSelectionMode(false);
+        setCustomAlert({
+            visible: true,
+            type: 'warning',
+            title: 'Eliminar fotos',
+            message: `¿Estás seguro de que quieres eliminar ${selectedIds.size} foto(s) seleccionada(s)?`,
+            onCancel: closeCustomAlert,
+            onConfirm: async () => {
+                closeCustomAlert();
+                const ids = Array.from(selectedIds);
+                const success = await deletePhotos(ids);
+                if (success) {
                     setSelectedIds(new Set());
-                },
-            },
-        ]);
+                    setIsSelectionMode(false);
+                    setCustomAlert({
+                        visible: true,
+                        type: 'success',
+                        title: 'Eliminado',
+                        message: 'Las fotos seleccionadas han sido eliminadas.',
+                        onConfirm: closeCustomAlert
+                    });
+                } else {
+                    setCustomAlert({
+                        visible: true,
+                        type: 'error',
+                        title: 'Error',
+                        message: 'Hubo un problema al eliminar las fotos.',
+                        onConfirm: closeCustomAlert
+                    });
+                }
+            }
+        });
     };
 
     const openViewer = (index: number) => {
@@ -141,9 +191,21 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
         if (success) {
             setEditModalVisible(false);
             setEditingPhoto(null);
-            Alert.alert('Éxito', 'Foto actualizada correctamente');
+            setCustomAlert({
+                visible: true,
+                type: 'success',
+                title: 'Éxito',
+                message: 'La foto ha sido actualizada correctamente.',
+                onConfirm: closeCustomAlert
+            });
         } else {
-            Alert.alert('Error', 'No se pudo actualizar la foto');
+            setCustomAlert({
+                visible: true,
+                type: 'error',
+                title: 'Error',
+                message: 'No se pudo actualizar la foto. Inténtalo de nuevo.',
+                onConfirm: closeCustomAlert
+            });
         }
     };
 
@@ -294,7 +356,10 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
 
             {/* Upload Modal */}
             <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => setModalVisible(false)}>
-                <View style={styles.modalOverlay}>
+                <KeyboardAvoidingView
+                    style={styles.modalOverlay}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                >
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Nueva Foto de Progreso</Text>
                         {selectedImageUri && <Image source={{ uri: selectedImageUri }} style={styles.previewImage} />}
@@ -302,19 +367,26 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                         <Text style={styles.label}>Fecha de la foto</Text>
                         <TouchableOpacity
                             style={[styles.input, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}
-                            onPress={() => {
-                                // Simple date adjustment - could add DatePicker later
-                                Alert.alert('Cambiar Fecha', 'Selecciona una opción', [
-                                    { text: 'Hoy', onPress: () => setSelectedDate(new Date()) },
-                                    { text: 'Ayer', onPress: () => { const d = new Date(); d.setDate(d.getDate() - 1); setSelectedDate(d); } },
-                                    { text: 'Hace 1 semana', onPress: () => { const d = new Date(); d.setDate(d.getDate() - 7); setSelectedDate(d); } },
-                                    { text: 'Cancelar', style: 'cancel' },
-                                ]);
-                            }}
+                            onPress={() => setShowDatePicker(true)}
                         >
-                            <Text style={{ color: colors.text }}>{selectedDate.toLocaleDateString()}</Text>
+                            <Text style={{ color: colors.text }}>{format(selectedDate, "d 'de' MMMM, yyyy", { locale: es })}</Text>
                             <MaterialIcons name="calendar-today" size={20} color={colors.textSecondary} />
                         </TouchableOpacity>
+
+                        {showDatePicker && (
+                            <DateTimePicker
+                                value={selectedDate}
+                                mode="date"
+                                display="default"
+                                onChange={(event, date) => {
+                                    setShowDatePicker(false);
+                                    if (date) {
+                                        setSelectedDate(date);
+                                    }
+                                }}
+                                maximumDate={new Date()}
+                            />
+                        )}
 
                         <Text style={styles.label}>Comentario (opcional)</Text>
                         <TextInput
@@ -334,7 +406,7 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                             </TouchableOpacity>
                         </View>
                     </View>
-                </View>
+                </KeyboardAvoidingView>
             </Modal>
 
             {/* Photo Viewer with Zoom */}
@@ -379,9 +451,12 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
 
             {/* Edit Photo Modal */}
             <Modal visible={editModalVisible} transparent animationType="fade" onRequestClose={() => setEditModalVisible(false)}>
-                <View style={styles.modalOverlay}>
+                <KeyboardAvoidingView
+                    style={styles.modalOverlay}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                >
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Editar Foto</Text>
+                        <Text style={styles.modalTitle}>Editar Detalles de Foto</Text>
 
                         <Text style={styles.label}>Fecha</Text>
                         <TouchableOpacity
@@ -417,8 +492,47 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                             </TouchableOpacity>
                         </View>
                     </View>
+                </KeyboardAvoidingView>
+            </Modal>
+
+            {/* Custom Alert Modal */}
+            <Modal visible={customAlert.visible} transparent animationType="fade" onRequestClose={closeCustomAlert}>
+                <View style={[styles.modalOverlay, { padding: 40 }]}>
+                    <View style={[styles.modalContent, { maxWidth: 350 }]}>
+                        <View style={{
+                            width: 56, height: 56, borderRadius: 28, alignSelf: 'center', justifyContent: 'center', alignItems: 'center', marginBottom: 16,
+                            backgroundColor: customAlert.type === 'success' ? '#dcfce7' : customAlert.type === 'error' ? '#fee2e2' : '#fef3c7'
+                        }}>
+                            <MaterialIcons
+                                name={customAlert.type === 'success' ? 'check' : customAlert.type === 'error' ? 'close' : 'warning'}
+                                size={32}
+                                color={customAlert.type === 'success' ? '#22c55e' : customAlert.type === 'error' ? '#ef4444' : '#f59e0b'}
+                            />
+                        </View>
+                        <Text style={[styles.modalTitle, { textAlign: 'center' }]}>{customAlert.title}</Text>
+                        <Text style={{ fontSize: 16, color: colors.textSecondary, textAlign: 'center', marginBottom: 24, lineHeight: 22 }}>
+                            {customAlert.message}
+                        </Text>
+                        <View style={{ flexDirection: 'row', gap: 12 }}>
+                            {customAlert.type === 'warning' && (
+                                <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={customAlert.onCancel}>
+                                    <MaterialIcons name="close" size={24} color={colors.text} style={{ alignSelf: 'center' }} />
+                                </TouchableOpacity>
+                            )}
+                            <TouchableOpacity
+                                style={[styles.modalButton, {
+                                    backgroundColor: customAlert.type === 'warning' ? '#ef4444' : colors.primary,
+                                    justifyContent: 'center', alignItems: 'center'
+                                }]}
+                                onPress={customAlert.onConfirm}
+                            >
+                                <MaterialIcons name="check" size={24} color="#fff" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </View>
             </Modal>
+
         </SafeAreaView>
     );
 };
