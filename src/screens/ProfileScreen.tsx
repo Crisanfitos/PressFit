@@ -7,6 +7,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useProfileController } from '../controllers/useProfileController';
 import EditProfileModal from '../components/EditProfileModal';
+import LogoutConfirmationModal from '../components/LogoutConfirmationModal';
 
 type ProfileScreenProps = { navigation: any };
 
@@ -18,6 +19,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
     const { metrics, progressPhotos, loading, loadingPhotos, uploadingPhoto, updateProfilePhoto, updateMetrics } = useProfileController(user);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     const [profilePhoto, setProfilePhoto] = useState<string | null>(user?.user_metadata?.custom_avatar_url || user?.user_metadata?.avatar_url || null);
 
@@ -177,7 +179,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                     </View>
 
                     <View style={styles.logoutSection}>
-                        <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
+                        <TouchableOpacity
+                            style={styles.logoutButton}
+                            onPress={() => setShowLogoutModal(true)}
+                        >
                             <MaterialIcons name="logout" size={24} color="#ef4444" />
                             <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
                         </TouchableOpacity>
@@ -195,6 +200,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         bodyFatPercentage: data.bodyFatPercentage ?? undefined
                     });
                     Alert.alert('Éxito', 'Datos actualizados correctamente');
+                }}
+            />
+
+            <LogoutConfirmationModal
+                visible={showLogoutModal}
+                onClose={() => setShowLogoutModal(false)}
+                onConfirm={() => {
+                    setShowLogoutModal(false);
+                    if (signOut) signOut();
                 }}
             />
         </SafeAreaView>
