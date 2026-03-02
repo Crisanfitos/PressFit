@@ -34,6 +34,7 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
     const [comment, setComment] = useState('');
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+    const [sourceModalVisible, setSourceModalVisible] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [viewerVisible, setViewerVisible] = useState(false);
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -71,9 +72,40 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
         }
     }, [user?.id]);
 
-    const handleAddPhoto = async () => {
+    const handleAddPhoto = () => {
+        setSourceModalVisible(true);
+    };
+
+    const pickFromGallery = async () => {
+        setSourceModalVisible(false);
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
+            allowsEditing: true,
+            quality: 0.8,
+        });
+
+        if (!result.canceled && result.assets?.[0]?.uri) {
+            setSelectedImageUri(result.assets[0].uri);
+            setComment('');
+            setSelectedDate(new Date());
+            setModalVisible(true);
+        }
+    };
+
+    const pickFromCamera = async () => {
+        setSourceModalVisible(false);
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+            setCustomAlert({
+                visible: true,
+                type: 'error',
+                title: 'Permiso denegado',
+                message: 'Se necesita acceso a la cámara para tomar fotos de progreso.',
+                onConfirm: closeCustomAlert
+            });
+            return;
+        }
+        const result = await ImagePicker.launchCameraAsync({
             allowsEditing: true,
             quality: 0.8,
         });
@@ -353,6 +385,50 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                     </View>
                 </TouchableOpacity>
             )}
+
+            {/* Source Selection Modal */}
+            <Modal visible={sourceModalVisible} transparent animationType="fade" onRequestClose={() => setSourceModalVisible(false)}>
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContent, { maxWidth: 350 }]}>
+                        <Text style={styles.modalTitle}>Añadir Foto</Text>
+                        <Text style={{ color: colors.textSecondary, textAlign: 'center', marginBottom: 20, fontSize: 14 }}>
+                            Elige de dónde quieres obtener la foto
+                        </Text>
+                        <TouchableOpacity
+                            style={{ flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, backgroundColor: colors.inputBackground, marginBottom: 10, borderWidth: 1, borderColor: colors.border }}
+                            onPress={pickFromCamera}
+                        >
+                            <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.primary + '20', justifyContent: 'center', alignItems: 'center', marginRight: 14 }}>
+                                <MaterialIcons name="camera-alt" size={24} color={colors.primary} />
+                            </View>
+                            <View>
+                                <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>Cámara</Text>
+                                <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Tomar una foto ahora</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{ flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, backgroundColor: colors.inputBackground, marginBottom: 16, borderWidth: 1, borderColor: colors.border }}
+                            onPress={pickFromGallery}
+                        >
+                            <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.primary + '20', justifyContent: 'center', alignItems: 'center', marginRight: 14 }}>
+                                <MaterialIcons name="photo-library" size={24} color={colors.primary} />
+                            </View>
+                            <View>
+                                <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>Galería</Text>
+                                <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Seleccionar de tus fotos</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <View style={{ flexDirection: 'row' }}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.cancelButton, { flex: 1, alignItems: 'center' }]}
+                                onPress={() => setSourceModalVisible(false)}
+                            >
+                                <Text style={[styles.buttonText, { color: colors.text }]}>Cancelar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
 
             {/* Upload Modal */}
             <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => setModalVisible(false)}>
