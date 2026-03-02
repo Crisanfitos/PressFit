@@ -55,6 +55,15 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
         return `${days[d.getDay()]}, ${d.getDate()} de ${months[d.getMonth()]} ${d.getFullYear()}`;
     };
 
+    const formatDuration = (minutes: number | null) => {
+        if (minutes === null) return '-';
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        const formattedHours = hours.toString().padStart(2, '0');
+        const formattedMins = mins.toString().padStart(2, '0');
+        return `${formattedHours}:${formattedMins}`;
+    };
+
     useEffect(() => {
         loadDayData();
     }, [date, routineId]);
@@ -356,6 +365,82 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
             alignItems: 'center',
             justifyContent: 'center',
         },
+        heroSummaryContainer: {
+            flexDirection: 'row',
+            marginTop: 16,
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            padding: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+            gap: 16,
+        },
+        heroSummaryItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+        },
+        heroSummaryText: {
+            fontSize: 15,
+            fontWeight: '600',
+            color: colors.text,
+        },
+        completedExerciseCard: {
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            padding: 16,
+            marginBottom: 16,
+            borderWidth: 1,
+            borderColor: colors.border,
+        },
+        completedExerciseHeader: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 16,
+            paddingBottom: 12,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderBottomColor: colors.border,
+        },
+        completedExerciseName: {
+            fontSize: 16,
+            fontWeight: 'bold',
+            color: colors.text,
+            marginBottom: 2,
+        },
+        setRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 6,
+        },
+        setNumber: {
+            color: colors.textSecondary,
+            width: 60,
+            fontSize: 14,
+        },
+        setDetails: {
+            color: colors.text,
+            flex: 1,
+            fontWeight: '500',
+            fontSize: 15,
+        },
+        setBadgesContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+        },
+        badge: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: `${colors.textSecondary}20`,
+            paddingHorizontal: 8,
+            paddingVertical: 4,
+            borderRadius: 12,
+        },
+        badgeText: {
+            color: colors.textSecondary,
+            fontSize: 12,
+            fontWeight: 'bold',
+        },
     });
 
     if (loading) {
@@ -400,6 +485,20 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                     </View>
                 )}
 
+                {/* Resumen del entrenamiento (solo si completado) en la sección hero */}
+                {workoutStats?.isCompleted && (
+                    <View style={styles.heroSummaryContainer}>
+                        <View style={styles.heroSummaryItem}>
+                            <MaterialIcons name="fitness-center" size={20} color={colors.primary} />
+                            <Text style={styles.heroSummaryText}>{workoutStats.exerciseCount} Ejercicios</Text>
+                        </View>
+                        <View style={styles.heroSummaryItem}>
+                            <MaterialIcons name="timer" size={20} color={colors.primary} />
+                            <Text style={styles.heroSummaryText}>{formatDuration(workoutStats.duration)}</Text>
+                        </View>
+                    </View>
+                )}
+
                 {activeWorkout && !workoutStats?.isCompleted && (
                     <View style={[styles.statusBadge, { backgroundColor: `${colors.statusWarning}20` }]}>
                         <MaterialIcons name="play-circle" size={18} color={colors.statusWarning} />
@@ -412,7 +511,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
 
             <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 100 }}>
                 <Text style={styles.sectionTitle}>
-                    Ejercicios ({exercises.length})
+                    {workoutStats?.isCompleted ? 'Ejercicios' : `Ejercicios (${exercises.length})`}
                 </Text>
 
                 {exercises.length === 0 ? (
@@ -424,46 +523,83 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                         </Text>
                     </View>
                 ) : (
-                    exercises.map((exercise, index) => (
-                        <View key={exercise.id || index} style={styles.exerciseCard}>
-                            <View style={styles.exerciseIcon}>
-                                <MaterialIcons name="fitness-center" size={24} color={colors.primary} />
-                            </View>
-                            <View style={styles.exerciseInfo}>
-                                <Text style={styles.exerciseName}>
-                                    {exercise.ejercicio?.titulo || 'Ejercicio'}
-                                </Text>
-                                <Text style={styles.exerciseMuscle}>
-                                    {exercise.ejercicio?.grupo_muscular || 'Sin grupo'}
-                                </Text>
-                            </View>
-                            <View style={styles.exerciseSets}>
-                                <Text style={styles.setsNumber}>
-                                    {exercise.series?.length || 0}
-                                </Text>
-                                <Text style={styles.setsLabel}>series</Text>
-                            </View>
-                        </View>
-                    ))
-                )}
+                    workoutStats?.isCompleted ? (
+                        // Nuevo diseño para entrenamientos COMPLETADOS
+                        exercises.map((exercise, index) => {
+                            // Sort user's completed sets by set number if they exist
+                            const sortedSeries = [...(exercise.series || [])].sort((a, b) => a.numero_serie - b.numero_serie);
 
-                {/* Workout Summary - shows for all completed workouts */}
-                {workoutStats?.isCompleted && (
-                    <View style={styles.historySection}>
-                        <Text style={styles.historyTitle}>Resumen del entrenamiento</Text>
-                        <View style={styles.historyCard}>
-                            <View style={styles.historyRow}>
-                                <Text style={styles.historyLabel}>Ejercicios</Text>
-                                <Text style={styles.historyValue}>{workoutStats.exerciseCount}</Text>
+                            return (
+                                <View key={exercise.id || index} style={styles.completedExerciseCard}>
+                                    <View style={styles.completedExerciseHeader}>
+                                        <View style={styles.exerciseIcon}>
+                                            <MaterialIcons name="fitness-center" size={24} color={colors.primary} />
+                                        </View>
+                                        <View style={styles.exerciseInfo}>
+                                            <Text style={styles.completedExerciseName}>
+                                                {exercise.ejercicio?.titulo || 'Ejercicio'}
+                                            </Text>
+                                            <Text style={styles.exerciseMuscle}>
+                                                {exercise.ejercicio?.grupo_muscular || 'Sin grupo'}
+                                            </Text>
+                                        </View>
+                                    </View>
+
+                                    {/* Render detailed sets */}
+                                    {sortedSeries.length > 0 ? (
+                                        sortedSeries.map((set) => (
+                                            <View key={set.id || set.numero_serie} style={styles.setRow}>
+                                                <Text style={styles.setNumber}>Serie {set.numero_serie}</Text>
+                                                <Text style={styles.setDetails}>
+                                                    {set.peso_utilizado || 0} kg × {set.repeticiones || 0} reps
+                                                </Text>
+                                                <View style={styles.setBadgesContainer}>
+                                                    {set.rpe ? (
+                                                        <View style={styles.badge}>
+                                                            <Text style={styles.badgeText}>RPE {set.rpe}</Text>
+                                                        </View>
+                                                    ) : null}
+                                                    {set.descanso_segundos ? (
+                                                        <View style={styles.badge}>
+                                                            <MaterialIcons name="timer" size={10} color={colors.textSecondary} style={{ marginRight: 2 }} />
+                                                            <Text style={styles.badgeText}>{set.descanso_segundos}s</Text>
+                                                        </View>
+                                                    ) : null}
+                                                </View>
+                                            </View>
+                                        ))
+                                    ) : (
+                                        <Text style={[styles.emptyText, { fontSize: 14, marginTop: 4, marginBottom: 8 }]}>
+                                            No se registraron series.
+                                        </Text>
+                                    )}
+                                </View>
+                            );
+                        })
+                    ) : (
+                        // Diseño original para entrenamientos NO COMPLETADOS (pendientes o en progreso)
+                        exercises.map((exercise, index) => (
+                            <View key={exercise.id || index} style={styles.exerciseCard}>
+                                <View style={styles.exerciseIcon}>
+                                    <MaterialIcons name="fitness-center" size={24} color={colors.primary} />
+                                </View>
+                                <View style={styles.exerciseInfo}>
+                                    <Text style={styles.exerciseName}>
+                                        {exercise.ejercicio?.titulo || 'Ejercicio'}
+                                    </Text>
+                                    <Text style={styles.exerciseMuscle}>
+                                        {exercise.ejercicio?.grupo_muscular || 'Sin grupo'}
+                                    </Text>
+                                </View>
+                                <View style={styles.exerciseSets}>
+                                    <Text style={styles.setsNumber}>
+                                        {exercise.series?.length || 0}
+                                    </Text>
+                                    <Text style={styles.setsLabel}>series</Text>
+                                </View>
                             </View>
-                            <View style={styles.historyRow}>
-                                <Text style={styles.historyLabel}>Duración</Text>
-                                <Text style={styles.historyValue}>
-                                    {workoutStats.duration ? `${workoutStats.duration} min` : '-'}
-                                </Text>
-                            </View>
-                        </View>
-                    </View>
+                        ))
+                    )
                 )}
             </ScrollView>
 
