@@ -56,7 +56,7 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
     const renderItem = ({ item }: { item: any }) => (
         <TouchableOpacity
             style={styles.exerciseCard}
-            onPress={() => navigation.navigate('ExerciseDetail', { exerciseId: item.id })}
+            onPress={() => navigation.navigate('ExerciseProgressDetail', { exerciseId: item.id })}
         >
             <Text style={styles.exerciseName} numberOfLines={1}>{item.titulo}</Text>
             <MaterialIcons name="arrow-forward-ios" size={16} color={colors.textSecondary} />

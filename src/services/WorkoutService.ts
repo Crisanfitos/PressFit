@@ -441,4 +441,56 @@ export const WorkoutService = {
             return { error };
         }
     },
+
+    async getExerciseHistory(
+        userId: string,
+        exerciseId: string
+    ): Promise<ServiceResponse<any[]>> {
+        try {
+            // Join series with ejercicios_programados and rutinas_diarias to get the date
+            // Ordered by rutinas_diarias.fecha_dia
+            const { data, error } = await supabase
+                .from('series')
+                .select(`
+                    id,
+                    numero_serie,
+                    peso_utilizado,
+                    repeticiones,
+                    rpe,
+                    ejercicios_programados!inner(
+                        ejercicio_id,
+                        rutinas_diarias!inner(
+                            id,
+                            fecha_dia,
+                            rutinas_semanales!inner(usuario_id)
+                        )
+                    )
+                `)
+                .eq('ejercicios_programados.ejercicio_id', exerciseId)
+                .eq('ejercicios_programados.rutinas_diarias.rutinas_semanales.usuario_id', userId)
+                .not('ejercicios_programados.rutinas_diarias.fecha_dia', 'is', null)
+                .not('peso_utilizado', 'is', null)
+                .order('ejercicios_programados(rutinas_diarias(fecha_dia))', { ascending: true }); // Note: PostgREST ordering on joined tables has syntax limitations, we will sort in JS to be safe.
+
+            if (error) throw error;
+
+            // Flatten and sort the data in JS to ensure correctness
+            const history = (data || []).map((row: any) => ({
+                id: row.id,
+                numero_serie: row.numero_serie,
+                peso_utilizado: row.peso_utilizado,
+                repeticiones: row.repeticiones,
+                rpe: row.rpe,
+                fecha: row.ejercicios_programados?.rutinas_diarias?.fecha_dia,
+                rutina_id: row.ejercicios_programados?.rutinas_diarias?.id,
+            }))
+                .filter((item) => item.fecha)
+                .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
+
+            return { data: history, error: null };
+        } catch (error) {
+            console.error('Error fetching exercise history:', error);
+            return { data: null, error };
+        }
+    },
 };

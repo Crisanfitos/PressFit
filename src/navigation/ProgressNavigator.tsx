@@ -13,6 +13,7 @@ export type ProgressStackParamList = {
     WeeklyProgress: undefined;
     DailyProgress: { date?: string };
     ExerciseTracking: { exerciseId?: string };
+    ExerciseProgressDetail: { exerciseId: string };
     PhysicalProgress: undefined;
 };
 
@@ -26,6 +27,7 @@ const ProgressNavigator: React.FC = () => {
             <Stack.Screen name="WeeklyProgress" component={WeeklyProgressScreen} />
             <Stack.Screen name="DailyProgress" component={DailyProgressScreen} />
             <Stack.Screen name="ExerciseTracking" component={ExerciseTrackingScreen} />
+            <Stack.Screen name="ExerciseProgressDetail" component={require('../screens/ExerciseProgressDetailScreen').default} />
             <Stack.Screen name="PhysicalProgress" component={PhysicalProgressScreen} />
         </Stack.Navigator>
     );
