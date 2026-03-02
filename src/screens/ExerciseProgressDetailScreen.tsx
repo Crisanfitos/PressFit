@@ -328,7 +328,7 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                                 textShiftY={-10}
                                 textShiftX={-5}
                                 textColor={colors.text}
-                                yAxisLabelSuffix={chartMode === 'peso' ? ' kg' : ''}
+                                yAxisLabelSuffix=" kg"
                                 yAxisTextStyle={{ color: colors.textSecondary, fontSize: 10 }}
                                 xAxisLabelTextStyle={{ color: colors.textSecondary, fontSize: 10, width: 60 }}
                                 initialSpacing={20}
