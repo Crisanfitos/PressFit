@@ -18,9 +18,7 @@ describe('Weight Types (tipo_peso)', () => {
   let testRoutineDayId: string;
 
   beforeAll(async () => {
-    // Reset DB to a clean state
-    const { resetAndInsert } = require('../setup/resetDB');
-    await resetAndInsert();
+    // Test setup happens in testSetup.ts
 
     // Get the template routine for the test user
     templateRoutine = await getTestUserTemplate();

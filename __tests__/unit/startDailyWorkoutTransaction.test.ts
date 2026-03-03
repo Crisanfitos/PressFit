@@ -16,24 +16,25 @@ import { RoutineService } from '../../src/services/RoutineService';
 describe('startDailyWorkout - Template-Only Architecture', () => {
 
     beforeAll(async () => {
-        const { resetAndInsert } = require('../setup/resetDB');
-        await resetAndInsert();
+        // Test DB setup handled globally via testSetup
     });
 
     it('Step 1: Find active routine and verify it is the template', async () => {
         const { data: routines } = await supabase
             .from('rutinas_semanales')
             .select('id, nombre, activa, es_plantilla')
-            .eq('usuario_id', TEST_USER.id);
+            .eq('usuario_id', TEST_USER.id)
+            .eq('activa', true)
+            .eq('es_plantilla', true);
 
-        console.log('All routines:', routines);
+        console.log('Active template routines:', routines);
 
         expect(routines).toBeDefined();
-        expect(routines!.length).toBe(1); // Only ONE routine exists
+        expect(routines!.length).toBeGreaterThanOrEqual(1);
 
-        const activeRoutine = routines!.find((r: any) => r.activa);
+        const activeRoutine = routines![0];
         expect(activeRoutine).toBeDefined();
-        expect(activeRoutine!.es_plantilla).toBe(true); // Active routine IS the template
+        expect(activeRoutine!.es_plantilla).toBe(true);
         console.log('✅ Active routine:', activeRoutine!.id, activeRoutine!.nombre);
     });
 

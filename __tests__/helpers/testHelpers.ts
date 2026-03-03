@@ -284,7 +284,8 @@ export const getTestUserTemplate = async () => {
         `)
         .eq('usuario_id', TEST_USER.id)
         .eq('es_plantilla', true)
-        .single();
+        .limit(1)
+        .maybeSingle();
 
     if (error && error.code !== 'PGRST116') throw error;
     return data;
@@ -305,7 +306,8 @@ export const getTestUserNormalRoutine = async () => {
         `)
         .eq('usuario_id', TEST_USER.id)
         .eq('es_plantilla', false)
-        .single();
+        .limit(1)
+        .maybeSingle();
 
     if (error && error.code !== 'PGRST116') throw error;
     return data;

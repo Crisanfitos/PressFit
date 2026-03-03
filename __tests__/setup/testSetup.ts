@@ -75,12 +75,12 @@ beforeAll(async () => {
         }
 
         // AUTO-DESCUBRIMIENTO DE USUARIO
-        console.log('🔍 setup: Buscando usuario de test (clave: Plantilla_FullBody_Test)...');
+        console.log('🔍 setup: Buscando usuario de test ...');
 
         const { data: templates } = await supabase
             .from('rutinas_semanales')
             .select('usuario_id')
-            .eq('nombre', 'Plantilla_Fuerza Básica')
+            .eq('es_plantilla', true)
             .limit(1);
 
         if (templates && templates.length > 0) {
@@ -89,7 +89,7 @@ beforeAll(async () => {
             TEST_USER.id = foundUserId;
         } else {
             console.warn('⚠️ setup: NO SE ENCONTRÓ LA PLANTILLA.');
-            console.warn('   Causa probable 1: No has ejecutado el script SQL.');
+            console.warn('   Causa probable 1: No hay rutinas creadas en la base de datos.');
             console.warn('   Causa probable 2: RLS está bloqueando (Anon Key). Necesitas SUPABASE_SERVICE_ROLE_KEY en .env');
         }
 

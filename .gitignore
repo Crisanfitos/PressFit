@@ -50,3 +50,5 @@ android/app/google-services.json*
 
 #Documentacion
 Documentacion/
+coverage/
+failed_test.txt
