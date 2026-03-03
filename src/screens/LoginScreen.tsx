@@ -198,10 +198,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container}>
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                behavior="padding"
                 style={{ flex: 1 }}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
             >
-                <ScrollView contentContainerStyle={styles.scrollContent}>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                >
                     <View style={styles.header}>
                         <Image
                             source={require('../../assets/icon.png')}
@@ -241,7 +245,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                                     secureTextEntry={!showPassword}
                                     autoCapitalize="none"
                                     autoCorrect={false}
-                                    value={password}
+                                    defaultValue=""
                                     onChangeText={setPassword}
                                 />
                                 <TouchableOpacity
