@@ -9,6 +9,7 @@ import { AuthContext } from '../context/AuthContext';
 import { ExerciseService } from '../services/ExerciseService';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { TipoPeso, TIPO_PESO_SHORT_LABELS } from '../types/setTypes';
 
 interface SetData {
     id: string;
@@ -16,6 +17,7 @@ interface SetData {
     peso_utilizado: number;
     repeticiones: number;
     rpe: number | null;
+    tipo_peso: TipoPeso;
     fecha: string;
     rutina_id: string;
 }
@@ -376,19 +378,24 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                             <Text style={styles.sessionDate}>{format(parseISO(date), "EEEE, d 'de' MMMM yyyy", { locale: es })}</Text>
                         </View>
 
-                        {[...historyListGroupedByDate[date]].sort((a, b) => a.numero_serie - b.numero_serie).map((set) => (
-                            <View key={set.id} style={styles.setRow}>
-                                <Text style={styles.setNumber}>Serie {set.numero_serie}</Text>
-                                <Text style={styles.setDetails}>{set.peso_utilizado} kg × {set.repeticiones} reps</Text>
-                                {set.rpe ? (
-                                    <View style={styles.rpeBadge}>
-                                        <Text style={styles.rpeText}>RPE {set.rpe}</Text>
-                                    </View>
-                                ) : (
-                                    <View style={{ width: 50 }} />
-                                )}
-                            </View>
-                        ))}
+                        {[...historyListGroupedByDate[date]].sort((a, b) => a.numero_serie - b.numero_serie).map((set) => {
+                            const weightLabel = set.tipo_peso === 'corporal'
+                                ? 'BW'
+                                : `${set.peso_utilizado} ${TIPO_PESO_SHORT_LABELS[set.tipo_peso || 'total'].toLowerCase()}`;
+                            return (
+                                <View key={set.id} style={styles.setRow}>
+                                    <Text style={styles.setNumber}>Serie {set.numero_serie}</Text>
+                                    <Text style={styles.setDetails}>{weightLabel} × {set.repeticiones} reps</Text>
+                                    {set.rpe ? (
+                                        <View style={styles.rpeBadge}>
+                                            <Text style={styles.rpeText}>RPE {set.rpe}</Text>
+                                        </View>
+                                    ) : (
+                                        <View style={{ width: 50 }} />
+                                    )}
+                                </View>
+                            );
+                        })}
                     </View>
                 ))}
 
