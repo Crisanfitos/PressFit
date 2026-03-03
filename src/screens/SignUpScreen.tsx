@@ -180,10 +180,14 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
             </TouchableOpacity>
 
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                behavior="padding"
                 style={styles.keyboardView}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
             >
-                <ScrollView contentContainerStyle={styles.scrollContent}>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                >
                     <View style={styles.header}>
                         <Image
                             source={require('../../assets/icon.png')}
@@ -237,7 +241,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                                     secureTextEntry={!showPassword}
                                     autoCapitalize="none"
                                     autoCorrect={false}
-                                    value={password}
+                                    defaultValue=""
                                     onChangeText={setPassword}
                                 />
                                 <TouchableOpacity
@@ -265,7 +269,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                                     secureTextEntry={!showConfirmPassword}
                                     autoCapitalize="none"
                                     autoCorrect={false}
-                                    value={confirmPassword}
+                                    defaultValue=""
                                     onChangeText={setConfirmPassword}
                                 />
                                 <TouchableOpacity
