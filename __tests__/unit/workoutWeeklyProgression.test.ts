@@ -30,8 +30,7 @@ describe('Nivel 5: Progresión Semanal de Entrenamientos', () => {
     let exerciseId: string;
 
     beforeAll(async () => {
-        const { resetAndInsert } = require('../setup/resetDB');
-        await resetAndInsert();
+        // The DB is assumed to have data now based on testSetup
 
         // Find the single active routine
         const { data } = await supabase

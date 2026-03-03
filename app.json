@@ -2,7 +2,7 @@
   "expo": {
     "name": "PressFit",
     "slug": "PressFit_Expo",
-    "version": "1.6.0",
+    "version": "1.8.9",
     "scheme": "pressfit",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
