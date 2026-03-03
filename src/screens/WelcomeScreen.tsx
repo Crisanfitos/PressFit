@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
@@ -72,11 +72,10 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
-                <MaterialIcons
-                    name="fitness-center"
-                    size={100}
-                    color={colors.primary}
-                    style={styles.icon}
+                <Image
+                    source={require('../../assets/icon.png')}
+                    style={[styles.icon, { width: 100, height: 100, alignSelf: 'center' }]}
+                    resizeMode="contain"
                 />
                 <Text style={styles.title}>PressFit</Text>
                 <Text style={styles.subtitle}>

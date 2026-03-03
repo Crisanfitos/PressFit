@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 
@@ -35,11 +35,10 @@ const SplashScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <MaterialIcons
-                name="fitness-center"
-                size={80}
-                color={colors.primary}
-                style={styles.icon}
+            <Image
+                source={require('../../assets/icon.png')}
+                style={[styles.icon, { width: 80, height: 80 }]}
+                resizeMode="contain"
             />
             <Text style={styles.title}>PressFit</Text>
             <Text style={styles.subtitle}>Tu Progreso, Tu Poder</Text>
