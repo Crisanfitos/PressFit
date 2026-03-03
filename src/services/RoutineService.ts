@@ -118,6 +118,7 @@ export const RoutineService = {
             id,
             ejercicio_id,
             orden_ejecucion,
+            tipo_peso,
             ejercicio:ejercicios (*),
             series (*)
           )
@@ -159,6 +160,7 @@ export const RoutineService = {
                         id,
                         ejercicio_id,
                         orden_ejecucion,
+                        tipo_peso,
                         ejercicio:ejercicios (*),
                         series (*)
                     )
@@ -201,6 +203,7 @@ export const RoutineService = {
                         id,
                         ejercicio_id,
                         orden_ejecucion,
+                        tipo_peso,
                         ejercicio:ejercicios (*),
                         series (*)
                     )
@@ -490,6 +493,7 @@ export const RoutineService = {
                             ejercicio_id: templateEx.ejercicio_id,
                             orden_ejecucion: templateEx.orden_ejecucion,
                             notas_sesion: templateEx.notas_sesion || null,
+                            tipo_peso: templateEx.tipo_peso || 'total',
                         })
                         .select('id')
                         .single();
@@ -755,6 +759,7 @@ export const RoutineService = {
                                     rutina_diaria_id: newDay.id,
                                     ejercicio_id: exercise.ejercicio_id,
                                     orden_ejecucion: exercise.orden_ejecucion,
+                                    tipo_peso: exercise.tipo_peso || 'total',
                                     created_at: new Date().toISOString(),
                                     updated_at: new Date().toISOString(),
                                 })

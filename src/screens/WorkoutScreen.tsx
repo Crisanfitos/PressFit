@@ -20,7 +20,9 @@ import { useWorkoutController } from '../controllers/useWorkoutController';
 import SetInput from '../components/SetInput';
 import { PersonalNoteButton } from '../components/PersonalNoteButton';
 import RestTimer from '../components/RestTimer';
+import { WeightTypeBadge } from '../components/WeightTypeBadge';
 import { WorkoutService } from '../services/WorkoutService';
+import { TIPO_PESO_SHORT_LABELS } from '../types/setTypes';
 
 type WorkoutScreenProps = {
     navigation: any;
@@ -47,6 +49,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         deleteSet,
         removeExercise,
         finishWorkout,
+        updateWeightType,
         loadSeriesForExercise,
         reloadExercises,
     } = useWorkoutController(
@@ -255,6 +258,14 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                 setNumber: { width: 40, fontSize: 16, color: colors.textSecondary, textAlign: 'center' },
                 inputGroup: { flex: 1, marginHorizontal: 4, alignItems: 'center', justifyContent: 'center' },
                 referenceText: { fontSize: 11, color: colors.primary, textAlign: 'center', marginTop: 4 },
+                bodyweightPlaceholder: {
+                    flex: 1,
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    padding: 12,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                },
                 deleteSetButton: { padding: 4, marginLeft: 6 },
                 addSetButton: {
                     flexDirection: 'row',
@@ -444,7 +455,13 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                 />
                                                 <View style={{ flex: 1, flexDirection: 'column' }}>
                                                     <Text style={styles.exerciseName}>{exercise.titulo}</Text>
-                                                    <View style={{ marginTop: 4 }}>
+                                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 8 }}>
+                                                        <WeightTypeBadge
+                                                            tipoPeso={exercise.tipo_peso || 'total'}
+                                                            editable={isInputEditable}
+                                                            onSelect={(tipo) => updateWeightType(exercise.routine_exercise_id, exercise.id, tipo)}
+                                                            colors={colors}
+                                                        />
                                                         <PersonalNoteButton exerciseId={exercise.id} />
                                                     </View>
                                                 </View>
@@ -476,7 +493,9 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                             <View style={[styles.setRow, { marginBottom: 8 }]}>
                                                 <Text style={[styles.setNumber, { fontSize: 12 }]}>Serie</Text>
                                                 <View style={styles.inputGroup}>
-                                                    <Text style={styles.referenceText}>KG</Text>
+                                                    <Text style={styles.referenceText}>
+                                                        {TIPO_PESO_SHORT_LABELS[exercise.tipo_peso || 'total']}
+                                                    </Text>
                                                 </View>
                                                 <View style={styles.inputGroup}>
                                                     <Text style={styles.referenceText}>REPS</Text>
@@ -497,18 +516,25 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                 (exercise.sets || []).map((set, setIndex) => {
                                                     const ghostWeight = getGhostValue(exercise.id, set.numero_serie, 'weight');
                                                     const ghostReps = getGhostValue(exercise.id, set.numero_serie, 'reps');
+                                                    const isBodyweight = exercise.tipo_peso === 'corporal';
 
                                                     return (
                                                         <View key={set.id || setIndex} style={styles.setRow}>
                                                             <Text style={styles.setNumber}>{set.numero_serie}</Text>
                                                             <View style={styles.inputGroup}>
-                                                                <SetInput
-                                                                    value={set.peso_utilizado > 0 ? set.peso_utilizado : ''}
-                                                                    placeholder={ghostWeight || '-'}
-                                                                    onChange={(val) => handleSetChange(set.id, 'weight', val)}
-                                                                    isEditable={isInputEditable}
-                                                                    colors={colors}
-                                                                />
+                                                                {isBodyweight ? (
+                                                                    <View style={[styles.bodyweightPlaceholder, { backgroundColor: colors.surfaceHighlight, borderColor: colors.border }]}>
+                                                                        <Text style={{ color: colors.textSecondary, fontSize: 14, fontWeight: '600' }}>BW</Text>
+                                                                    </View>
+                                                                ) : (
+                                                                    <SetInput
+                                                                        value={set.peso_utilizado > 0 ? set.peso_utilizado : ''}
+                                                                        placeholder={ghostWeight || '-'}
+                                                                        onChange={(val) => handleSetChange(set.id, 'weight', val)}
+                                                                        isEditable={isInputEditable}
+                                                                        colors={colors}
+                                                                    />
+                                                                )}
                                                             </View>
                                                             <View style={styles.inputGroup}>
                                                                 <SetInput
