@@ -8,6 +8,8 @@ import {
     StyleSheet,
     ActivityIndicator,
     Image,
+    KeyboardAvoidingView,
+    Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -195,107 +197,118 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                <View style={styles.header}>
-                    <MaterialIcons name="fitness-center" size={64} color={colors.primary} />
-                    <Text style={styles.title}>PressFit</Text>
-                    <Text style={styles.subtitle}>Tu Progreso, Tu Poder</Text>
-                </View>
-
-                <View style={styles.form}>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Correo Electrónico</Text>
-                        <View style={styles.inputContainer}>
-                            <MaterialIcons name="mail" size={24} color={colors.primary} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="tu@correo.com"
-                                placeholderTextColor={colors.textSecondary}
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                                autoCorrect={false}
-                                value={email}
-                                onChangeText={setEmail}
-                            />
-                        </View>
-                    </View>
-
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Contraseña</Text>
-                        <View style={styles.inputContainer}>
-                            <MaterialIcons name="lock" size={24} color={colors.primary} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Ingresa tu contraseña"
-                                placeholderTextColor={colors.textSecondary}
-                                secureTextEntry={!showPassword}
-                                value={password}
-                                onChangeText={setPassword}
-                            />
-                            <TouchableOpacity
-                                style={styles.eyeButton}
-                                onPress={() => setShowPassword(!showPassword)}
-                                hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-                            >
-                                <MaterialIcons
-                                    name={showPassword ? 'visibility' : 'visibility-off'}
-                                    size={24}
-                                    color={colors.primary}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
-                    <TouchableOpacity style={styles.forgotPassword}>
-                        <Text style={styles.forgotPasswordText}>Olvidé mi contraseña</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.loginButton}
-                        onPress={handleEmailLogin}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <ActivityIndicator color={colors.textOnPrimary} />
-                        ) : (
-                            <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
-                        )}
-                    </TouchableOpacity>
-
-                    {error ? (
-                        <View style={styles.errorContainer}>
-                            <Text style={styles.errorText}>{error}</Text>
-                        </View>
-                    ) : null}
-                </View>
-
-                <View style={styles.divider}>
-                    <View style={styles.dividerLine} />
-                    <Text style={styles.dividerText}>o inicia sesión con</Text>
-                    <View style={styles.dividerLine} />
-                </View>
-
-                <View style={styles.socialContainer}>
-                    <TouchableOpacity style={styles.socialButton} onPress={handleGoogleLogin}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                style={{ flex: 1 }}
+            >
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                    <View style={styles.header}>
                         <Image
-                            source={require('../../assets/googlelogo.png')}
-                            style={{ width: 28, height: 28 }}
+                            source={require('../../assets/icon.png')}
+                            style={{ width: 80, height: 80, marginBottom: 16 }}
+                            resizeMode="contain"
                         />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.socialButton, { opacity: 0.5 }]} disabled>
-                        <MaterialIcons name="apple" size={28} color={colors.text} />
-                    </TouchableOpacity>
-                </View>
+                        <Text style={styles.title}>PressFit</Text>
+                        <Text style={styles.subtitle}>Tu Progreso, Tu Poder</Text>
+                    </View>
 
-                <View style={styles.footer}>
-                    <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                        <Text style={styles.footerText}>
-                            ¿No tienes una cuenta?{' '}
-                            <Text style={styles.footerLink}>Regístrate</Text>
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
+                    <View style={styles.form}>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Correo Electrónico</Text>
+                            <View style={styles.inputContainer}>
+                                <MaterialIcons name="mail" size={24} color={colors.primary} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="tu@correo.com"
+                                    placeholderTextColor={colors.textSecondary}
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    value={email}
+                                    onChangeText={setEmail}
+                                />
+                            </View>
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Contraseña</Text>
+                            <View style={styles.inputContainer}>
+                                <MaterialIcons name="lock" size={24} color={colors.primary} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Ingresa tu contraseña"
+                                    placeholderTextColor={colors.textSecondary}
+                                    secureTextEntry={!showPassword}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    value={password}
+                                    onChangeText={setPassword}
+                                />
+                                <TouchableOpacity
+                                    style={styles.eyeButton}
+                                    onPress={() => setShowPassword(!showPassword)}
+                                    hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                                >
+                                    <MaterialIcons
+                                        name={showPassword ? 'visibility' : 'visibility-off'}
+                                        size={24}
+                                        color={colors.primary}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        <TouchableOpacity style={styles.forgotPassword}>
+                            <Text style={styles.forgotPasswordText}>Olvidé mi contraseña</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.loginButton}
+                            onPress={handleEmailLogin}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ActivityIndicator color={colors.textOnPrimary} />
+                            ) : (
+                                <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+                            )}
+                        </TouchableOpacity>
+
+                        {error ? (
+                            <View style={styles.errorContainer}>
+                                <Text style={styles.errorText}>{error}</Text>
+                            </View>
+                        ) : null}
+                    </View>
+
+                    <View style={styles.divider}>
+                        <View style={styles.dividerLine} />
+                        <Text style={styles.dividerText}>o inicia sesión con</Text>
+                        <View style={styles.dividerLine} />
+                    </View>
+
+                    <View style={styles.socialContainer}>
+                        <TouchableOpacity style={styles.socialButton} onPress={handleGoogleLogin}>
+                            <Image
+                                source={require('../../assets/googlelogo.png')}
+                                style={{ width: 28, height: 28 }}
+                            />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.socialButton, { opacity: 0.5 }]} disabled>
+                            <MaterialIcons name="apple" size={28} color={colors.text} />
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.footer}>
+                        <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+                            <Text style={styles.footerText}>
+                                ¿No tienes una cuenta?{' '}
+                                <Text style={styles.footerLink}>Regístrate</Text>
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 };

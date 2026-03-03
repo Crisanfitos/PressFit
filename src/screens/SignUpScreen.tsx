@@ -9,6 +9,7 @@ import {
     ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
+    Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -184,7 +185,11 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
             >
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.header}>
-                        <MaterialIcons name="fitness-center" size={56} color={colors.primary} />
+                        <Image
+                            source={require('../../assets/icon.png')}
+                            style={{ width: 80, height: 80, marginBottom: 16 }}
+                            resizeMode="contain"
+                        />
                         <Text style={styles.title}>Crear Cuenta</Text>
                         <Text style={styles.subtitle}>Únete a PressFit</Text>
                     </View>
@@ -230,6 +235,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                                     placeholder="Mínimo 6 caracteres"
                                     placeholderTextColor={colors.textSecondary}
                                     secureTextEntry={!showPassword}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
                                     value={password}
                                     onChangeText={setPassword}
                                 />
@@ -256,6 +263,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                                     placeholder="Repite tu contraseña"
                                     placeholderTextColor={colors.textSecondary}
                                     secureTextEntry={!showConfirmPassword}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
                                     value={confirmPassword}
                                     onChangeText={setConfirmPassword}
                                 />
