@@ -1,5 +1,5 @@
 import React, { useState, useContext, useMemo, useEffect } from 'react';
-import { View, Text, Modal, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
+import { View, Text, Modal, TextInput, TouchableOpacity, Pressable, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -101,8 +101,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
     };
 
     const styles = useMemo(() => StyleSheet.create({
-        overlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.7)', justifyContent: 'flex-end' },
-        kavContainer: { justifyContent: 'flex-end' },
+        overlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.7)' },
         modalContent: {
             backgroundColor: colors.background,
             borderTopLeftRadius: 20,
@@ -130,76 +129,79 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
 
     return (
         <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-            <View style={styles.overlay}>
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    style={styles.kavContainer}
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.overlay}
+            >
+                <ScrollView
+                    bounces={false}
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
                 >
-                    <ScrollView bounces={false} keyboardShouldPersistTaps="handled">
-                        <View style={styles.modalContent}>
-                            <View style={styles.modalHeader}>
-                                <Text style={styles.modalTitle}>Editar Datos Físicos</Text>
-                                <TouchableOpacity onPress={onClose}>
-                                    <MaterialIcons name="close" size={24} color={colors.text} />
-                                </TouchableOpacity>
+                    <Pressable style={{ flex: 1 }} onPress={onClose} />
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Editar Datos Físicos</Text>
+                            <TouchableOpacity onPress={onClose}>
+                                <MaterialIcons name="close" size={24} color={colors.text} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.form}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Peso (kg) *</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={weight}
+                                    onChangeText={setWeight}
+                                    keyboardType="decimal-pad"
+                                    placeholder="72.5"
+                                    placeholderTextColor={colors.textSecondary}
+                                />
                             </View>
 
-                            <View style={styles.form}>
-                                <View style={styles.inputGroup}>
-                                    <Text style={styles.label}>Peso (kg) *</Text>
-                                    <TextInput
-                                        style={styles.input}
-                                        value={weight}
-                                        onChangeText={setWeight}
-                                        keyboardType="decimal-pad"
-                                        placeholder="72.5"
-                                        placeholderTextColor={colors.textSecondary}
-                                    />
-                                </View>
-
-                                <View style={styles.inputGroup}>
-                                    <Text style={styles.label}>
-                                        Altura (cm){hasExistingHeight ? ' (opcional)' : ' *'}
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>
+                                    Altura (cm){hasExistingHeight ? ' (opcional)' : ' *'}
+                                </Text>
+                                <TextInput
+                                    style={styles.input}
+                                    value={height}
+                                    onChangeText={setHeight}
+                                    keyboardType="decimal-pad"
+                                    placeholder={hasExistingHeight ? `${currentMetrics?.altura} cm (actual)` : '178'}
+                                    placeholderTextColor={colors.textSecondary}
+                                />
+                                {hasExistingHeight && (
+                                    <Text style={styles.optionalHint}>
+                                        Déjalo vacío para mantener {currentMetrics?.altura} cm
                                     </Text>
-                                    <TextInput
-                                        style={styles.input}
-                                        value={height}
-                                        onChangeText={setHeight}
-                                        keyboardType="decimal-pad"
-                                        placeholder={hasExistingHeight ? `${currentMetrics?.altura} cm (actual)` : '178'}
-                                        placeholderTextColor={colors.textSecondary}
-                                    />
-                                    {hasExistingHeight && (
-                                        <Text style={styles.optionalHint}>
-                                            Déjalo vacío para mantener {currentMetrics?.altura} cm
-                                        </Text>
-                                    )}
-                                </View>
-
-                                {showImcPreview && imcValue && (
-                                    <View style={styles.imcPreview}>
-                                        <Text style={styles.imcLabel}>IMC calculado:</Text>
-                                        <Text style={styles.imcValue}>{imcValue}</Text>
-                                    </View>
                                 )}
                             </View>
 
-                            <View style={styles.buttonContainer}>
-                                <TouchableOpacity style={styles.cancelButton} onPress={onClose} disabled={loading}>
-                                    <Text style={styles.cancelButtonText}>Cancelar</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={[styles.saveButton, loading && styles.saveButtonDisabled]} onPress={handleSave} disabled={loading}>
-                                    {loading ? (
-                                        <ActivityIndicator size="small" color={colors.background} />
-                                    ) : (
-                                        <Text style={styles.saveButtonText}>Guardar</Text>
-                                    )}
-                                </TouchableOpacity>
-                            </View>
+                            {showImcPreview && imcValue && (
+                                <View style={styles.imcPreview}>
+                                    <Text style={styles.imcLabel}>IMC calculado:</Text>
+                                    <Text style={styles.imcValue}>{imcValue}</Text>
+                                </View>
+                            )}
                         </View>
-                    </ScrollView>
-                </KeyboardAvoidingView>
-            </View>
+
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity style={styles.cancelButton} onPress={onClose} disabled={loading}>
+                                <Text style={styles.cancelButtonText}>Cancelar</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.saveButton, loading && styles.saveButtonDisabled]} onPress={handleSave} disabled={loading}>
+                                {loading ? (
+                                    <ActivityIndicator size="small" color={colors.background} />
+                                ) : (
+                                    <Text style={styles.saveButtonText}>Guardar</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </Modal>
     );
 };

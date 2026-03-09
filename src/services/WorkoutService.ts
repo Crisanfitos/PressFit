@@ -162,8 +162,9 @@ export const WorkoutService = {
                                         ejercicio_programado_id: newExerciseId,
                                         numero_serie: serie.numero_serie,
                                         peso_utilizado: serie.peso_utilizado,
-                                        repeticiones: null,  // Reps come as placeholder from previousWorkout
-                                        rpe: serie.rpe,
+                                        repeticiones: 0,
+                                        rpe: 0,
+                                        descanso_segundos: 0,
                                     });
                                 }
                             }

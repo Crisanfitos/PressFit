@@ -13,6 +13,7 @@ interface Set {
     repeticiones: number;
     peso_utilizado: number;
     rpe?: number;
+    descanso_segundos?: number;
     pending?: boolean;
 }
 

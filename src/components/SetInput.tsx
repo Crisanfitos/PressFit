@@ -7,6 +7,7 @@ interface SetInputProps {
     onChange: (value: string) => void;
     isEditable: boolean;
     colors: any;
+    maxLength?: number;
 }
 
 const SetInput: React.FC<SetInputProps> = ({
@@ -15,6 +16,7 @@ const SetInput: React.FC<SetInputProps> = ({
     onChange,
     isEditable,
     colors,
+    maxLength,
 }) => {
     // Local state to handle typing without triggering saves on each keystroke
     const [localValue, setLocalValue] = useState(
@@ -51,7 +53,8 @@ const SetInput: React.FC<SetInputProps> = ({
             editable={isEditable}
             onChangeText={setLocalValue}
             onBlur={handleBlur}
-            selectTextOnFocus={localValue.length > 0}
+            maxLength={maxLength}
+        // Removed selectTextOnFocus so the text is not auto-selected
         />
     );
 };
@@ -61,7 +64,8 @@ const styles = StyleSheet.create({
         flex: 1,
         borderWidth: 1,
         borderRadius: 8,
-        padding: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 4,
         fontSize: 16,
         textAlign: 'center',
     },

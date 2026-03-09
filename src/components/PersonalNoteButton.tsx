@@ -73,7 +73,7 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
 
         return (
             <View style={styles.contentRow}>
-                <View style={{ flex: 1 }}>
+                <View style={{ flexShrink: 1 }}>
                     <Text style={[styles.noteText, { color: colors.textSecondary }]}>
                         {displayText}
                         {isLongText && (

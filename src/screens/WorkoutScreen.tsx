@@ -8,9 +8,9 @@ import {
     ActivityIndicator,
     Modal,
     Alert,
-    KeyboardAvoidingView,
     Platform,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -128,7 +128,9 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         if (!prevExercise?.series) return null;
         const prevSet = prevExercise.series.find((s: any) => s.numero_serie === setNumber);
         if (!prevSet) return null;
-        return field === 'reps' ? `${prevSet.repeticiones || ''}` : `${prevSet.peso_utilizado || ''}`;
+
+        const val = field === 'reps' ? prevSet.repeticiones : prevSet.peso_utilizado;
+        return val > 0 ? String(val) : '-';
     };
 
     const handleSetChange = async (setId: string, field: string, value: string) => {
@@ -413,12 +415,17 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
             </View>
 
             {/* Content */}
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            <KeyboardAwareScrollView
                 style={{ flex: 1 }}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
+                contentContainerStyle={{ paddingBottom: 100, flexGrow: 1 }}
+                showsVerticalScrollIndicator={false}
+                enableOnAndroid={true}
+                enableAutomaticScroll={true}
+                extraScrollHeight={120} // Aditional space to lift over keyboard
+                keyboardShouldPersistTaps="handled"
+                nestedScrollEnabled={true}
             >
-                <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+                <View style={styles.scrollView}>
                     {exercises.length === 0 ? (
                         <View style={styles.placeholderContainer}>
                             <View style={styles.placeholderIconContainer}>
@@ -454,8 +461,8 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                     style={{ marginRight: 8, marginTop: 2, alignSelf: 'flex-start' }}
                                                 />
                                                 <View style={{ flex: 1, flexDirection: 'column' }}>
-                                                    <Text style={styles.exerciseName}>{exercise.titulo}</Text>
-                                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 8 }}>
+                                                    <Text style={styles.exerciseName} numberOfLines={2}>{exercise.titulo}</Text>
+                                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, flexWrap: 'wrap', gap: 8 }}>
                                                         <WeightTypeBadge
                                                             tipoPeso={exercise.tipo_peso || 'total'}
                                                             editable={isInputEditable}
@@ -492,12 +499,12 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                             {/* Header Row */}
                                             <View style={[styles.setRow, { marginBottom: 8 }]}>
                                                 <Text style={[styles.setNumber, { fontSize: 12 }]}>Serie</Text>
-                                                <View style={styles.inputGroup}>
+                                                <View style={[styles.inputGroup, { maxWidth: 80 }]}>
                                                     <Text style={styles.referenceText}>
                                                         {TIPO_PESO_SHORT_LABELS[exercise.tipo_peso || 'total']}
                                                     </Text>
                                                 </View>
-                                                <View style={styles.inputGroup}>
+                                                <View style={[styles.inputGroup, { maxWidth: 80 }]}>
                                                     <Text style={styles.referenceText}>REPS</Text>
                                                 </View>
                                                 <View style={[styles.inputGroup, { maxWidth: 60 }]}>
@@ -521,7 +528,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                     return (
                                                         <View key={set.id || setIndex} style={styles.setRow}>
                                                             <Text style={styles.setNumber}>{set.numero_serie}</Text>
-                                                            <View style={styles.inputGroup}>
+                                                            <View style={[styles.inputGroup, { maxWidth: 80 }]}>
                                                                 {isBodyweight ? (
                                                                     <View style={[styles.bodyweightPlaceholder, { backgroundColor: colors.surfaceHighlight, borderColor: colors.border }]}>
                                                                         <Text style={{ color: colors.textSecondary, fontSize: 14, fontWeight: '600' }}>BW</Text>
@@ -529,20 +536,22 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                                 ) : (
                                                                     <SetInput
                                                                         value={set.peso_utilizado > 0 ? set.peso_utilizado : ''}
-                                                                        placeholder={ghostWeight || '-'}
+                                                                        placeholder={ghostWeight ?? '-'}
                                                                         onChange={(val) => handleSetChange(set.id, 'weight', val)}
                                                                         isEditable={isInputEditable}
                                                                         colors={colors}
+                                                                        maxLength={5}
                                                                     />
                                                                 )}
                                                             </View>
-                                                            <View style={styles.inputGroup}>
+                                                            <View style={[styles.inputGroup, { maxWidth: 80 }]}>
                                                                 <SetInput
                                                                     value={set.repeticiones > 0 ? set.repeticiones : ''}
-                                                                    placeholder={ghostReps || '-'}
+                                                                    placeholder={ghostReps ?? '-'}
                                                                     onChange={(val) => handleSetChange(set.id, 'reps', val)}
                                                                     isEditable={isInputEditable}
                                                                     colors={colors}
+                                                                    maxLength={3}
                                                                 />
                                                             </View>
                                                             <View style={[styles.inputGroup, { maxWidth: 60 }]}>
@@ -552,6 +561,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                                     onChange={(val) => handleSetChange(set.id, 'rpe', val)}
                                                                     isEditable={isInputEditable}
                                                                     colors={colors}
+                                                                    maxLength={2}
                                                                 />
                                                             </View>
                                                             {isStructureEditable && (
@@ -565,21 +575,27 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                             )}
                                                             {mode === 'ACTIVE' && navMode !== 'edit' && (() => {
                                                                 const isActiveTimer = lastCompletedSetId === set.id && restTimerVisible;
-                                                                const isSaved = savedTimerSetIds.has(set.id);
+                                                                const hasSavedTimerValue = set.descanso_segundos && set.descanso_segundos > 0;
+                                                                // DB stored > 0 = already recorded so we disable interaction
+                                                                const isSaved = hasSavedTimerValue;
+                                                                const isLocallySaved = savedTimerSetIds.has(set.id); // For currently executed app lifecycle (since saved timers have `isSaved` already)
+
+                                                                const disableInteraction = isSaved || isLocallySaved;
+
                                                                 const timerColor = isActiveTimer
                                                                     ? colors.primary
-                                                                    : isSaved
+                                                                    : disableInteraction
                                                                         ? '#22c55e'
                                                                         : colors.textSecondary;
                                                                 return (
                                                                     <TouchableOpacity
                                                                         style={{ padding: 4, marginLeft: 4 }}
                                                                         onPress={() => handleStartRestTimer(set.id)}
-                                                                        disabled={isSaved}
+                                                                        disabled={disableInteraction}
                                                                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                                                                     >
                                                                         <MaterialIcons
-                                                                            name={isSaved ? 'timer-off' : 'timer'}
+                                                                            name={disableInteraction ? 'timer-off' : 'timer'}
                                                                             size={18}
                                                                             color={timerColor}
                                                                         />
@@ -591,8 +607,8 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                 })
                                             )}
 
-                                            {/* Always show add series button in editable modes */}
-                                            {(isStructureEditable || isInputEditable) && (
+                                            {/* Always show add series button in editable modes, EXCEPT when we are in ACTIVE training mode  */}
+                                            {(isStructureEditable || (isInputEditable && mode !== 'ACTIVE')) && (
                                                 <TouchableOpacity style={styles.addSetButton} onPress={() => openAddSetsModal(exercise.id)}>
                                                     <MaterialIcons name="add" size={16} color={colors.primary} />
                                                     <Text style={styles.addSetText}>Añadir Series</Text>
@@ -624,8 +640,8 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                     )}
 
                     <View style={{ height: 100 }} />
-                </ScrollView>
-            </KeyboardAvoidingView>
+                </View>
+            </KeyboardAwareScrollView>
 
             {/* FAB */}
             {isStructureEditable && exercises.length > 0 && (
