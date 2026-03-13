@@ -120,7 +120,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         }));
     };
 
-    const getGhostValue = (exerciseId: string, setNumber: number, field: 'weight' | 'reps') => {
+    const getGhostValue = (exerciseId: string, setNumber: number, field: 'weight' | 'reps' | 'rpe') => {
         if (!previousWorkout?.ejercicios_programados) return null;
         const prevExercise = previousWorkout.ejercicios_programados.find(
             (ep: any) => ep.ejercicio_id === exerciseId
@@ -129,8 +129,11 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         const prevSet = prevExercise.series.find((s: any) => s.numero_serie === setNumber);
         if (!prevSet) return null;
 
-        const val = field === 'reps' ? prevSet.repeticiones : prevSet.peso_utilizado;
-        return val > 0 ? String(val) : '-';
+        let val: number;
+        if (field === 'reps') val = prevSet.repeticiones;
+        else if (field === 'rpe') val = prevSet.rpe;
+        else val = prevSet.peso_utilizado;
+        return val > 0 ? String(val) : null;
     };
 
     const handleSetChange = async (setId: string, field: string, value: string) => {
@@ -523,6 +526,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                 (exercise.sets || []).map((set, setIndex) => {
                                                     const ghostWeight = getGhostValue(exercise.id, set.numero_serie, 'weight');
                                                     const ghostReps = getGhostValue(exercise.id, set.numero_serie, 'reps');
+                                                    const ghostRpe = getGhostValue(exercise.id, set.numero_serie, 'rpe');
                                                     const isBodyweight = exercise.tipo_peso === 'corporal';
 
                                                     return (
@@ -557,7 +561,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                             <View style={[styles.inputGroup, { maxWidth: 60 }]}>
                                                                 <SetInput
                                                                     value={set.rpe && set.rpe > 0 ? set.rpe : ''}
-                                                                    placeholder='-'
+                                                                    placeholder={ghostRpe ?? '-'}
                                                                     onChange={(val) => handleSetChange(set.id, 'rpe', val)}
                                                                     isEditable={isInputEditable}
                                                                     colors={colors}

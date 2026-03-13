@@ -59,6 +59,11 @@ export const useWorkoutController = (
     const loadExercises = useCallback(async (rDayId: string, wId: string | null, prevWorkout?: any) => {
         let finalExercises: Exercise[] = [];
 
+        // Set previousWorkout atomically with exercises to avoid timing issues
+        if (prevWorkout !== undefined) {
+            setPreviousWorkout(prevWorkout);
+        }
+
         if (wId) {
             const { data: workoutData } = await WorkoutService.getWorkoutDetails(wId);
             if (workoutData) {
@@ -145,7 +150,6 @@ export const useWorkoutController = (
 
             if (calculatedMode === 'MISSED') {
                 const { data: lastData } = await WorkoutService.getLastCompletedWorkoutForDay(userId, routineDayId);
-                setPreviousWorkout(lastData);
                 await loadExercises(routineDayId, null, lastData);
                 setLoading(false);
                 return;
@@ -204,7 +208,18 @@ export const useWorkoutController = (
                 }
             }
 
-            await loadExercises(routineDayId, currentWorkoutId);
+            // Load ghost values for ACTIVE mode (reps/RPE placeholders from previous workout)
+            if (calculatedMode === 'ACTIVE') {
+                const { data: prevData } = await WorkoutService.getLastCompletedWorkoutForDay(userId, routineDayId);
+                let ghostSource = prevData;
+                if (!ghostSource) {
+                    const { data: templateDay } = await RoutineService.getRoutineDayById(routineDayId);
+                    ghostSource = templateDay;
+                }
+                await loadExercises(routineDayId, currentWorkoutId, ghostSource);
+            } else {
+                await loadExercises(routineDayId, currentWorkoutId);
+            }
         } catch (error) {
             console.error('Error initializing workout:', error);
         } finally {
@@ -217,7 +232,17 @@ export const useWorkoutController = (
         try {
             const now = new Date();
 
-            // Create a new workout from the template (copies exercises + series)
+            // Fetch previous workout data for ghost values (reps/RPE placeholders)
+            const { data: prevData } = await WorkoutService.getLastCompletedWorkoutForDay(userId, routineDayId);
+
+            // If no previous workout, use template data as ghost source
+            let ghostSource = prevData;
+            if (!ghostSource) {
+                const { data: templateDay } = await RoutineService.getRoutineDayById(routineDayId);
+                ghostSource = templateDay;
+            }
+
+            // Create a new workout from the template (copies exercises + series with only weight filled)
             const { data: newWorkout } = await RoutineService.startDailyWorkout(
                 routineDayId,
                 now.toISOString(),
@@ -229,7 +254,10 @@ export const useWorkoutController = (
             const { data: fullWorkout } = await WorkoutService.getWorkoutDetails(newWorkout.id);
             setWorkout(fullWorkout);
             setMode('ACTIVE');
-            await loadExercises(routineDayId, newWorkout.id);
+
+            // Pass ghost source to loadExercises so previousWorkout and exercises
+            // are set in the same execution context (atomic React batch)
+            await loadExercises(routineDayId, newWorkout.id, ghostSource);
             setIsTimerRunning(true);
         } catch (error) {
             console.error('Error starting workout:', error);

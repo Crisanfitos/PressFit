@@ -119,16 +119,12 @@ export const WorkoutService = {
 
                 if (exercisesError) throw exercisesError;
 
-                // Try to copy series from last week's workout for the same day
+                // Try to copy series from last completed workout for the same day
                 try {
-                    const today = new Date();
-                    const oneWeekAgo = new Date(today);
-                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-                    const weekAgoStr = oneWeekAgo.toISOString().split('T')[0];
-                    const todayStr = today.toISOString().split('T')[0];
+                    const todayStr = new Date().toISOString().split('T')[0];
 
-                    // Find last week's completed workout for the same day name
-                    const { data: lastWeekWorkouts } = await supabase
+                    // Find the most recent completed workout for the same day name
+                    const { data: lastWorkouts } = await supabase
                         .from('rutinas_diarias')
                         .select(`
                             id,
@@ -139,22 +135,22 @@ export const WorkoutService = {
                         `)
                         .eq('rutina_semanal_id', templateDay.rutina_semanal_id)
                         .eq('nombre_dia', templateDay.nombre_dia)
-                        .gte('fecha_dia', weekAgoStr)
                         .lt('fecha_dia', todayStr)
                         .eq('completada', true)
+                        .not('fecha_dia', 'is', null)
                         .order('fecha_dia', { ascending: false })
                         .limit(1);
 
-                    if (lastWeekWorkouts?.[0]?.ejercicios_programados && insertedExercises) {
+                    if (lastWorkouts?.[0]?.ejercicios_programados && insertedExercises) {
                         // Map exercise_id -> new ejercicio_programado_id
                         const newExerciseMap = new Map<string, string>();
                         insertedExercises.forEach((ex: any) => {
                             newExerciseMap.set(ex.ejercicio_id, ex.id);
                         });
 
-                        // Copy series for each matching exercise
+                        // Copy series with only weight filled, reps/rpe as 0 (shown as placeholders)
                         const seriesToInsert: any[] = [];
-                        for (const lastExercise of lastWeekWorkouts[0].ejercicios_programados) {
+                        for (const lastExercise of lastWorkouts[0].ejercicios_programados) {
                             const newExerciseId = newExerciseMap.get(lastExercise.ejercicio_id);
                             if (newExerciseId && lastExercise.series?.length > 0) {
                                 for (const serie of lastExercise.series) {
@@ -163,7 +159,6 @@ export const WorkoutService = {
                                         numero_serie: serie.numero_serie,
                                         peso_utilizado: serie.peso_utilizado,
                                         repeticiones: 0,
-                                        rpe: 0,
                                         descanso_segundos: 0,
                                     });
                                 }
@@ -175,7 +170,7 @@ export const WorkoutService = {
                         }
                     }
                 } catch (copyError) {
-                    console.warn('Could not copy series from last week:', copyError);
+                    console.warn('Could not copy series from last workout:', copyError);
                     // Continue even if copying fails - workout is still created
                 }
             }
