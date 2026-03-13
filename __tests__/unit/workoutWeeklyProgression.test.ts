@@ -124,13 +124,22 @@ describe('Nivel 5: Progresión Semanal de Entrenamientos', () => {
 
         workout2Id = workout!.id;
 
-        // Verify exercises were copied from TEMPLATE (not from last week's workout)
+        // Verify exercises were copied from template structure
         const { data: details } = await WorkoutService.getWorkoutDetails(workout2Id);
         expect(details?.ejercicios_programados?.length).toBeGreaterThan(0);
 
-        // Series should be copied from template (3 series with target reps)
+        // Series should be copied from last completed workout (Week 1 had 2 sets)
+        // with only peso_utilizado filled, repeticiones=0 (shown as placeholders in UI)
         const firstEx = details?.ejercicios_programados?.[0];
-        expect(firstEx?.series?.length).toBe(3); // 3 template series
+        expect(firstEx?.series?.length).toBe(2); // 2 series from Week 1's completed data
+
+        // Verify peso was copied from Week 1 and reps are 0
+        if (firstEx?.series?.length === 2) {
+            expect(firstEx.series[0].peso_utilizado).toBe(100);
+            expect(firstEx.series[0].repeticiones).toBe(0);
+            expect(firstEx.series[1].peso_utilizado).toBe(105);
+            expect(firstEx.series[1].repeticiones).toBe(0);
+        }
 
         console.log('✅ Fase 4: Week 2 workout created:', workout2Id);
         console.log('   Exercises:', details?.ejercicios_programados?.length);

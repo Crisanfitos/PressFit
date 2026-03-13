@@ -466,6 +466,37 @@ export const RoutineService = {
                 return { data: null, error: templateError || 'Template not found' };
             }
 
+            // Look for the most recent completed workout for the same day name
+            // to use its series data (weight) instead of template values
+            let prevSeriesMap = new Map<string, any[]>();
+            try {
+                const { data: prevWorkouts } = await supabase
+                    .from('rutinas_diarias')
+                    .select(`
+                        id,
+                        ejercicios_programados (
+                            ejercicio_id,
+                            series (numero_serie, peso_utilizado, repeticiones, rpe)
+                        )
+                    `)
+                    .eq('rutina_semanal_id', templateDay.rutina_semanal_id)
+                    .eq('nombre_dia', templateDay.nombre_dia)
+                    .eq('completada', true)
+                    .not('fecha_dia', 'is', null)
+                    .order('fecha_dia', { ascending: false })
+                    .limit(1);
+
+                if (prevWorkouts?.[0]?.ejercicios_programados) {
+                    for (const ex of prevWorkouts[0].ejercicios_programados) {
+                        if (ex.series && ex.series.length > 0) {
+                            prevSeriesMap.set(ex.ejercicio_id, ex.series);
+                        }
+                    }
+                }
+            } catch {
+                // If lookup fails, continue with template data
+            }
+
             const fechaDia = new Date(date).toISOString().split('T')[0];
 
             const { data: newWorkout, error: createError } = await supabase
@@ -500,13 +531,18 @@ export const RoutineService = {
 
                     if (exError || !newEx) continue;
 
-                    const templateSeries = templateEx.series || [];
-                    if (templateSeries.length > 0) {
-                        const seriesToInsert = templateSeries.map((serie: any) => ({
+                    // Use previous workout series if available, otherwise template series
+                    const prevSeries = prevSeriesMap.get(templateEx.ejercicio_id);
+                    const sourceSeries = (prevSeries && prevSeries.length > 0)
+                        ? prevSeries
+                        : (templateEx.series || []);
+
+                    if (sourceSeries.length > 0) {
+                        const seriesToInsert = sourceSeries.map((serie: any) => ({
                             ejercicio_programado_id: newEx.id,
                             numero_serie: serie.numero_serie,
-                            repeticiones: serie.repeticiones || 0,
                             peso_utilizado: serie.peso_utilizado || 0,
+                            repeticiones: 0,
                         }));
 
                         await supabase.from('series').insert(seriesToInsert);
