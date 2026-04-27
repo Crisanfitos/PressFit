@@ -497,7 +497,7 @@ export const RoutineService = {
                 // If lookup fails, continue with template data
             }
 
-            const fechaDia = new Date(date).toISOString().split('T')[0];
+            const fechaDia = date.includes('T') ? date.split('T')[0] : date;
 
             const { data: newWorkout, error: createError } = await supabase
                 .from('rutinas_diarias')
