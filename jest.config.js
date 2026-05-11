@@ -18,11 +18,5 @@ module.exports = {
         '!**/node_modules/**'
     ],
     coverageDirectory: 'coverage',
-    testTimeout: 30000, // 30s para operaciones de BD
-    // projects removed for debugging
-    collectCoverageFrom: [
-        'src/services/**/*.ts',
-        'src/controllers/**/*.ts',
-        '!**/node_modules/**'
-    ]
+    testTimeout: 10000,
 };
