@@ -1,107 +1,160 @@
 /**
- * Tests Nivel 2: Ejercicios Programados
- * 
- * Tests sobre ejercicios_programados con sus series asociadas.
- * Usa funciones del Nivel 1.
+ * Unit Tests: ExerciseService
+ *
+ * Tests ExerciseService methods with mocked Supabase.
  */
 
-import { TEST_USER } from '../setup/testSetup';
-import {
-    getEjercicioProgramadoWithSeries,
-    getTestUserTemplate,
-    getTestUserNormalRoutine
-} from '../helpers/testHelpers';
+import { mockChain, mockSupabase, resetMocks } from '../helpers/mockSupabase';
+import { createMockExercise } from '../helpers/testHelpers';
 
-describe('Nivel 2: Ejercicios Programados', () => {
-    let templateEjercicioId: string;
-    let normalEjercicioId: string;
+jest.mock('../../src/lib/supabase', () => ({
+    supabase: require('../helpers/mockSupabase').mockSupabase,
+}));
 
-    beforeAll(async () => {
-        // Obtener ejercicios del dataset de test
-        const template = await getTestUserTemplate();
-        const normal = await getTestUserNormalRoutine();
+import { ExerciseService } from '../../src/services/ExerciseService';
 
-        if (template) {
-            const templateDia = template.rutinas_diarias.find(
-                (d: any) => d.ejercicios_programados?.length > 0
-            );
-            templateEjercicioId = templateDia?.ejercicios_programados?.[0]?.id;
-        }
-
-        if (normal) {
-            const normalDia = normal.rutinas_diarias.find(
-                (d: any) => d.ejercicios_programados?.length > 0
-            );
-            normalEjercicioId = normalDia?.ejercicios_programados?.[0]?.id;
-        }
+describe('ExerciseService', () => {
+    beforeEach(() => {
+        resetMocks();
     });
 
-    describe('Obtener Ejercicio con Series', () => {
-        it('debería obtener ejercicio de plantilla con sus series', async () => {
-            if (!templateEjercicioId) { console.warn('Missing templateEjercicioId, skipping'); return; }
-            const ep = await getEjercicioProgramadoWithSeries(templateEjercicioId);
-
-            expect(ep).toBeDefined();
-            expect(ep.id).toBe(templateEjercicioId);
-            expect(ep.ejercicio).toBeDefined();
-            expect(ep.ejercicio.titulo).toBeDefined();
-            expect(ep.series).toBeDefined();
-            expect(Array.isArray(ep.series)).toBe(true);
-            expect(ep.series.length).toBeGreaterThan(0);
-        });
-
-        it('las series deberían estar ordenadas por numero_serie', async () => {
-            if (!templateEjercicioId) { console.warn('Missing templateEjercicioId, skipping'); return; }
-            const ep = await getEjercicioProgramadoWithSeries(templateEjercicioId);
-
-            for (let i = 1; i < ep.series.length; i++) {
-                expect(ep.series[i].numero_serie).toBeGreaterThan(
-                    ep.series[i - 1].numero_serie
-                );
-            }
-        });
-
-        it('debería incluir datos de peso y repeticiones', async () => {
-            if (!templateEjercicioId) { console.warn('Missing templateEjercicioId, skipping'); return; }
-            const ep = await getEjercicioProgramadoWithSeries(templateEjercicioId);
-
-            // Al menos una serie debería tener datos
-            const serieConDatos = ep.series.find(
-                (s: any) => s.peso_utilizado !== null && s.repeticiones !== null
+    describe('getExercises', () => {
+        it('should return a sorted list of exercises', async () => {
+            const exercises = [
+                createMockExercise({ id: 'e1', titulo: 'Curl Bíceps' }),
+                createMockExercise({ id: 'e2', titulo: 'Press Banca' }),
+            ];
+            mockChain.then.mockImplementationOnce((resolve: any) =>
+                Promise.resolve({ data: exercises, error: null }).then(resolve)
             );
 
-            expect(serieConDatos).toBeDefined();
-            expect(typeof serieConDatos.peso_utilizado).toBe('number');
-            expect(typeof serieConDatos.repeticiones).toBe('number');
+            const result = await ExerciseService.getExercises();
+
+            expect(result.error).toBeNull();
+            expect(result.data).toHaveLength(2);
+            expect(result.data![0].titulo).toBe('Curl Bíceps');
+        });
+
+        it('should return error on failure', async () => {
+            mockChain.then.mockImplementationOnce((resolve: any) =>
+                Promise.resolve({ data: null, error: new Error('DB Error') }).then(resolve)
+            );
+
+            const result = await ExerciseService.getExercises();
+
+            expect(result.error).toBeDefined();
+            expect(result.data).toBeNull();
         });
     });
 
-    describe('Ejercicio de Rutina Normal vs Plantilla', () => {
-        it('ejercicio de rutina normal debería tener datos reales', async () => {
-            if (!normalEjercicioId) { console.warn('Missing normalEjercicioId, skipping'); return; }
-            const ep = await getEjercicioProgramadoWithSeries(normalEjercicioId);
+    describe('getExerciseById', () => {
+        it('should return a single exercise', async () => {
+            const exercise = createMockExercise({ id: 'e1' });
+            mockChain.single.mockResolvedValueOnce({ data: exercise, error: null });
 
-            expect(ep).toBeDefined();
-            expect(ep.series.length).toBeGreaterThan(0);
+            const result = await ExerciseService.getExerciseById('e1');
 
-            // El primer ejercicio de la rutina normal tiene datos reales
-            const serieConDatos = ep.series.find(
-                (s: any) => s.peso_utilizado !== null
-            );
-            expect(serieConDatos).toBeDefined();
+            expect(result.error).toBeNull();
+            expect(result.data!.id).toBe('e1');
+            expect(result.data!.titulo).toBe('Press Banca');
         });
 
-        it('datos de ejercicio normal deberían diferir de plantilla', async () => {
-            if (!templateEjercicioId || !normalEjercicioId) { console.warn('Missing IDs, skipping'); return; }
-            const epTemplate = await getEjercicioProgramadoWithSeries(templateEjercicioId);
-            const epNormal = await getEjercicioProgramadoWithSeries(normalEjercicioId);
+        it('should return error if not found', async () => {
+            mockChain.single.mockResolvedValueOnce({ data: null, error: new Error('Not found') });
 
-            // Los IDs deberían ser diferentes
-            expect(epTemplate.id).not.toBe(epNormal.id);
+            const result = await ExerciseService.getExerciseById('nonexistent');
 
-            // Pero ambos tienen series
-            expect(epTemplate.series.length).toBeGreaterThan(0);
-            expect(epNormal.series.length).toBeGreaterThan(0);
+            expect(result.error).toBeDefined();
+            expect(result.data).toBeNull();
+        });
+    });
+
+    describe('addExercisesToRoutineDay', () => {
+        it('should add exercises starting from the correct order index', async () => {
+            // First call: get current max order
+            mockChain.then.mockImplementationOnce((resolve: any) =>
+                Promise.resolve({ data: [{ orden_ejecucion: 2 }], error: null }).then(resolve)
+            );
+            // Second call: insert exercises
+            const insertedExercises = [
+                { id: 'ep-new-1', ejercicio_id: 'e1', orden_ejecucion: 3 },
+                { id: 'ep-new-2', ejercicio_id: 'e2', orden_ejecucion: 4 },
+            ];
+            mockChain.then.mockImplementationOnce((resolve: any) =>
+                Promise.resolve({ data: insertedExercises, error: null }).then(resolve)
+            );
+
+            const result = await ExerciseService.addExercisesToRoutineDay('user-1', 'day-001', ['e1', 'e2']);
+
+            expect(result.error).toBeNull();
+            expect(result.data).toHaveLength(2);
+        });
+
+        it('should start at order 1 when no existing exercises', async () => {
+            // First call: no exercises yet
+            mockChain.then.mockImplementationOnce((resolve: any) =>
+                Promise.resolve({ data: [], error: null }).then(resolve)
+            );
+            // Second call: insert
+            mockChain.then.mockImplementationOnce((resolve: any) =>
+                Promise.resolve({ data: [{ id: 'ep-1', orden_ejecucion: 1 }], error: null }).then(resolve)
+            );
+
+            const result = await ExerciseService.addExercisesToRoutineDay('user-1', 'day-001', ['e1']);
+
+            expect(result.error).toBeNull();
+            expect(result.data).toHaveLength(1);
+        });
+
+        it('should return error on failure', async () => {
+            mockChain.then.mockImplementationOnce((resolve: any) =>
+                Promise.resolve({ data: [], error: null }).then(resolve)
+            );
+            mockChain.then.mockImplementationOnce((resolve: any) =>
+                Promise.resolve({ data: null, error: new Error('Insert failed') }).then(resolve)
+            );
+
+            const result = await ExerciseService.addExercisesToRoutineDay('user-1', 'day-001', ['e1']);
+
+            expect(result.error).toBeDefined();
+        });
+    });
+
+    describe('getPersonalNote', () => {
+        it('should return note content', async () => {
+            mockChain.single.mockResolvedValueOnce({
+                data: { contenido_nota: 'Agarre prono' },
+                error: null,
+            });
+
+            const result = await ExerciseService.getPersonalNote('user-1', 'e1');
+
+            expect(result.error).toBeNull();
+            expect(result.data).toBe('Agarre prono');
+        });
+
+        it('should return null when no note exists (PGRST116)', async () => {
+            mockChain.single.mockResolvedValueOnce({
+                data: null,
+                error: { code: 'PGRST116', message: 'Row not found' },
+            });
+
+            const result = await ExerciseService.getPersonalNote('user-1', 'e1');
+
+            expect(result.error).toBeNull();
+            expect(result.data).toBeNull();
+        });
+    });
+
+    describe('savePersonalNote', () => {
+        it('should upsert a personal note', async () => {
+            const savedNote = { id: 'note-1', contenido_nota: 'Codos pegados' };
+            mockChain.single.mockResolvedValueOnce({ data: savedNote, error: null });
+
+            const result = await ExerciseService.savePersonalNote('user-1', 'e1', 'Codos pegados');
+
+            expect(result.error).toBeNull();
+            expect(result.data).toBeDefined();
         });
     });
 });

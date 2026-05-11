@@ -1,226 +1,123 @@
 /**
- * Weight Types Tests
+ * Unit Tests: Weight Types (tipo_peso)
  *
- * Tests for the tipo_peso column in ejercicios_programados.
- * Verifies CRUD operations with weight type support.
+ * Tests TipoPeso type definitions and WorkoutService weight type methods.
  */
 
-import { supabase } from '../../src/lib/supabase';
-import { TEST_USER } from '../setup/testSetup';
-import {
-  getTestUserTemplate,
-  getEjercicioProgramadoWithSeries,
-} from '../helpers/testHelpers';
+import { mockChain, resetMocks } from '../helpers/mockSupabase';
+
+jest.mock('../../src/lib/supabase', () => ({
+    supabase: require('../helpers/mockSupabase').mockSupabase,
+}));
+
+import { TipoPeso, TIPO_PESO_LABELS, TIPO_PESO_SHORT_LABELS, TIPO_PESO_ICONS } from '../../src/types/setTypes';
+import { WorkoutService } from '../../src/services/WorkoutService';
 
 describe('Weight Types (tipo_peso)', () => {
-  let templateRoutine: any;
-  let testExerciseId: string;
-  let testRoutineDayId: string;
+    beforeEach(() => { resetMocks(); });
 
-  beforeAll(async () => {
-    // Test setup happens in testSetup.ts
-
-    // Get the template routine for the test user
-    templateRoutine = await getTestUserTemplate();
-    expect(templateRoutine).toBeTruthy();
-
-    // Find a day with at least one exercise
-    const dayWithExercises = templateRoutine.rutinas_diarias?.find(
-      (d: any) => d.ejercicios_programados && d.ejercicios_programados.length > 0
-    );
-    expect(dayWithExercises).toBeTruthy();
-
-    testRoutineDayId = dayWithExercises.id;
-    testExerciseId = dayWithExercises.ejercicios_programados[0].ejercicio_id;
-  });
-
-  describe('Default values', () => {
-    it('should default to "total" for existing ejercicios_programados', async () => {
-      const dayWithExercises = templateRoutine.rutinas_diarias?.find(
-        (d: any) => d.ejercicios_programados && d.ejercicios_programados.length > 0
-      );
-
-      const ep = dayWithExercises.ejercicios_programados[0];
-      const { data, error } = await supabase
-        .from('ejercicios_programados')
-        .select('tipo_peso')
-        .eq('id', ep.id)
-        .single();
-
-      expect(error).toBeNull();
-      expect(data?.tipo_peso).toBe('total');
-    });
-  });
-
-  describe('CRUD operations', () => {
-    let createdEpId: string;
-
-    it('should create ejercicio_programado with tipo_peso = total (default)', async () => {
-      const { data, error } = await supabase
-        .from('ejercicios_programados')
-        .insert({
-          rutina_diaria_id: testRoutineDayId,
-          ejercicio_id: testExerciseId,
-          orden_ejecucion: 99,
-        })
-        .select()
-        .single();
-
-      expect(error).toBeNull();
-      expect(data).toBeTruthy();
-      expect(data.tipo_peso).toBe('total');
-      createdEpId = data.id;
-    });
-
-    it('should create ejercicio_programado with tipo_peso = por_lado', async () => {
-      const { data, error } = await supabase
-        .from('ejercicios_programados')
-        .insert({
-          rutina_diaria_id: testRoutineDayId,
-          ejercicio_id: testExerciseId,
-          orden_ejecucion: 100,
-          tipo_peso: 'por_lado',
-        })
-        .select()
-        .single();
-
-      expect(error).toBeNull();
-      expect(data).toBeTruthy();
-      expect(data.tipo_peso).toBe('por_lado');
-
-      // Cleanup
-      await supabase.from('ejercicios_programados').delete().eq('id', data.id);
-    });
-
-    it('should create ejercicio_programado with tipo_peso = corporal', async () => {
-      const { data, error } = await supabase
-        .from('ejercicios_programados')
-        .insert({
-          rutina_diaria_id: testRoutineDayId,
-          ejercicio_id: testExerciseId,
-          orden_ejecucion: 101,
-          tipo_peso: 'corporal',
-        })
-        .select()
-        .single();
-
-      expect(error).toBeNull();
-      expect(data).toBeTruthy();
-      expect(data.tipo_peso).toBe('corporal');
-
-      // Cleanup
-      await supabase.from('ejercicios_programados').delete().eq('id', data.id);
-    });
-
-    it('should update tipo_peso from total to por_lado', async () => {
-      const { data, error } = await supabase
-        .from('ejercicios_programados')
-        .update({ tipo_peso: 'por_lado' })
-        .eq('id', createdEpId)
-        .select()
-        .single();
-
-      expect(error).toBeNull();
-      expect(data?.tipo_peso).toBe('por_lado');
-    });
-
-    it('should update tipo_peso from por_lado to corporal', async () => {
-      const { data, error } = await supabase
-        .from('ejercicios_programados')
-        .update({ tipo_peso: 'corporal' })
-        .eq('id', createdEpId)
-        .select()
-        .single();
-
-      expect(error).toBeNull();
-      expect(data?.tipo_peso).toBe('corporal');
-    });
-
-    it('should reject invalid tipo_peso values', async () => {
-      const { error } = await supabase
-        .from('ejercicios_programados')
-        .update({ tipo_peso: 'invalid_value' })
-        .eq('id', createdEpId)
-        .select()
-        .single();
-
-      expect(error).toBeTruthy();
-    });
-
-    afterAll(async () => {
-      // Cleanup test data
-      if (createdEpId) {
-        await supabase.from('ejercicios_programados').delete().eq('id', createdEpId);
-      }
-    });
-  });
-
-  describe('WorkoutService.updateWeightType', () => {
-    let createdEpId: string;
-
-    beforeAll(async () => {
-      const { data } = await supabase
-        .from('ejercicios_programados')
-        .insert({
-          rutina_diaria_id: testRoutineDayId,
-          ejercicio_id: testExerciseId,
-          orden_ejecucion: 98,
-        })
-        .select()
-        .single();
-
-      createdEpId = data!.id;
-    });
-
-    it('should update weight type via WorkoutService', async () => {
-      const { WorkoutService } = require('../../src/services/WorkoutService');
-      const result = await WorkoutService.updateWeightType(createdEpId, 'por_lado');
-
-      expect(result.error).toBeNull();
-      expect(result.data).toBeTruthy();
-      expect(result.data.tipo_peso).toBe('por_lado');
-    });
-
-    afterAll(async () => {
-      if (createdEpId) {
-        await supabase.from('ejercicios_programados').delete().eq('id', createdEpId);
-      }
-    });
-  });
-
-  describe('tipo_peso in queries', () => {
-    it('should include tipo_peso in getWorkoutDetails response', async () => {
-      const { WorkoutService } = require('../../src/services/WorkoutService');
-
-      // Find a workout (rutina_diaria with fecha_dia not null)
-      const { data: workouts } = await supabase
-        .from('rutinas_diarias')
-        .select('id')
-        .eq('rutina_semanal_id', templateRoutine.id)
-        .not('fecha_dia', 'is', null)
-        .limit(1);
-
-      if (workouts && workouts.length > 0) {
-        const result = await WorkoutService.getWorkoutDetails(workouts[0].id);
-        if (result.data?.ejercicios_programados?.length > 0) {
-          const ep = result.data.ejercicios_programados[0];
-          expect(ep).toHaveProperty('tipo_peso');
-          expect(['total', 'por_lado', 'corporal']).toContain(ep.tipo_peso);
-        }
-      }
-    });
-
-    it('should include tipo_peso in getExerciseHistory response', async () => {
-      const { WorkoutService } = require('../../src/services/WorkoutService');
-
-      const result = await WorkoutService.getExerciseHistory(TEST_USER.id, testExerciseId);
-
-      if (result.data && result.data.length > 0) {
-        result.data.forEach((entry: any) => {
-          expect(entry).toHaveProperty('tipo_peso');
-          expect(['total', 'por_lado', 'corporal']).toContain(entry.tipo_peso);
+    describe('Type definitions', () => {
+        it('TIPO_PESO_LABELS should have all 3 types', () => {
+            expect(TIPO_PESO_LABELS.total).toBe('Peso Total');
+            expect(TIPO_PESO_LABELS.por_lado).toBe('Por Lado');
+            expect(TIPO_PESO_LABELS.corporal).toBe('Peso Corporal');
         });
-      }
+
+        it('TIPO_PESO_SHORT_LABELS should have short labels', () => {
+            expect(TIPO_PESO_SHORT_LABELS.total).toBe('KG');
+            expect(TIPO_PESO_SHORT_LABELS.por_lado).toBe('KG/lado');
+            expect(TIPO_PESO_SHORT_LABELS.corporal).toBe('BW');
+        });
+
+        it('TIPO_PESO_ICONS should have icon names', () => {
+            expect(TIPO_PESO_ICONS.total).toBe('fitness-center');
+            expect(TIPO_PESO_ICONS.por_lado).toBe('sync-alt');
+            expect(TIPO_PESO_ICONS.corporal).toBe('accessibility-new');
+        });
+
+        it('all maps should have exactly 3 keys', () => {
+            expect(Object.keys(TIPO_PESO_LABELS)).toHaveLength(3);
+            expect(Object.keys(TIPO_PESO_SHORT_LABELS)).toHaveLength(3);
+            expect(Object.keys(TIPO_PESO_ICONS)).toHaveLength(3);
+        });
     });
-  });
+
+    describe('WorkoutService.updateWeightType', () => {
+        it('should update to por_lado', async () => {
+            mockChain.single.mockResolvedValueOnce({
+                data: { id: 'ep-1', tipo_peso: 'por_lado' },
+                error: null,
+            });
+            const result = await WorkoutService.updateWeightType('ep-1', 'por_lado');
+            expect(result.error).toBeNull();
+            expect(result.data!.tipo_peso).toBe('por_lado');
+        });
+
+        it('should update to corporal', async () => {
+            mockChain.single.mockResolvedValueOnce({
+                data: { id: 'ep-1', tipo_peso: 'corporal' },
+                error: null,
+            });
+            const result = await WorkoutService.updateWeightType('ep-1', 'corporal');
+            expect(result.error).toBeNull();
+            expect(result.data!.tipo_peso).toBe('corporal');
+        });
+
+        it('should update to total', async () => {
+            mockChain.single.mockResolvedValueOnce({
+                data: { id: 'ep-1', tipo_peso: 'total' },
+                error: null,
+            });
+            const result = await WorkoutService.updateWeightType('ep-1', 'total');
+            expect(result.error).toBeNull();
+            expect(result.data!.tipo_peso).toBe('total');
+        });
+
+        it('should return error on failure', async () => {
+            mockChain.single.mockResolvedValueOnce({ data: null, error: new Error('Update failed') });
+            const result = await WorkoutService.updateWeightType('ep-1', 'total');
+            expect(result.error).toBeDefined();
+        });
+    });
+
+    describe('tipo_peso in getWorkoutDetails', () => {
+        it('should include tipo_peso in exercise data', async () => {
+            mockChain.single.mockResolvedValueOnce({
+                data: {
+                    id: 'workout-1',
+                    ejercicios_programados: [
+                        { id: 'ep-1', tipo_peso: 'total', orden_ejecucion: 1, series: [] },
+                        { id: 'ep-2', tipo_peso: 'por_lado', orden_ejecucion: 2, series: [] },
+                    ],
+                },
+                error: null,
+            });
+            const result = await WorkoutService.getWorkoutDetails('workout-1');
+            expect(result.error).toBeNull();
+            expect(result.data!.ejercicios_programados![0].tipo_peso).toBe('total');
+            expect(result.data!.ejercicios_programados![1].tipo_peso).toBe('por_lado');
+        });
+    });
+
+    describe('tipo_peso in getExerciseHistory', () => {
+        it('should include tipo_peso in history entries', async () => {
+            mockChain.then.mockImplementationOnce((resolve: any) =>
+                Promise.resolve({
+                    data: [
+                        {
+                            id: 's1', numero_serie: 1, peso_utilizado: 60, repeticiones: 10, rpe: 7,
+                            ejercicios_programados: {
+                                tipo_peso: 'por_lado',
+                                rutinas_diarias: { fecha_dia: '2026-05-01', id: 'rd-1', rutinas_semanales: { usuario_id: 'user-1' } },
+                            },
+                        },
+                    ],
+                    error: null,
+                }).then(resolve)
+            );
+            const result = await WorkoutService.getExerciseHistory('user-1', 'ex-1');
+            expect(result.error).toBeNull();
+            expect(result.data![0].tipo_peso).toBe('por_lado');
+        });
+    });
 });

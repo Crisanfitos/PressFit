@@ -1,159 +1,24 @@
 /**
- * Test Helpers
- * 
- * Funciones auxiliares reutilizables para los tests.
- * Organizadas de menor a mayor nivel de abstracción.
+ * Test Helpers — Pure utility functions only.
+ *
+ * No database calls. These are deterministic functions
+ * used across multiple test suites.
  */
-
-import { supabase } from '../../src/lib/supabase';
-import { TEST_USER } from '../setup/testSetup';
 
 // ==============================================================================
-// NIVEL 1: SERIES
-// ==============================================================================
-
-export interface SerieTestData {
-    ejercicio_programado_id: string;
-    numero_serie: number;
-    repeticiones?: number | null;
-    peso_utilizado?: number | null;
-    rpe?: number | null;
-}
-
-/**
- * Crea una serie en la BD
- */
-export const createSerie = async (data: SerieTestData) => {
-    const { data: serie, error } = await supabase
-        .from('series')
-        .insert({
-            ...data,
-            created_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-
-    if (error) throw error;
-    return serie;
-};
-
-/**
- * Obtiene una serie por ID
- */
-export const getSerieById = async (id: string) => {
-    const { data, error } = await supabase
-        .from('series')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-    if (error) throw error;
-    return data;
-};
-
-/**
- * Actualiza una serie
- */
-export const updateSerie = async (id: string, updates: Partial<SerieTestData>) => {
-    const { data, error } = await supabase
-        .from('series')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-    if (error) throw error;
-    return data;
-};
-
-/**
- * Elimina una serie
- */
-export const deleteSerie = async (id: string) => {
-    const { error } = await supabase
-        .from('series')
-        .delete()
-        .eq('id', id);
-
-    if (error) throw error;
-    return true;
-};
-
-// ==============================================================================
-// NIVEL 2: EJERCICIOS PROGRAMADOS
-// ==============================================================================
-
-/**
- * Obtiene ejercicio programado con sus series
- */
-export const getEjercicioProgramadoWithSeries = async (id: string) => {
-    const { data, error } = await supabase
-        .from('ejercicios_programados')
-        .select(`
-            *,
-            ejercicio:ejercicios(*),
-            series(*)
-        `)
-        .eq('id', id)
-        .single();
-
-    if (error) throw error;
-
-    // Ordenar series por numero_serie
-    if (data?.series) {
-        data.series.sort((a: any, b: any) => a.numero_serie - b.numero_serie);
-    }
-
-    return data;
-};
-
-/**
- * Crea un ejercicio programado con series
- */
-export const createEjercicioProgramadoWithSeries = async (
-    rutina_diaria_id: string,
-    ejercicio_id: string,
-    orden_ejecucion: number,
-    numSeries: number = 3
-) => {
-    const { data: ep, error } = await supabase
-        .from('ejercicios_programados')
-        .insert({
-            rutina_diaria_id,
-            ejercicio_id,
-            orden_ejecucion,
-            created_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-
-    if (error) throw error;
-
-    // Crear series vacías
-    const series = [];
-    for (let i = 1; i <= numSeries; i++) {
-        const serie = await createSerie({
-            ejercicio_programado_id: ep.id,
-            numero_serie: i,
-            repeticiones: null,
-            peso_utilizado: null
-        });
-        series.push(serie);
-    }
-
-    return { ...ep, series };
-};
-
-// ==============================================================================
-// NIVEL 3: RUTINAS DIARIAS
+// RUTINA DIARIA — State machine
 // ==============================================================================
 
 export type RutinaDiariaEstado = 'PLANTILLA' | 'PENDIENTE' | 'EN_PROGRESO' | 'COMPLETADA';
 
 /**
- * Obtiene el estado de una rutina diaria
+ * Determines the state of a daily routine based on its fields.
  */
-export const getRutinaDiariaEstado = (rutinaDiaria: any): RutinaDiariaEstado => {
+export const getRutinaDiariaEstado = (rutinaDiaria: {
+    fecha_dia: string | null;
+    hora_inicio: string | null;
+    hora_fin: string | null;
+}): RutinaDiariaEstado => {
     if (rutinaDiaria.fecha_dia === null) {
         return 'PLANTILLA';
     }
@@ -167,7 +32,7 @@ export const getRutinaDiariaEstado = (rutinaDiaria: any): RutinaDiariaEstado => 
 };
 
 /**
- * Calcula la duración de un entrenamiento en minutos
+ * Calculates workout duration in minutes.
  */
 export const calcularDuracionMinutos = (hora_inicio: string, hora_fin: string): number => {
     const inicio = new Date(hora_inicio);
@@ -176,139 +41,108 @@ export const calcularDuracionMinutos = (hora_inicio: string, hora_fin: string): 
     return Math.round(diffMs / 1000 / 60);
 };
 
-/**
- * Obtiene rutina diaria completa con ejercicios y series
- */
-export const getRutinaDiariaCompleta = async (id: string) => {
-    const { data, error } = await supabase
-        .from('rutinas_diarias')
-        .select(`
-            *,
-            ejercicios_programados(
-                *,
-                ejercicio:ejercicios(*),
-                series(*)
-            )
-        `)
-        .eq('id', id)
-        .single();
-
-    if (error) throw error;
-
-    // Ordenar ejercicios y series
-    if (data?.ejercicios_programados) {
-        data.ejercicios_programados.sort((a: any, b: any) =>
-            (a.orden_ejecucion || 0) - (b.orden_ejecucion || 0)
-        );
-        data.ejercicios_programados.forEach((ep: any) => {
-            if (ep.series) {
-                ep.series.sort((a: any, b: any) => a.numero_serie - b.numero_serie);
-            }
-        });
-    }
-
-    return data;
-};
-
 // ==============================================================================
-// NIVEL 4: RUTINAS SEMANALES
+// DATE HELPERS
 // ==============================================================================
 
 /**
- * Obtiene rutina semanal con todos sus días
- */
-export const getRutinaSemanalCompleta = async (id: string) => {
-    const { data, error } = await supabase
-        .from('rutinas_semanales')
-        .select(`
-            *,
-            rutinas_diarias(
-                *,
-                ejercicios_programados(
-                    *,
-                    ejercicio:ejercicios(*),
-                    series(*)
-                )
-            )
-        `)
-        .eq('id', id)
-        .single();
-
-    if (error) throw error;
-    return data;
-};
-
-/**
- * Calcula el lunes de la semana actual
+ * Returns the Monday of the current week as YYYY-MM-DD.
+ * Uses local timezone to avoid UTC date shift issues.
  */
 export const getMondayOfCurrentWeek = (): string => {
     const now = new Date();
-    const day = now.getDay();
+    const day = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
     const daysToSubtract = day === 0 ? 6 : day - 1;
     const monday = new Date(now);
     monday.setDate(now.getDate() - daysToSubtract);
     monday.setHours(0, 0, 0, 0);
-    return monday.toISOString().split('T')[0];
+    // Use local date components to avoid UTC shift
+    const y = monday.getFullYear();
+    const m = String(monday.getMonth() + 1).padStart(2, '0');
+    const d = String(monday.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+};
+
+/**
+ * Parses a YYYY-MM-DD string into a local Date object.
+ * Avoids the UTC midnight issue of new Date("YYYY-MM-DD").
+ */
+export const parseLocalDate = (dateStr: string): Date => {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d);
 };
 
 // ==============================================================================
-// QUERIES DE TEST
+// MOCK DATA FIXTURES
 // ==============================================================================
 
-/**
- * Obtiene todas las rutinas del usuario de test
- */
-export const getTestUserRoutines = async () => {
-    const { data, error } = await supabase
-        .from('rutinas_semanales')
-        .select('*')
-        .eq('usuario_id', TEST_USER.id)
-        .order('created_at', { ascending: false });
+export const MOCK_USER_ID = 'user-test-001';
 
-    if (error) throw error;
-    return data;
-};
+export const createMockExercise = (overrides: Record<string, any> = {}) => ({
+    id: 'exercise-001',
+    titulo: 'Press Banca',
+    descripcion: 'Ejercicio de pecho',
+    grupo_muscular: 'Pecho',
+    url_video: null,
+    imagen_url: null,
+    ...overrides,
+});
 
-/**
- * Obtiene la plantilla del usuario de test
- */
-export const getTestUserTemplate = async () => {
-    const { data, error } = await supabase
-        .from('rutinas_semanales')
-        .select(`
-            *,
-            rutinas_diarias(
-                *,
-                ejercicios_programados(*, series(*))
-            )
-        `)
-        .eq('usuario_id', TEST_USER.id)
-        .eq('es_plantilla', true)
-        .limit(1)
-        .maybeSingle();
+export const createMockSerie = (overrides: Record<string, any> = {}) => ({
+    id: 'serie-001',
+    ejercicio_programado_id: 'ep-001',
+    numero_serie: 1,
+    peso_utilizado: 60,
+    repeticiones: 10,
+    rpe: 7,
+    ...overrides,
+});
 
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
-};
+export const createMockEjercicioProgramado = (overrides: Record<string, any> = {}) => ({
+    id: 'ep-001',
+    rutina_diaria_id: 'day-001',
+    ejercicio_id: 'exercise-001',
+    orden_ejecucion: 1,
+    tipo_peso: 'total',
+    notas_sesion: null,
+    ejercicio: createMockExercise(),
+    series: [
+        createMockSerie({ id: 'serie-001', numero_serie: 1 }),
+        createMockSerie({ id: 'serie-002', numero_serie: 2, peso_utilizado: 65 }),
+    ],
+    ...overrides,
+});
 
-/**
- * Obtiene la rutina normal (no plantilla) del usuario de test
- */
-export const getTestUserNormalRoutine = async () => {
-    const { data, error } = await supabase
-        .from('rutinas_semanales')
-        .select(`
-            *,
-            rutinas_diarias(
-                *,
-                ejercicios_programados(*, series(*))
-            )
-        `)
-        .eq('usuario_id', TEST_USER.id)
-        .eq('es_plantilla', false)
-        .limit(1)
-        .maybeSingle();
+export const createMockRutinaDiaria = (overrides: Record<string, any> = {}) => ({
+    id: 'day-001',
+    rutina_semanal_id: 'routine-001',
+    nombre_dia: 'Lunes',
+    fecha_dia: null,
+    hora_inicio: null,
+    hora_fin: null,
+    completada: false,
+    ejercicios_programados: [createMockEjercicioProgramado()],
+    ...overrides,
+});
 
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
-};
+export const createMockRutinaSemanal = (overrides: Record<string, any> = {}) => ({
+    id: 'routine-001',
+    usuario_id: MOCK_USER_ID,
+    nombre: 'Mi Rutina PPL',
+    es_plantilla: true,
+    activa: true,
+    fecha_inicio_semana: null,
+    copiada_de_id: null,
+    created_at: '2026-01-01T00:00:00Z',
+    updated_at: '2026-01-01T00:00:00Z',
+    rutinas_diarias: [
+        createMockRutinaDiaria({ id: 'day-lunes', nombre_dia: 'Lunes' }),
+        createMockRutinaDiaria({ id: 'day-martes', nombre_dia: 'Martes', ejercicios_programados: [] }),
+        createMockRutinaDiaria({ id: 'day-miercoles', nombre_dia: 'Miércoles', ejercicios_programados: [] }),
+        createMockRutinaDiaria({ id: 'day-jueves', nombre_dia: 'Jueves', ejercicios_programados: [] }),
+        createMockRutinaDiaria({ id: 'day-viernes', nombre_dia: 'Viernes', ejercicios_programados: [] }),
+        createMockRutinaDiaria({ id: 'day-sabado', nombre_dia: 'Sábado', ejercicios_programados: [] }),
+        createMockRutinaDiaria({ id: 'day-domingo', nombre_dia: 'Domingo', ejercicios_programados: [] }),
+    ],
+    ...overrides,
+});
