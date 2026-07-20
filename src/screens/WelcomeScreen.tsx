@@ -70,7 +70,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
     });
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="welcome-screen">
             <View style={styles.content}>
                 <Image
                     source={require('../../assets/icon.png')}
@@ -86,6 +86,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
                     <TouchableOpacity
                         style={styles.primaryButton}
                         onPress={() => navigation.navigate('Login')}
+                        testID="login-button"
                     >
                         <Text style={styles.primaryButtonText}>Iniciar Sesión</Text>
                     </TouchableOpacity>

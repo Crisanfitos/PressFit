@@ -38,6 +38,7 @@ const SetInput: React.FC<SetInputProps> = ({
 
     return (
         <TextInput
+            testID="set-input"
             style={[
                 styles.input,
                 {

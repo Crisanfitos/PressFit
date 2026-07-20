@@ -14,6 +14,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { RoutineService } from '../services/RoutineService';
+import { formatLocalDateKey, parseDateKeyAsLocalDate } from '../utils/dateUtils';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SideDrawer, MenuItem } from '../components/SideDrawer';
 
@@ -160,8 +161,8 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
         if (!selectedRoutine?.id) return;
 
         // Calculate date range for current month
-        const startDate = new Date(year, month, 1).toISOString();
-        const endDate = new Date(year, month + 1, 0).toISOString();
+        const startDate = formatLocalDateKey(new Date(year, month, 1));
+        const endDate = formatLocalDateKey(new Date(year, month + 1, 0));
 
         const { data: workouts } = await RoutineService.getWorkoutsForDateRange(
             [selectedRoutine.id],
@@ -235,7 +236,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
 
         // Navigate to day detail
         navigation.navigate('WorkoutDay', {
-            date: date.toISOString(),
+            date: formatLocalDateKey(date),
             routineId: selectedRoutine?.id,
             isToday: selectedDate.getTime() === now.getTime(),
         });
@@ -245,7 +246,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
     const getDayStyle = (date: Date | null) => {
         if (!date) return {};
 
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = formatLocalDateKey(date);
         const now = new Date();
         now.setHours(0, 0, 0, 0);
         const dateNorm = new Date(date);

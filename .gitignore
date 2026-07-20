@@ -51,4 +51,12 @@ android/app/google-services.json*
 #Documentacion
 Documentacion/
 coverage/
+coverage-components/
 failed_test.txt
+
+#Gemini
+GEMINI.md
+
+#EAS
+app.json
+eas.json

@@ -196,7 +196,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     });
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="login-screen">
             <KeyboardAvoidingView
                 behavior="padding"
                 style={{ flex: 1 }}

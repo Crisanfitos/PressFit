@@ -15,6 +15,7 @@ import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { RoutineService } from '../services/RoutineService';
 import { WorkoutService } from '../services/WorkoutService';
+import { formatLocalDateKey, parseDateKeyAsLocalDate } from '../utils/dateUtils';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface Exercise {
@@ -40,7 +41,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
     const userId = authContext?.user?.id;
 
     const { date, routineId, isToday } = route.params || {};
-    const selectedDate = date ? new Date(date) : new Date();
+    const selectedDate = date ? parseDateKeyAsLocalDate(date) : new Date();
 
     const [loading, setLoading] = useState(true);
     const [dayData, setDayData] = useState<any>(null);
@@ -85,7 +86,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
 
         try {
             // Format date as yyyy-mm-dd for direct query
-            const selectedDateStr = selectedDate.toISOString().split('T')[0];
+            const selectedDateStr = formatLocalDateKey(selectedDate);
 
             // Try to find an instance for this specific date first
             let { data: targetDay } = await RoutineService.getRoutineDayByDate(
@@ -165,7 +166,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
             const now = new Date();
             const { data: newWorkout, error } = await RoutineService.startDailyWorkout(
                 dayData.id,
-                now.toISOString(),
+                formatLocalDateKey(now),
                 now.toISOString()
             );
 

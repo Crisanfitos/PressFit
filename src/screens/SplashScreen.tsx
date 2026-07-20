@@ -34,7 +34,7 @@ const SplashScreen: React.FC = () => {
     });
 
     return (
-        <View style={styles.container}>
+        <View style={styles.container} testID="splash-screen">
             <Image
                 source={require('../../assets/icon.png')}
                 style={[styles.icon, { width: 80, height: 80 }]}

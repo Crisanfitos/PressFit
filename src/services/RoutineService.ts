@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { formatLocalDateKey, getStartOfWeek as getStartOfWeekUtil } from "../utils/dateUtils";
 
 interface RoutineDay {
     id: string;
@@ -238,27 +239,13 @@ export const RoutineService = {
 
     // Helper to get the start of the current week (Monday)
     getStartOfWeek(): string {
-        const now = new Date();
-        const day = now.getDay();
-        const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-        const monday = new Date(now);
-        monday.setDate(diff);
-        monday.setHours(0, 0, 0, 0);
-        return monday.toISOString();
+        return getStartOfWeekUtil(new Date()).toISOString();
     },
 
     // Helper to get Monday of current week as a date string (YYYY-MM-DD)
     // If today is Sunday, returns the Monday of this week (not next week)
     getMondayOfCurrentWeek(): string {
-        const now = new Date();
-        const day = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-        // Calculate days to subtract to get to Monday
-        // If Sunday (0), go back 6 days; otherwise go back (day - 1) days
-        const daysToSubtract = day === 0 ? 6 : day - 1;
-        const monday = new Date(now);
-        monday.setDate(now.getDate() - daysToSubtract);
-        monday.setHours(0, 0, 0, 0);
-        return monday.toISOString().split('T')[0];
+        return formatLocalDateKey(getStartOfWeekUtil(new Date()));
     },
 
     async getWorkoutStatsForRoutineDay(
@@ -266,12 +253,12 @@ export const RoutineService = {
         routineDayId: string
     ): Promise<ServiceResponse<WorkoutStats>> {
         try {
-            const startOfWeek = this.getStartOfWeek();
+            const startOfWeek = getStartOfWeekUtil(new Date());
 
             const { data: templateDay } = await this.getRoutineDayById(routineDayId);
             if (!templateDay) return { data: null, error: 'Template not found' };
 
-            const startOfWeekDate = startOfWeek.split('T')[0];
+            const startOfWeekDate = formatLocalDateKey(startOfWeek);
 
             const { data, error } = await supabase
                 .from('rutinas_diarias')
@@ -333,7 +320,7 @@ export const RoutineService = {
             const { data: templateDay } = await this.getRoutineDayById(routineDayId);
             if (!templateDay) return { data: null, error: 'Template not found' };
 
-            const startOfWeek = this.getStartOfWeek().split('T')[0];
+            const startOfWeek = formatLocalDateKey(getStartOfWeekUtil(new Date()));
 
             const { data, error } = await supabase
                 .from('rutinas_diarias')
@@ -497,7 +484,7 @@ export const RoutineService = {
                 // If lookup fails, continue with template data
             }
 
-            const fechaDia = date.includes('T') ? date.split('T')[0] : date;
+            const fechaDia = date; // date is already expected to be YYYY-MM-DD
 
             const { data: newWorkout, error: createError } = await supabase
                 .from('rutinas_diarias')
@@ -629,8 +616,8 @@ export const RoutineService = {
         endDate: string
     ): Promise<ServiceResponse<RoutineDay[]>> {
         try {
-            const startDateStr = startDate.split('T')[0];
-            const endDateStr = endDate.split('T')[0];
+            const startDateStr = startDate; // startDate is already expected to be YYYY-MM-DD
+            const endDateStr = endDate;     // endDate is already expected to be YYYY-MM-DD
 
             const { data, error } = await supabase
                 .from('rutinas_diarias')
@@ -759,7 +746,7 @@ export const RoutineService = {
                     es_plantilla: true,
                     activa: false,
                     copiada_de_id: templateId,
-                    fecha_inicio_semana: this.getMondayOfCurrentWeek(),
+                    fecha_inicio_semana: formatLocalDateKey(getStartOfWeekUtil(new Date())),
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString(),
                 })
