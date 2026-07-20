@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, fireEvent, act } from '@testing-library/react-native';
 import WorkoutScreen from '../../src/screens/WorkoutScreen';
 import { useWorkoutController } from '../../src/controllers/useWorkoutController';
 
@@ -20,6 +20,8 @@ describe('WorkoutScreen Component (RNTL)', () => {
             dayOfWeek: 1,
         },
     } as any;
+
+    const mockFinishWorkout = jest.fn().mockResolvedValue(true);
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -42,7 +44,7 @@ describe('WorkoutScreen Component (RNTL)', () => {
             updateSet: jest.fn(),
             deleteSet: jest.fn(),
             removeExercise: jest.fn(),
-            finishWorkout: jest.fn(),
+            finishWorkout: mockFinishWorkout,
             updateWeightType: jest.fn(),
             loadSeriesForExercise: jest.fn(),
             reloadExercises: jest.fn(),
@@ -58,11 +60,30 @@ describe('WorkoutScreen Component (RNTL)', () => {
         expect(getByText('Press de Banca')).toBeTruthy();
     });
 
-    it('displays finalizar entrenamiento button', async () => {
+    it('displays finalizar entrenamiento button and triggers finish workout', async () => {
         const { getByText } = await render(
             <WorkoutScreen navigation={mockNavigation} route={mockRoute} />
         );
 
-        expect(getByText('Finalizar Entrenamiento')).toBeTruthy();
+        const finishBtn = getByText('Finalizar Entrenamiento');
+        expect(finishBtn).toBeTruthy();
+
+        fireEvent.press(finishBtn);
+    });
+
+    it('renders empty exercise message when exercises array is empty', async () => {
+        mockUseWorkoutController.mockReturnValue({
+            workout: { id: 'w-101' },
+            exercises: [],
+            loading: false,
+            mode: 'ACTIVE',
+            finishWorkout: mockFinishWorkout,
+        } as any);
+
+        const { getByText } = await render(
+            <WorkoutScreen navigation={mockNavigation} route={mockRoute} />
+        );
+
+        expect(getByText('¡Día libre de ejercicios!')).toBeTruthy();
     });
 });

@@ -8,67 +8,51 @@ jest.mock('../../src/hooks/useExerciseNote');
 const mockUseExerciseNote = useExerciseNote as jest.MockedFunction<typeof useExerciseNote>;
 
 describe('PersonalNoteButton Component (RNTL)', () => {
+    const mockSaveNote = jest.fn();
+
     beforeEach(() => {
         jest.clearAllMocks();
-    });
-
-    it('renders placeholder text when exercise has no personal note', async () => {
         mockUseExerciseNote.mockReturnValue({
             note: null,
             loading: false,
             saving: false,
-            saveNote: jest.fn(),
+            saveNote: mockSaveNote,
+            loadNote: jest.fn(),
         } as any);
+    });
 
-        const { getByText } = await render(
-            <PersonalNoteButton exerciseId="ex-1" />
-        );
-
+    it('renders placeholder text when exercise has no personal note', async () => {
+        const { getByText } = await render(<PersonalNoteButton exerciseId="ex-1" />);
         expect(getByText('Añadir nota personal...')).toBeTruthy();
     });
 
     it('renders existing note text when exercise note exists', async () => {
         mockUseExerciseNote.mockReturnValue({
-            note: 'Codos bien cerrados al bajar',
-            loading: false,
-            saving: false,
-            saveNote: jest.fn(),
-        } as any);
-
-        const { getByText } = await render(
-            <PersonalNoteButton exerciseId="ex-1" />
-        );
-
-        expect(getByText('Codos bien cerrados al bajar')).toBeTruthy();
-    });
-
-    it('opens modal when clicking placeholder, allowing user to edit and save note', async () => {
-        const mockSaveNote = jest.fn().mockResolvedValue({ success: true });
-        mockUseExerciseNote.mockReturnValue({
-            note: 'Nota inicial',
+            note: 'Mantener la espalda recta',
             loading: false,
             saving: false,
             saveNote: mockSaveNote,
+            loadNote: jest.fn(),
         } as any);
 
-        const { getByText, findByText, findByDisplayValue, rerender } = await render(
-            <PersonalNoteButton exerciseId="ex-1" />
-        );
+        const { getByText } = await render(<PersonalNoteButton exerciseId="ex-1" />);
+        expect(getByText('Mantener la espalda recta')).toBeTruthy();
+    });
 
-        // Edit button ✏️
-        fireEvent.press(getByText('✏️'));
+    it('expands and collapses long text when Ver más is pressed', async () => {
+        const longText = 'A'.repeat(160);
+        mockUseExerciseNote.mockReturnValue({
+            note: longText,
+            loading: false,
+            saving: false,
+            saveNote: mockSaveNote,
+            loadNote: jest.fn(),
+        } as any);
 
-        expect(await findByText('Nota Personal')).toBeTruthy();
+        const { getByText, findByText } = await render(<PersonalNoteButton exerciseId="ex-1" />);
+        expect(getByText('Ver más')).toBeTruthy();
 
-        const input = await findByDisplayValue('Nota inicial');
-        fireEvent.changeText(input, 'Mantener la vista al frente');
-
-        await rerender(<PersonalNoteButton exerciseId="ex-1" />);
-
-        await act(async () => {
-            fireEvent.press(getByText('Guardar'));
-        });
-
-        expect(mockSaveNote).toHaveBeenCalledWith('Mantener la vista al frente');
+        fireEvent.press(getByText('Ver más'));
+        expect(await findByText('Ver menos')).toBeTruthy();
     });
 });

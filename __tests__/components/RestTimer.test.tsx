@@ -2,31 +2,26 @@ import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react-native';
 import RestTimer from '../../src/components/RestTimer';
 
-jest.mock('expo-notifications', () => ({
-    addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
-    requestPermissionsAsync: jest.fn(),
-    setNotificationCategoryAsync: jest.fn(),
-}));
-
 jest.mock('../../src/services/TimerNotificationService', () => ({
-    requestNotificationPermissions: jest.fn(),
-    setupNotificationCategory: jest.fn(),
-    scheduleTimerNotification: jest.fn(),
-    cancelTimerNotification: jest.fn(),
-    getElapsedSecondsFromStorage: jest.fn().mockResolvedValue(45),
-    ACTION_OK: 'ok',
-    ACTION_PAUSE: 'pause',
-    ACTION_DISCARD: 'discard',
+    requestNotificationPermissions: jest.fn().mockResolvedValue(true),
+    setupNotificationCategory: jest.fn().mockResolvedValue(undefined),
+    scheduleTimerNotification: jest.fn().mockResolvedValue(undefined),
+    cancelTimerNotification: jest.fn().mockResolvedValue(undefined),
+    getElapsedSecondsFromStorage: jest.fn().mockResolvedValue(120),
+    ACTION_OK: 'ACTION_OK',
+    ACTION_PAUSE: 'ACTION_PAUSE',
+    ACTION_DISCARD: 'ACTION_DISCARD',
 }));
 
 describe('RestTimer Component (RNTL)', () => {
-    const mockColors = {
-        primary: '#238636',
+    const mockOnDismiss = jest.fn();
+    const mockOnTimerStop = jest.fn();
+    const colors = {
         surface: '#161b22',
-        border: '#30363d',
+        primary: '#238636',
         text: '#ffffff',
-        textSecondary: '#888888',
-        textOnPrimary: '#000000',
+        textSecondary: '#8b949e',
+        textOnPrimary: '#ffffff',
     };
 
     beforeEach(() => {
@@ -35,90 +30,71 @@ describe('RestTimer Component (RNTL)', () => {
 
     it('renders null when visible is false', async () => {
         const { queryByText } = await render(
-            <RestTimer
-                visible={false}
-                onDismiss={jest.fn()}
-                onTimerStop={jest.fn()}
-                colors={mockColors}
-            />
+            <RestTimer visible={false} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
         );
-
         expect(queryByText('Descanso')).toBeNull();
     });
 
     it('renders timer time and "Descanso" label when visible is true', async () => {
         const { getByText } = await render(
-            <RestTimer
-                visible={true}
-                onDismiss={jest.fn()}
-                onTimerStop={jest.fn()}
-                colors={mockColors}
-            />
+            <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
         );
-
-        expect(getByText('0:00')).toBeTruthy();
         expect(getByText('Descanso')).toBeTruthy();
-        expect(getByText('Parar')).toBeTruthy();
+        expect(getByText('0:00')).toBeTruthy();
     });
 
     it('pauses timer and shows "Pausado" state when Parar is pressed', async () => {
-        const { getByText, findByTestId, findByText } = await render(
-            <RestTimer
-                visible={true}
-                onDismiss={jest.fn()}
-                onTimerStop={jest.fn()}
-                colors={mockColors}
-            />
+        const { getByText, findByText } = await render(
+            <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
         );
 
-        fireEvent.press(getByText('Parar'));
-
+        await act(async () => {
+            fireEvent.press(getByText('Parar'));
+        });
         expect(await findByText('Pausado')).toBeTruthy();
-        expect(await findByTestId('icon-check')).toBeTruthy();
-        expect(await findByTestId('icon-play-arrow')).toBeTruthy();
+    });
+
+    it('resumes timer when play-arrow button is pressed in paused state', async () => {
+        const { getByText, findByText, getByTestId } = await render(
+            <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
+        );
+
+        await act(async () => {
+            fireEvent.press(getByText('Parar'));
+        });
+        expect(await findByText('Pausado')).toBeTruthy();
+
+        await act(async () => {
+            fireEvent.press(getByTestId('icon-play-arrow'));
+        });
+        expect(await findByText('Descanso')).toBeTruthy();
     });
 
     it('calls onTimerStop and onDismiss when confirm check button is pressed', async () => {
-        const mockOnTimerStop = jest.fn();
-        const mockOnDismiss = jest.fn();
-
-        const { getByText, findByTestId } = await render(
-            <RestTimer
-                visible={true}
-                onDismiss={mockOnDismiss}
-                onTimerStop={mockOnTimerStop}
-                colors={mockColors}
-            />
+        const { getByText, findByText, getByTestId } = await render(
+            <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
         );
 
-        fireEvent.press(getByText('Parar'));
-
-        const checkIcon = await findByTestId('icon-check');
+        await act(async () => {
+            fireEvent.press(getByText('Parar'));
+        });
+        await findByText('Pausado');
 
         await act(async () => {
-            fireEvent.press(checkIcon);
+            fireEvent.press(getByTestId('icon-check'));
         });
 
-        expect(mockOnTimerStop).toHaveBeenCalledWith(45);
+        expect(mockOnTimerStop).toHaveBeenCalledWith(120);
         expect(mockOnDismiss).toHaveBeenCalled();
     });
 
-    it('calls onDismiss when close button is pressed', async () => {
-        const mockOnDismiss = jest.fn();
-
-        const { findByTestId } = await render(
-            <RestTimer
-                visible={true}
-                onDismiss={mockOnDismiss}
-                onTimerStop={jest.fn()}
-                colors={mockColors}
-            />
+    it('calls onDismiss when close discard button is pressed', async () => {
+        const { getByTestId } = await render(
+            <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
         );
 
-        const closeIcon = await findByTestId('icon-close');
-
         await act(async () => {
-            fireEvent.press(closeIcon);
+            fireEvent.press(getByTestId('icon-close'));
         });
 
         expect(mockOnDismiss).toHaveBeenCalled();
