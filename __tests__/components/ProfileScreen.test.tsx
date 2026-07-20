@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import ProfileScreen from '../../src/screens/ProfileScreen';
 import { AuthContext } from '../../src/context/AuthContext';
 import { useProfileController } from '../../src/controllers/useProfileController';

@@ -14,6 +14,7 @@ jest.mock('../../src/services/ExerciseService', () => ({
 jest.mock('../../src/services/WorkoutService', () => ({
     WorkoutService: {
         getExerciseSeriesHistory: jest.fn().mockResolvedValue({ data: [], error: null }),
+        getExerciseHistory: jest.fn().mockResolvedValue({ data: [], error: null }),
     },
 }));
 
@@ -31,6 +32,10 @@ describe('ExerciseProgressDetailScreen Component (RNTL)', () => {
             data: [
                 { id: 's1', numero_serie: 1, peso_utilizado: 14, repeticiones: 10, tipo_peso: 'total', fecha: '2026-01-01' },
             ],
+            error: null,
+        });
+        (WorkoutService.getExerciseHistory as jest.Mock).mockResolvedValue({
+            data: [],
             error: null,
         });
     });

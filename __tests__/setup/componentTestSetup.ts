@@ -1,3 +1,6 @@
+// Tell React 19 test environment that act(...) environment is active
+(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () =>
     require('@react-native-async-storage/async-storage/jest/async-storage-mock')

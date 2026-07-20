@@ -48,9 +48,7 @@ describe('RestTimer Component (RNTL)', () => {
             <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
         );
 
-        await act(async () => {
-            fireEvent.press(getByText('Parar'));
-        });
+        fireEvent.press(getByText('Parar'));
         expect(await findByText('Pausado')).toBeTruthy();
     });
 
@@ -59,14 +57,10 @@ describe('RestTimer Component (RNTL)', () => {
             <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
         );
 
-        await act(async () => {
-            fireEvent.press(getByText('Parar'));
-        });
+        fireEvent.press(getByText('Parar'));
         expect(await findByText('Pausado')).toBeTruthy();
 
-        await act(async () => {
-            fireEvent.press(getByTestId('icon-play-arrow'));
-        });
+        fireEvent.press(getByTestId('icon-play-arrow'));
         expect(await findByText('Descanso')).toBeTruthy();
     });
 
@@ -75,14 +69,10 @@ describe('RestTimer Component (RNTL)', () => {
             <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
         );
 
-        await act(async () => {
-            fireEvent.press(getByText('Parar'));
-        });
+        fireEvent.press(getByText('Parar'));
         await findByText('Pausado');
 
-        await act(async () => {
-            fireEvent.press(getByTestId('icon-check'));
-        });
+        await fireEvent.press(getByTestId('icon-check'));
 
         expect(mockOnTimerStop).toHaveBeenCalledWith(120);
         expect(mockOnDismiss).toHaveBeenCalled();
@@ -93,9 +83,7 @@ describe('RestTimer Component (RNTL)', () => {
             <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
         );
 
-        await act(async () => {
-            fireEvent.press(getByTestId('icon-close'));
-        });
+        await fireEvent.press(getByTestId('icon-close'));
 
         expect(mockOnDismiss).toHaveBeenCalled();
     });

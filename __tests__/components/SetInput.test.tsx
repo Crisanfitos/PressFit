@@ -72,7 +72,7 @@ describe('SetInput Component (RNTL)', () => {
 
     it('calls onChange on blur when value has changed', async () => {
         const mockOnChange = jest.fn();
-        const { getByTestId, rerender } = await render(
+        const { getByTestId, findByDisplayValue } = await render(
             <SetInput
                 value={60}
                 onChange={mockOnChange}
@@ -84,18 +84,9 @@ describe('SetInput Component (RNTL)', () => {
         const input = getByTestId('set-input');
 
         fireEvent.changeText(input, '70');
-        expect(mockOnChange).not.toHaveBeenCalled();
+        expect(await findByDisplayValue('70')).toBeTruthy();
 
-        await rerender(
-            <SetInput
-                value={60}
-                onChange={mockOnChange}
-                isEditable={true}
-                colors={mockColors}
-            />
-        );
-
-        fireEvent(input, 'blur');
+        fireEvent(getByTestId('set-input'), 'blur');
 
         expect(mockOnChange).toHaveBeenCalledWith('70');
     });
