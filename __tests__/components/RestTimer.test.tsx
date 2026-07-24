@@ -2,12 +2,15 @@ import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react-native';
 import RestTimer from '../../src/components/RestTimer';
 
+const mockCheckActiveRestTimer = jest.fn().mockResolvedValue({ active: false, elapsedSeconds: 0 });
+
 jest.mock('../../src/services/TimerNotificationService', () => ({
     requestNotificationPermissions: jest.fn().mockResolvedValue(true),
     setupNotificationCategory: jest.fn().mockResolvedValue(undefined),
     scheduleTimerNotification: jest.fn().mockResolvedValue(undefined),
     cancelTimerNotification: jest.fn().mockResolvedValue(undefined),
     getElapsedSecondsFromStorage: jest.fn().mockResolvedValue(120),
+    checkActiveRestTimer: (...args: any[]) => mockCheckActiveRestTimer(...args),
     ACTION_OK: 'ACTION_OK',
     ACTION_PAUSE: 'ACTION_PAUSE',
     ACTION_DISCARD: 'ACTION_DISCARD',
@@ -86,5 +89,29 @@ describe('RestTimer Component (RNTL)', () => {
         await fireEvent.press(getByTestId('icon-close'));
 
         expect(mockOnDismiss).toHaveBeenCalled();
+    });
+
+    describe('Kill-recovery reconciliation (PF-133)', () => {
+        it('reconciles elapsed time from AsyncStorage when a previous timer exists', async () => {
+            // Simulate a timer that was running for 3 minutes before app kill
+            mockCheckActiveRestTimer.mockResolvedValueOnce({ active: true, elapsedSeconds: 180 });
+
+            const { findByText } = await render(
+                <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
+            );
+
+            // Should show 3:00 instead of 0:00
+            expect(await findByText('3:00')).toBeTruthy();
+        });
+
+        it('starts fresh at 0:00 when no previous timer exists', async () => {
+            mockCheckActiveRestTimer.mockResolvedValueOnce({ active: false, elapsedSeconds: 0 });
+
+            const { findByText } = await render(
+                <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
+            );
+
+            expect(await findByText('0:00')).toBeTruthy();
+        });
     });
 });
