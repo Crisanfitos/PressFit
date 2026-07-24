@@ -5,6 +5,10 @@ import { AuthProvider } from './src/context/AuthContext';
 import { ThemeProvider } from './src/context/ThemeContext';
 import { AlertProvider } from './src/context/AlertContext';
 import RootNavigator from './src/navigation/RootNavigator';
+import { SentryService } from './src/services/SentryService';
+
+SentryService.init();
+
 
 export default function App() {
   return (

@@ -8,6 +8,21 @@ import { useTheme } from '../context/ThemeContext';
 import WeeklyPlanNavigator from './WeeklyPlanNavigator';
 import ProgressNavigator from './ProgressNavigator';
 import ProfileNavigator from './ProfileNavigator';
+import ErrorBoundary from '../components/ErrorBoundary';
+
+const withErrorBoundary = <P extends object>(
+    Component: React.ComponentType<P>
+): React.FC<P> => {
+    return (props: P) => (
+        <ErrorBoundary>
+            <Component {...props} />
+        </ErrorBoundary>
+    );
+};
+
+const WeeklyPlanNavigatorWithBoundary = withErrorBoundary(WeeklyPlanNavigator);
+const ProgressNavigatorWithBoundary = withErrorBoundary(ProgressNavigator);
+const ProfileNavigatorWithBoundary = withErrorBoundary(ProfileNavigator);
 
 export type MainTabParamList = {
     Semana: undefined;
@@ -58,7 +73,7 @@ const MainNavigator: React.FC = () => {
         >
             <Tab.Screen
                 name="Semana"
-                component={WeeklyPlanNavigator}
+                component={WeeklyPlanNavigatorWithBoundary}
                 options={({ route }) => ({
                     swipeEnabled: getSwipeEnabled(route),
                     tabBarLabel: 'Semana',
@@ -69,7 +84,7 @@ const MainNavigator: React.FC = () => {
             />
             <Tab.Screen
                 name="Progreso"
-                component={ProgressNavigator}
+                component={ProgressNavigatorWithBoundary}
                 options={{
                     tabBarLabel: 'Progreso',
                     tabBarIcon: ({ color }) => (
@@ -79,7 +94,7 @@ const MainNavigator: React.FC = () => {
             />
             <Tab.Screen
                 name="Perfil"
-                component={ProfileNavigator}
+                component={ProfileNavigatorWithBoundary}
                 options={{
                     tabBarLabel: 'Perfil',
                     tabBarIcon: ({ color }) => (

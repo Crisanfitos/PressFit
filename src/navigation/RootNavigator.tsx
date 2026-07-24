@@ -6,6 +6,7 @@ import MainNavigator from './MainNavigator';
 import SplashScreen from '../screens/SplashScreen';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 const RootNavigator: React.FC = () => {
     const authContext = useContext(AuthContext);
@@ -51,9 +52,11 @@ const RootNavigator: React.FC = () => {
                 barStyle={theme.mode === 'dark' ? 'light-content' : 'dark-content'}
                 backgroundColor={theme.colors.background}
             />
-            <NavigationContainer theme={navigationTheme}>
-                {isAuthenticated ? <MainNavigator /> : <AuthNavigator />}
-            </NavigationContainer>
+            <ErrorBoundary>
+                <NavigationContainer theme={navigationTheme}>
+                    {isAuthenticated ? <MainNavigator /> : <AuthNavigator />}
+                </NavigationContainer>
+            </ErrorBoundary>
         </>
     );
 };
