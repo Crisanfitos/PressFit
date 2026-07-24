@@ -1,8 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
-import * as Crypto from 'expo-crypto';
-import { supabase } from '../lib/supabase';
+import { AuthService } from '../services/AuthService';
 import { Session, User } from '@supabase/supabase-js';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -32,10 +31,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     useEffect(() => {
         const initializeAuth = async () => {
             const minDelayPromise = new Promise(resolve => setTimeout(resolve, 3000));
-            const sessionPromise = supabase.auth.getSession();
+            const sessionPromise = AuthService.getSession();
 
             try {
-                const [_, { data: { session } }] = await Promise.all([minDelayPromise, sessionPromise]);
+                const [_, session] = await Promise.all([minDelayPromise, sessionPromise]);
                 setSession(session);
                 setUser(session?.user ?? null);
             } catch (error) {
@@ -48,7 +47,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         initializeAuth();
 
         // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = AuthService.onAuthStateChange((_event, session) => {
             setSession(session);
             setUser(session?.user ?? null);
         });
@@ -58,9 +57,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const signInWithGoogle = async () => {
         try {
-            // Generate a random nonce for security
-            const nonce = await Crypto.randomUUID();
-
             // Create the redirect URL for Expo
             const redirectUrl = AuthSession.makeRedirectUri({
                 scheme: 'pressfit',
@@ -68,12 +64,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             });
 
             // Start OAuth flow with Supabase
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: redirectUrl,
-                    skipBrowserRedirect: true,
-                },
+            const { data, error } = await AuthService.signInWithOAuth('google', {
+                redirectTo: redirectUrl,
+                skipBrowserRedirect: true,
             });
 
             if (error) throw error;
@@ -117,12 +110,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
                     if (code) {
                         // PKCE Flow
-                        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+                        const { data, error } = await AuthService.exchangeCodeForSession(code);
                         if (error) throw error;
                         return data.session;
                     } else if (accessToken && refreshToken) {
                         // Implicit Flow
-                        const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+                        const { data: sessionData, error: sessionError } = await AuthService.setSession({
                             access_token: accessToken,
                             refresh_token: refreshToken,
                         });
@@ -141,30 +134,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     const signInWithEmail = async (email: string, password: string) => {
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
-        if (error) throw error;
-        return data;
+        return await AuthService.signInWithEmail(email, password);
     };
 
     const signUpWithEmail = async (email: string, password: string, fullName: string) => {
-        const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    full_name: fullName,
-                },
-            },
-        });
-        if (error) throw error;
-        return data;
+        return await AuthService.signUpWithEmail(email, password, fullName);
     };
 
     const signOut = async () => {
-        await supabase.auth.signOut();
+        await AuthService.signOut();
     };
 
     const value: AuthContextType = {
