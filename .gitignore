@@ -45,18 +45,19 @@ android/app/google-services.json*
 /ios
 /android
 
-#claude
+# AI Agent Directories & Knowledge Bases (Ignored from GitHub)
+.agents/
 .claude/
-
-#Documentacion
+.gemini/
+GEMINI.md
 Documentacion/
+
+# Testing & E2E temporary configs
+.maestro/
 coverage/
 coverage-components/
 failed_test.txt
 
-#Gemini
-GEMINI.md
-
-#EAS
+# EAS
 app.json
 eas.json

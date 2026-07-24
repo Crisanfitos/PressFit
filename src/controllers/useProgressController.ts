@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { ProgressService } from '../services/ProgressService';
+import { parseDateKeyAsLocalDate } from '../utils/dateUtils';
 
 interface DailyStats {
     exercises: number;
@@ -131,7 +132,8 @@ export const useProgressController = (userId: string | undefined) => {
                 weekEnd.setHours(23, 59, 59, 999);
 
                 const weekWorkouts = data.filter((w: any) => {
-                    const date = new Date(w.hora_fin);
+                    if (!w.fecha_dia) return false;
+                    const date = parseDateKeyAsLocalDate(w.fecha_dia);
                     return date >= weekStart && date <= weekEnd;
                 });
 

@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { TipoPeso } from '../types/setTypes';
+import { formatLocalDateKey, parseDateKeyAsLocalDate } from '../utils/dateUtils';
 
 interface SetData {
     id: string;
@@ -94,7 +95,7 @@ export const WorkoutService = {
                 .insert({
                     rutina_semanal_id: templateDay.rutina_semanal_id,
                     nombre_dia: templateDay.nombre_dia,
-                    fecha_dia: new Date().toISOString().split('T')[0],
+                    fecha_dia: formatLocalDateKey(new Date()),
                     hora_inicio: new Date().toISOString(),
                     completada: false,
                 })
@@ -121,7 +122,7 @@ export const WorkoutService = {
 
                 // Try to copy series from last completed workout for the same day
                 try {
-                    const todayStr = new Date().toISOString().split('T')[0];
+                    const todayStr = formatLocalDateKey(new Date());
 
                     // Find the most recent completed workout for the same day name
                     const { data: lastWorkouts } = await supabase
@@ -485,7 +486,7 @@ export const WorkoutService = {
                 rutina_id: row.ejercicios_programados?.rutinas_diarias?.id,
             }))
                 .filter((item) => item.fecha)
-                .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
+                .sort((a, b) => parseDateKeyAsLocalDate(a.fecha).getTime() - parseDateKeyAsLocalDate(b.fecha).getTime());
 
             return { data: history, error: null };
         } catch (error) {

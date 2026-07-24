@@ -153,8 +153,8 @@ export const useCalendarController = (userId: string | undefined, routineId: str
     const fetchStatsForRange = useCallback(async (templates: any[], minWeek: number, maxWeek: number): Promise<Record<string, WorkoutStats>> => {
         if (!templates || templates.length === 0) return {};
 
-        const startDate = getMondayOfWeek(minWeek).toISOString();
-        const endDate = getSundayOfWeek(getMondayOfWeek(maxWeek)).toISOString();
+        const startDate = formatDateKey(getMondayOfWeek(minWeek));
+        const endDate = formatDateKey(getSundayOfWeek(getMondayOfWeek(maxWeek)));
         const routineIds = templates.map((t) => t.id);
 
         const { data: workouts } = await RoutineService.getWorkoutsForDateRange(routineIds, startDate, endDate);

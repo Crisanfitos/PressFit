@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { formatLocalDateKey, getStartOfWeek } from '../utils/dateUtils';
 
 
 interface ProgressPhoto {
@@ -27,10 +28,7 @@ interface ServiceResponse<T> {
 export const ProgressService = {
     async getDailyProgress(userId: string, date: Date): Promise<ServiceResponse<WorkoutSession[]>> {
         try {
-            const startOfDay = new Date(date);
-            startOfDay.setHours(0, 0, 0, 0);
-            const endOfDay = new Date(date);
-            endOfDay.setHours(23, 59, 59, 999);
+            const dateStr = formatLocalDateKey(date);
 
             const { data, error } = await supabase
                 .from('rutinas_diarias')
@@ -44,8 +42,8 @@ export const ProgressService = {
           )
         `)
                 .eq('rutina_semanal.usuario_id', userId)
-                .gte('hora_fin', startOfDay.toISOString())
-                .lte('hora_fin', endOfDay.toISOString())
+                .eq('fecha_dia', dateStr)
+                .not('hora_fin', 'is', null)
                 .order('hora_fin', { ascending: false });
 
             if (error) throw error;
@@ -58,10 +56,8 @@ export const ProgressService = {
 
     async getWeeklyProgress(userId: string): Promise<ServiceResponse<WorkoutSession[]>> {
         try {
-            const now = new Date();
-            const startOfWeek = new Date(now);
-            startOfWeek.setDate(now.getDate() - now.getDay());
-            startOfWeek.setHours(0, 0, 0, 0);
+            const startOfWeek = getStartOfWeek(new Date());
+            const startOfWeekStr = formatLocalDateKey(startOfWeek);
 
             const { data, error } = await supabase
                 .from('rutinas_diarias')
@@ -69,10 +65,11 @@ export const ProgressService = {
           id,
           hora_inicio,
           hora_fin,
+          fecha_dia,
           rutina_semanal:rutinas_semanales!inner(usuario_id)
         `)
                 .eq('rutina_semanal.usuario_id', userId)
-                .gte('hora_fin', startOfWeek.toISOString())
+                .gte('fecha_dia', startOfWeekStr)
                 .not('hora_fin', 'is', null);
 
             if (error) throw error;
@@ -94,7 +91,10 @@ export const ProgressService = {
             const targetMonth = month ?? now.getMonth();
 
             const startOfMonth = new Date(targetYear, targetMonth, 1);
-            const endOfMonth = new Date(targetYear, targetMonth + 1, 0, 23, 59, 59, 999);
+            const endOfMonth = new Date(targetYear, targetMonth + 1, 0);
+
+            const startOfMonthStr = formatLocalDateKey(startOfMonth);
+            const endOfMonthStr = formatLocalDateKey(endOfMonth);
 
             const { data, error } = await supabase
                 .from('rutinas_diarias')
@@ -106,8 +106,8 @@ export const ProgressService = {
           rutina_semanal:rutinas_semanales!inner(usuario_id)
         `)
                 .eq('rutina_semanal.usuario_id', userId)
-                .gte('hora_fin', startOfMonth.toISOString())
-                .lte('hora_fin', endOfMonth.toISOString())
+                .gte('fecha_dia', startOfMonthStr)
+                .lte('fecha_dia', endOfMonthStr)
                 .not('hora_fin', 'is', null);
 
             if (error) throw error;
