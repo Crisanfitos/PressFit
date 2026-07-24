@@ -18,6 +18,7 @@ import {
     scheduleTimerNotification,
     cancelTimerNotification,
     getElapsedSecondsFromStorage,
+    checkActiveRestTimer,
     ACTION_OK,
     ACTION_PAUSE,
     ACTION_DISCARD,
@@ -135,14 +136,24 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
         };
     }, [visible, isRunning, isStopped]);
 
-    // ─── Visibility: animate + start/reset timer ───
+    // ─── Visibility: animate + start/reset timer (with kill-recovery reconciliation) ───
     useEffect(() => {
         if (visible) {
-            const startTs = Date.now();
-            setSeconds(0);
-            setIsStopped(false);
-            setIsRunning(true);
-            AsyncStorage.setItem(TIMER_STORAGE_KEY, String(startTs));
+            // Check if a timer was already running before (survives app kill via AsyncStorage)
+            (async () => {
+                const { active, elapsedSeconds } = await checkActiveRestTimer();
+                if (active && elapsedSeconds > 0) {
+                    // Reconcile: resume from persisted start timestamp
+                    setSeconds(elapsedSeconds);
+                } else {
+                    // Fresh start: store new timestamp
+                    const startTs = Date.now();
+                    setSeconds(0);
+                    await AsyncStorage.setItem(TIMER_STORAGE_KEY, String(startTs));
+                }
+                setIsStopped(false);
+                setIsRunning(true);
+            })();
             Animated.spring(slideAnim, {
                 toValue: 0,
                 useNativeDriver: true,

@@ -111,3 +111,15 @@ export async function getElapsedSecondsFromStorage(): Promise<number> {
     } catch (_) { }
     return 0;
 }
+
+// ─── Check if a rest timer was active (survives app kill via AsyncStorage) ───
+export async function checkActiveRestTimer(): Promise<{ active: boolean; elapsedSeconds: number }> {
+    try {
+        const saved = await AsyncStorage.getItem(TIMER_STORAGE_KEY);
+        if (saved) {
+            const elapsed = Math.max(0, Math.floor((Date.now() - parseInt(saved, 10)) / 1000));
+            return { active: true, elapsedSeconds: elapsed };
+        }
+    } catch (_) { }
+    return { active: false, elapsedSeconds: 0 };
+}

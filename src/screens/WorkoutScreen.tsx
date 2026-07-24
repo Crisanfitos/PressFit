@@ -22,6 +22,7 @@ import { PersonalNoteButton } from '../components/PersonalNoteButton';
 import RestTimer from '../components/RestTimer';
 import { WeightTypeBadge } from '../components/WeightTypeBadge';
 import { WorkoutService } from '../services/WorkoutService';
+import { checkActiveRestTimer } from '../services/TimerNotificationService';
 import { TIPO_PESO_SHORT_LABELS } from '../types/setTypes';
 
 type WorkoutScreenProps = {
@@ -79,6 +80,18 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
             setCollapsedExercises(initial);
         }
     }, [controllerLoading, exercises.length]);
+
+    // ─── Detect active rest timer left from a killed session ───
+    useEffect(() => {
+        if (!controllerLoading && mode === 'ACTIVE') {
+            (async () => {
+                const { active } = await checkActiveRestTimer();
+                if (active) {
+                    setRestTimerVisible(true);
+                }
+            })();
+        }
+    }, [controllerLoading, mode]);
 
     // Flag to track if we need to refresh exercises when returning from ExerciseLibrary
     const needsRefreshRef = useRef(false);
