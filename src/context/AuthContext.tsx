@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, ReactNode, useContext } from
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 import { AuthService } from '../services/AuthService';
+import { parseOAuthCallbackUrl } from '../utils/parseOAuthCallbackUrl';
 import { Session, User } from '@supabase/supabase-js';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -79,45 +80,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 );
 
                 if (result.type === 'success') {
-                    // Extract the params from the URL manually since URL() can fail on custom schemes
-                    const urlStr = result.url;
-                    const queryStr = urlStr.includes('?') ? urlStr.split('?')[1].split('#')[0] : '';
-                    const hashStr = urlStr.includes('#') ? urlStr.split('#')[1] : '';
+                    const params = parseOAuthCallbackUrl(result.url);
 
-                    const getParams = (str: string) => {
-                        const params: Record<string, string> = {};
-                        if (!str) return params;
-                        str.split('&').forEach(pair => {
-                            const [key, value] = pair.split('=');
-                            if (key && value) {
-                                params[key] = decodeURIComponent(value);
-                            }
-                        });
-                        return params;
-                    };
-
-                    const queryParams = getParams(queryStr);
-                    const hashParams = getParams(hashStr);
-
-                    const code = queryParams.code || hashParams.code;
-                    const accessToken = queryParams.access_token || hashParams.access_token;
-                    const refreshToken = queryParams.refresh_token || hashParams.refresh_token;
-                    const errorDesc = queryParams.error_description || hashParams.error_description || queryParams.error || hashParams.error;
-
-                    if (errorDesc) {
-                        throw new Error(errorDesc);
+                    if (params.error) {
+                        throw new Error(params.error);
                     }
 
-                    if (code) {
+                    if (params.code) {
                         // PKCE Flow
-                        const { data, error } = await AuthService.exchangeCodeForSession(code);
+                        const { data, error } = await AuthService.exchangeCodeForSession(params.code);
                         if (error) throw error;
                         return data.session;
-                    } else if (accessToken && refreshToken) {
+                    } else if (params.accessToken && params.refreshToken) {
                         // Implicit Flow
                         const { data: sessionData, error: sessionError } = await AuthService.setSession({
-                            access_token: accessToken,
-                            refresh_token: refreshToken,
+                            access_token: params.accessToken,
+                            refresh_token: params.refreshToken,
                         });
 
                         if (sessionError) throw sessionError;
