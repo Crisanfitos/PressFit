@@ -31,16 +31,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     useEffect(() => {
         const initializeAuth = async () => {
-            const minDelayPromise = new Promise(resolve => setTimeout(resolve, 3000));
-            const sessionPromise = AuthService.getSession();
+            const MIN_SPLASH_MS = 800;
+            const start = Date.now();
 
             try {
-                const [_, session] = await Promise.all([minDelayPromise, sessionPromise]);
+                const session = await AuthService.getSession();
                 setSession(session);
                 setUser(session?.user ?? null);
             } catch (error) {
                 console.error('Error initializing auth:', error);
             } finally {
+                const elapsed = Date.now() - start;
+                const remaining = Math.max(0, MIN_SPLASH_MS - elapsed);
+                if (remaining > 0) {
+                    await new Promise(resolve => setTimeout(resolve, remaining));
+                }
                 setIsLoading(false);
             }
         };
