@@ -1,7 +1,7 @@
 # 📋 Tablero de Backlog Activo — PressFit Expo
 
 > **Estado**: Activo (Poblado con Issues PF-131 a PF-170)  
-> **Última Actualización del Tablero**: `2026-07-28 23:04:00 CEST`  
+> **Última Actualización del Tablero**: `2026-07-28 23:08:20 CEST`  
 > **Última Issue Histórica**: `PF-130`  
 > **Siguiente Issue Disponible**: `PF-171`
 
@@ -10,9 +10,9 @@
 ## 🚦 Vistas Rápidas del Tablero
 
 * **En Progreso (`IN_PROGRESS_*`)**: 0 tickets
-* **Pendientes Listos en Backlog (`BACKLOG`)**: 14 tickets (`PF-139`, `PF-141`, `PF-143` a `PF-145`, `PF-147` a `PF-149`, `PF-154`, `PF-155`, `PF-160`, `PF-166`, `PF-169`)
+* **Pendientes Listos en Backlog (`BACKLOG`)**: 13 tickets (`PF-141`, `PF-143` a `PF-145`, `PF-147` a `PF-149`, `PF-154`, `PF-155`, `PF-160`, `PF-166`, `PF-169`)
 * **Bloqueados por Infraestructura (`IN_PROGRESS_BLOCKED`)**: 16 tickets (`PF-150` a `PF-153`, `PF-156` a `PF-159`, `PF-161` a `PF-165`, `PF-167`, `PF-168`, `PF-170`)
-* **Completados (`DONE`)**: 141 tickets (`PF-001` a `PF-138`, `PF-140`, `PF-142`, `PF-146`)
+* **Completados (`DONE`)**: 142 tickets (`PF-001` a `PF-140`, `PF-142`, `PF-146`)
 
 ---
 
@@ -339,13 +339,13 @@ Descomponer el archivo monolítico `RoutineService.ts` (32 KB) extrayendo la ges
 id: PF-139
 title: "[Refactor]: Descomposición de ProgressService.ts (10 KB) y creación de HistoryService.ts"
 epic: EPIC-04
-status: IN_PROGRESS_TEST
+status: DONE
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-28T23:07:50+02:00"
-closed_at: null
+updated_at: "2026-07-28T23:08:20+02:00"
+closed_at: "2026-07-28T23:08:20+02:00"
 related_historical_tickets: [PF-020, PF-090]
 ---
 
@@ -353,9 +353,9 @@ related_historical_tickets: [PF-020, PF-090]
 Separar la lógica de fotos de progreso y métricas corporales del historial de volúmenes de entrenamiento creando `HistoryService.ts`.
 
 ### 📋 Criterios de Aceptación
-- [ ] Creación de `HistoryService.ts` dedicado exclusivamente a consultas de histórico de series y cargas.
-- [ ] `ProgressService.ts` se enfoca únicamente en fotos de avance y registros antropométricos.
-- [ ] Preservación de firmas de funciones y paso de tests en verde.
+- [x] Creación de `HistoryService.ts` dedicado exclusivamente a consultas de histórico de series y cargas.
+- [x] `ProgressService.ts` se enfoca únicamente en fotos de avance y registros antropométricos.
+- [x] Preservación de firmas de funciones y paso de tests en verde.
 
 ### 🔍 Contexto e Información Requerida (Pre-Coding)
 - Inspeccionar `ProgressService.ts` y controladores asociados `useProgressController`.
@@ -364,6 +364,7 @@ Separar la lógica de fotos de progreso y métricas corporales del historial de 
 - `src/services/ProgressService.ts`
 - `src/services/HistoryService.ts`
 - `__tests__/unit/services/ProgressService.test.ts`
+- `__tests__/unit/services/HistoryService.test.ts`
 
 ### 📜 Historial de Modificaciones
 - `2026-07-24 20:03:25 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
@@ -372,6 +373,7 @@ Separar la lógica de fotos de progreso y métricas corporales del historial de 
 - `2026-07-28 23:07:05 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Tránsito a diseño tras validación de baseline tests (177/177 verde).
 - `2026-07-28 23:07:30 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Inicio de construcción de HistoryService.ts y refactorización de ProgressService.ts.
 - `2026-07-28 23:07:50 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Tránsito a fase de pruebas tras crear HistoryService.ts, refactorizar ProgressService.ts y añadir suites unitarias.
+- `2026-07-28 23:08:20 CEST` | Estado: IN_PROGRESS_TEST ➔ DONE | Antigravity AI | Descomposición completada. Creado HistoryService.ts, ProgressService refactorizado como fachada para retrocompatibilidad y suites unitarias/componentes 100% en verde. Commit merge: f1813ee.
 ```
 
 ---
