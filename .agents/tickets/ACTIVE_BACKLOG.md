@@ -286,18 +286,7 @@ Definir interfaces estrictas para `Routine`, `Workout`, `Exercise`, `User`, `Set
 - `src/services/UserService.ts`
 
 ### 📜 Historial de Modificaciones
-- `2026-07-24 20:03:25 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
-- `2026-07-25 08:25:15 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Inicio del análisis pre-coding. Inspección de tipos existentes y uso de `any`.
-- `2026-07-25 08:26:30 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Tránsito a diseño tras baseline verde (203/203 tests).
-- `2026-07-25 08:27:30 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Inicio de construcción tras aprobación del plan.
-- `2026-07-28 21:13:00 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Reemplazados más de 25 casts `any` por tipos estrictos de `models.ts` en servicios.
-- `2026-07-28 21:13:45 CEST` | Estado: IN_PROGRESS_TEST ➔ IN_REVIEW | Antigravity AI | Tests unitarios (203/203) y de componentes (72/72) 100% en verde.
-- `2026-07-28 21:14:00 CEST` | Estado: IN_REVIEW ➔ DONE | Antigravity AI | Issue resuelta y fusionada en main (Commit 8c27118). Rama feature/strict-typescript-models preservada.
-```
-
 ---
-
-### 🟡 Prioridad P2 — Medias (Deuda Técnica y Refactorización)
 
 #### PF-138
 ```markdown
@@ -305,25 +294,40 @@ Definir interfaces estrictas para `Routine`, `Workout`, `Exercise`, `User`, `Set
 id: PF-138
 title: "[Refactor]: Descomposición de RoutineService.ts (32 KB) en sub-servicios de dominio"
 epic: EPIC-02
-status: BACKLOG
+status: IN_PROGRESS_TEST
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-24T20:03:25+02:00"
+updated_at: "2026-07-28T23:03:35+02:00"
 closed_at: null
 related_historical_tickets: [PF-106, PF-126]
 ---
 
 ### 🎯 Objetivo
-Extraer responsabilidades de entrenamientos diarios a `DailyWorkoutService.ts`.
+Descomponer el archivo monolítico `RoutineService.ts` (32 KB) extrayendo la gestión de entrenamientos diarios a `DailyWorkoutService.ts`.
+
+### 📋 Criterios de Aceptación
+- [x] Creación de `DailyWorkoutService.ts` encapsulando la lógica de `startDailyWorkout`, `finishDailyWorkout` y gestión de estado diario.
+- [x] Preservación del 100% de la API pública en `RoutineService.ts` actuando como fachada sin romper controladores existentes.
+- [x] Cobertura de tests unitarios mantenida al 100% en verde.
+
+### 🔍 Contexto e Información Requerida (Pre-Coding)
+- Revisar `RoutineService.ts` (líneas 1 a 650) e identificar funciones que operan exclusivamente sobre `rutinas_diarias`.
 
 ### 🛠️ Archivos Implicados
 - `src/services/RoutineService.ts`
 - `src/services/DailyWorkoutService.ts`
+- `__tests__/unit/services/RoutineService.test.ts`
+- `__tests__/unit/services/DailyWorkoutService.test.ts`
 
 ### 📜 Historial de Modificaciones
 - `2026-07-24 20:03:25 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 22:59:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios de aceptación completados.
+- `2026-07-28 23:02:15 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Inicio de la fase de análisis pre-coding.
+- `2026-07-28 23:03:00 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Tránsito a diseño tras validación exitosa de baseline tests (228/228 en verde).
+- `2026-07-28 23:03:15 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Inicio de la fase de construcción (Build).
+- `2026-07-28 23:03:35 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Tránsito a fase de pruebas tras crear DailyWorkoutService.ts, refactorizar RoutineService.ts y añadir DailyWorkoutService.test.ts.
 ```
 
 ---
@@ -339,57 +343,30 @@ priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-24T20:03:25+02:00"
+updated_at: "2026-07-28T22:59:00+02:00"
 closed_at: null
 related_historical_tickets: [PF-020, PF-090]
 ---
 
 ### 🎯 Objetivo
-Separar métricas de fotos/peso corporal del historial de volúmenes de entrenamiento.
+Separar la lógica de fotos de progreso y métricas corporales del historial de volúmenes de entrenamiento creando `HistoryService.ts`.
+
+### 📋 Criterios de Aceptación
+- [ ] Creación de `HistoryService.ts` dedicado exclusivamente a consultas de histórico de series y cargas.
+- [ ] `ProgressService.ts` se enfoca únicamente en fotos de avance y registros antropométricos.
+- [ ] Preservación de firmas de funciones y paso de tests en verde.
+
+### 🔍 Contexto e Información Requerida (Pre-Coding)
+- Inspeccionar `ProgressService.ts` y controladores asociados `useProgressController`.
 
 ### 🛠️ Archivos Implicados
 - `src/services/ProgressService.ts`
 - `src/services/HistoryService.ts`
+- `__tests__/unit/services/ProgressService.test.ts`
 
 ### 📜 Historial de Modificaciones
 - `2026-07-24 20:03:25 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
-```
-
----
-
-#### PF-140
-```markdown
----
-id: PF-140
-title: "[Task]: Creación del módulo central de utilidades compartidas src/utils/"
-epic: EPIC-01
-status: DONE
-priority: LOW
-reporter: Usuario / Antigravity AI
-assignee: Antigravity AI
-created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
-closed_at: "2026-07-28T23:00:00+02:00"
-related_historical_tickets: []
----
-
-### 🎯 Objetivo
-Poblar `src/utils/` con helpers puros de formateo de KG, fechas y validaciones de IMC.
-
-### 🛠️ Archivos Implicados
-- `src/utils/dateUtils.ts`
-- `src/utils/formatters.ts`
-- `__tests__/unit/utils/formatters.test.ts`
-- `__tests__/unit/utils/dateUtils.test.ts`
-
-### 📜 Historial de Modificaciones
-- `2026-07-24 20:03:25 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
-- `2026-07-28 22:56:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Inicio de la fase de análisis pre-coding para PF-140.
-- `2026-07-28 22:57:00 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Tránsito a diseño tras validación exitosa de baseline tests (203 unit, 72 components en verde).
-- `2026-07-28 22:58:00 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Inicio de la fase de construcción en rama feature/central-utils-module.
-- `2026-07-28 22:59:00 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Tránsito a pruebas tras poblar src/utils/formatters.ts, actualizar src/utils/dateUtils.ts y escribir sus respectivas test suites.
-- `2026-07-28 22:59:30 CEST` | Estado: IN_PROGRESS_TEST ➔ IN_REVIEW | Antigravity AI | Verificación de suites de prueba unitarias (228/228) y componentes (72/72) 100% en verde.
-- `2026-07-28 23:00:00 CEST` | Estado: IN_REVIEW ➔ DONE | Antigravity AI | Issue resuelta y fusionada en main (Commit 6dde42d). Rama feature/central-utils-module preservada.
+- `2026-07-28 22:59:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios de aceptación completados.
 ```
 
 ---
@@ -405,13 +382,20 @@ priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-24T20:03:25+02:00"
+updated_at: "2026-07-28T22:59:00+02:00"
 closed_at: null
 related_historical_tickets: [PF-118]
 ---
 
 ### 🎯 Objetivo
-Mostrar una advertencia prudencial cuando el peso sugerido proviene de una sesión realizada hace más de 14 días.
+Mostrar una alerta o badge prudencial en la interfaz de entrenamiento cuando el peso sugerido o copiado proviene de una sesión realizada hace más de 14 días.
+
+### 📋 Criterios de Aceptación
+- [ ] `WorkoutService.ts` retorna la bandera `isStale: true` cuando `days_diff > 14`.
+- [ ] Componente `WorkoutSetRow.tsx` renderiza una indicación ámbar ("Referencia de hace 15+ días").
+
+### 🔍 Contexto e Información Requerida (Pre-Coding)
+- Revisar `PF-118` donde se eliminó la restricción rígida de 7 días.
 
 ### 🛠️ Archivos Implicados
 - `src/services/WorkoutService.ts`
@@ -419,45 +403,10 @@ Mostrar una advertencia prudencial cuando el peso sugerido proviene de una sesi�
 
 ### 📜 Historial de Modificaciones
 - `2026-07-24 20:03:25 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 22:59:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios de aceptación completados.
 ```
 
 ---
-
-#### PF-142
-```markdown
----
-id: PF-142
-title: "[UX / Performance]: Optimización del tiempo del Splash Screen inicial"
-epic: EPIC-06
-status: DONE
-priority: LOW
-reporter: Usuario / Antigravity AI
-assignee: Antigravity AI
-created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-28T21:07:00+02:00"
-closed_at: "2026-07-28T21:07:00+02:00"
-related_historical_tickets: []
----
-
-### 🎯 Objetivo
-Sustituir la espera hardcodeada de 3000ms en `AuthContext.tsx` por una resolución dinámica basada en la sesión.
-
-### 🛠️ Archivos Implicados
-- `src/context/AuthContext.tsx`
-
-### 📜 Historial de Modificaciones
-- `2026-07-24 20:03:25 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
-- `2026-07-28 21:02:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Inicio de la fase de análisis pre-coding para PF-142.
-- `2026-07-28 21:04:00 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Tránsito a diseño tras baseline verde (203/203 tests, 13 suites).
-- `2026-07-28 21:05:00 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Inicio de construcción tras aprobación del plan.
-- `2026-07-28 21:06:00 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Tránsito a pruebas tras modificar initializeAuth en AuthContext.tsx.
-- `2026-07-28 21:07:00 CEST` | Estado: IN_PROGRESS_TEST ➔ IN_REVIEW | Antigravity AI | Tests unitarios (203/203) y componentes (72/72) en verde.
-- `2026-07-28 21:07:00 CEST` | Estado: IN_REVIEW ➔ DONE | Antigravity AI | Issue resuelta y fusionada en main (Commit aea60e8). Rama fix/splash-screen-optimization preservada.
-```
-
----
-
-### 🟢 Prioridad P3 — Mejoras & Cobertura de Tests
 
 #### PF-143
 ```markdown
@@ -470,13 +419,28 @@ priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-24T20:03:25+02:00"
+updated_at: "2026-07-28T22:59:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Incrementar la cobertura de pruebas unitarias y de componentes para `AuthService` y `AuthContext`.
+
+### 📋 Criterios de Aceptación
+- [ ] Suite de pruebas para `signInWithEmail`, `signUpWithEmail`, `signOut` y listener de estado.
+- [ ] Cobertura de tests para el contexto de autenticación en RNTL > 85%.
+
+### 🔍 Contexto e Información Requerida (Pre-Coding)
+- Revisar `AuthService.ts` y `AuthContext.tsx`.
+
 ### 🛠️ Archivos Implicados
 - `__tests__/unit/services/AuthService.test.ts`
 - `__tests__/unit/context/AuthContext.test.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-24 20:03:25 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 22:59:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
 ```
 
 ---
@@ -492,13 +456,25 @@ priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-24T20:03:25+02:00"
+updated_at: "2026-07-28T22:59:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Escribir suites de pruebas unitarias dedicadas para `TimerNotificationService` y `ProgressService`.
+
+### 📋 Criterios de Aceptación
+- [ ] Verificación de programación y cancelación de notificaciones en `TimerNotificationService`.
+- [ ] Verificación de cálculo de promedios de peso corporal y fotos en `ProgressService`.
+
 ### 🛠️ Archivos Implicados
 - `__tests__/unit/services/TimerNotificationService.test.ts`
 - `__tests__/unit/services/ProgressService.test.ts`
+
+### 📜 Historial de Modificaciones
+- `2026-07-24 20:03:25 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 22:59:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
 ```
 
 ---
@@ -514,10 +490,18 @@ priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-24T20:03:25+02:00"
+updated_at: "2026-07-28T22:59:00+02:00"
 closed_at: null
 related_historical_tickets: [PF-044, PF-112, PF-114, PF-116]
 ---
+
+### 🎯 Objetivo
+Resolver de forma sistémica la superposición del teclado virtual sobre inputs de texto creando un wrapper global reutilizable.
+
+### 📋 Criterios de Aceptación
+- [ ] Componente `KeyboardAwareContainer.tsx` envolviendo `KeyboardAvoidingView` y `ScrollView`.
+- [ ] Aplicado en `WorkoutScreen`, `RoutineEditScreen` y formulación de perfiles.
+
 ### 🛠️ Archivos Implicados
 - `src/components/KeyboardAwareContainer.tsx`
 ```
@@ -565,12 +549,32 @@ title: "[Task]: Harness de Automatización E2E con Maestro para flujos críticos
 epic: EPIC-00-BLOCKING
 status: BACKLOG
 priority: HIGH
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: [PF-110]
 ---
+
+### 🎯 Objetivo
+Configurar Maestro E2E para ejecutar pruebas automatizadas en emulador Android del flujo completo: Login -> Crear Rutina -> Iniciar Workout -> Completar Serie -> Finalizar.
+
+### 📋 Criterios de Aceptación
+- [ ] Archivo `e2e/maestro/smoke_flow.yaml` ejecutable sin errores.
+- [ ] Comando `npm run test:e2e` que lanza la suite sobre la build preview.
+- [ ] Integración opcional en el workflow de CI de GitHub Actions.
+
+### 🔍 Contexto e Información Requerida (Pre-Coding)
+- Revisar `PF-110` donde los tests con Maestro quedaron como borrador WIP.
+
 ### 🛠️ Archivos Implicados
 - `e2e/maestro/smoke_flow.yaml`
 - `.github/workflows/ci.yml`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial de Épica 0.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios de aceptación completados.
 ```
 
 #### PF-148
@@ -581,12 +585,31 @@ title: "[Task]: Centralización de Mocks Nativos (Haptics, ViewShot, SQLite, Sen
 epic: EPIC-00-BLOCKING
 status: BACKLOG
 priority: HIGH
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Crear mocks reutilizables en `jest.setup.js` y `__tests__/mocks/` para `expo-haptics`, `react-native-view-shot`, `@tanstack/react-query` y `Sentry`.
+
+### 📋 Criterios de Aceptación
+- [ ] Ningún test RNTL o unitario falla al importar componentes nativos avanzadas.
+- [ ] Mocks exportados y configurados globalmente.
+
+### 🔍 Contexto e Información Requerida (Pre-Coding)
+- Revisar `jest.setup.js`.
+
 ### 🛠️ Archivos Implicados
 - `jest.setup.js`
 - `__tests__/mocks/nativeModules.ts`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial de Épica 0.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios de aceptación completados.
 ```
 
 #### PF-149
@@ -597,11 +620,29 @@ title: "[Task]: Harness de prueba de integración aislada para clientes Supabase
 epic: EPIC-00-BLOCKING
 status: BACKLOG
 priority: HIGH
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Proveer un mock stateful en memoria de Supabase para probar operaciones CRUD complejas y simulación de desconexión sin depender de red externa.
+
+### 📋 Criterios de Aceptación
+- [ ] Mock Client permite alternar estados de red (online/offline) dinámicamente durante los tests.
+
+### 🔍 Contexto e Información Requerida (Pre-Coding)
+- Revisar `src/lib/supabase.ts`.
+
 ### 🛠️ Archivos Implicados
 - `__tests__/mocks/supabaseMockClient.ts`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial de Épica 0.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
 ```
 
 ---
@@ -616,11 +657,31 @@ title: "[Task]: Configuración del Almacenamiento Local (Local DB / Query Cache 
 epic: EPIC-07-OFFLINE
 status: BACKLOG
 priority: HIGH
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Implementar réplica local de datos en AsyncStorage / React Query Persist client para permitir lectura/escritura de entrenamientos sin red.
+
+### 📋 Criterios de Aceptación
+- [ ] Persistencia local activa.
+- [ ] Lectura instantánea de rutinas (< 50ms) desde caché local.
+
+### 🔍 Contexto e Información Requerida (Pre-Coding)
+- Configuración de `@tanstack/react-query` y `@react-native-async-storage/async-storage`.
+
 ### 🛠️ Archivos Implicados
 - `src/lib/storage/localDatabase.ts`
+- `src/lib/supabase.ts`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
 ```
 
 #### PF-151
@@ -631,11 +692,28 @@ title: "[Task]: Motor de Cola de Mutaciones Offline (SyncService)"
 epic: EPIC-07-OFFLINE
 status: BACKLOG
 priority: HIGH
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Crear `SyncService.ts` para encolar operaciones FIFO creadas sin conexión y procesarlas automáticamente al detectar reconexión de red.
+
+### 📋 Criterios de Aceptación
+- [ ] Cola `sync_queue` persistida localmente.
+- [ ] Listener `NetInfo` que vacía la cola en orden estricto al reconectar.
+
 ### 🛠️ Archivos Implicados
 - `src/services/SyncService.ts`
+- `src/services/WorkoutService.ts`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
 ```
 
 #### PF-152
@@ -646,11 +724,27 @@ title: "[Task]: Estrategia y Algoritmo de Resolución de Conflictos de Fechas"
 epic: EPIC-07-OFFLINE
 status: BACKLOG
 priority: HIGH
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: [PF-131]
 ---
+
+### 🎯 Objetivo
+Resolver conflictos entre mutaciones locales desfasadas y el servidor mediante algoritmo *Last-Write-Wins* apoyado en `updated_at`.
+
+### 📋 Criterios de Aceptación
+- [ ] Cero duplicados en tablas de `series` y `rutinas_diarias`.
+- [ ] Pruebas unitarias de resolución de conflictos en verde.
+
 ### 🛠️ Archivos Implicados
 - `src/services/SyncService.ts`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
 ```
 
 #### PF-153
@@ -661,11 +755,28 @@ title: "[UI]: Componente OfflineBanner para indicación visual de red"
 epic: EPIC-07-OFFLINE
 status: BACKLOG
 priority: MEDIUM
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Crear un banner visual no intrusivo que notifique al usuario cuando la app está en modo offline.
+
+### 📋 Criterios de Aceptación
+- [ ] Animación de entrada/salida fluida al cambiar el estado de conexión.
+- [ ] Test RNTL del componente.
+
 ### 🛠️ Archivos Implicados
 - `src/components/OfflineBanner.tsx`
+- `App.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
 ```
 
 ---
@@ -680,12 +791,28 @@ title: "[Feature]: Motor de Cálculo de 1RM Estimado (Fórmulas Brzycki & Epley)
 epic: EPIC-04-ANALYTICS
 status: BACKLOG
 priority: HIGH
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Implementar motor de cálculo de 1 Rep Max estimado utilizando las fórmulas de Brzycki y Epley.
+
+### 📋 Criterios de Aceptación
+- [ ] Funciones puras en `analyticsUtils.ts` con cobertura del 100%.
+- [ ] Integración en `AnalyticsService.ts`.
+
 ### 🛠️ Archivos Implicados
 - `src/services/AnalyticsService.ts`
 - `src/utils/analyticsUtils.ts`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
 ```
 
 #### PF-155
@@ -696,11 +823,27 @@ title: "[Feature]: Algoritmo de Agregación de Series Efectivas por Grupo Muscul
 epic: EPIC-04-ANALYTICS
 status: BACKLOG
 priority: MEDIUM
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Agrupar y sumar el número de series efectivas realizadas por cada grupo muscular en la semana actual.
+
+### 📋 Criterios de Aceptación
+- [ ] Exclusión automática de series de calentamiento.
+- [ ] Retorno estructurado para gráficos de distribución.
+
 ### 🛠️ Archivos Implicados
 - `src/services/AnalyticsService.ts`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 #### PF-156
@@ -711,11 +854,28 @@ title: "[UI]: Componente Dashboard de Métricas Avanzadas & Gráfico 1RM"
 epic: EPIC-04-ANALYTICS
 status: BACKLOG
 priority: MEDIUM
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Integrar el gráfico interactivo de proyección de 1RM por ejercicio en la pantalla de progreso.
+
+### 📋 Criterios de Aceptación
+- [ ] Selector de ejercicio funcional.
+- [ ] Renderizado sin fallos con `react-native-gifted-charts`.
+
 ### 🛠️ Archivos Implicados
 - `src/screens/PhysicalProgressScreen.tsx`
+- `src/components/AdvancedMetricsCard.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 #### PF-157
@@ -726,11 +886,26 @@ title: "[UI]: Indicador de Fatiga y RPE Promedio Semanal"
 epic: EPIC-04-ANALYTICS
 status: BACKLOG
 priority: MEDIUM
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Mostrar una tarjeta semáforo con el nivel de fatiga acumulado y RPE medio semanal.
+
+### 📋 Criterios de Aceptación
+- [ ] Indicador Verde (Óptimo), Amarillo (Alto) o Rojo (Sobreentrenamiento).
+
 ### 🛠️ Archivos Implicados
 - `src/components/FatigueLevelCard.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 ---
@@ -745,11 +920,28 @@ title: "[UI / Component]: Floating Rest-Timer Pill (PIP Style) Global"
 epic: EPIC-02-INGYM
 status: BACKLOG
 priority: HIGH
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: [PF-133]
 ---
+
+### 🎯 Objetivo
+Crear una píldora flotante persistente que muestre el tiempo de descanso restante mientras el usuario navega fuera de la pantalla de entrenamiento.
+
+### 📋 Criterios de Aceptación
+- [ ] Animación de aparición/desaparición fluida (Reanimated).
+- [ ] Tap en la píldora redirige de vuelta a `WorkoutScreen`.
+
 ### 🛠️ Archivos Implicados
 - `src/components/FloatingTimerPill.tsx`
+- `src/navigation/RootNavigator.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 #### PF-159
@@ -760,11 +952,28 @@ title: "[Task]: Sistema de Feedback Háptico Integrado (HapticService)"
 epic: EPIC-02-INGYM
 status: BACKLOG
 priority: MEDIUM
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Proveer un servicio centralizado de respuesta háptica (`HapticService`) envolviendo `expo-haptics`.
+
+### 📋 Criterios de Aceptación
+- [ ] Vibraciones suaves al marcar series completadas.
+- [ ] Patrón de vibración al finalizar el RestTimer.
+
 ### 🛠️ Archivos Implicados
 - `src/services/HapticService.ts`
+- `src/components/WorkoutSetRow.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 #### PF-160
@@ -775,11 +984,27 @@ title: "[Feature]: Sugerencia Inteligente de Peso y RPE/RIR Basada en Histórico
 epic: EPIC-02-INGYM
 status: BACKLOG
 priority: MEDIUM
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: [PF-118]
 ---
+
+### 🎯 Objetivo
+Precargar sugerencias inteligentes de peso y reps basadas en las series equivalentes de la sesión anterior.
+
+### 📋 Criterios de Aceptación
+- [ ] Placeholders dinámicos en los campos de entrada de series.
+
 ### 🛠️ Archivos Implicados
 - `src/controllers/useWorkoutController.ts`
+- `src/services/WorkoutService.ts`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 #### PF-161
@@ -790,11 +1015,26 @@ title: "[UI]: Rediseño UX e Interactividad de WorkoutSetRow"
 epic: EPIC-02-INGYM
 status: BACKLOG
 priority: LOW
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Mejorar los controles táctiles de incremento rápido (+2.5kg, -2.5kg) en la fila de serie.
+
+### 📋 Criterios de Aceptación
+- [ ] Botones de ajuste rápido funcionales sin abrir teclado.
+
 ### 🛠️ Archivos Implicados
 - `src/components/WorkoutSetRow.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 ---
@@ -809,11 +1049,26 @@ title: "[UI]: Componente Canvas de Tarjeta de Logro Estilizada (SocialCardCanvas
 epic: EPIC-09-SOCIAL
 status: BACKLOG
 priority: MEDIUM
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Crear componente canvas visual (9:16 y 1:1) formateado para resumen de entrenamiento y PRs.
+
+### 📋 Criterios de Aceptación
+- [ ] Renderizado estilizado con branding de PressFit.
+
 ### 🛠️ Archivos Implicados
 - `src/components/SocialCardCanvas.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 #### PF-163
@@ -824,11 +1079,26 @@ title: "[Feature]: Motor de Captura y Generación de Imagen (ShareService)"
 epic: EPIC-09-SOCIAL
 status: BACKLOG
 priority: MEDIUM
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Convertir el canvas visual en archivo de imagen PNG mediante `react-native-view-shot`.
+
+### 📋 Criterios de Aceptación
+- [ ] Retorno de URI de archivo temporal nativo.
+
 ### 🛠️ Archivos Implicados
 - `src/services/ShareService.ts`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 #### PF-164
@@ -839,11 +1109,26 @@ title: "[UI / Integration]: Diálogo Nativo de Compartir (ShareModal)"
 epic: EPIC-09-SOCIAL
 status: BACKLOG
 priority: LOW
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Abrir la hoja nativa de compartir del sistema operativo con la tarjeta generada.
+
+### 📋 Criterios de Aceptación
+- [ ] Integración con `Share.share`.
+
 ### 🛠️ Archivos Implicados
 - `src/components/ShareModal.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 ---
@@ -858,11 +1143,26 @@ title: "[UI / Screen]: Flujo de Onboarding Interactivo en 3 Pasos"
 epic: EPIC-08-ONBOARDING
 status: BACKLOG
 priority: MEDIUM
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Crear asistente de configuración inicial para nuevos usuarios en 3 pasos.
+
+### 📋 Criterios de Aceptación
+- [ ] Selección de Objetivo, Días/Semana y Nivel.
+
 ### 🛠️ Archivos Implicados
 - `src/screens/OnboardingScreen.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 #### PF-166
@@ -873,11 +1173,26 @@ title: "[Data]: Semilla de Rutinas Prémium Predefinidas (presetRoutines.json)"
 epic: EPIC-08-ONBOARDING
 status: BACKLOG
 priority: MEDIUM
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Proveer archivo de plantillas de rutinas (Push/Pull/Legs, Torso/Pierna, Fullbody).
+
+### 📋 Criterios de Aceptación
+- [ ] Estructura JSON validada con TypeScript models.
+
 ### 🛠️ Archivos Implicados
 - `src/assets/data/presetRoutines.json`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 #### PF-167
@@ -888,11 +1203,26 @@ title: "[Feature]: Motor de Clonación e Importación de Plantilla a Rutina Pers
 epic: EPIC-08-ONBOARDING
 status: BACKLOG
 priority: MEDIUM
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Clonar la plantilla seleccionada e insertarla como rutina semanal activa del usuario en Supabase.
+
+### 📋 Criterios de Aceptación
+- [ ] Método `importPresetRoutine` en `RoutineService`.
+
 ### 🛠️ Archivos Implicados
 - `src/services/RoutineService.ts`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 ---
@@ -907,11 +1237,28 @@ title: "[Feature]: Configuración de react-i18next y Extracción de Diccionarios
 epic: EPIC-11-UX-I18N
 status: BACKLOG
 priority: LOW
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Configurar `react-i18next` y extraer diccionarios de texto en español e inglés.
+
+### 📋 Criterios de Aceptación
+- [ ] Detección automática del idioma del dispositivo.
+
 ### 🛠️ Archivos Implicados
 - `src/i18n/index.ts`
+- `src/i18n/locales/es.json`
+- `src/i18n/locales/en.json`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 #### PF-169
@@ -922,11 +1269,26 @@ title: "[Refactor]: Wrapper Sistémico KeyboardAwareContainer"
 epic: EPIC-11-UX-I18N
 status: BACKLOG
 priority: LOW
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Envolver pantallas de la aplicación en el container global de resolución de teclado.
+
+### 📋 Criterios de Aceptación
+- [ ] Cero solapamiento de teclado en formularios.
+
 ### 🛠️ Archivos Implicados
 - `src/components/KeyboardAwareContainer.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
 #### PF-170
@@ -937,10 +1299,25 @@ title: "[UI]: Selector de Idioma en Pantalla de Ajustes de Usuario"
 epic: EPIC-11-UX-I18N
 status: BACKLOG
 priority: LOW
+reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
+updated_at: "2026-07-28T23:00:00+02:00"
+closed_at: null
+related_historical_tickets: []
 ---
+
+### 🎯 Objetivo
+Permitir al usuario cambiar el idioma de la aplicación manualmente desde Ajustes.
+
+### 📋 Criterios de Aceptación
+- [ ] Persistencia de la preferencia de idioma en AsyncStorage.
+
 ### 🛠️ Archivos Implicados
 - `src/screens/SettingsScreen.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 ```
 
