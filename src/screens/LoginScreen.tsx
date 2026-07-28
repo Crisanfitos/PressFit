@@ -4,12 +4,9 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    ScrollView,
     StyleSheet,
     ActivityIndicator,
     Image,
-    KeyboardAvoidingView,
-    Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -17,6 +14,7 @@ import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator';
+import KeyboardAwareContainer from '../components/KeyboardAwareContainer';
 
 type LoginScreenProps = {
     navigation: NativeStackNavigationProp<AuthStackParamList, 'Login'>;
@@ -197,15 +195,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.container} testID="login-screen">
-            <KeyboardAvoidingView
-                behavior="padding"
-                style={{ flex: 1 }}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
-            >
-                <ScrollView
-                    contentContainerStyle={styles.scrollContent}
-                    keyboardShouldPersistTaps="handled"
-                >
+            <KeyboardAwareContainer contentContainerStyle={styles.scrollContent}>
                     <View style={styles.header}>
                         <Image
                             source={require('../../assets/icon.png')}
@@ -311,8 +301,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                             </Text>
                         </TouchableOpacity>
                     </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+            </KeyboardAwareContainer>
         </SafeAreaView>
     );
 };

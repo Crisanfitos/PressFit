@@ -1,9 +1,9 @@
 # 📋 Tablero de Backlog Activo — PressFit Expo
 
-> **Estado**: Activo (Poblado con Issues PF-131 a PF-170)  
-> **Última Actualización del Tablero**: `2026-07-28 23:08:20 CEST`  
+> **Estado**: Activo (Poblado con Issues PF-131 a PF-171)  
+> **Última Actualización del Tablero**: `2026-07-28 23:08:50 CEST`  
 > **Última Issue Histórica**: `PF-130`  
-> **Siguiente Issue Disponible**: `PF-171`
+> **Siguiente Issue Disponible**: `PF-172`
 
 ---
 
@@ -11,7 +11,7 @@
 
 * **En Progreso (`IN_PROGRESS_*`)**: 0 tickets
 * **Pendientes Listos en Backlog (`BACKLOG`)**: 13 tickets (`PF-141`, `PF-143` a `PF-145`, `PF-147` a `PF-149`, `PF-154`, `PF-155`, `PF-160`, `PF-166`, `PF-169`)
-* **Bloqueados por Infraestructura (`IN_PROGRESS_BLOCKED`)**: 16 tickets (`PF-150` a `PF-153`, `PF-156` a `PF-159`, `PF-161` a `PF-165`, `PF-167`, `PF-168`, `PF-170`)
+* **Bloqueados por Infraestructura / Dependencias (`IN_PROGRESS_BLOCKED`)**: 17 tickets (`PF-150` a `PF-153`, `PF-156` a `PF-159`, `PF-161` a `PF-165`, `PF-167`, `PF-168`, `PF-170`, `PF-171`)
 * **Completados (`DONE`)**: 142 tickets (`PF-001` a `PF-140`, `PF-142`, `PF-146`)
 
 ---
@@ -1209,16 +1209,27 @@ priority: MEDIUM
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:08:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
 
 ### 🎯 Objetivo
-Proveer archivo de plantillas de rutinas (Push/Pull/Legs, Torso/Pierna, Fullbody).
+Proveer el archivo semilla JSON (`presetRoutines.json`) con una biblioteca variada de plantillas de rutinas científicamente probadas para diferentes objetivos, niveles y frecuencias semanales.
 
 ### 📋 Criterios de Aceptación
-- [ ] Estructura JSON validada con TypeScript models.
+- [ ] Inclusión de al menos 7 variantes de rutinas divididas:
+  1. **Push / Pull / Legs (PPL)** (6 días - Hipertrofia Clásica).
+  2. **Push / Pull / Legs (PPL)** (3-4 días - Hipertrofia Frecuencia 1.5).
+  3. **Torso / Pierna (Upper / Lower)** (4 días - Híbrido Fuerza/Masa).
+  4. **Fullbody (Cuerpo Completo)** (3 días - Principiantes / Frecuencia Alta).
+  5. **Arnold Split (Pecho/Espalda, Hombros/Brazos, Piernas)** (6 días - Hipertrofia Avanzada).
+  6. **PHUL (Power Hypertrophy Upper Lower)** (4 días - Híbrido Potencia/Volumen).
+  7. **Enfoque Tren Inferior & Glúteo** (3-4 días - Especialización Femenina/Estética).
+- [ ] Estructura JSON tipada estrictamente acorde a `src/types/models.ts`.
+
+### 🔍 Contexto e Información Requerida (Pre-Coding)
+- Estructura del schema de `rutinas_semanales`, `rutinas_diarias` y `ejercicios_programados` en `initial_schema.sql`.
 
 ### 🛠️ Archivos Implicados
 - `src/assets/data/presetRoutines.json`
@@ -1226,6 +1237,7 @@ Proveer archivo de plantillas de rutinas (Push/Pull/Legs, Torso/Pierna, Fullbody
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
+- `2026-07-28 23:08:00 CEST` | Estado: BACKLOG | Antigravity AI | Ampliado con 7 variantes de rutinas predefinidas (Arnold Split, PHUL, Glúteo/Pierna, PPL, Torso/Pierna).
 ```
 
 #### PF-167
@@ -1258,6 +1270,45 @@ Clonar la plantilla seleccionada e insertarla como rutina semanal activa del usu
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
 - `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera del archivo semilla de plantillas (PF-166).
+```
+
+#### PF-171
+```markdown
+---
+id: PF-171
+title: "[UI / Screen]: Galería y Pantalla de Vista Previa de Plantillas Predefinidas (PresetRoutinesScreen)"
+epic: EPIC-08-ONBOARDING
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-166, PF-167]
+priority: MEDIUM
+reporter: Usuario / Antigravity AI
+assignee: Antigravity AI
+created_at: "2026-07-28T23:08:00+02:00"
+updated_at: "2026-07-28T23:08:00+02:00"
+closed_at: null
+related_historical_tickets: []
+---
+
+### 🎯 Objetivo
+Diseñar e implementar la interfaz de usuario para explorar la biblioteca de plantillas (`PresetRoutinesScreen.tsx`), permitiendo filtrar por objetivo/frecuencia, ver el detalle de días/ejercicios en un modal y clonar la rutina elegida.
+
+### 📋 Criterios de Aceptación
+- [ ] Grilla/Lista de tarjetas estilizadas (`PresetRoutineCard.tsx`) mostrando título, tags (Hipertrofia/Fuerza), días/semana y nivel.
+- [ ] Barra de filtros interactivos por Objetivo (Hipertrofia, Fuerza, Glúteo) y Días (3, 4, 5, 6 días).
+- [ ] Modal de Vista Previa (`PresetRoutineDetailModal.tsx`) que desglose la rutina por días con sus ejercicios y series objetivo.
+- [ ] Botón de llamada a la acción ("Usar esta Rutina") conectado con `RoutineService.importPresetRoutine`.
+
+### 🔍 Contexto e Información Requerida (Pre-Coding)
+- Diseñado para integrarse tanto en el flujo de Onboarding (`OnboardingScreen`) como desde el botón "Explorar Plantillas" en la pantalla principal de Rutinas (`RoutinesScreen`).
+
+### 🛠️ Archivos Implicados
+- `src/screens/PresetRoutinesScreen.tsx`
+- `src/components/PresetRoutineCard.tsx`
+- `src/components/PresetRoutineDetailModal.tsx`
+- `src/navigation/RootNavigator.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-28 23:08:00 CEST` | Estado: CREATED ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Registrada nueva issue UI para soporte de visualización y selección de plantillas. Bloqueada por PF-166 y PF-167.
 ```
 
 ---
@@ -1304,12 +1355,12 @@ Configurar `react-i18next` y extraer diccionarios de texto en español e inglés
 id: PF-169
 title: "[Refactor]: Wrapper Sistémico KeyboardAwareContainer"
 epic: EPIC-11-UX-I18N
-status: BACKLOG
+status: IN_PROGRESS_TEST
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:13:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -1326,6 +1377,10 @@ Envolver pantallas de la aplicación en el container global de resolución de te
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
+- `2026-07-28 23:10:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Inicio de la fase de análisis pre-coding.
+- `2026-07-28 23:11:00 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Tránsito a diseño tras validación exitosa de baseline tests (100% verde).
+- `2026-07-28 23:12:00 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Inicio de la fase de construcción (Build) de KeyboardAwareContainer y refactor de pantallas.
+- `2026-07-28 23:13:00 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Tránsito a fase de pruebas tras implementar KeyboardAwareContainer y refactorizar Login, SignUp y EditProfileModal.
 ```
 
 #### PF-170

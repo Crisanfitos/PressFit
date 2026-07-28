@@ -4,11 +4,8 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    ScrollView,
     StyleSheet,
     ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
     Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,6 +14,7 @@ import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator';
+import KeyboardAwareContainer from '../components/KeyboardAwareContainer';
 
 type SignUpScreenProps = {
     navigation: NativeStackNavigationProp<AuthStackParamList, 'SignUp'>;
@@ -179,15 +177,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                 <MaterialIcons name="arrow-back" size={28} color={colors.text} />
             </TouchableOpacity>
 
-            <KeyboardAvoidingView
-                behavior="padding"
-                style={styles.keyboardView}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
-            >
-                <ScrollView
-                    contentContainerStyle={styles.scrollContent}
-                    keyboardShouldPersistTaps="handled"
-                >
+            <KeyboardAwareContainer contentContainerStyle={styles.scrollContent}>
                     <View style={styles.header}>
                         <Image
                             source={require('../../assets/icon.png')}
@@ -313,8 +303,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                             </Text>
                         </TouchableOpacity>
                     </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+            </KeyboardAwareContainer>
         </SafeAreaView>
     );
 };
