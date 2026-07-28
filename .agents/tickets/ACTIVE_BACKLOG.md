@@ -10,9 +10,9 @@
 ## 🚦 Vistas Rápidas del Tablero
 
 * **En Progreso (`IN_PROGRESS_*`)**: 0 tickets
-* **Pendientes en Backlog (`BACKLOG`)**: 30 tickets (`PF-138`, `PF-139`, `PF-141`, `PF-143` a `PF-145`, `PF-147` a `PF-170`)
+* **Pendientes en Backlog (`BACKLOG`)**: 29 tickets (`PF-139`, `PF-141`, `PF-143` a `PF-145`, `PF-147` a `PF-170`)
 * **Bloqueados (`IN_PROGRESS_BLOCKED`)**: 0 tickets
-* **Completados (`DONE`)**: 140 tickets (`PF-001` a `PF-137`, `PF-140`, `PF-142`, `PF-146`)
+* **Completados (`DONE`)**: 141 tickets (`PF-001` a `PF-138`, `PF-140`, `PF-142`, `PF-146`)
 
 ---
 
@@ -294,13 +294,13 @@ Definir interfaces estrictas para `Routine`, `Workout`, `Exercise`, `User`, `Set
 id: PF-138
 title: "[Refactor]: Descomposición de RoutineService.ts (32 KB) en sub-servicios de dominio"
 epic: EPIC-02
-status: IN_PROGRESS_TEST
+status: DONE
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-28T23:03:35+02:00"
-closed_at: null
+updated_at: "2026-07-28T23:04:15+02:00"
+closed_at: "2026-07-28T23:04:15+02:00"
 related_historical_tickets: [PF-106, PF-126]
 ---
 
@@ -328,6 +328,7 @@ Descomponer el archivo monolítico `RoutineService.ts` (32 KB) extrayendo la ges
 - `2026-07-28 23:03:00 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Tránsito a diseño tras validación exitosa de baseline tests (228/228 en verde).
 - `2026-07-28 23:03:15 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Inicio de la fase de construcción (Build).
 - `2026-07-28 23:03:35 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Tránsito a fase de pruebas tras crear DailyWorkoutService.ts, refactorizar RoutineService.ts y añadir DailyWorkoutService.test.ts.
+- `2026-07-28 23:04:15 CEST` | Estado: IN_PROGRESS_TEST ➔ DONE | Antigravity AI | Descomposición completada con éxito. Creado DailyWorkoutService.ts, RoutineService.ts actúa como fachada y suite completa de pruebas unitarias y componentes 100% en verde. Commit merge: 3112528.
 ```
 
 ---
