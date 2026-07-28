@@ -10,9 +10,9 @@
 ## 🚦 Vistas Rápidas del Tablero
 
 * **En Progreso (`IN_PROGRESS_*`)**: 0 tickets
-* **Pendientes Listos en Backlog (`BACKLOG`)**: 13 tickets (`PF-141`, `PF-143` a `PF-145`, `PF-147` a `PF-149`, `PF-154`, `PF-155`, `PF-160`, `PF-166`, `PF-169`)
+* **Pendientes Listos en Backlog (`BACKLOG`)**: 12 tickets (`PF-141`, `PF-143` a `PF-145`, `PF-147` a `PF-149`, `PF-154`, `PF-155`, `PF-160`, `PF-166`)
 * **Bloqueados por Infraestructura / Dependencias (`IN_PROGRESS_BLOCKED`)**: 17 tickets (`PF-150` a `PF-153`, `PF-156` a `PF-159`, `PF-161` a `PF-165`, `PF-167`, `PF-168`, `PF-170`, `PF-171`)
-* **Completados (`DONE`)**: 142 tickets (`PF-001` a `PF-140`, `PF-142`, `PF-146`)
+* **Completados (`DONE`)**: 143 tickets (`PF-001` a `PF-140`, `PF-142`, `PF-146`, `PF-169`)
 
 ---
 
@@ -1355,13 +1355,13 @@ Configurar `react-i18next` y extraer diccionarios de texto en español e inglés
 id: PF-169
 title: "[Refactor]: Wrapper Sistémico KeyboardAwareContainer"
 epic: EPIC-11-UX-I18N
-status: IN_PROGRESS_TEST
+status: DONE
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:13:00+02:00"
-closed_at: null
+updated_at: "2026-07-28T23:14:00+02:00"
+closed_at: "2026-07-28T23:14:00+02:00"
 related_historical_tickets: []
 ---
 
@@ -1369,7 +1369,7 @@ related_historical_tickets: []
 Envolver pantallas de la aplicación en el container global de resolución de teclado.
 
 ### 📋 Criterios de Aceptación
-- [ ] Cero solapamiento de teclado en formularios.
+- [x] Cero solapamiento de teclado en formularios.
 
 ### 🛠️ Archivos Implicados
 - `src/components/KeyboardAwareContainer.tsx`
@@ -1381,6 +1381,7 @@ Envolver pantallas de la aplicación en el container global de resolución de te
 - `2026-07-28 23:11:00 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Tránsito a diseño tras validación exitosa de baseline tests (100% verde).
 - `2026-07-28 23:12:00 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Inicio de la fase de construcción (Build) de KeyboardAwareContainer y refactor de pantallas.
 - `2026-07-28 23:13:00 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Tránsito a fase de pruebas tras implementar KeyboardAwareContainer y refactorizar Login, SignUp y EditProfileModal.
+- `2026-07-28 23:14:00 CEST` | Estado: IN_PROGRESS_TEST ➔ DONE | Antigravity AI | Desarrollo finalizado, 100% verificado con suite de pruebas (33 suites, 76 tests) y fusionado en main.
 ```
 
 #### PF-170
