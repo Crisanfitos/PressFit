@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { ProgressService } from '../services/ProgressService';
+import { HistoryService } from '../services/HistoryService';
 import { parseDateKeyAsLocalDate } from '../utils/dateUtils';
 
 interface DailyStats {
@@ -40,7 +41,7 @@ export const useProgressController = (userId: string | undefined) => {
         if (!userId) return;
         setLoading(true);
         try {
-            const { data } = await ProgressService.getDailyProgress(userId, date);
+            const { data } = await HistoryService.getDailyProgress(userId, date);
             if (data && data.length > 0) {
                 const workout = data[0];
                 const sets = workout.ejercicios_programados?.flatMap((ep: any) => ep.series || []) || [];
@@ -67,7 +68,7 @@ export const useProgressController = (userId: string | undefined) => {
         if (!userId) return;
         setLoading(true);
         try {
-            const { data } = await ProgressService.getWeeklyProgress(userId);
+            const { data } = await HistoryService.getWeeklyProgress(userId);
             setWeeklyStats(data || []);
         } catch (error) {
             console.error('Error fetching weekly progress:', error);
@@ -80,7 +81,7 @@ export const useProgressController = (userId: string | undefined) => {
         if (!userId) return;
         setLoading(true);
         try {
-            const { data } = await ProgressService.getMonthlyProgress(userId);
+            const { data } = await HistoryService.getMonthlyProgress(userId);
             setMonthlyStats(data || []);
         } catch (error) {
             console.error('Error fetching monthly progress:', error);
@@ -93,7 +94,7 @@ export const useProgressController = (userId: string | undefined) => {
         if (!userId) return;
         setLoading(true);
         try {
-            const { data } = await ProgressService.getMonthlyProgress(userId, year, month);
+            const { data } = await HistoryService.getMonthlyProgress(userId, year, month);
 
             if (!data || data.length === 0) {
                 setProcessedMonthlyData({
@@ -182,7 +183,7 @@ export const useProgressController = (userId: string | undefined) => {
         if (!userId || !exerciseId) return;
         setLoading(true);
         try {
-            const { data } = await ProgressService.getExerciseHistory(userId, exerciseId);
+            const { data } = await HistoryService.getExerciseHistory(userId, exerciseId);
             setExerciseHistory(data || []);
         } catch (error) {
             console.error('Error fetching exercise history:', error);

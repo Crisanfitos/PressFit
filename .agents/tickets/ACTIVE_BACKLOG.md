@@ -1,7 +1,7 @@
 # 📋 Tablero de Backlog Activo — PressFit Expo
 
 > **Estado**: Activo (Poblado con Issues PF-131 a PF-170)  
-> **Última Actualización del Tablero**: `2026-07-28 23:00:00 CEST`  
+> **Última Actualización del Tablero**: `2026-07-28 23:04:00 CEST`  
 > **Última Issue Histórica**: `PF-130`  
 > **Siguiente Issue Disponible**: `PF-171`
 
@@ -10,8 +10,8 @@
 ## 🚦 Vistas Rápidas del Tablero
 
 * **En Progreso (`IN_PROGRESS_*`)**: 0 tickets
-* **Pendientes en Backlog (`BACKLOG`)**: 29 tickets (`PF-139`, `PF-141`, `PF-143` a `PF-145`, `PF-147` a `PF-170`)
-* **Bloqueados (`IN_PROGRESS_BLOCKED`)**: 0 tickets
+* **Pendientes Listos en Backlog (`BACKLOG`)**: 14 tickets (`PF-139`, `PF-141`, `PF-143` a `PF-145`, `PF-147` a `PF-149`, `PF-154`, `PF-155`, `PF-160`, `PF-166`, `PF-169`)
+* **Bloqueados por Infraestructura (`IN_PROGRESS_BLOCKED`)**: 16 tickets (`PF-150` a `PF-153`, `PF-156` a `PF-159`, `PF-161` a `PF-165`, `PF-167`, `PF-168`, `PF-170`)
 * **Completados (`DONE`)**: 141 tickets (`PF-001` a `PF-138`, `PF-140`, `PF-142`, `PF-146`)
 
 ---
@@ -339,12 +339,12 @@ Descomponer el archivo monolítico `RoutineService.ts` (32 KB) extrayendo la ges
 id: PF-139
 title: "[Refactor]: Descomposición de ProgressService.ts (10 KB) y creación de HistoryService.ts"
 epic: EPIC-04
-status: BACKLOG
+status: IN_PROGRESS_TEST
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-28T22:59:00+02:00"
+updated_at: "2026-07-28T23:07:50+02:00"
 closed_at: null
 related_historical_tickets: [PF-020, PF-090]
 ---
@@ -368,6 +368,10 @@ Separar la lógica de fotos de progreso y métricas corporales del historial de 
 ### 📜 Historial de Modificaciones
 - `2026-07-24 20:03:25 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 22:59:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios de aceptación completados.
+- `2026-07-28 23:06:15 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Inicio de la fase de análisis pre-coding.
+- `2026-07-28 23:07:05 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Tránsito a diseño tras validación de baseline tests (177/177 verde).
+- `2026-07-28 23:07:30 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Inicio de construcción de HistoryService.ts y refactorización de ProgressService.ts.
+- `2026-07-28 23:07:50 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Tránsito a fase de pruebas tras crear HistoryService.ts, refactorizar ProgressService.ts y añadir suites unitarias.
 ```
 
 ---
@@ -656,12 +660,13 @@ Proveer un mock stateful en memoria de Supabase para probar operaciones CRUD com
 id: PF-150
 title: "[Task]: Configuración del Almacenamiento Local (Local DB / Query Cache Persistente)"
 epic: EPIC-07-OFFLINE
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-148, PF-149]
 priority: HIGH
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -683,6 +688,7 @@ Implementar réplica local de datos en AsyncStorage / React Query Persist client
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera de los mocks nativos de SQLite (PF-148) y el harness de prueba Supabase (PF-149).
 ```
 
 #### PF-151
@@ -691,12 +697,13 @@ Implementar réplica local de datos en AsyncStorage / React Query Persist client
 id: PF-151
 title: "[Task]: Motor de Cola de Mutaciones Offline (SyncService)"
 epic: EPIC-07-OFFLINE
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-150]
 priority: HIGH
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -715,6 +722,7 @@ Crear `SyncService.ts` para encolar operaciones FIFO creadas sin conexión y pro
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera del almacenamiento local (PF-150).
 ```
 
 #### PF-152
@@ -723,12 +731,13 @@ Crear `SyncService.ts` para encolar operaciones FIFO creadas sin conexión y pro
 id: PF-152
 title: "[Task]: Estrategia y Algoritmo de Resolución de Conflictos de Fechas"
 epic: EPIC-07-OFFLINE
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-151]
 priority: HIGH
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: [PF-131]
 ---
@@ -746,6 +755,7 @@ Resolver conflictos entre mutaciones locales desfasadas y el servidor mediante a
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera de SyncService (PF-151).
 ```
 
 #### PF-153
@@ -754,12 +764,13 @@ Resolver conflictos entre mutaciones locales desfasadas y el servidor mediante a
 id: PF-153
 title: "[UI]: Componente OfflineBanner para indicación visual de red"
 epic: EPIC-07-OFFLINE
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-148]
 priority: MEDIUM
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -778,6 +789,7 @@ Crear un banner visual no intrusivo que notifique al usuario cuando la app está
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera de mocks nativos de NetInfo (PF-148).
 ```
 
 ---
@@ -853,12 +865,13 @@ Agrupar y sumar el número de series efectivas realizadas por cada grupo muscula
 id: PF-156
 title: "[UI]: Componente Dashboard de Métricas Avanzadas & Gráfico 1RM"
 epic: EPIC-04-ANALYTICS
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-148, PF-154]
 priority: MEDIUM
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -877,6 +890,7 @@ Integrar el gráfico interactivo de proyección de 1RM por ejercicio en la panta
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera de mocks nativos de gráficos (PF-148) y motor 1RM (PF-154).
 ```
 
 #### PF-157
@@ -885,12 +899,13 @@ Integrar el gráfico interactivo de proyección de 1RM por ejercicio en la panta
 id: PF-157
 title: "[UI]: Indicador de Fatiga y RPE Promedio Semanal"
 epic: EPIC-04-ANALYTICS
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-155]
 priority: MEDIUM
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -907,6 +922,7 @@ Mostrar una tarjeta semáforo con el nivel de fatiga acumulado y RPE medio seman
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera del algoritmo de series efectivas (PF-155).
 ```
 
 ---
@@ -919,12 +935,13 @@ Mostrar una tarjeta semáforo con el nivel de fatiga acumulado y RPE medio seman
 id: PF-158
 title: "[UI / Component]: Floating Rest-Timer Pill (PIP Style) Global"
 epic: EPIC-02-INGYM
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-147, PF-148]
 priority: HIGH
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: [PF-133]
 ---
@@ -943,6 +960,7 @@ Crear una píldora flotante persistente que muestre el tiempo de descanso restan
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera de mocks de animación nativos (PF-148) y suite E2E (PF-147).
 ```
 
 #### PF-159
@@ -951,12 +969,13 @@ Crear una píldora flotante persistente que muestre el tiempo de descanso restan
 id: PF-159
 title: "[Task]: Sistema de Feedback Háptico Integrado (HapticService)"
 epic: EPIC-02-INGYM
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-148]
 priority: MEDIUM
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -975,6 +994,7 @@ Proveer un servicio centralizado de respuesta háptica (`HapticService`) envolvi
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera del mock nativo expo-haptics (PF-148).
 ```
 
 #### PF-160
@@ -1014,12 +1034,13 @@ Precargar sugerencias inteligentes de peso y reps basadas en las series equivale
 id: PF-161
 title: "[UI]: Rediseño UX e Interactividad de WorkoutSetRow"
 epic: EPIC-02-INGYM
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-159]
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -1036,6 +1057,7 @@ Mejorar los controles táctiles de incremento rápido (+2.5kg, -2.5kg) en la fil
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera del sistema háptico (PF-159).
 ```
 
 ---
@@ -1048,12 +1070,13 @@ Mejorar los controles táctiles de incremento rápido (+2.5kg, -2.5kg) en la fil
 id: PF-162
 title: "[UI]: Componente Canvas de Tarjeta de Logro Estilizada (SocialCardCanvas)"
 epic: EPIC-09-SOCIAL
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-148]
 priority: MEDIUM
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -1070,6 +1093,7 @@ Crear componente canvas visual (9:16 y 1:1) formateado para resumen de entrenami
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera de mocks nativos de ViewShot (PF-148).
 ```
 
 #### PF-163
@@ -1078,12 +1102,13 @@ Crear componente canvas visual (9:16 y 1:1) formateado para resumen de entrenami
 id: PF-163
 title: "[Feature]: Motor de Captura y Generación de Imagen (ShareService)"
 epic: EPIC-09-SOCIAL
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-148, PF-162]
 priority: MEDIUM
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -1100,6 +1125,7 @@ Convertir el canvas visual en archivo de imagen PNG mediante `react-native-view-
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera de SocialCardCanvas (PF-162) y mocks nativos (PF-148).
 ```
 
 #### PF-164
@@ -1108,12 +1134,13 @@ Convertir el canvas visual en archivo de imagen PNG mediante `react-native-view-
 id: PF-164
 title: "[UI / Integration]: Diálogo Nativo de Compartir (ShareModal)"
 epic: EPIC-09-SOCIAL
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-148, PF-163]
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -1130,6 +1157,7 @@ Abrir la hoja nativa de compartir del sistema operativo con la tarjeta generada.
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera de ShareService (PF-163).
 ```
 
 ---
@@ -1142,12 +1170,13 @@ Abrir la hoja nativa de compartir del sistema operativo con la tarjeta generada.
 id: PF-165
 title: "[UI / Screen]: Flujo de Onboarding Interactivo en 3 Pasos"
 epic: EPIC-08-ONBOARDING
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-147]
 priority: MEDIUM
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -1164,6 +1193,7 @@ Crear asistente de configuración inicial para nuevos usuarios en 3 pasos.
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera de la suite de pruebas E2E (PF-147).
 ```
 
 #### PF-166
@@ -1202,12 +1232,13 @@ Proveer archivo de plantillas de rutinas (Push/Pull/Legs, Torso/Pierna, Fullbody
 id: PF-167
 title: "[Feature]: Motor de Clonación e Importación de Plantilla a Rutina Personal"
 epic: EPIC-08-ONBOARDING
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-166]
 priority: MEDIUM
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -1224,6 +1255,7 @@ Clonar la plantilla seleccionada e insertarla como rutina semanal activa del usu
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera del archivo semilla de plantillas (PF-166).
 ```
 
 ---
@@ -1236,12 +1268,13 @@ Clonar la plantilla seleccionada e insertarla como rutina semanal activa del usu
 id: PF-168
 title: "[Feature]: Configuración de react-i18next y Extracción de Diccionarios (es.json, en.json)"
 epic: EPIC-11-UX-I18N
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-148]
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -1260,6 +1293,7 @@ Configurar `react-i18next` y extraer diccionarios de texto en español e inglés
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera de mocks nativos de expo-localization (PF-148).
 ```
 
 #### PF-169
@@ -1298,12 +1332,13 @@ Envolver pantallas de la aplicación en el container global de resolución de te
 id: PF-170
 title: "[UI]: Selector de Idioma en Pantalla de Ajustes de Usuario"
 epic: EPIC-11-UX-I18N
-status: BACKLOG
+status: IN_PROGRESS_BLOCKED
+blocked_by: [PF-168]
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-28T22:53:00+02:00"
-updated_at: "2026-07-28T23:00:00+02:00"
+updated_at: "2026-07-28T23:04:00+02:00"
 closed_at: null
 related_historical_tickets: []
 ---
@@ -1320,5 +1355,7 @@ Permitir al usuario cambiar el idioma de la aplicación manualmente desde Ajuste
 ### 📜 Historial de Modificaciones
 - `2026-07-28 22:53:00 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 23:00:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos completados.
+- `2026-07-28 23:04:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Bloqueado a la espera del módulo react-i18next (PF-168).
 ```
+
 
