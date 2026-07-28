@@ -1,40 +1,16 @@
 import { supabase } from '../lib/supabase';
 import { formatLocalDateKey, getStartOfWeek as getStartOfWeekUtil } from "../utils/dateUtils";
-
-interface RoutineDay {
-    id: string;
-    rutina_semanal_id: string;
-    nombre_dia: string;
-    fecha_dia: string | null;
-    hora_inicio?: string;
-    hora_fin?: string;
-    completada?: boolean;
-    ejercicios_programados?: any[];
-    [key: string]: any;
-}
-
-interface WeeklyRoutine {
-    id: string;
-    usuario_id: string;
-    nombre: string;
-    es_plantilla: boolean;
-    activa: boolean;
-    rutinas_diarias?: RoutineDay[];
-    [key: string]: any;
-}
-
-interface WorkoutStats {
-    exerciseCount: number;
-    duration: number | null;
-    isCompleted: boolean;
-    startTime?: string | null;
-    endTime?: string | null;
-}
-
-interface ServiceResponse<T> {
-    data: T | null;
-    error: any | null;
-}
+import {
+    RoutineDay,
+    WeeklyRoutine,
+    WorkoutStats,
+    ScheduledExercise,
+    Serie,
+    ServiceResponse,
+    WeeklyRoutineInsert,
+    PostgrestError,
+    SeriesInsert,
+} from '../types/models';
 
 export const RoutineService = {
     async getWeeklyRoutineWithDays(routineId: string): Promise<ServiceResponse<WeeklyRoutine>> {
@@ -59,14 +35,14 @@ export const RoutineService = {
 
             // Sort exercises and series
             if (data?.rutinas_diarias) {
-                data.rutinas_diarias.forEach((day: any) => {
+                data.rutinas_diarias.forEach((day: RoutineDay) => {
                     if (day.ejercicios_programados) {
-                        day.ejercicios_programados.sort((a: any, b: any) =>
+                        day.ejercicios_programados.sort((a: ScheduledExercise, b: ScheduledExercise) =>
                             (a.orden_ejecucion || 0) - (b.orden_ejecucion || 0)
                         );
-                        day.ejercicios_programados.forEach((ex: any) => {
+                        day.ejercicios_programados.forEach((ex: ScheduledExercise) => {
                             if (ex.series) {
-                                ex.series.sort((a: any, b: any) =>
+                                ex.series.sort((a: Serie, b: Serie) =>
                                     (a.numero_serie || 0) - (b.numero_serie || 0)
                                 );
                             }
@@ -131,12 +107,12 @@ export const RoutineService = {
 
             // Sort exercises by order if available
             if (data?.ejercicios_programados) {
-                data.ejercicios_programados.sort((a: any, b: any) =>
+                data.ejercicios_programados.sort((a: ScheduledExercise, b: ScheduledExercise) =>
                     (a.orden_ejecucion || 0) - (b.orden_ejecucion || 0)
                 );
-                data.ejercicios_programados.forEach((ex: any) => {
+                data.ejercicios_programados.forEach((ex: ScheduledExercise) => {
                     if (ex.series) {
-                        ex.series.sort((a: any, b: any) =>
+                        ex.series.sort((a: Serie, b: Serie) =>
                             (a.numero_serie || 0) - (b.numero_serie || 0)
                         );
                     }
@@ -174,12 +150,12 @@ export const RoutineService = {
 
             // Sort exercises and series if data found
             if (data?.ejercicios_programados) {
-                data.ejercicios_programados.sort((a: any, b: any) =>
+                data.ejercicios_programados.sort((a: ScheduledExercise, b: ScheduledExercise) =>
                     (a.orden_ejecucion || 0) - (b.orden_ejecucion || 0)
                 );
-                data.ejercicios_programados.forEach((ex: any) => {
+                data.ejercicios_programados.forEach((ex: ScheduledExercise) => {
                     if (ex.series) {
-                        ex.series.sort((a: any, b: any) =>
+                        ex.series.sort((a: Serie, b: Serie) =>
                             (a.numero_serie || 0) - (b.numero_serie || 0)
                         );
                     }
@@ -218,12 +194,12 @@ export const RoutineService = {
 
             // Sort exercises and series if data found
             if (data?.ejercicios_programados) {
-                data.ejercicios_programados.sort((a: any, b: any) =>
+                data.ejercicios_programados.sort((a: ScheduledExercise, b: ScheduledExercise) =>
                     (a.orden_ejecucion || 0) - (b.orden_ejecucion || 0)
                 );
-                data.ejercicios_programados.forEach((ex: any) => {
+                data.ejercicios_programados.forEach((ex: ScheduledExercise) => {
                     if (ex.series) {
-                        ex.series.sort((a: any, b: any) =>
+                        ex.series.sort((a: Serie, b: Serie) =>
                             (a.numero_serie || 0) - (b.numero_serie || 0)
                         );
                     }
@@ -283,7 +259,7 @@ export const RoutineService = {
             }
 
             const uniqueExercises = new Set(
-                data.ejercicios_programados?.map((set: any) => set.ejercicio_id) || []
+                data.ejercicios_programados?.map((set: ScheduledExercise) => set.ejercicio_id) || []
             );
             const exerciseCount = uniqueExercises.size;
 
@@ -315,7 +291,7 @@ export const RoutineService = {
         }
     },
 
-    async getActiveWorkout(userId: string, routineDayId: string): Promise<ServiceResponse<any>> {
+    async getActiveWorkout(userId: string, routineDayId: string): Promise<ServiceResponse<RoutineDay>> {
         try {
             const { data: templateDay } = await this.getRoutineDayById(routineDayId);
             if (!templateDay) return { data: null, error: 'Template not found' };
@@ -333,7 +309,7 @@ export const RoutineService = {
                 .eq('completada', false)
                 .maybeSingle();
 
-            if (error && (error as any).code !== 'PGRST116') throw error;
+            if (error && (error as PostgrestError).code !== 'PGRST116') throw error;
             return { data, error: null };
         } catch (error) {
             console.error('Error getting active workout:', error);
@@ -360,7 +336,7 @@ export const RoutineService = {
     async createWeeklyRoutine(routineData: Partial<WeeklyRoutine>): Promise<ServiceResponse<WeeklyRoutine>> {
         try {
             // For non-template routines, set fecha_inicio_semana to Monday of current week
-            const insertData: any = {
+            const insertData: WeeklyRoutineInsert = {
                 ...routineData,
                 updated_at: new Date().toISOString(),
             };
@@ -416,7 +392,7 @@ export const RoutineService = {
         }
     },
 
-    async deleteWeeklyRoutine(id: string): Promise<{ error: any | null }> {
+    async deleteWeeklyRoutine(id: string): Promise<{ error: unknown }> {
         try {
             const { error } = await supabase
                 .from('rutinas_semanales')
@@ -455,7 +431,7 @@ export const RoutineService = {
 
             // Look for the most recent completed workout for the same day name
             // to use its series data (weight) instead of template values
-            let prevSeriesMap = new Map<string, any[]>();
+            let prevSeriesMap = new Map<string, Serie[]>();
             try {
                 const { data: prevWorkouts } = await supabase
                     .from('rutinas_diarias')
@@ -525,7 +501,7 @@ export const RoutineService = {
                         : (templateEx.series || []);
 
                     if (sourceSeries.length > 0) {
-                        const seriesToInsert = sourceSeries.map((serie: any) => ({
+                        const seriesToInsert = sourceSeries.map((serie: Serie) => ({
                             ejercicio_programado_id: newEx.id,
                             numero_serie: serie.numero_serie,
                             peso_utilizado: serie.peso_utilizado || 0,
@@ -793,7 +769,7 @@ export const RoutineService = {
 
                             // 5. Copy series for this exercise
                             if (exercise.series && exercise.series.length > 0) {
-                                const seriesToInsert = exercise.series.map((serie: any) => ({
+                                const seriesToInsert = exercise.series.map((serie: Serie) => ({
                                     ejercicio_programado_id: newExercise.id,
                                     numero_serie: serie.numero_serie,
                                     repeticiones: serie.repeticiones,

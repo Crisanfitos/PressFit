@@ -1,26 +1,16 @@
+import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { PostgrestError, UserMetrics, ServiceResponse, UserProfile } from '../types/models';
 
-
-interface UserMetrics {
-    weight: number;
-    height: number;
-    bodyFatPercentage?: number;
-    imc?: number;
-}
-
-interface ServiceResponse<T> {
-    data: T | null;
-    error: any | null;
-}
 
 export const UserService = {
-    async createOrUpdateProfile(user: any): Promise<ServiceResponse<any>> {
+    async createOrUpdateProfile(user: User): Promise<ServiceResponse<UserProfile>> {
         try {
             const { data, error } = await supabase
                 .from('usuarios')
                 .upsert({
                     id: user.id,
-                    email: user.email,
+                    email: user.email!,
                     nombre: user.user_metadata?.full_name || '',
                     updated_at: new Date().toISOString(),
                 })
@@ -35,7 +25,7 @@ export const UserService = {
         }
     },
 
-    async saveUserMetrics(userId: string, metrics: UserMetrics): Promise<ServiceResponse<any>> {
+    async saveUserMetrics(userId: string, metrics: UserMetrics): Promise<ServiceResponse<UserProfile>> {
         try {
             const imc = metrics.imc ??
                 (metrics.weight / Math.pow(metrics.height / 100, 2));
@@ -84,7 +74,7 @@ export const UserService = {
                 .eq('id', userId)
                 .single();
 
-            if (error && (error as any).code !== 'PGRST116') throw error;
+            if (error && (error as PostgrestError).code !== 'PGRST116') throw error;
 
             // Convert Meters to CM for the app
             if (data?.altura) {

@@ -1,46 +1,19 @@
 import { supabase } from '../lib/supabase';
 import { TipoPeso } from '../types/setTypes';
 import { formatLocalDateKey, parseDateKeyAsLocalDate } from '../utils/dateUtils';
-
-interface SetData {
-    id: string;
-    numero_serie: number;
-    peso_utilizado: number;
-    repeticiones: number;
-    rpe?: number;
-    [key: string]: any;
-}
-
-interface ScheduledExercise {
-    id: string;
-    rutina_diaria_id: string;
-    ejercicio_id: string;
-    orden_ejecucion: number;
-    tipo_peso: TipoPeso;
-    ejercicio?: any;
-    series?: SetData[];
-    [key: string]: any;
-}
-
-interface WorkoutDetails {
-    id: string;
-    nombre_dia: string;
-    fecha_dia: string;
-    hora_inicio?: string;
-    hora_fin?: string;
-    completada: boolean;
-    descripcion?: string;
-    ejercicios_programados?: ScheduledExercise[];
-    [key: string]: any;
-}
-
-interface ServiceResponse<T> {
-    data: T | null;
-    error: any | null;
-}
+import {
+    Serie,
+    ScheduledExercise,
+    RoutineDay,
+    ServiceResponse,
+    SetUpdatePayload,
+    PostgrestError,
+    SeriesInsert,
+    ExerciseHistoryRow,
+} from '../types/models';
 
 export const WorkoutService = {
-    async getWorkoutDetails(workoutId: string): Promise<ServiceResponse<WorkoutDetails>> {
+    async getWorkoutDetails(workoutId: string): Promise<ServiceResponse<RoutineDay>> {
         try {
             const { data, error } = await supabase
                 .from('rutinas_diarias')
@@ -60,14 +33,14 @@ export const WorkoutService = {
             // Sort exercises by order
             if (data?.ejercicios_programados) {
                 data.ejercicios_programados.sort(
-                    (a: any, b: any) => (a.orden_ejecucion || 0) - (b.orden_ejecucion || 0)
+                    (a: ScheduledExercise, b: ScheduledExercise) => (a.orden_ejecucion || 0) - (b.orden_ejecucion || 0)
                 );
 
                 // Sort sets by number
-                data.ejercicios_programados.forEach((ex: any) => {
+                data.ejercicios_programados.forEach((ex: ScheduledExercise) => {
                     if (ex.series) {
                         ex.series.sort(
-                            (a: any, b: any) => (a.numero_serie || 0) - (b.numero_serie || 0)
+                            (a: Serie, b: Serie) => (a.numero_serie || 0) - (b.numero_serie || 0)
                         );
                     }
                 });
@@ -80,7 +53,7 @@ export const WorkoutService = {
         }
     },
 
-    async createWorkout(userId: string, routineDayId: string): Promise<ServiceResponse<any>> {
+    async createWorkout(userId: string, routineDayId: string): Promise<ServiceResponse<RoutineDay>> {
         try {
             const { data: templateDay, error: templateError } = await supabase
                 .from('rutinas_diarias')
@@ -105,7 +78,7 @@ export const WorkoutService = {
             if (createError) throw createError;
 
             if (templateDay.ejercicios_programados?.length > 0) {
-                const exercisesToInsert = templateDay.ejercicios_programados.map((ex: any) => ({
+                const exercisesToInsert = templateDay.ejercicios_programados.map((ex: ScheduledExercise) => ({
                     rutina_diaria_id: newWorkout.id,
                     ejercicio_id: ex.ejercicio_id,
                     orden_ejecucion: ex.orden_ejecucion,
@@ -145,12 +118,12 @@ export const WorkoutService = {
                     if (lastWorkouts?.[0]?.ejercicios_programados && insertedExercises) {
                         // Map exercise_id -> new ejercicio_programado_id
                         const newExerciseMap = new Map<string, string>();
-                        insertedExercises.forEach((ex: any) => {
+                        insertedExercises.forEach((ex: { ejercicio_id: string; id: string }) => {
                             newExerciseMap.set(ex.ejercicio_id, ex.id);
                         });
 
                         // Copy series with only weight filled, reps/rpe as 0 (shown as placeholders)
-                        const seriesToInsert: any[] = [];
+                        const seriesToInsert: SeriesInsert[] = [];
                         for (const lastExercise of lastWorkouts[0].ejercicios_programados) {
                             const newExerciseId = newExerciseMap.get(lastExercise.ejercicio_id);
                             if (newExerciseId && lastExercise.series?.length > 0) {
@@ -185,7 +158,7 @@ export const WorkoutService = {
         }
     },
 
-    async completeWorkout(workoutId: string, durationMinutes?: number): Promise<ServiceResponse<any>> {
+    async completeWorkout(workoutId: string, durationMinutes?: number): Promise<ServiceResponse<RoutineDay>> {
         try {
             const { data, error } = await supabase
                 .from('rutinas_diarias')
@@ -209,7 +182,7 @@ export const WorkoutService = {
     async getSeriesForExercise(
         workoutId: string,
         exerciseId: string
-    ): Promise<ServiceResponse<SetData[]>> {
+    ): Promise<ServiceResponse<Serie[]>> {
         try {
             // Find the ejercicio_programado linking this exercise to this workout
             const { data: scheduledExercise, error: findError } = await supabase
@@ -243,7 +216,7 @@ export const WorkoutService = {
         setNumber: number,
         weight: number,
         reps: number
-    ): Promise<ServiceResponse<SetData>> {
+    ): Promise<ServiceResponse<Serie>> {
         try {
             let { data: scheduledExercise, error: findError } = await supabase
                 .from('ejercicios_programados')
@@ -252,7 +225,7 @@ export const WorkoutService = {
                 .eq('ejercicio_id', exerciseId)
                 .single();
 
-            if (findError && (findError as any).code !== 'PGRST116') throw findError;
+            if (findError && (findError as PostgrestError).code !== 'PGRST116') throw findError;
 
             if (!scheduledExercise) {
                 const { data: maxOrderData } = await supabase
@@ -301,9 +274,9 @@ export const WorkoutService = {
     async updateSet(
         setId: string,
         updates: { weight?: number; reps?: number; rpe?: number; descanso_segundos?: number }
-    ): Promise<ServiceResponse<SetData>> {
+    ): Promise<ServiceResponse<Serie>> {
         try {
-            const dbUpdates: any = {};
+            const dbUpdates: SetUpdatePayload = {};
             if (updates.weight !== undefined) dbUpdates.peso_utilizado = updates.weight;
             if (updates.reps !== undefined) dbUpdates.repeticiones = updates.reps;
             if (updates.rpe !== undefined) dbUpdates.rpe = updates.rpe;
@@ -324,7 +297,7 @@ export const WorkoutService = {
         }
     },
 
-    async deleteSet(setId: string): Promise<{ error: any | null }> {
+    async deleteSet(setId: string): Promise<{ error: unknown }> {
         try {
             const { error } = await supabase.from('series').delete().eq('id', setId);
 
@@ -336,7 +309,7 @@ export const WorkoutService = {
         }
     },
 
-    async removeExerciseFromRoutine(routineExerciseId: string): Promise<{ error: any | null }> {
+    async removeExerciseFromRoutine(routineExerciseId: string): Promise<{ error: unknown }> {
         try {
             const { error } = await supabase
                 .from('ejercicios_programados')
@@ -354,7 +327,7 @@ export const WorkoutService = {
     async getLastCompletedWorkoutForDay(
         userId: string,
         routineDayId: string
-    ): Promise<ServiceResponse<WorkoutDetails>> {
+    ): Promise<ServiceResponse<RoutineDay>> {
         try {
             const { data: templateDay } = await supabase
                 .from('rutinas_diarias')
@@ -426,7 +399,7 @@ export const WorkoutService = {
     async removeExerciseFromWorkout(
         workoutId: string,
         exerciseId: string
-    ): Promise<{ error: any | null }> {
+    ): Promise<{ error: unknown }> {
         try {
             const { error } = await supabase
                 .from('ejercicios_programados')
@@ -445,7 +418,7 @@ export const WorkoutService = {
     async getExerciseHistory(
         userId: string,
         exerciseId: string
-    ): Promise<ServiceResponse<any[]>> {
+    ): Promise<ServiceResponse<ExerciseHistoryRow[]>> {
         try {
             // Join series with ejercicios_programados and rutinas_diarias to get the date
             // Ordered by rutinas_diarias.fecha_dia
@@ -475,7 +448,7 @@ export const WorkoutService = {
             if (error) throw error;
 
             // Flatten and sort the data in JS to ensure correctness
-            const history = (data || []).map((row: any) => ({
+            const history = (data || []).map((row: ExerciseHistoryRow) => ({
                 id: row.id,
                 numero_serie: row.numero_serie,
                 peso_utilizado: row.peso_utilizado,
