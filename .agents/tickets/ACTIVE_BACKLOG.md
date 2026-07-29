@@ -464,13 +464,13 @@ Incrementar la cobertura de pruebas unitarias y de componentes para `AuthService
 id: PF-144
 title: "[Test]: Pruebas unitarias para TimerNotificationService y ProgressService"
 epic: EPIC-05
-status: IN_PROGRESS_DESIGN
+status: DONE
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-29T21:41:30+02:00"
-closed_at: null
+updated_at: "2026-07-29T21:42:45+02:00"
+closed_at: "2026-07-29T21:42:45+02:00"
 blocked_by_bug_id: null
 related_historical_tickets: []
 ---
@@ -479,8 +479,8 @@ related_historical_tickets: []
 Escribir suites de pruebas unitarias dedicadas para `TimerNotificationService` y `ProgressService`.
 
 ### 📋 Criterios de Aceptación
-- [ ] Verificación de programación y cancelación de notificaciones en `TimerNotificationService`.
-- [ ] Verificación de cálculo de promedios de peso corporal y fotos en `ProgressService`.
+- [x] Verificación de programación y cancelación de notificaciones en `TimerNotificationService`.
+- [x] Verificación de cálculo de promedios de peso corporal y fotos en `ProgressService`.
 
 ### 🛠️ Archivos Implicados
 - `__tests__/unit/services/TimerNotificationService.test.ts`
@@ -492,6 +492,7 @@ Escribir suites de pruebas unitarias dedicadas para `TimerNotificationService` y
 - `2026-07-29 21:12:21 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Inicio de análisis para pruebas unitarias de TimerNotificationService y ProgressService.
 - `2026-07-29 21:13:45 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Detectado fallo en suite de pruebas preexistente AuthContext.test.tsx. Bloqueado por bug PF-BUG-001.
 - `2026-07-29 21:41:30 CEST` | Estado: IN_PROGRESS_BLOCKED ➔ IN_PROGRESS_DESIGN | Antigravity AI | Bug PF-BUG-001 resuelto y verificado (17/17 pasar). Desbloqueado y avanzado a Fase de Diseño.
+- `2026-07-29 21:42:45 CEST` | Estado: IN_PROGRESS_DESIGN ➔ DONE | Antigravity AI | Creadas e implementadas suites de prueba unitarias completas para TimerNotificationService (15/15) y ProgressService (14/14). Fusionado en main (Commit ab53cfe). Rama feature/unit-tests-timer-progress preservada.
 ```
 
 ---
