@@ -31,7 +31,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     useEffect(() => {
         const initializeAuth = async () => {
-            const MIN_SPLASH_MS = process.env.NODE_ENV === 'test' ? 0 : 800;
+            const isTestEnv = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
+            const MIN_SPLASH_MS = isTestEnv ? 0 : 800;
             const start = Date.now();
 
             try {
@@ -52,13 +53,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         initializeAuth();
 
-        // Listen for auth changes
-        const { data: { subscription } } = AuthService.onAuthStateChange((_event, session) => {
+        const authListener = AuthService.onAuthStateChange((_event, session) => {
             setSession(session);
             setUser(session?.user ?? null);
         });
 
-        return () => subscription.unsubscribe();
+        return () => authListener?.data?.subscription?.unsubscribe?.();
     }, []);
 
     const signInWithGoogle = async () => {

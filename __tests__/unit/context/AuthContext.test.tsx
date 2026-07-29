@@ -44,25 +44,56 @@ const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <AuthProvider>{children}</AuthProvider>
 );
 
+// Helper ErrorBoundary to swallow component errors in React 19 without corrupting test renderer
+class TestErrorBoundary extends React.Component<{ children: React.ReactNode }, { error: Error | null }> {
+    state = { error: null };
+    static getDerivedStateFromError(error: Error) {
+        return { error };
+    }
+    render() {
+        if (this.state.error) {
+            return <Text>{(this.state.error as Error).message}</Text>;
+        }
+        return this.props.children;
+    }
+}
+
 describe('AuthContext & AuthProvider', () => {
     let authStateCallback: ((event: string, session: any) => void) | null = null;
     const mockUnsubscribe = jest.fn();
 
-    const mockSession = {
+    const getMockSession = () => ({
         access_token: 'valid_access_token',
         refresh_token: 'valid_refresh_token',
         user: { id: 'user_123', email: 'test@example.com' },
-    } as any;
+    }) as any;
 
     beforeEach(() => {
+        cleanup();
         jest.clearAllMocks();
         authStateCallback = null;
+
+        const { openAuthSessionAsync } = getWebBrowser();
+        const { makeRedirectUri } = getAuthSession();
+        const { parseOAuthCallbackUrl } = getParseOAuthCallbackUrl();
+
+        (openAuthSessionAsync as jest.Mock).mockReset();
+        (makeRedirectUri as jest.Mock).mockReset().mockReturnValue('pressfit://auth/callback');
+        (parseOAuthCallbackUrl as jest.Mock).mockReset();
+
+        (AuthService.signInWithEmail as jest.Mock).mockReset();
+        (AuthService.signUpWithEmail as jest.Mock).mockReset();
+        (AuthService.signOut as jest.Mock).mockReset();
+        (AuthService.signInWithOAuth as jest.Mock).mockReset();
+        (AuthService.exchangeCodeForSession as jest.Mock).mockReset();
+        (AuthService.setSession as jest.Mock).mockReset();
 
         (AuthService.onAuthStateChange as jest.Mock).mockImplementation((cb) => {
             authStateCallback = cb;
             return { data: { subscription: { unsubscribe: mockUnsubscribe } } };
         });
 
+        (AuthService.getSession as jest.Mock).mockReset();
         (AuthService.getSession as jest.Mock).mockResolvedValue(null);
     });
 
@@ -70,37 +101,22 @@ describe('AuthContext & AuthProvider', () => {
         cleanup();
     });
 
-    /**
-     * Renders the AuthProvider and waits for initializeAuth()
-     * to finish so isLoading becomes false.
-     */
     const renderAndWait = async () => {
-        const rendered = renderHook(() => useAuth(), { wrapper: AuthWrapper });
-        await waitFor(() => expect(rendered.result.current?.isLoading).toBe(false));
-        return rendered;
+        const hook = await renderHook(() => useAuth(), { wrapper: AuthWrapper });
+        await waitFor(() => {
+            expect(hook.result.current.isLoading).toBe(false);
+        });
+        return hook;
     };
 
-    // ----------------------------------------------------------------
     // useAuth hook guard
     // ----------------------------------------------------------------
     describe('useAuth hook', () => {
-        it('should throw an error when used outside of AuthProvider', () => {
+        it('should throw an error when used outside of AuthProvider', async () => {
             const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-            let caughtError: Error | null = null;
-            const TestComponent = () => {
-                try {
-                    useAuth();
-                } catch (e: any) {
-                    caughtError = e;
-                }
-                return <Text>test</Text>;
-            };
+            await expect(renderHook(() => useAuth())).rejects.toThrow('useAuth must be used within an AuthProvider');
 
-            render(<TestComponent />);
-
-            expect(caughtError).toBeDefined();
-            expect(caughtError!.message).toBe('useAuth must be used within an AuthProvider');
             consoleSpy.mockRestore();
         });
     });
@@ -109,17 +125,18 @@ describe('AuthContext & AuthProvider', () => {
     // AuthProvider initialization
     // ----------------------------------------------------------------
     describe('AuthProvider initialization', () => {
-        it('should start in loading state before getSession resolves', () => {
-            // Promise that does not resolve immediately
-            (AuthService.getSession as jest.Mock).mockReturnValue(new Promise(() => {}));
+        it('should start in loading state before getSession resolves', async () => {
+            (AuthService.getSession as jest.Mock).mockReturnValueOnce(new Promise(() => {}));
 
-            const { result } = renderHook(() => useAuth(), { wrapper: AuthWrapper });
+            const hook = await renderHook(() => useAuth(), { wrapper: AuthWrapper });
 
-            expect(result.current.isLoading).toBe(true);
+            expect(hook.result.current.isLoading).toBe(true);
+            hook.unmount();
         });
 
         it('should initialize with session and user when session exists', async () => {
-            (AuthService.getSession as jest.Mock).mockResolvedValueOnce(mockSession);
+            const mockSession = getMockSession();
+            (AuthService.getSession as jest.Mock).mockResolvedValue(mockSession);
 
             const { result } = await renderAndWait();
 
@@ -130,7 +147,7 @@ describe('AuthContext & AuthProvider', () => {
         });
 
         it('should initialize without session when no session exists', async () => {
-            (AuthService.getSession as jest.Mock).mockResolvedValueOnce(null);
+            (AuthService.getSession as jest.Mock).mockResolvedValue(null);
 
             const { result } = await renderAndWait();
 
@@ -142,7 +159,7 @@ describe('AuthContext & AuthProvider', () => {
 
         it('should handle getSession error gracefully during initialization', async () => {
             const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-            (AuthService.getSession as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+            (AuthService.getSession as jest.Mock).mockRejectedValue(new Error('Network error'));
 
             const { result } = await renderAndWait();
 
@@ -164,38 +181,47 @@ describe('AuthContext & AuthProvider', () => {
         });
 
         it('should update user and session when auth state changes to SIGNED_IN', async () => {
+            const mockSession = getMockSession();
             const { result } = await renderAndWait();
 
             expect(result.current.user).toBeNull();
 
-            act(() => {
+            await act(async () => {
                 authStateCallback?.('SIGNED_IN', mockSession);
             });
 
-            expect(result.current.session).toEqual(mockSession);
-            expect(result.current.user).toEqual(mockSession.user);
-            expect(result.current.isAuthenticated).toBe(true);
+            await waitFor(() => {
+                expect(result.current.session).toEqual(mockSession);
+                expect(result.current.user).toEqual(mockSession.user);
+                expect(result.current.isAuthenticated).toBe(true);
+            });
         });
 
         it('should clear user and session when auth state changes to SIGNED_OUT', async () => {
-            (AuthService.getSession as jest.Mock).mockResolvedValueOnce(mockSession);
+            const mockSession = getMockSession();
+            (AuthService.getSession as jest.Mock).mockResolvedValue(mockSession);
             const { result } = await renderAndWait();
 
             expect(result.current.isAuthenticated).toBe(true);
 
-            act(() => {
+            await act(async () => {
                 authStateCallback?.('SIGNED_OUT', null);
             });
 
-            expect(result.current.session).toBeNull();
-            expect(result.current.user).toBeNull();
-            expect(result.current.isAuthenticated).toBe(false);
+            await waitFor(() => {
+                expect(result.current.session).toBeNull();
+                expect(result.current.user).toBeNull();
+                expect(result.current.isAuthenticated).toBe(false);
+            });
         });
 
         it('should unsubscribe on unmount', async () => {
             const { unmount } = await renderAndWait();
 
-            unmount();
+            await act(async () => {
+                await unmount();
+            });
+
             expect(mockUnsubscribe).toHaveBeenCalled();
         });
     });
@@ -205,28 +231,24 @@ describe('AuthContext & AuthProvider', () => {
     // ----------------------------------------------------------------
     describe('Auth methods delegation', () => {
         it('should delegate signInWithEmail to AuthService', async () => {
+            const mockSession = getMockSession();
             (AuthService.signInWithEmail as jest.Mock).mockResolvedValue({ user: mockSession.user });
 
             const { result } = await renderAndWait();
 
-            let res: any;
-            await act(async () => {
-                res = await result.current.signInWithEmail('test@example.com', 'pass123');
-            });
+            const res = await result.current.signInWithEmail('test@example.com', 'pass123');
 
             expect(AuthService.signInWithEmail).toHaveBeenCalledWith('test@example.com', 'pass123');
             expect(res).toEqual({ user: mockSession.user });
         });
 
         it('should delegate signUpWithEmail to AuthService', async () => {
+            const mockSession = getMockSession();
             (AuthService.signUpWithEmail as jest.Mock).mockResolvedValue({ user: mockSession.user });
 
             const { result } = await renderAndWait();
 
-            let res: any;
-            await act(async () => {
-                res = await result.current.signUpWithEmail('test@example.com', 'pass123', 'John Doe');
-            });
+            const res = await result.current.signUpWithEmail('test@example.com', 'pass123', 'John Doe');
 
             expect(AuthService.signUpWithEmail).toHaveBeenCalledWith('test@example.com', 'pass123', 'John Doe');
             expect(res).toEqual({ user: mockSession.user });
@@ -237,9 +259,7 @@ describe('AuthContext & AuthProvider', () => {
 
             const { result } = await renderAndWait();
 
-            await act(async () => {
-                await result.current.signOut();
-            });
+            await result.current.signOut();
 
             expect(AuthService.signOut).toHaveBeenCalled();
         });
@@ -250,6 +270,7 @@ describe('AuthContext & AuthProvider', () => {
     // ----------------------------------------------------------------
     describe('signInWithGoogle OAuth flow', () => {
         it('should handle PKCE flow successfully', async () => {
+            const mockSession = getMockSession();
             const { parseOAuthCallbackUrl } = getParseOAuthCallbackUrl();
             (parseOAuthCallbackUrl as jest.Mock).mockReturnValue({ code: 'pkce_code_789' });
 
@@ -268,10 +289,7 @@ describe('AuthContext & AuthProvider', () => {
 
             const { result } = await renderAndWait();
 
-            let session: any;
-            await act(async () => {
-                session = await result.current.signInWithGoogle();
-            });
+            const session = await result.current.signInWithGoogle();
 
             expect(getAuthSession().makeRedirectUri).toHaveBeenCalledWith({
                 scheme: 'pressfit',
@@ -290,6 +308,7 @@ describe('AuthContext & AuthProvider', () => {
         });
 
         it('should handle Implicit flow successfully', async () => {
+            const mockSession = getMockSession();
             const { parseOAuthCallbackUrl } = getParseOAuthCallbackUrl();
             (parseOAuthCallbackUrl as jest.Mock).mockReturnValue({
                 accessToken: 'acc_token_123',
@@ -311,10 +330,7 @@ describe('AuthContext & AuthProvider', () => {
 
             const { result } = await renderAndWait();
 
-            let session: any;
-            await act(async () => {
-                session = await result.current.signInWithGoogle();
-            });
+            const session = await result.current.signInWithGoogle();
 
             expect(AuthService.setSession).toHaveBeenCalledWith({
                 access_token: 'acc_token_123',
@@ -332,11 +348,7 @@ describe('AuthContext & AuthProvider', () => {
 
             const { result } = await renderAndWait();
 
-            await expect(
-                act(async () => {
-                    await result.current.signInWithGoogle();
-                })
-            ).rejects.toThrow('OAuth init error');
+            await expect(result.current.signInWithGoogle()).rejects.toThrow('OAuth init error');
             consoleSpy.mockRestore();
         });
 
@@ -356,11 +368,7 @@ describe('AuthContext & AuthProvider', () => {
 
             const { result } = await renderAndWait();
 
-            await expect(
-                act(async () => {
-                    await result.current.signInWithGoogle();
-                })
-            ).rejects.toThrow('user_cancelled');
+            await expect(result.current.signInWithGoogle()).rejects.toThrow('user_cancelled');
             consoleSpy.mockRestore();
         });
 
@@ -376,11 +384,7 @@ describe('AuthContext & AuthProvider', () => {
 
             const { result } = await renderAndWait();
 
-            await expect(
-                act(async () => {
-                    await result.current.signInWithGoogle();
-                })
-            ).rejects.toThrow('OAuth flow failed');
+            await expect(result.current.signInWithGoogle()).rejects.toThrow('OAuth flow failed');
             consoleSpy.mockRestore();
         });
     });
