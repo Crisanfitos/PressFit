@@ -1,16 +1,16 @@
 # 📋 Tablero de Backlog Activo — PressFit Expo
 
-> **Estado**: Activo (Poblado con Issues PF-131 a PF-171)  
-> **Última Actualización del Tablero**: `2026-07-28 23:08:50 CEST`  
+> **Estado**: Activo (Poblado con Issues PF-131 a PF-172)  
+> **Última Actualización del Tablero**: `2026-07-29 21:01:26 CEST`  
 > **Última Issue Histórica**: `PF-130`  
-> **Siguiente Issue Disponible**: `PF-172`
+> **Siguiente Issue Disponible**: `PF-173`
 
 ---
 
 ## 🚦 Vistas Rápidas del Tablero
 
 * **En Progreso (`IN_PROGRESS_*`)**: 0 tickets
-* **Pendientes Listos en Backlog (`BACKLOG`)**: 11 tickets (`PF-141`, `PF-144`, `PF-145`, `PF-147` a `PF-149`, `PF-154`, `PF-155`, `PF-160`, `PF-166`)
+* **Pendientes Listos en Backlog (`BACKLOG`)**: 12 tickets (`PF-141`, `PF-144`, `PF-145`, `PF-147` a `PF-149`, `PF-154`, `PF-155`, `PF-160`, `PF-166`, `PF-172`)
 * **Bloqueados por Infraestructura / Dependencias (`IN_PROGRESS_BLOCKED`)**: 17 tickets (`PF-150` a `PF-153`, `PF-156` a `PF-159`, `PF-161` a `PF-165`, `PF-167`, `PF-168`, `PF-170`, `PF-171`)
 * **Completados (`DONE`)**: 144 tickets (`PF-001` a `PF-140`, `PF-142`, `PF-143`, `PF-146`, `PF-169`)
 
@@ -517,6 +517,44 @@ Resolver de forma sistémica la superposición del teclado virtual sobre inputs 
 
 ### 🛠️ Archivos Implicados
 - `src/components/KeyboardAwareContainer.tsx`
+```
+
+---
+
+#### PF-172
+```markdown
+---
+id: PF-172
+title: "[Bug Fix / Test]: Refactorización de AuthContext.test.tsx para eliminar desincronización de desmonte en RNTL"
+epic: EPIC-05
+status: BACKLOG
+priority: HIGH
+reporter: Usuario / Antigravity AI
+assignee: Antigravity AI
+created_at: "2026-07-29T21:01:26+02:00"
+updated_at: "2026-07-29T21:01:26+02:00"
+closed_at: null
+related_historical_tickets: [PF-143]
+---
+
+### 🎯 Objetivo
+Corregir el archivo de pruebas `__tests__/unit/context/AuthContext.test.tsx` para evitar que `result.current` pase a `null` por desmonte prematuro durante retrasos de temporizadores reales (`setTimeout` dentro de `act`).
+
+### 📋 Criterios de Aceptación
+- [ ] Eliminar `setTimeout(..., 900)`/`setTimeout(..., 1000)` reales dentro de `act()` que provocan el desmonte del árbol renderizado por RNTL.
+- [ ] Mockear o circunvalar `MIN_SPLASH_MS = 800` en `AuthContext` durante pruebas o implementar un harness con Fake Timers aislados sin fuga entre tests.
+- [ ] Lograr que los 16 tests de `AuthContext.test.tsx` pasen en verde de forma determinista (16/16 passed).
+
+### 🔍 Contexto e Información Requerida (Pre-Coding)
+- Error registrado: `TypeError: Cannot read properties of null (reading 'signInWithGoogle')`.
+- En RNTL v12+, las esperas de tiempo real dentro de `act()` acumuladas con `cleanup()` en `afterEach` marcan las referencias del hook `renderHook` como unmounted (`result.current = null`).
+
+### 🛠️ Archivos Implicados
+- `__tests__/unit/context/AuthContext.test.tsx`
+- `src/context/AuthContext.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-29 21:01:26 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog tras diagnóstico de fallos por desincronización de temporizadores en RNTL.
 ```
 
 ---
