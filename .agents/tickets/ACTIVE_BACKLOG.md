@@ -10,9 +10,9 @@
 ## 🚦 Vistas Rápidas del Tablero
 
 * **En Progreso (`IN_PROGRESS_*`)**: 0 tickets
-* **Pendientes Listos en Backlog (`BACKLOG`)**: 12 tickets (`PF-141`, `PF-143` a `PF-145`, `PF-147` a `PF-149`, `PF-154`, `PF-155`, `PF-160`, `PF-166`)
+* **Pendientes Listos en Backlog (`BACKLOG`)**: 11 tickets (`PF-141`, `PF-144`, `PF-145`, `PF-147` a `PF-149`, `PF-154`, `PF-155`, `PF-160`, `PF-166`)
 * **Bloqueados por Infraestructura / Dependencias (`IN_PROGRESS_BLOCKED`)**: 17 tickets (`PF-150` a `PF-153`, `PF-156` a `PF-159`, `PF-161` a `PF-165`, `PF-167`, `PF-168`, `PF-170`, `PF-171`)
-* **Completados (`DONE`)**: 143 tickets (`PF-001` a `PF-140`, `PF-142`, `PF-146`, `PF-169`)
+* **Completados (`DONE`)**: 144 tickets (`PF-001` a `PF-140`, `PF-142`, `PF-143`, `PF-146`, `PF-169`)
 
 ---
 
@@ -421,13 +421,13 @@ Mostrar una alerta o badge prudencial en la interfaz de entrenamiento cuando el 
 id: PF-143
 title: "[Test]: Pruebas unitarias para AuthService y AuthContext"
 epic: EPIC-05
-status: BACKLOG
+status: DONE
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-28T22:59:00+02:00"
-closed_at: null
+updated_at: "2026-07-29T20:55:07+02:00"
+closed_at: "2026-07-29T20:55:07+02:00"
 related_historical_tickets: []
 ---
 
@@ -435,8 +435,8 @@ related_historical_tickets: []
 Incrementar la cobertura de pruebas unitarias y de componentes para `AuthService` y `AuthContext`.
 
 ### 📋 Criterios de Aceptación
-- [ ] Suite de pruebas para `signInWithEmail`, `signUpWithEmail`, `signOut` y listener de estado.
-- [ ] Cobertura de tests para el contexto de autenticación en RNTL > 85%.
+- [x] Suite de pruebas para `signInWithEmail`, `signUpWithEmail`, `signOut` y listener de estado.
+- [x] Cobertura de tests para el contexto de autenticación en RNTL > 85%.
 
 ### 🔍 Contexto e Información Requerida (Pre-Coding)
 - Revisar `AuthService.ts` y `AuthContext.tsx`.
@@ -448,6 +448,12 @@ Incrementar la cobertura de pruebas unitarias y de componentes para `AuthService
 ### 📜 Historial de Modificaciones
 - `2026-07-24 20:03:25 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 22:59:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
+- `2026-07-28 23:14:35 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Inicio de la fase de análisis pre-coding.
+- `2026-07-28 23:15:00 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Tránsito a diseño tras validación exitosa de baseline tests (252/252 unit tests en verde).
+- `2026-07-28 23:15:15 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Creación de rama update/auth-unit-tests e inicio de la construcción de pruebas unitarias.
+- `2026-07-28 23:41:00 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Pausado por indicación del usuario. Diagnóstico registrado: Fuga de temporizador `MIN_SPLASH_MS = 800` de `initializeAuth()` provoca `TypeError: Cannot read properties of undefined (reading 'current')` al re-renderizar en tests dependientes.
+- `2026-07-29 20:54:00 CEST` | Estado: IN_PROGRESS_TEST ➔ IN_REVIEW | Antigravity AI | Resuelta fuga de temporizadores en AuthContext.test.tsx mediante drenaje síncrono en afterEach y resueltos mocks de supabase/lib. Pruebas unitarias (268/268) y componentes (76/76) 100% en verde.
+- `2026-07-29 20:55:07 CEST` | Estado: IN_REVIEW ➔ DONE | Antigravity AI | Ticket completado y fusionado en main (Commit ffdec1a). Rama update/auth-unit-tests preservada.
 ```
 
 ---
