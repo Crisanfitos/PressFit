@@ -464,14 +464,14 @@ Incrementar la cobertura de pruebas unitarias y de componentes para `AuthService
 id: PF-144
 title: "[Test]: Pruebas unitarias para TimerNotificationService y ProgressService"
 epic: EPIC-05
-status: IN_PROGRESS_BLOCKED
+status: IN_PROGRESS_DESIGN
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-29T21:13:45+02:00"
+updated_at: "2026-07-29T21:41:30+02:00"
 closed_at: null
-blocked_by_bug_id: PF-BUG-001
+blocked_by_bug_id: null
 related_historical_tickets: []
 ---
 
@@ -491,6 +491,7 @@ Escribir suites de pruebas unitarias dedicadas para `TimerNotificationService` y
 - `2026-07-28 22:59:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
 - `2026-07-29 21:12:21 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Inicio de análisis para pruebas unitarias de TimerNotificationService y ProgressService.
 - `2026-07-29 21:13:45 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_BLOCKED | Antigravity AI | Detectado fallo en suite de pruebas preexistente AuthContext.test.tsx. Bloqueado por bug PF-BUG-001.
+- `2026-07-29 21:41:30 CEST` | Estado: IN_PROGRESS_BLOCKED ➔ IN_PROGRESS_DESIGN | Antigravity AI | Bug PF-BUG-001 resuelto y verificado (17/17 pasar). Desbloqueado y avanzado a Fase de Diseño.
 ```
 
 ---
@@ -501,13 +502,13 @@ Escribir suites de pruebas unitarias dedicadas para `TimerNotificationService` y
 id: PF-BUG-001
 title: "[BUG]: Fallo preexistente en AuthContext.test.tsx por desajuste en renderHook y waitFor"
 epic: EPIC-05
-status: IN_PROGRESS_BUILD
+status: DONE
 priority: HIGH
 reporter: Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-29T21:13:45+02:00"
-updated_at: "2026-07-29T21:14:00+02:00"
-closed_at: null
+updated_at: "2026-07-29T21:41:30+02:00"
+closed_at: "2026-07-29T21:41:30+02:00"
 related_historical_tickets: [PF-172]
 ---
 
@@ -515,8 +516,8 @@ related_historical_tickets: [PF-172]
 Reparar el fallo preexistente en `AuthContext.test.tsx` detectado durante el análisis baseline de PF-144.
 
 ### 📋 Criterios de Aceptación
-- [ ] Ejecución 100% exitosa de `npx jest __tests__/unit/context/AuthContext.test.tsx`.
-- [ ] Preservación del estado verde en la suite completa de unit tests (`npm run test:unit`).
+- [x] Ejecución 100% exitosa de `npx jest __tests__/unit/context/AuthContext.test.tsx`.
+- [x] Preservación del estado verde en la suite completa de unit tests (`npm run test:unit`).
 
 ### 🛠️ Archivos Implicados
 - `__tests__/unit/context/AuthContext.test.tsx`
@@ -524,6 +525,7 @@ Reparar el fallo preexistente en `AuthContext.test.tsx` detectado durante el an�
 ### 📜 Historial de Modificaciones
 - `2026-07-29 21:13:45 CEST` | Estado: CREATED ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Bug preexistente aislado e identificado durante la fase de análisis de PF-144.
 - `2026-07-29 21:14:00 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_BUILD | Antigravity AI | Conmutado a rama bug/pf-bug-001 e inicio del arreglo quirúrgico.
+- `2026-07-29 21:41:30 CEST` | Estado: IN_PROGRESS_BUILD ➔ DONE | Antigravity AI | Arreglado AuthContext.test.tsx (17/17 en verde). Fusionado en main (Commit 8b17c47). Rama bug/pf-bug-001 preservada.
 ```
 
 ---
