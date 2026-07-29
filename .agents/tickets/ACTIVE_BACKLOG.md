@@ -9,8 +9,8 @@
 
 ## 🚦 Vistas Rápidas del Tablero
 
-* **En Progreso (`IN_PROGRESS_*`)**: 0 tickets
-* **Pendientes Listos en Backlog (`BACKLOG`)**: 12 tickets (`PF-141`, `PF-144`, `PF-145`, `PF-147` a `PF-149`, `PF-154`, `PF-155`, `PF-160`, `PF-166`, `PF-172`)
+* **En Progreso (`IN_PROGRESS_*`)**: 1 tickets (`PF-172`)
+* **Pendientes Listos en Backlog (`BACKLOG`)**: 11 tickets (`PF-141`, `PF-144`, `PF-145`, `PF-147` a `PF-149`, `PF-154`, `PF-155`, `PF-160`, `PF-166`)
 * **Bloqueados por Infraestructura / Dependencias (`IN_PROGRESS_BLOCKED`)**: 17 tickets (`PF-150` a `PF-153`, `PF-156` a `PF-159`, `PF-161` a `PF-165`, `PF-167`, `PF-168`, `PF-170`, `PF-171`)
 * **Completados (`DONE`)**: 144 tickets (`PF-001` a `PF-140`, `PF-142`, `PF-143`, `PF-146`, `PF-169`)
 
@@ -527,12 +527,12 @@ Resolver de forma sistémica la superposición del teclado virtual sobre inputs 
 id: PF-172
 title: "[Bug Fix / Test]: Refactorización de AuthContext.test.tsx para eliminar desincronización de desmonte en RNTL"
 epic: EPIC-05
-status: BACKLOG
+status: IN_PROGRESS_ANALYSIS
 priority: HIGH
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-29T21:01:26+02:00"
-updated_at: "2026-07-29T21:01:26+02:00"
+updated_at: "2026-07-29T21:03:00+02:00"
 closed_at: null
 related_historical_tickets: [PF-143]
 ---
@@ -555,6 +555,7 @@ Corregir el archivo de pruebas `__tests__/unit/context/AuthContext.test.tsx` par
 
 ### 📜 Historial de Modificaciones
 - `2026-07-29 21:01:26 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog tras diagnóstico de fallos por desincronización de temporizadores en RNTL.
+- `2026-07-29 21:03:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Inicio de la fase de análisis pre-coding.
 ```
 
 ---
