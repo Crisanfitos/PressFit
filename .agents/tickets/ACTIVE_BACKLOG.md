@@ -9,10 +9,10 @@
 
 ## 🚦 Vistas Rápidas del Tablero
 
-* **En Progreso (`IN_PROGRESS_*`)**: 1 tickets (`PF-172`)
+* **En Progreso (`IN_PROGRESS_*`)**: 0 tickets
 * **Pendientes Listos en Backlog (`BACKLOG`)**: 11 tickets (`PF-141`, `PF-144`, `PF-145`, `PF-147` a `PF-149`, `PF-154`, `PF-155`, `PF-160`, `PF-166`)
 * **Bloqueados por Infraestructura / Dependencias (`IN_PROGRESS_BLOCKED`)**: 17 tickets (`PF-150` a `PF-153`, `PF-156` a `PF-159`, `PF-161` a `PF-165`, `PF-167`, `PF-168`, `PF-170`, `PF-171`)
-* **Completados (`DONE`)**: 144 tickets (`PF-001` a `PF-140`, `PF-142`, `PF-143`, `PF-146`, `PF-169`)
+* **Completados (`DONE`)**: 145 tickets (`PF-001` a `PF-140`, `PF-142`, `PF-143`, `PF-146`, `PF-169`, `PF-172`)
 
 ---
 
@@ -527,13 +527,13 @@ Resolver de forma sistémica la superposición del teclado virtual sobre inputs 
 id: PF-172
 title: "[Bug Fix / Test]: Refactorización de AuthContext.test.tsx para eliminar desincronización de desmonte en RNTL"
 epic: EPIC-05
-status: IN_PROGRESS_ANALYSIS
+status: DONE
 priority: HIGH
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-29T21:01:26+02:00"
-updated_at: "2026-07-29T21:03:00+02:00"
-closed_at: null
+updated_at: "2026-07-29T21:05:00+02:00"
+closed_at: "2026-07-29T21:05:00+02:00"
 related_historical_tickets: [PF-143]
 ---
 
@@ -541,9 +541,9 @@ related_historical_tickets: [PF-143]
 Corregir el archivo de pruebas `__tests__/unit/context/AuthContext.test.tsx` para evitar que `result.current` pase a `null` por desmonte prematuro durante retrasos de temporizadores reales (`setTimeout` dentro de `act`).
 
 ### 📋 Criterios de Aceptación
-- [ ] Eliminar `setTimeout(..., 900)`/`setTimeout(..., 1000)` reales dentro de `act()` que provocan el desmonte del árbol renderizado por RNTL.
-- [ ] Mockear o circunvalar `MIN_SPLASH_MS = 800` en `AuthContext` durante pruebas o implementar un harness con Fake Timers aislados sin fuga entre tests.
-- [ ] Lograr que los 16 tests de `AuthContext.test.tsx` pasen en verde de forma determinista (16/16 passed).
+- [x] Eliminar `setTimeout(..., 900)`/`setTimeout(..., 1000)` reales dentro de `act()` que provocan el desmonte del árbol renderizado por RNTL.
+- [x] Mockear o circunvalar `MIN_SPLASH_MS = 800` en `AuthContext` durante pruebas o implementar un harness con Fake Timers aislados sin fuga entre tests.
+- [x] Lograr que los 17 tests de `AuthContext.test.tsx` pasen en verde de forma determinista (17/17 passed).
 
 ### 🔍 Contexto e Información Requerida (Pre-Coding)
 - Error registrado: `TypeError: Cannot read properties of null (reading 'signInWithGoogle')`.
@@ -556,6 +556,10 @@ Corregir el archivo de pruebas `__tests__/unit/context/AuthContext.test.tsx` par
 ### 📜 Historial de Modificaciones
 - `2026-07-29 21:01:26 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog tras diagnóstico de fallos por desincronización de temporizadores en RNTL.
 - `2026-07-29 21:03:00 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Inicio de la fase de análisis pre-coding.
+- `2026-07-29 21:03:30 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Definido plan de optimización de MIN_SPLASH_MS en entorno test.
+- `2026-07-29 21:03:45 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Inicio de implementación en AuthContext.tsx y AuthContext.test.tsx.
+- `2026-07-29 21:04:30 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Pruebas unitarias (269/269) y componentes (76/76) 100% en verde en 1.3s.
+- `2026-07-29 21:05:00 CEST` | Estado: IN_PROGRESS_TEST ➔ DONE | Antigravity AI | Ticket completado y fusionado en main (Commit 5924530). Rama fix/auth-context-test-timer-unmount preservada.
 ```
 
 ---
