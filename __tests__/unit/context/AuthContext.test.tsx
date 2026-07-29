@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderHook, act, cleanup, render } from '@testing-library/react-native';
+import { renderHook, act, cleanup, render, waitFor } from '@testing-library/react-native';
 import { Text } from 'react-native';
 import { AuthProvider, useAuth } from '../../../src/context/AuthContext';
 import { AuthService } from '../../../src/services/AuthService';
@@ -44,13 +44,6 @@ const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <AuthProvider>{children}</AuthProvider>
 );
 
-/** Wait for MIN_SPLASH_MS (800ms) plus buffer for async state updates */
-const waitForInit = async () => {
-    await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 900));
-    });
-};
-
 describe('AuthContext & AuthProvider', () => {
     let authStateCallback: ((event: string, session: any) => void) | null = null;
     const mockUnsubscribe = jest.fn();
@@ -73,25 +66,18 @@ describe('AuthContext & AuthProvider', () => {
         (AuthService.getSession as jest.Mock).mockResolvedValue(null);
     });
 
-    afterEach(async () => {
-        // Drain any pending MIN_SPLASH_MS timers before cleanup
-        await act(async () => {
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-        });
+    afterEach(() => {
         cleanup();
     });
 
     /**
-     * Renders the AuthProvider and waits for the MIN_SPLASH_MS delay
+     * Renders the AuthProvider and waits for initializeAuth()
      * to finish so isLoading becomes false.
      */
     const renderAndWait = async () => {
-        const hook = renderHook(() => useAuth(), { wrapper: AuthWrapper });
-
-        // Wait for initializeAuth() to complete (getSession + MIN_SPLASH_MS delay)
-        await waitForInit();
-
-        return hook;
+        const rendered = renderHook(() => useAuth(), { wrapper: AuthWrapper });
+        await waitFor(() => expect(rendered.result.current?.isLoading).toBe(false));
+        return rendered;
     };
 
     // ----------------------------------------------------------------
@@ -101,8 +87,6 @@ describe('AuthContext & AuthProvider', () => {
         it('should throw an error when used outside of AuthProvider', () => {
             const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-            // Use a component-based test since renderHook in node env
-            // doesn't expose result.error reliably
             let caughtError: Error | null = null;
             const TestComponent = () => {
                 try {
@@ -125,6 +109,15 @@ describe('AuthContext & AuthProvider', () => {
     // AuthProvider initialization
     // ----------------------------------------------------------------
     describe('AuthProvider initialization', () => {
+        it('should start in loading state before getSession resolves', () => {
+            // Promise that does not resolve immediately
+            (AuthService.getSession as jest.Mock).mockReturnValue(new Promise(() => {}));
+
+            const { result } = renderHook(() => useAuth(), { wrapper: AuthWrapper });
+
+            expect(result.current.isLoading).toBe(true);
+        });
+
         it('should initialize with session and user when session exists', async () => {
             (AuthService.getSession as jest.Mock).mockResolvedValueOnce(mockSession);
 

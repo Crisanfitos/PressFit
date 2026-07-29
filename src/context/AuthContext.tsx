@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     useEffect(() => {
         const initializeAuth = async () => {
-            const MIN_SPLASH_MS = 800;
+            const MIN_SPLASH_MS = process.env.NODE_ENV === 'test' ? 0 : 800;
             const start = Date.now();
 
             try {
