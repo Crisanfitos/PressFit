@@ -1,0 +1,394 @@
+import React from 'react';
+import { renderHook, act, cleanup, render } from '@testing-library/react-native';
+import { Text } from 'react-native';
+import { AuthProvider, useAuth } from '../../../src/context/AuthContext';
+import { AuthService } from '../../../src/services/AuthService';
+
+// --- Mocks ---
+jest.mock('../../../src/services/AuthService');
+jest.mock('../../../src/lib/supabase', () => ({
+    supabase: {
+        auth: {
+            signInWithPassword: jest.fn(),
+            signUp: jest.fn(),
+            signOut: jest.fn(),
+            getSession: jest.fn(),
+            onAuthStateChange: jest.fn(),
+            signInWithOAuth: jest.fn(),
+            exchangeCodeForSession: jest.fn(),
+            setSession: jest.fn(),
+            startAutoRefresh: jest.fn(),
+            stopAutoRefresh: jest.fn(),
+        },
+    },
+}));
+jest.mock('expo-web-browser', () => ({
+    maybeCompleteAuthSession: jest.fn(),
+    openAuthSessionAsync: jest.fn(),
+}));
+jest.mock('expo-auth-session', () => ({
+    makeRedirectUri: jest.fn().mockReturnValue('pressfit://auth/callback'),
+}));
+jest.mock('../../../src/utils/parseOAuthCallbackUrl', () => ({
+    parseOAuthCallbackUrl: jest.fn(),
+}));
+
+// Lazy imports for mocked modules
+const getWebBrowser = () => require('expo-web-browser') as { openAuthSessionAsync: jest.Mock };
+const getAuthSession = () => require('expo-auth-session') as { makeRedirectUri: jest.Mock };
+const getParseOAuthCallbackUrl = () =>
+    require('../../../src/utils/parseOAuthCallbackUrl') as { parseOAuthCallbackUrl: jest.Mock };
+
+// --- Helpers ---
+const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <AuthProvider>{children}</AuthProvider>
+);
+
+/** Wait for MIN_SPLASH_MS (800ms) plus buffer for async state updates */
+const waitForInit = async () => {
+    await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 900));
+    });
+};
+
+describe('AuthContext & AuthProvider', () => {
+    let authStateCallback: ((event: string, session: any) => void) | null = null;
+    const mockUnsubscribe = jest.fn();
+
+    const mockSession = {
+        access_token: 'valid_access_token',
+        refresh_token: 'valid_refresh_token',
+        user: { id: 'user_123', email: 'test@example.com' },
+    } as any;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        authStateCallback = null;
+
+        (AuthService.onAuthStateChange as jest.Mock).mockImplementation((cb) => {
+            authStateCallback = cb;
+            return { data: { subscription: { unsubscribe: mockUnsubscribe } } };
+        });
+
+        (AuthService.getSession as jest.Mock).mockResolvedValue(null);
+    });
+
+    afterEach(async () => {
+        // Drain any pending MIN_SPLASH_MS timers before cleanup
+        await act(async () => {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+        });
+        cleanup();
+    });
+
+    /**
+     * Renders the AuthProvider and waits for the MIN_SPLASH_MS delay
+     * to finish so isLoading becomes false.
+     */
+    const renderAndWait = async () => {
+        const hook = renderHook(() => useAuth(), { wrapper: AuthWrapper });
+
+        // Wait for initializeAuth() to complete (getSession + MIN_SPLASH_MS delay)
+        await waitForInit();
+
+        return hook;
+    };
+
+    // ----------------------------------------------------------------
+    // useAuth hook guard
+    // ----------------------------------------------------------------
+    describe('useAuth hook', () => {
+        it('should throw an error when used outside of AuthProvider', () => {
+            const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+            // Use a component-based test since renderHook in node env
+            // doesn't expose result.error reliably
+            let caughtError: Error | null = null;
+            const TestComponent = () => {
+                try {
+                    useAuth();
+                } catch (e: any) {
+                    caughtError = e;
+                }
+                return <Text>test</Text>;
+            };
+
+            render(<TestComponent />);
+
+            expect(caughtError).toBeDefined();
+            expect(caughtError!.message).toBe('useAuth must be used within an AuthProvider');
+            consoleSpy.mockRestore();
+        });
+    });
+
+    // ----------------------------------------------------------------
+    // AuthProvider initialization
+    // ----------------------------------------------------------------
+    describe('AuthProvider initialization', () => {
+        it('should initialize with session and user when session exists', async () => {
+            (AuthService.getSession as jest.Mock).mockResolvedValueOnce(mockSession);
+
+            const { result } = await renderAndWait();
+
+            expect(result.current.isLoading).toBe(false);
+            expect(result.current.session).toEqual(mockSession);
+            expect(result.current.user).toEqual(mockSession.user);
+            expect(result.current.isAuthenticated).toBe(true);
+        });
+
+        it('should initialize without session when no session exists', async () => {
+            (AuthService.getSession as jest.Mock).mockResolvedValueOnce(null);
+
+            const { result } = await renderAndWait();
+
+            expect(result.current.isLoading).toBe(false);
+            expect(result.current.session).toBeNull();
+            expect(result.current.user).toBeNull();
+            expect(result.current.isAuthenticated).toBe(false);
+        });
+
+        it('should handle getSession error gracefully during initialization', async () => {
+            const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            (AuthService.getSession as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+
+            const { result } = await renderAndWait();
+
+            expect(result.current.isLoading).toBe(false);
+            expect(result.current.session).toBeNull();
+            expect(result.current.user).toBeNull();
+            expect(result.current.isAuthenticated).toBe(false);
+            consoleSpy.mockRestore();
+        });
+    });
+
+    // ----------------------------------------------------------------
+    // Auth state change listener
+    // ----------------------------------------------------------------
+    describe('Auth state change listener', () => {
+        it('should register an auth state change listener on mount', async () => {
+            await renderAndWait();
+            expect(AuthService.onAuthStateChange).toHaveBeenCalledTimes(1);
+        });
+
+        it('should update user and session when auth state changes to SIGNED_IN', async () => {
+            const { result } = await renderAndWait();
+
+            expect(result.current.user).toBeNull();
+
+            act(() => {
+                authStateCallback?.('SIGNED_IN', mockSession);
+            });
+
+            expect(result.current.session).toEqual(mockSession);
+            expect(result.current.user).toEqual(mockSession.user);
+            expect(result.current.isAuthenticated).toBe(true);
+        });
+
+        it('should clear user and session when auth state changes to SIGNED_OUT', async () => {
+            (AuthService.getSession as jest.Mock).mockResolvedValueOnce(mockSession);
+            const { result } = await renderAndWait();
+
+            expect(result.current.isAuthenticated).toBe(true);
+
+            act(() => {
+                authStateCallback?.('SIGNED_OUT', null);
+            });
+
+            expect(result.current.session).toBeNull();
+            expect(result.current.user).toBeNull();
+            expect(result.current.isAuthenticated).toBe(false);
+        });
+
+        it('should unsubscribe on unmount', async () => {
+            const { unmount } = await renderAndWait();
+
+            unmount();
+            expect(mockUnsubscribe).toHaveBeenCalled();
+        });
+    });
+
+    // ----------------------------------------------------------------
+    // Auth methods delegation
+    // ----------------------------------------------------------------
+    describe('Auth methods delegation', () => {
+        it('should delegate signInWithEmail to AuthService', async () => {
+            (AuthService.signInWithEmail as jest.Mock).mockResolvedValue({ user: mockSession.user });
+
+            const { result } = await renderAndWait();
+
+            let res: any;
+            await act(async () => {
+                res = await result.current.signInWithEmail('test@example.com', 'pass123');
+            });
+
+            expect(AuthService.signInWithEmail).toHaveBeenCalledWith('test@example.com', 'pass123');
+            expect(res).toEqual({ user: mockSession.user });
+        });
+
+        it('should delegate signUpWithEmail to AuthService', async () => {
+            (AuthService.signUpWithEmail as jest.Mock).mockResolvedValue({ user: mockSession.user });
+
+            const { result } = await renderAndWait();
+
+            let res: any;
+            await act(async () => {
+                res = await result.current.signUpWithEmail('test@example.com', 'pass123', 'John Doe');
+            });
+
+            expect(AuthService.signUpWithEmail).toHaveBeenCalledWith('test@example.com', 'pass123', 'John Doe');
+            expect(res).toEqual({ user: mockSession.user });
+        });
+
+        it('should delegate signOut to AuthService', async () => {
+            (AuthService.signOut as jest.Mock).mockResolvedValue(undefined);
+
+            const { result } = await renderAndWait();
+
+            await act(async () => {
+                await result.current.signOut();
+            });
+
+            expect(AuthService.signOut).toHaveBeenCalled();
+        });
+    });
+
+    // ----------------------------------------------------------------
+    // signInWithGoogle OAuth flow
+    // ----------------------------------------------------------------
+    describe('signInWithGoogle OAuth flow', () => {
+        it('should handle PKCE flow successfully', async () => {
+            const { parseOAuthCallbackUrl } = getParseOAuthCallbackUrl();
+            (parseOAuthCallbackUrl as jest.Mock).mockReturnValue({ code: 'pkce_code_789' });
+
+            (AuthService.signInWithOAuth as jest.Mock).mockResolvedValue({
+                data: { url: 'https://supabase.co/auth/v1/authorize?provider=google' },
+                error: null,
+            });
+            getWebBrowser().openAuthSessionAsync.mockResolvedValue({
+                type: 'success',
+                url: 'pressfit://auth/callback?code=pkce_code_789',
+            });
+            (AuthService.exchangeCodeForSession as jest.Mock).mockResolvedValue({
+                data: { session: mockSession },
+                error: null,
+            });
+
+            const { result } = await renderAndWait();
+
+            let session: any;
+            await act(async () => {
+                session = await result.current.signInWithGoogle();
+            });
+
+            expect(getAuthSession().makeRedirectUri).toHaveBeenCalledWith({
+                scheme: 'pressfit',
+                path: 'auth/callback',
+            });
+            expect(AuthService.signInWithOAuth).toHaveBeenCalledWith('google', {
+                redirectTo: 'pressfit://auth/callback',
+                skipBrowserRedirect: true,
+            });
+            expect(getWebBrowser().openAuthSessionAsync).toHaveBeenCalledWith(
+                'https://supabase.co/auth/v1/authorize?provider=google',
+                'pressfit://auth/callback'
+            );
+            expect(AuthService.exchangeCodeForSession).toHaveBeenCalledWith('pkce_code_789');
+            expect(session).toEqual(mockSession);
+        });
+
+        it('should handle Implicit flow successfully', async () => {
+            const { parseOAuthCallbackUrl } = getParseOAuthCallbackUrl();
+            (parseOAuthCallbackUrl as jest.Mock).mockReturnValue({
+                accessToken: 'acc_token_123',
+                refreshToken: 'ref_token_123',
+            });
+
+            (AuthService.signInWithOAuth as jest.Mock).mockResolvedValue({
+                data: { url: 'https://supabase.co/auth/v1/authorize?provider=google' },
+                error: null,
+            });
+            getWebBrowser().openAuthSessionAsync.mockResolvedValue({
+                type: 'success',
+                url: 'pressfit://auth/callback#access_token=acc_token_123&refresh_token=ref_token_123',
+            });
+            (AuthService.setSession as jest.Mock).mockResolvedValue({
+                data: mockSession,
+                error: null,
+            });
+
+            const { result } = await renderAndWait();
+
+            let session: any;
+            await act(async () => {
+                session = await result.current.signInWithGoogle();
+            });
+
+            expect(AuthService.setSession).toHaveBeenCalledWith({
+                access_token: 'acc_token_123',
+                refresh_token: 'ref_token_123',
+            });
+            expect(session).toEqual(mockSession);
+        });
+
+        it('should throw error when signInWithOAuth returns error', async () => {
+            const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            (AuthService.signInWithOAuth as jest.Mock).mockResolvedValue({
+                data: null,
+                error: new Error('OAuth init error'),
+            });
+
+            const { result } = await renderAndWait();
+
+            await expect(
+                act(async () => {
+                    await result.current.signInWithGoogle();
+                })
+            ).rejects.toThrow('OAuth init error');
+            consoleSpy.mockRestore();
+        });
+
+        it('should throw error when callback URL contains error parameter', async () => {
+            const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            const { parseOAuthCallbackUrl } = getParseOAuthCallbackUrl();
+            (parseOAuthCallbackUrl as jest.Mock).mockReturnValue({ error: 'user_cancelled' });
+
+            (AuthService.signInWithOAuth as jest.Mock).mockResolvedValue({
+                data: { url: 'https://supabase.co/auth/v1/authorize?provider=google' },
+                error: null,
+            });
+            getWebBrowser().openAuthSessionAsync.mockResolvedValue({
+                type: 'success',
+                url: 'pressfit://auth/callback?error=user_cancelled',
+            });
+
+            const { result } = await renderAndWait();
+
+            await expect(
+                act(async () => {
+                    await result.current.signInWithGoogle();
+                })
+            ).rejects.toThrow('user_cancelled');
+            consoleSpy.mockRestore();
+        });
+
+        it('should throw error when browser session fails or is cancelled', async () => {
+            const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            (AuthService.signInWithOAuth as jest.Mock).mockResolvedValue({
+                data: { url: 'https://supabase.co/auth/v1/authorize?provider=google' },
+                error: null,
+            });
+            getWebBrowser().openAuthSessionAsync.mockResolvedValue({
+                type: 'cancel',
+            });
+
+            const { result } = await renderAndWait();
+
+            await expect(
+                act(async () => {
+                    await result.current.signInWithGoogle();
+                })
+            ).rejects.toThrow('OAuth flow failed');
+            consoleSpy.mockRestore();
+        });
+    });
+});
