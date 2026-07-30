@@ -479,7 +479,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                 ) : null}
 
                 {workoutStats?.isCompleted && (
-                    <View style={[styles.statusBadge, { backgroundColor: `${colors.statusSuccess}20` }]}>
+                    <View style={[styles.statusBadge, { backgroundColor: `${colors.statusSuccess}20` }]} testID="status-badge-completed">
                         <MaterialIcons name="check-circle" size={18} color={colors.statusSuccess} />
                         <Text style={[styles.statusText, { color: colors.statusSuccess }]}>
                             Completado
@@ -502,7 +502,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                 )}
 
                 {activeWorkout && !workoutStats?.isCompleted && (
-                    <View style={[styles.statusBadge, { backgroundColor: `${colors.statusWarning}20` }]}>
+                    <View style={[styles.statusBadge, { backgroundColor: `${colors.statusWarning}20` }]} testID="status-badge-in-progress">
                         <MaterialIcons name="play-circle" size={18} color={colors.statusWarning} />
                         <Text style={[styles.statusText, { color: colors.statusWarning }]}>
                             En Progreso

@@ -614,20 +614,20 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                 </View>
 
                 {/* Legend */}
-                <View style={[styles.legendContainer, { paddingBottom: 100 }]}>
-                    <View style={styles.legendItem}>
+                <View style={[styles.legendContainer, { paddingBottom: 100 }]} testID="status-legend">
+                    <View style={styles.legendItem} testID="legend-today">
                         <View style={[styles.legendDot, { backgroundColor: colors.primary }]} />
                         <Text style={styles.legendText}>Hoy</Text>
                     </View>
-                    <View style={styles.legendItem}>
+                    <View style={styles.legendItem} testID="legend-completed">
                         <View style={[styles.legendDot, { backgroundColor: (colors as any).timelineCompleted || colors.statusSuccess }]} />
                         <Text style={styles.legendText}>Completado</Text>
                     </View>
-                    <View style={styles.legendItem}>
+                    <View style={styles.legendItem} testID="legend-in-progress">
                         <View style={[styles.legendDot, { backgroundColor: (colors as any).timelineInProgress || colors.statusWarning }]} />
                         <Text style={styles.legendText}>En Progreso</Text>
                     </View>
-                    <View style={styles.legendItem}>
+                    <View style={styles.legendItem} testID="legend-missed">
                         <View style={[styles.legendDot, { backgroundColor: `${colors.statusError}30` }]} />
                         <Text style={styles.legendText}>Sin Hacer</Text>
                     </View>
