@@ -8,6 +8,7 @@ import {
     ScrollView,
     Dimensions,
     Animated,
+    RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -52,6 +53,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
     const [completedDays, setCompletedDays] = useState<Set<string>>(new Set());
     const [inProgressDays, setInProgressDays] = useState<Set<string>>(new Set());
     const [drawerVisible, setDrawerVisible] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
     const dropdownHeight = useState(new Animated.Value(0))[0];
 
     const drawerMenuItems: MenuItem[] = useMemo(() => [
@@ -188,6 +190,17 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
             setInProgressDays(inProgress);
         }
     };
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        if (userId) {
+            await loadRoutines();
+        }
+        if (selectedRoutine?.id) {
+            await loadWorkoutStats();
+        }
+        setRefreshing(false);
+    }, [userId, selectedRoutine?.id, year, month]);
 
     // Toggle dropdown
     const toggleRoutineSelector = () => {
@@ -435,7 +448,18 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
 
     return (
         <SafeAreaView style={styles.container} testID="monthly-calendar-screen">
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        colors={[colors.primary]}
+                        tintColor={colors.primary}
+                        testID="calendar-refresh-control"
+                    />
+                }
+            >
                 {/* Header with Routine Selector */}
                 <View style={styles.header}>
                     {/* Hamburger Menu */}

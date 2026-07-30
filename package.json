@@ -38,6 +38,7 @@
     "test:e2e:us012": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_012_side_drawer_toggle.yaml",
     "test:e2e:us013": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_013_bottom_tab_navigation.yaml",
     "test:e2e:us014": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_014_status_badges_verification.yaml",
+    "test:e2e:us015": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_015_calendar_pull_to_refresh.yaml",
     "test:e2e:smoke": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/smoke_flow.yaml",
     "test:e2e:all": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/"
   },
