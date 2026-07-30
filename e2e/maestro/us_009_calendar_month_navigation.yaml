@@ -1,0 +1,111 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_009_calendar_month_navigation.yaml — US-009: Cambio entre meses anterior/siguiente en el calendario
+
+- launchApp:
+    clearState: true
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 1. Navegar desde bienvenida a pantalla de Login
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+# 2. Introducir credenciales de prueba
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+- inputText: "${E2E_TEST_EMAIL}"
+
+- tapOn:
+    id: "password-input"
+- inputText: "${E2E_TEST_PASSWORD}"
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# 3. Verificar entrada a la pantalla del Calendario Mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+- assertVisible:
+    id: "month-title"
+
+# 4. Navegar hacia el mes anterior
+- tapOn:
+    id: "prev-month-button"
+
+- assertVisible:
+    id: "month-title"
+
+# 5. Navegar dos veces hacia el mes siguiente
+- tapOn:
+    id: "next-month-button"
+
+- assertVisible:
+    id: "month-title"
+
+- tapOn:
+    id: "next-month-button"
+
+- assertVisible:
+    id: "month-title"
+
+# 6. Retornar al mes actual (prev)
+- tapOn:
+    id: "prev-month-button"
+
+- assertVisible:
+    id: "month-title"
+
+# 7. Limpieza (Logout final)
+- tapOn: "Perfil"
+
+- scroll
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000

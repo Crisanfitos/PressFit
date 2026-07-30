@@ -32,6 +32,7 @@
     "test:e2e:us006": "maestro --device emulator-5554 test e2e/maestro/us_006_password_visibility_toggle.yaml",
     "test:e2e:us007": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_007_logout_flow.yaml",
     "test:e2e:us008": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_008_monthly_calendar_grid.yaml",
+    "test:e2e:us009": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_009_calendar_month_navigation.yaml",
     "test:e2e:smoke": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/smoke_flow.yaml",
     "test:e2e:all": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/"
   },
