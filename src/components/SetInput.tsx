@@ -8,6 +8,7 @@ interface SetInputProps {
     isEditable: boolean;
     colors: any;
     maxLength?: number;
+    testID?: string;
 }
 
 const SetInput: React.FC<SetInputProps> = ({
@@ -17,6 +18,7 @@ const SetInput: React.FC<SetInputProps> = ({
     isEditable,
     colors,
     maxLength,
+    testID = 'set-input',
 }) => {
     // Local state to handle typing without triggering saves on each keystroke
     const [localValue, setLocalValue] = useState(
@@ -38,7 +40,7 @@ const SetInput: React.FC<SetInputProps> = ({
 
     return (
         <TextInput
-            testID="set-input"
+            testID={testID}
             style={[
                 styles.input,
                 {

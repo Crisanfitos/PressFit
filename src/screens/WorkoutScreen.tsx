@@ -595,6 +595,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                                     </View>
                                                                 ) : (
                                                                     <SetInput
+                                                                        testID={`set-weight-input-${setIndex}`}
                                                                         value={set.peso_utilizado > 0 ? set.peso_utilizado : ''}
                                                                         placeholder={ghostWeight ?? '-'}
                                                                         onChange={(val) => handleSetChange(set.id, 'weight', val)}
@@ -606,6 +607,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                             </View>
                                                             <View style={[styles.inputGroup, { maxWidth: 80 }]}>
                                                                 <SetInput
+                                                                    testID={`set-reps-input-${setIndex}`}
                                                                     value={set.repeticiones > 0 ? set.repeticiones : ''}
                                                                     placeholder={ghostReps ?? '-'}
                                                                     onChange={(val) => handleSetChange(set.id, 'reps', val)}
@@ -616,6 +618,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                             </View>
                                                             <View style={[styles.inputGroup, { maxWidth: 60 }]}>
                                                                 <SetInput
+                                                                    testID={`set-rpe-input-${setIndex}`}
                                                                     value={set.rpe && set.rpe > 0 ? set.rpe : ''}
                                                                     placeholder={ghostRpe ?? '-'}
                                                                     onChange={(val) => handleSetChange(set.id, 'rpe', val)}
