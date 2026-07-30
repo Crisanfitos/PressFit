@@ -537,13 +537,13 @@ Reparar el fallo preexistente en `AuthContext.test.tsx` detectado durante el an�
 id: PF-145
 title: "[Refactor]: Componente KeyboardAwareContainer para resolución sistémica de teclado"
 epic: EPIC-06
-status: IN_PROGRESS_BUILD
+status: DONE
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-29T21:47:15+02:00"
-closed_at: null
+updated_at: "2026-07-30T07:28:40+02:00"
+closed_at: "2026-07-30T07:28:40+02:00"
 related_historical_tickets: [PF-044, PF-112, PF-114, PF-116]
 ---
 
@@ -551,11 +551,15 @@ related_historical_tickets: [PF-044, PF-112, PF-114, PF-116]
 Resolver de forma sistémica la superposición del teclado virtual sobre inputs de texto creando un wrapper global reutilizable.
 
 ### 📋 Criterios de Aceptación
-- [ ] Componente `KeyboardAwareContainer.tsx` envolviendo `KeyboardAvoidingView` y `ScrollView`.
-- [ ] Aplicado en `WorkoutScreen`, `RoutineEditScreen` y formulación de perfiles.
+- [x] Componente `KeyboardAwareContainer.tsx` envolviendo `KeyboardAvoidingView` y `ScrollView`.
+- [x] Aplicado en `WorkoutScreen`, `RoutineEditScreen` y formulación de perfiles.
 
 ### 🛠️ Archivos Implicados
 - `src/components/KeyboardAwareContainer.tsx`
+- `src/screens/WorkoutScreen.tsx`
+- `src/screens/RoutineEditorScreen.tsx`
+- `src/screens/PhysicalProgressScreen.tsx`
+- `__tests__/components/KeyboardAwareContainer.test.tsx`
 
 ### 📜 Historial de Modificaciones
 - `2026-07-24 20:03:25 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
@@ -563,6 +567,9 @@ Resolver de forma sistémica la superposición del teclado virtual sobre inputs 
 - `2026-07-29 21:46:30 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Inicio de la fase de análisis pre-coding para PF-145.
 - `2026-07-29 21:46:45 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Tránsito a diseño tras validación exitosa de baseline tests (282/282 en verde).
 - `2026-07-29 21:47:15 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Aprobación del plan e inicio de la fase de construcción (Build).
+- `2026-07-30 07:28:10 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Tránsito a pruebas tras refactorizar KeyboardAwareContainer, WorkoutScreen, RoutineEditorScreen y PhysicalProgressScreen.
+- `2026-07-30 07:28:30 CEST` | Estado: IN_PROGRESS_TEST ➔ IN_REVIEW | Antigravity AI | Pruebas unitarias (282/282) y de componentes (77/77) 100% en verde.
+- `2026-07-30 07:28:40 CEST` | Estado: IN_REVIEW ➔ DONE | Antigravity AI | Desarrollo completado con éxito. Fusionado en main (Commit 2bb5933). Rama update/keyboard-aware-container preservada.
 ```
 
 ---
