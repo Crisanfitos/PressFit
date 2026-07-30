@@ -296,7 +296,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
     });
 
     return (
-        <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
+        <Animated.View testID="rest-timer-banner" style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
             <View style={styles.iconContainer}>
                 <MaterialIcons
                     name={isStopped ? 'timer-off' : 'timer'}
@@ -305,7 +305,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                 />
             </View>
             <View style={{ flex: 1 }}>
-                <Text style={styles.timerText}>{formatTime(seconds)}</Text>
+                <Text testID="rest-timer-text" style={styles.timerText}>{formatTime(seconds)}</Text>
                 <Text style={styles.label}>{isStopped ? 'Pausado' : 'Descanso'}</Text>
             </View>
 

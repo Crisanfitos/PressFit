@@ -1,0 +1,107 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# US-021: Verificación de auto-inicio del temporizador de descanso (RestTimer) al completar serie
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- assertVisible:
+    id: "welcome-screen"
+
+- tapOn:
+    id: "login-button"
+
+- assertVisible:
+    id: "email-input"
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+- tapOn:
+    id: "calendar-day-today"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "start-workout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 15000
+
+# Completar una serie para disparar el temporizador de descanso
+- runFlow:
+    when:
+      visible:
+        id: "set-complete-checkbox-0"
+    commands:
+      - tapOn:
+          id: "set-complete-checkbox-0"
+      - assertVisible:
+          id: "rest-timer-banner"
+
+# Regresar a WorkoutDayScreen
+- back
+
+- assertVisible:
+    id: "workout-day-screen"
+
+# Regresar a MonthlyCalendarScreen
+- tapOn:
+    id: "workout-day-back-button"
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# Limpieza: Cierre de Sesión
+- tapOn: "Perfil"
+
+- scroll
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- assertVisible:
+    id: "logout-confirm-button"
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- assertVisible:
+    id: "welcome-screen"
