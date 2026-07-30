@@ -463,6 +463,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                         style={styles.backButton}
                         onPress={() => navigation.goBack()}
                         hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                        testID="workout-day-back-button"
                     >
                         <MaterialIcons name="arrow-back" size={24} color={colors.text} />
                     </TouchableOpacity>
