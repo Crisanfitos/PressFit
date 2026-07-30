@@ -1,0 +1,50 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_002_welcome_to_login.yaml — US-002: Navegación de Bienvenida a pantalla de Login (LoginScreen)
+
+- launchApp
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# Espera a que la pantalla de bienvenida esté visible
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 15000
+
+# Verificación de visibilidad del botón de login
+- assertVisible:
+    id: "login-button"
+
+# Acción: Pulsar el botón Iniciar Sesión
+- tapOn:
+    id: "login-button"
+
+# Espera a que la pantalla de Login esté visible tras la navegación
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 15000
+
+# Aserciones de visibilidad de los elementos del formulario de Login
+- assertVisible:
+    id: "login-screen"
+
+- assertVisible:
+    id: "email-input"
+
+- assertVisible:
+    id: "password-input"
+
+- assertVisible:
+    id: "login-submit-button"
