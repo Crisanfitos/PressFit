@@ -4,3 +4,8 @@ appId: com.crisanfitos.PressFit_Expo
 # Lanza la aplicación PressFit en el emulador
 
 - launchApp
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true

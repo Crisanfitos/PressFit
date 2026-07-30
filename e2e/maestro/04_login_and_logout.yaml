@@ -6,11 +6,16 @@ appId: com.crisanfitos.PressFit_Expo
 - launchApp:
     clearState: true
 
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
 # 1. Navegar desde bienvenida a pantalla de Login
 - extendedWaitUntil:
     visible:
       id: "login-button"
-    timeout: 10000
+    timeout: 15000
 
 - tapOn:
     id: "login-button"

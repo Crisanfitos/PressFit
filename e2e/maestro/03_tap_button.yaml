@@ -4,10 +4,15 @@ appId: com.crisanfitos.PressFit_Expo
 
 - launchApp
 
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
 - extendedWaitUntil:
     visible:
       id: "login-button"
-    timeout: 10000
+    timeout: 15000
 
 # Tap on "Iniciar Sesión" to open login screen
 - tapOn:

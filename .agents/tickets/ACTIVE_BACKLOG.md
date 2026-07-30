@@ -837,17 +837,56 @@ Corregir la aserción de pantalla inicial en la suite Maestro para validar `Welc
 
 
 
-```
-
-
-
-
 
 
 ```
 
+---
 
-#### PF-148
+#### PF-175
+```markdown
+---
+id: PF-175
+title: "[Task]: Manejo de Expo Dev Client Launcher UI y menú flotante de desarrollo en flujos Maestro E2E"
+epic: EPIC-00-BLOCKING
+status: IN_PROGRESS_TEST
+priority: HIGH
+reporter: Usuario / Antigravity AI
+assignee: Antigravity AI
+created_at: "2026-07-30T09:32:00+02:00"
+updated_at: "2026-07-30T09:35:00+02:00"
+closed_at: null
+related_historical_tickets: [PF-147, PF-BUG-002, PF-173, PF-174]
+---
+
+### 🎯 Objetivo
+Hacer que los flujos de pruebas E2E en Maestro superen automáticamente la pantalla de inicio de Expo Dev Client ("Development Servers / http://10.0.2.2:8081") y descarten overlays/menús flotantes de desarrollo al iniciar la aplicación.
+
+### 📋 Criterios de Aceptación
+- [x] Incorporado en todos los flujos YAML el paso condicional `tapOn` para conectar automáticamente con el servidor `http://10.0.2.2:8081` o `Development Servers` si se muestra la pantalla de Expo Launcher.
+- [x] Incorporado paso condicional de descarte/ocultado de overlays o teclados si el menú flotante de Expo interfiere.
+- [x] Actualizada la documentación en `e2e/README.md` con instrucciones precisas para entornos Expo Dev Client.
+- [x] Preservación del estado verde en la suite completa de unit tests y component tests.
+
+### 🛠️ Archivos Implicados
+- `e2e/maestro/01_hello_world.yaml`
+- `e2e/maestro/02_assert_screen.yaml`
+- `e2e/maestro/03_tap_button.yaml`
+- `e2e/maestro/04_login_and_logout.yaml`
+- `e2e/maestro/login_flow.yaml`
+- `e2e/maestro/smoke_flow.yaml`
+- `e2e/README.md`
+
+### 📜 Historial de Modificaciones
+- `2026-07-30 09:32:00 CEST` | Estado: CREATED ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Registrada issue PF-175 tras captura de pantalla enviada por usuario mostrando la pantalla de Expo Dev Client Launcher.
+- `2026-07-30 09:33:00 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Tránsito a fase de diseño tras definir estrategia de paso condicional tapOn para http://10.0.2.2:8081.
+- `2026-07-30 09:34:00 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Creada rama feature/pf-175-expo-dev-launcher-handling e inicio de las modificaciones en flujos Maestro.
+- `2026-07-30 09:35:00 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Añadido paso condicional tapOn .*8081.* a los 6 flujos YAML y actualizada e2e/README.md. Tránsito a pruebas.
+
+
+
+```
+
 ```markdown
 ---
 id: PF-148

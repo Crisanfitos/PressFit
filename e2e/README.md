@@ -6,43 +6,61 @@ Esta guía explica cómo ejecutar las pruebas End-to-End (E2E) utilizando **Maes
 
 ## 🚀 Requisitos Previos
 
-1. **Emulador Android iniciado** en tu sistema (verificable con `emulator-5554`).
-2. **Servidor Expo activo en localhost**.
+1. **Emulador Android iniciado** en tu sistema (`emulator-5554`).
+2. **Servidor Expo activo en localhost**:
+   ```bash
+   npm run start:localhost
+   ```
 
 ---
 
-## 🛠️ Flujo de Ejecución (Paso a Paso)
+## 📲 Manejo de Expo Dev Client (Development Build)
 
-### Paso 1: Iniciar el servidor de desarrollo de Expo en Localhost
-En una terminal principal, ejecuta:
-```bash
-npm run start:localhost
-```
-*(O `npx expo start --localhost` / `npx expo run:android` para instalar el build dev client en el emulador).*
+Cuando la aplicación se construye con Expo Dev Client, al lanzar la app es común que aparezca la pantalla de **Development Servers** (`http://10.0.2.2:8081` o `http://localhost:8081`).
+
+- **Auto-Conexión en Maestro**: Todos los flujos YAML de Maestro en `e2e/maestro/` incluyen el paso condicional:
+  ```yaml
+  - tapOn:
+      text: ".*8081.*"
+      optional: true
+  ```
+  Esto hace que si aparece la pantalla de la launcher de Expo Dev Client, Maestro pulse automáticamente en el servidor de desarrollo `http://10.0.2.2:8081` para cargar el bundle de la aplicación sin detener la prueba.
 
 ---
 
-### Paso 2: Ejecutar los Tests E2E con Maestro
-En una **segunda terminal**, ejecuta la suite de pruebas que desees. Al apuntar a un archivo específico, Maestro mostrará **feedback en tiempo real paso por paso**:
+## 🛠️ Flujo de Ejecución Incremental
 
-* **Probar solo el flujo de Login (`login_flow.yaml`)**:
+En una **segunda terminal**, ejecuta cualquiera de los flujos incrementales:
+
+* **01 — Hello World (Verificar lanzamiento)**:
   ```bash
-  npm run test:e2e
+  npm run test:e2e:01
   ```
 
-* **Probar el flujo completo Happy Path (`smoke_flow.yaml`)**:
+* **02 — Assert Screen (Verificar pantalla de Bienvenida)**:
+  ```bash
+  npm run test:e2e:02
+  ```
+
+* **03 — Tap & Input (Verificar navegación e inserción de texto en Login)**:
+  ```bash
+  npm run test:e2e:03
+  ```
+
+* **04 — Login & Logout (Verificar autenticación completa y cierre de sesión)**:
+  ```bash
+  npm run test:e2e:04
+  ```
+
+* **Smoke Test Completo (Happy Path de entrenamiento)**:
   ```bash
   npm run test:e2e:smoke
   ```
 
-* **Ejecutar todos los flujos de la carpeta `e2e/maestro/`**:
-  ```bash
-  npm run test:e2e:all
-  ```
-
 ---
 
-## 🔍 Notas de Diagnóstico y Feedback
+## 💡 Consejo sobre el Menú Flotante de Expo (Dev Menu)
 
-* **Feedback paso a paso**: Si ejecutas Maestro sobre un único archivo `.yaml` (ej. `npm run test:e2e`), Maestro renderizará en la terminal cada paso con su estado (`[PASS]`, `[WAIT]`, etc.) en tiempo real.
-* **Timeout o cuelgue**: Si Maestro parece colgado, verifica que la app `com.crisanfitos.pressfit` esté abierta o disponible en el emulador apuntando al bundler `localhost:8081`.
+Si el menú desplegable de desarrollo de Expo aparece sobre la interfaz:
+* Puedes presionar `Ctrl + M` (en Windows/Linux) o `Cmd + D` (en macOS) para abrir/cerrar el menú de desarrollo.
+* O sacudir el emulador desde la barra de herramientas de Android Studio (botón `...` ➔ `Virtual Sensors` ➔ `Move`).
