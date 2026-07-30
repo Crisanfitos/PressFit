@@ -1,0 +1,10 @@
+appId: com.crisanfitos.pressfit
+---
+# 03_tap_button.yaml — Lanza la app, toca el input de email y escribe texto
+
+- launchApp
+
+- tapOn:
+    id: "email-input"
+
+- inputText: "test@pressfit.com"

@@ -1,0 +1,8 @@
+appId: com.crisanfitos.pressfit
+---
+# 02_assert_screen.yaml — Lanza la app y verifica visibilidad de la pantalla de login
+
+- launchApp
+
+- assertVisible:
+    id: "login-screen"

@@ -1,0 +1,6 @@
+appId: com.crisanfitos.pressfit
+---
+# 01_hello_world.yaml — Test E2E Mínimo de Verificación
+# Simplemente lanza la aplicación en el emulador
+
+- launchApp
