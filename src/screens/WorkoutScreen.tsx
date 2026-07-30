@@ -651,6 +651,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                                         : colors.textSecondary;
                                                                 return (
                                                                     <TouchableOpacity
+                                                                        testID={`set-complete-checkbox-${setIndex}`}
                                                                         style={{ padding: 4, marginLeft: 4 }}
                                                                         onPress={() => handleStartRestTimer(set.id)}
                                                                         disabled={disableInteraction}
