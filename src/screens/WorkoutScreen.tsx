@@ -248,6 +248,37 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                 headerText: { fontSize: 18, fontWeight: '600', color: colors.text },
                 loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
                 scrollView: { flex: 1, paddingHorizontal: 16, paddingTop: 16 },
+                staleWarningBanner: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#fef3c7',
+                    borderColor: '#f59e0b',
+                    borderWidth: 1,
+                    borderRadius: 12,
+                    padding: 12,
+                    marginBottom: 16,
+                },
+                staleWarningText: {
+                    flex: 1,
+                    fontSize: 13,
+                    fontWeight: '600',
+                    color: '#92400e',
+                },
+                staleBadge: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#fef3c7',
+                    borderColor: '#f59e0b',
+                    borderWidth: 1,
+                    borderRadius: 12,
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                },
+                staleBadgeText: {
+                    fontSize: 11,
+                    fontWeight: '600',
+                    color: '#92400e',
+                },
                 exerciseCard: {
                     backgroundColor: colors.surface,
                     borderWidth: 1,
@@ -439,6 +470,15 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                 nestedScrollEnabled={true}
             >
                 <View style={styles.scrollView}>
+                    {previousWorkout?.isStale && (
+                        <View style={styles.staleWarningBanner} testID="stale-warning-banner">
+                            <MaterialIcons name="warning-amber" size={20} color="#d97706" style={{ marginRight: 8 }} />
+                            <Text style={styles.staleWarningText}>
+                                Referencia de hace {previousWorkout.days_diff ?? '15+'} días (&gt;14 días). Considera ajustar las cargas sugeridas.
+                            </Text>
+                        </View>
+                    )}
+
                     {exercises.length === 0 ? (
                         <View style={styles.placeholderContainer}>
                             <View style={styles.placeholderIconContainer}>
@@ -482,6 +522,12 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                             onSelect={(tipo) => updateWeightType(exercise.routine_exercise_id, exercise.id, tipo)}
                                                             colors={colors}
                                                         />
+                                                        {previousWorkout?.isStale && (
+                                                            <View style={styles.staleBadge} testID="stale-badge">
+                                                                <MaterialIcons name="schedule" size={12} color="#92400e" style={{ marginRight: 2 }} />
+                                                                <Text style={styles.staleBadgeText}>Referencia de hace {previousWorkout.days_diff ?? '15+'} días</Text>
+                                                            </View>
+                                                        )}
                                                         <PersonalNoteButton exerciseId={exercise.id} />
                                                     </View>
                                                 </View>

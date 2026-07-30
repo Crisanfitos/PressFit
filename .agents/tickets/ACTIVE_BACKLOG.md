@@ -384,12 +384,12 @@ Separar la lógica de fotos de progreso y métricas corporales del historial de 
 id: PF-141
 title: "[UX / Feature]: Aviso de caducidad al copiar pesos de entrenamientos anteriores (>14 días)"
 epic: EPIC-02
-status: BACKLOG
+status: IN_PROGRESS_TEST
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-28T22:59:00+02:00"
+updated_at: "2026-07-30T07:30:20+02:00"
 closed_at: null
 related_historical_tickets: [PF-118]
 ---
@@ -411,6 +411,10 @@ Mostrar una alerta o badge prudencial en la interfaz de entrenamiento cuando el 
 ### 📜 Historial de Modificaciones
 - `2026-07-24 20:03:25 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
 - `2026-07-28 22:59:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios de aceptación completados.
+- `2026-07-30 07:30:20 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Inicio de la fase de análisis pre-coding para PF-141.
+- `2026-07-30 07:30:20 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Tránsito a diseño tras validación de baseline tests en verde (282/282).
+- `2026-07-30 07:30:20 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Inicio de construcción de la funcionalidad tras aprobación de plan.
+- `2026-07-30 07:30:20 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Tránsito a fase de pruebas tras implementar isStale en WorkoutService, banderas en useWorkoutController y componentes en WorkoutScreen.
 ```
 
 ---

@@ -356,6 +356,17 @@ export const WorkoutService = {
                 .maybeSingle();
 
             if (error) throw error;
+
+            if (data && data.fecha_dia) {
+                const todayStr = formatLocalDateKey(new Date());
+                const todayDate = parseDateKeyAsLocalDate(todayStr);
+                const workoutDate = parseDateKeyAsLocalDate(data.fecha_dia);
+                const diffTime = todayDate.getTime() - workoutDate.getTime();
+                const daysDiff = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+                data.days_diff = daysDiff;
+                data.isStale = daysDiff > 14;
+            }
+
             return { data, error: null };
         } catch (error) {
             console.error('Error fetching last completed workout:', error);

@@ -86,6 +86,8 @@ export interface RoutineDay {
     descripcion?: string;
     ejercicios_programados?: ScheduledExercise[];
     rutina_semanal?: { usuario_id: string };
+    isStale?: boolean;
+    days_diff?: number;
 }
 
 /**

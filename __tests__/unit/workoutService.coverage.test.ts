@@ -7,6 +7,7 @@
 
 import { WorkoutService } from '../../src/services/WorkoutService';
 import { supabase } from '../../src/lib/supabase';
+import { formatLocalDateKey } from '../../src/utils/dateUtils';
 
 // ─── Mock chain reutilizable ──────────────────────────────────────────────────
 const mockChain: any = {
@@ -492,6 +493,46 @@ describe('WorkoutService.getLastCompletedWorkoutForDay', () => {
 
         const res = await WorkoutService.getLastCompletedWorkoutForDay('user-1', 'tmpl-day-1');
         expect(res.error).not.toBeNull();
+    });
+
+    it('should return isStale: false when last completed workout is <= 14 days old', async () => {
+        const recentDate = new Date();
+        recentDate.setDate(recentDate.getDate() - 5);
+        const fechaStr = formatLocalDateKey(recentDate);
+
+        mockChain.single.mockResolvedValueOnce({
+            data: { nombre_dia: 'Lunes', rutina_semanal_id: 'rs-1' },
+            error: null,
+        });
+        mockChain.maybeSingle.mockResolvedValueOnce({
+            data: { id: 'old-w-recent', fecha_dia: fechaStr, completada: true },
+            error: null,
+        });
+
+        const res = await WorkoutService.getLastCompletedWorkoutForDay('user-1', 'tmpl-day-1');
+        expect(res.error).toBeNull();
+        expect(res.data?.isStale).toBe(false);
+        expect(res.data?.days_diff).toBe(5);
+    });
+
+    it('should return isStale: true when last completed workout is > 14 days old', async () => {
+        const oldDate = new Date();
+        oldDate.setDate(oldDate.getDate() - 20);
+        const fechaStr = formatLocalDateKey(oldDate);
+
+        mockChain.single.mockResolvedValueOnce({
+            data: { nombre_dia: 'Lunes', rutina_semanal_id: 'rs-1' },
+            error: null,
+        });
+        mockChain.maybeSingle.mockResolvedValueOnce({
+            data: { id: 'old-w-stale', fecha_dia: fechaStr, completada: true },
+            error: null,
+        });
+
+        const res = await WorkoutService.getLastCompletedWorkoutForDay('user-1', 'tmpl-day-1');
+        expect(res.error).toBeNull();
+        expect(res.data?.isStale).toBe(true);
+        expect(res.data?.days_diff).toBe(20);
     });
 });
 
