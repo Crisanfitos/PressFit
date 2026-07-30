@@ -1,8 +1,13 @@
-appId: com.crisanfitos.pressfit
+appId: com.crisanfitos.PressFit_Expo
 ---
 # 03_tap_button.yaml — Lanza la app, toca el input de email y escribe texto
 
 - launchApp
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
 
 - tapOn:
     id: "email-input"

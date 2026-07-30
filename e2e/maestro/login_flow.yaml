@@ -1,4 +1,4 @@
-appId: com.crisanfitos.pressfit
+appId: com.crisanfitos.PressFit_Expo
 ---
 # Login Flow — PressFit E2E (Maestro)
 # Verifies the email/password login flow and navigation to main screen.
