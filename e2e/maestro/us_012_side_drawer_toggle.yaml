@@ -69,9 +69,8 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "drawer-title"
 
-# 5. Cerrar menú lateral mediante toque en overlay
-- tapOn:
-    id: "drawer-overlay"
+# 5. Cerrar menú lateral mediante botón de retroceso (Modal dismiss)
+- back
 
 - extendedWaitUntil:
     visible:
