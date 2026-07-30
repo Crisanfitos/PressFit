@@ -1,12 +1,12 @@
 import React from 'react';
 import { renderHook, act, cleanup, render, waitFor } from '@testing-library/react-native';
 import { Text } from 'react-native';
-import { AuthProvider, useAuth } from '../../../src/context/AuthContext';
-import { AuthService } from '../../../src/services/AuthService';
+import { AuthProvider, useAuth } from '../../src/context/AuthContext';
+import { AuthService } from '../../src/services/AuthService';
 
 // --- Mocks ---
-jest.mock('../../../src/services/AuthService');
-jest.mock('../../../src/lib/supabase', () => ({
+jest.mock('../../src/services/AuthService');
+jest.mock('../../src/lib/supabase', () => ({
     supabase: {
         auth: {
             signInWithPassword: jest.fn(),
@@ -29,7 +29,7 @@ jest.mock('expo-web-browser', () => ({
 jest.mock('expo-auth-session', () => ({
     makeRedirectUri: jest.fn().mockReturnValue('pressfit://auth/callback'),
 }));
-jest.mock('../../../src/utils/parseOAuthCallbackUrl', () => ({
+jest.mock('../../src/utils/parseOAuthCallbackUrl', () => ({
     parseOAuthCallbackUrl: jest.fn(),
 }));
 
@@ -37,7 +37,7 @@ jest.mock('../../../src/utils/parseOAuthCallbackUrl', () => ({
 const getWebBrowser = () => require('expo-web-browser') as { openAuthSessionAsync: jest.Mock };
 const getAuthSession = () => require('expo-auth-session') as { makeRedirectUri: jest.Mock };
 const getParseOAuthCallbackUrl = () =>
-    require('../../../src/utils/parseOAuthCallbackUrl') as { parseOAuthCallbackUrl: jest.Mock };
+    require('../../src/utils/parseOAuthCallbackUrl') as { parseOAuthCallbackUrl: jest.Mock };
 
 // --- Helpers ---
 const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
