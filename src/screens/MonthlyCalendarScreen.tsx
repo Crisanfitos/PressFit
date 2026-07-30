@@ -556,7 +556,15 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                                     onPress={() => handleDayPress(day.date)}
                                     disabled={!day.date || dayStyle?.isFuture}
                                     activeOpacity={dayStyle?.isFuture ? 1 : 0.7}
-                                    testID={dayStyle?.isToday ? 'calendar-day-today' : `calendar-day-${index}`}
+                                    testID={
+                                        dayStyle?.isToday
+                                            ? 'calendar-day-today'
+                                            : dayStyle?.isPast
+                                            ? 'calendar-day-past'
+                                            : dayStyle?.isFuture
+                                            ? 'calendar-day-future'
+                                            : `calendar-day-${index}`
+                                    }
                                 >
                                     {dayStyle?.inCurrentWeek && isCurrentMonth && (
                                         <View style={styles.weekHighlight} />

@@ -1,0 +1,113 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_011_calendar_past_future_days.yaml — US-011: Selección de días pasados y futuros en el calendario
+
+- launchApp:
+    clearState: true
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 1. Navegar desde bienvenida a pantalla de Login
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+# 2. Introducir credenciales de prueba
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+- inputText: "${E2E_TEST_EMAIL}"
+
+- tapOn:
+    id: "password-input"
+- inputText: "${E2E_TEST_PASSWORD}"
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# 3. Verificar entrada a la pantalla del Calendario Mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 4. Probar día futuro (deshabilitado): debe permanecer en el calendario sin navegar
+- runFlow:
+    when:
+      visible:
+        id: "calendar-day-future"
+    commands:
+      - tapOn:
+          id: "calendar-day-future"
+      - assertVisible:
+          id: "monthly-calendar-screen"
+
+# 5. Probar día pasado (habilitado): debe navegar a WorkoutDayScreen
+- runFlow:
+    when:
+      visible:
+        id: "calendar-day-past"
+    commands:
+      - tapOn:
+          id: "calendar-day-past"
+      - extendedWaitUntil:
+          visible:
+            id: "workout-day-screen"
+          timeout: 15000
+      - assertVisible:
+          id: "workout-day-screen"
+      - tapOn:
+          id: "workout-day-back-button"
+      - extendedWaitUntil:
+          visible:
+            id: "monthly-calendar-screen"
+          timeout: 10000
+
+# 6. Limpieza (Logout final)
+- tapOn: "Perfil"
+
+- scroll
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
