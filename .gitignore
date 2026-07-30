@@ -46,9 +46,11 @@ android/app/google-services.json*
 /android
 
 # AI Agent Directories & Knowledge Bases (Ignored from GitHub)
+.agents
 .agents/
 .claude/
 .gemini/
+AGENTS.md
 GEMINI.md
 Documentacion/
 
