@@ -25,11 +25,11 @@ appId: com.crisanfitos.PressFit_Expo
 # 3. Enter credentials
 - tapOn:
     id: "email-input"
-- inputText: ${E2E_TEST_EMAIL:test2@pressfit.com}
+- inputText: "${E2E_TEST_EMAIL}"
 
 - tapOn:
     id: "password-input"
-- inputText: ${E2E_TEST_PASSWORD:test2@pressfit}
+- inputText: "${E2E_TEST_PASSWORD}"
 
 - hideKeyboard
 
