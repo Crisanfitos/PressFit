@@ -537,12 +537,12 @@ Reparar el fallo preexistente en `AuthContext.test.tsx` detectado durante el an�
 id: PF-145
 title: "[Refactor]: Componente KeyboardAwareContainer para resolución sistémica de teclado"
 epic: EPIC-06
-status: BACKLOG
+status: IN_PROGRESS_BUILD
 priority: LOW
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-24T20:03:25+02:00"
-updated_at: "2026-07-28T22:59:00+02:00"
+updated_at: "2026-07-29T21:47:15+02:00"
 closed_at: null
 related_historical_tickets: [PF-044, PF-112, PF-114, PF-116]
 ---
@@ -556,6 +556,13 @@ Resolver de forma sistémica la superposición del teclado virtual sobre inputs 
 
 ### 🛠️ Archivos Implicados
 - `src/components/KeyboardAwareContainer.tsx`
+
+### 📜 Historial de Modificaciones
+- `2026-07-24 20:03:25 CEST` | Estado: CREATED ➔ BACKLOG | Antigravity AI | Registrado en backlog inicial.
+- `2026-07-28 22:59:00 CEST` | Estado: BACKLOG | Antigravity AI | Metadatos y criterios completados.
+- `2026-07-29 21:46:30 CEST` | Estado: BACKLOG ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Inicio de la fase de análisis pre-coding para PF-145.
+- `2026-07-29 21:46:45 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Tránsito a diseño tras validación exitosa de baseline tests (282/282 en verde).
+- `2026-07-29 21:47:15 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Aprobación del plan e inicio de la fase de construcción (Build).
 ```
 
 ---

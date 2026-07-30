@@ -18,6 +18,10 @@ export interface KeyboardAwareContainerProps {
   keyboardVerticalOffset?: number;
   dismissOnClickOutside?: boolean;
   testID?: string;
+  keyboardShouldPersistTaps?: 'always' | 'never' | 'handled';
+  showsVerticalScrollIndicator?: boolean;
+  bounces?: boolean;
+  nestedScrollEnabled?: boolean;
 }
 
 /**
@@ -34,12 +38,18 @@ export const KeyboardAwareContainer: React.FC<KeyboardAwareContainerProps> = ({
   keyboardVerticalOffset = Platform.OS === 'ios' ? 64 : 0,
   dismissOnClickOutside = true,
   testID = 'keyboard-aware-container',
+  keyboardShouldPersistTaps = 'handled',
+  showsVerticalScrollIndicator = false,
+  bounces = true,
+  nestedScrollEnabled = false,
 }) => {
   const content = scrollable ? (
     <ScrollView
       contentContainerStyle={[styles.scrollContent, contentContainerStyle]}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps={keyboardShouldPersistTaps}
+      showsVerticalScrollIndicator={showsVerticalScrollIndicator}
+      bounces={bounces}
+      nestedScrollEnabled={nestedScrollEnabled}
     >
       {children}
     </ScrollView>

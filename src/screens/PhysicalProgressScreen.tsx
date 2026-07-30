@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import ImageViewer from 'react-native-image-zoom-viewer';
+import KeyboardAwareContainer from '../components/KeyboardAwareContainer';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { useProgressController } from '../controllers/useProgressController';
@@ -432,9 +433,10 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
 
             {/* Upload Modal */}
             <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => setModalVisible(false)}>
-                <KeyboardAvoidingView
+                <KeyboardAwareContainer
                     style={styles.modalOverlay}
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+                    dismissOnClickOutside={false}
                 >
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Nueva Foto de Progreso</Text>
@@ -485,7 +487,7 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                             </TouchableOpacity>
                         </View>
                     </View>
-                </KeyboardAvoidingView>
+                </KeyboardAwareContainer>
             </Modal>
 
             {/* Photo Viewer with Zoom */}
@@ -530,9 +532,10 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
 
             {/* Edit Photo Modal */}
             <Modal visible={editModalVisible} transparent animationType="fade" onRequestClose={() => setEditModalVisible(false)}>
-                <KeyboardAvoidingView
+                <KeyboardAwareContainer
                     style={styles.modalOverlay}
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+                    dismissOnClickOutside={false}
                 >
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Editar Detalles de Foto</Text>
@@ -571,7 +574,7 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                             </TouchableOpacity>
                         </View>
                     </View>
-                </KeyboardAvoidingView>
+                </KeyboardAwareContainer>
             </Modal>
 
             {/* Custom Alert Modal */}

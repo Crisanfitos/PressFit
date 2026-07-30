@@ -55,4 +55,22 @@ describe('KeyboardAwareContainer Component (RNTL)', () => {
     expect(queryByTestId('keyboard-dismiss-touchable')).toBeNull();
     expect(getByText('No dismiss touchable')).toBeTruthy();
   });
+
+  it('renders correctly with custom offset, scroll indicators, and nested scrolling', async () => {
+    const { getByTestId, getByText } = await render(
+      <KeyboardAwareContainer
+        testID="custom-props-container"
+        keyboardVerticalOffset={100}
+        keyboardShouldPersistTaps="always"
+        showsVerticalScrollIndicator={true}
+        bounces={false}
+        nestedScrollEnabled={true}
+      >
+        <Text>Advanced Props Content</Text>
+      </KeyboardAwareContainer>
+    );
+
+    expect(getByTestId('custom-props-container')).toBeTruthy();
+    expect(getByText('Advanced Props Content')).toBeTruthy();
+  });
 });

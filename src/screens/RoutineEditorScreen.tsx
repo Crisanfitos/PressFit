@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import KeyboardAwareContainer from '../components/KeyboardAwareContainer';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { RoutineService } from '../services/RoutineService';
@@ -401,7 +402,11 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                 animationType="fade"
                 onRequestClose={() => setShowCreateModal(false)}
             >
-                <View style={styles.modalOverlay}>
+                <KeyboardAwareContainer
+                    style={styles.modalOverlay}
+                    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+                    dismissOnClickOutside={false}
+                >
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Nueva Plantilla</Text>
 
@@ -427,8 +432,6 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                             />
                         </View>
 
-
-
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
                                 style={[styles.modalButton, styles.cancelButton]}
@@ -444,7 +447,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                             </TouchableOpacity>
                         </View>
                     </View>
-                </View>
+                </KeyboardAwareContainer>
             </Modal>
 
 

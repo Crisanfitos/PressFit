@@ -10,8 +10,8 @@ import {
     Alert,
     Platform,
 } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import KeyboardAwareContainer from '../components/KeyboardAwareContainer';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import { useTheme } from '../context/ThemeContext';
@@ -431,13 +431,10 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
             </View>
 
             {/* Content */}
-            <KeyboardAwareScrollView
+            <KeyboardAwareContainer
                 style={{ flex: 1 }}
                 contentContainerStyle={{ paddingBottom: 100, flexGrow: 1 }}
                 showsVerticalScrollIndicator={false}
-                enableOnAndroid={true}
-                enableAutomaticScroll={true}
-                extraScrollHeight={120} // Aditional space to lift over keyboard
                 keyboardShouldPersistTaps="handled"
                 nestedScrollEnabled={true}
             >
@@ -593,9 +590,8 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                             {mode === 'ACTIVE' && navMode !== 'edit' && (() => {
                                                                 const isActiveTimer = lastCompletedSetId === set.id && restTimerVisible;
                                                                 const hasSavedTimerValue = set.descanso_segundos && set.descanso_segundos > 0;
-                                                                // DB stored > 0 = already recorded so we disable interaction
                                                                 const isSaved = hasSavedTimerValue;
-                                                                const isLocallySaved = savedTimerSetIds.has(set.id); // For currently executed app lifecycle (since saved timers have `isSaved` already)
+                                                                const isLocallySaved = savedTimerSetIds.has(set.id);
 
                                                                 const disableInteraction = isSaved || isLocallySaved;
 
@@ -624,7 +620,6 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                 })
                                             )}
 
-                                            {/* Always show add series button in editable modes, EXCEPT when we are in ACTIVE training mode  */}
                                             {(isStructureEditable || (isInputEditable && mode !== 'ACTIVE')) && (
                                                 <TouchableOpacity style={styles.addSetButton} onPress={() => openAddSetsModal(exercise.id)}>
                                                     <MaterialIcons name="add" size={16} color={colors.primary} />
@@ -637,9 +632,6 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                             );
                         })
                     )}
-
-                    {/* Action Buttons */}
-
 
                     {mode === 'ACTIVE' && navMode !== 'edit' && (
                         <View style={styles.finishButtonContainer}>
@@ -658,7 +650,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
 
                     <View style={{ height: 100 }} />
                 </View>
-            </KeyboardAwareScrollView>
+            </KeyboardAwareContainer>
 
             {/* FAB */}
             {isStructureEditable && exercises.length > 0 && (
