@@ -1,0 +1,41 @@
+{
+  "id": "routine-001",
+  "nombre": "Rutina Torso/Pierna E2E",
+  "activa": true,
+  "dias": [
+    {
+      "id": "day-001",
+      "dia_semana": 1,
+      "nombre": "Torso Hipertrofia",
+      "descripcion": "Enfoque en pecho y espalda",
+      "ejercicios": [
+        {
+          "id": "ex-001",
+          "nombre": "Press de Banca con Barra",
+          "series_objetivo": 4,
+          "reps_objetivo": 10
+        },
+        {
+          "id": "ex-003",
+          "nombre": "Dominadas",
+          "series_objetivo": 4,
+          "reps_objetivo": 8
+        }
+      ]
+    },
+    {
+      "id": "day-002",
+      "dia_semana": 2,
+      "nombre": "Pierna Fuerza",
+      "descripcion": "Enfoque en cuadriceps y peso muerto",
+      "ejercicios": [
+        {
+          "id": "ex-002",
+          "nombre": "Sentadilla Trasera con Barra",
+          "series_objetivo": 5,
+          "reps_objetivo": 5
+        }
+      ]
+    }
+  ]
+}

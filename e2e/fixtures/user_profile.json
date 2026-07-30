@@ -1,0 +1,9 @@
+{
+  "id": "e2e-user-id-001",
+  "email": "test2@pressfit.com",
+  "nombre": "Usuario E2E",
+  "peso_kg": 75.5,
+  "altura_cm": 178,
+  "porcentaje_grasa": 15.2,
+  "created_at": "2026-01-01T00:00:00Z"
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "id": "workout-001",
+    "fecha": "2026-07-30",
+    "estado": "completed",
+    "duracion_minutos": 45,
+    "ejercicios": [
+      {
+        "ejercicio_id": "ex-001",
+        "nombre": "Press de Banca con Barra",
+        "series": [
+          { "numero": 1, "peso": 70, "reps": 10, "completada": true },
+          { "numero": 2, "peso": 75, "reps": 8, "completada": true }
+        ]
+      }
+    ]
+  }
+]

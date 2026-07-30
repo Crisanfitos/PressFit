@@ -1,0 +1,30 @@
+[
+  {
+    "id": "ex-001",
+    "nombre": "Press de Banca con Barra",
+    "grupo_muscular": "Pecho",
+    "descripcion": "Ejercicio básico multiarticular para pectoral mayor.",
+    "equipamiento": "Barra"
+  },
+  {
+    "id": "ex-002",
+    "nombre": "Sentadilla Trasera con Barra",
+    "grupo_muscular": "Piernas",
+    "descripcion": "Ejercicio rey de tren inferior para cuadriceps y glúteos.",
+    "equipamiento": "Barra"
+  },
+  {
+    "id": "ex-003",
+    "nombre": "Dominadas",
+    "grupo_muscular": "Espalda",
+    "descripcion": "Ejercicio de tracción vertical para dorsal ancho.",
+    "equipamiento": "Peso Corporal"
+  },
+  {
+    "id": "ex-004",
+    "nombre": "Press Militar con Barra",
+    "grupo_muscular": "Hombros",
+    "descripcion": "Ejercicio de empuje vertical para deltoides.",
+    "equipamiento": "Barra"
+  }
+]
