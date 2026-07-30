@@ -503,7 +503,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                             const isCollapsed = collapsedExercises[exercise.id];
 
                             return (
-                                <View key={`${exercise.id}-${index}`} style={styles.exerciseCard}>
+                                <View key={`${exercise.id}-${index}`} style={styles.exerciseCard} testID={`exercise-card-${index}`}>
                                     <TouchableOpacity onPress={() => toggleExerciseCollapsed(exercise.id)} activeOpacity={0.7}>
                                         <View style={styles.exerciseHeader}>
                                             <View style={styles.exerciseHeaderLeft}>
@@ -586,7 +586,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                     const isBodyweight = exercise.tipo_peso === 'corporal';
 
                                                     return (
-                                                        <View key={set.id || setIndex} style={styles.setRow}>
+                                                        <View key={set.id || setIndex} style={styles.setRow} testID={`set-row-${setIndex}`}>
                                                             <Text style={styles.setNumber}>{set.numero_serie}</Text>
                                                             <View style={[styles.inputGroup, { maxWidth: 80 }]}>
                                                                 {isBodyweight ? (
