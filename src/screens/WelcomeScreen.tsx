@@ -77,8 +77,8 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
                     style={[styles.icon, { width: 100, height: 100, alignSelf: 'center' }]}
                     resizeMode="contain"
                 />
-                <Text style={styles.title}>PressFit</Text>
-                <Text style={styles.subtitle}>
+                <Text style={styles.title} testID="welcome-title">PressFit</Text>
+                <Text style={styles.subtitle} testID="welcome-subtitle">
                     Tu aplicación de seguimiento de entrenamientos y progreso físico
                 </Text>
 
@@ -94,6 +94,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
                     <TouchableOpacity
                         style={styles.secondaryButton}
                         onPress={() => navigation.navigate('SignUp')}
+                        testID="signup-button"
                     >
                         <Text style={styles.secondaryButtonText}>Crear Cuenta</Text>
                     </TouchableOpacity>

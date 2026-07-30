@@ -12,14 +12,18 @@ describe('WelcomeScreen Integration (RNTL)', () => {
     });
 
     it('renders application branding and call-to-action buttons', async () => {
-        const { getByText } = await render(
+        const { getByText, getByTestId } = await render(
             <WelcomeScreen navigation={mockNavigation} />
         );
 
         expect(getByText('PressFit')).toBeTruthy();
+        expect(getByTestId('welcome-title')).toBeTruthy();
         expect(getByText('Tu aplicación de seguimiento de entrenamientos y progreso físico')).toBeTruthy();
+        expect(getByTestId('welcome-subtitle')).toBeTruthy();
         expect(getByText('Iniciar Sesión')).toBeTruthy();
+        expect(getByTestId('login-button')).toBeTruthy();
         expect(getByText('Crear Cuenta')).toBeTruthy();
+        expect(getByTestId('signup-button')).toBeTruthy();
     });
 
     it('navigates to LoginScreen when "Iniciar Sesión" is pressed', async () => {
