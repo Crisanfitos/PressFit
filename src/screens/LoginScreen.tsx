@@ -244,6 +244,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                                     style={styles.eyeButton}
                                     onPress={() => setShowPassword(!showPassword)}
                                     hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                                    testID="login-password-toggle"
                                 >
                                     <MaterialIcons
                                         name={showPassword ? 'visibility' : 'visibility-off'}

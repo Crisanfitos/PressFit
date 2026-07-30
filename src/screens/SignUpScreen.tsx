@@ -241,6 +241,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                                     style={styles.eyeButton}
                                     onPress={() => setShowPassword(!showPassword)}
                                     hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                                    testID="signup-password-toggle"
                                 >
                                     <MaterialIcons
                                         name={showPassword ? 'visibility' : 'visibility-off'}
@@ -270,6 +271,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                                     style={styles.eyeButton}
                                     onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                                     hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                                    testID="signup-confirmpassword-toggle"
                                 >
                                     <MaterialIcons
                                         name={showConfirmPassword ? 'visibility' : 'visibility-off'}
