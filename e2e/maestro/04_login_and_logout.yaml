@@ -11,6 +11,11 @@ appId: com.crisanfitos.PressFit_Expo
     text: ".*8081.*"
     optional: true
 
+# If Expo Developer Menu modal appears, tap Continue to dismiss
+- tapOn:
+    text: "Continue"
+    optional: true
+
 # 1. Navegar desde bienvenida a pantalla de Login
 - extendedWaitUntil:
     visible:
