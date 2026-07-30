@@ -32,7 +32,13 @@ jobs:
         run: npm ci
 
       - name: Run Unit Tests
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://mock.supabase.co
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: mock-anon-key-for-ci
         run: npm run test:unit
 
       - name: Run Component Tests
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://mock.supabase.co
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: mock-anon-key-for-ci
         run: npm run test:components

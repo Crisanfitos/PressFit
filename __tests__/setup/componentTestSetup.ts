@@ -1,3 +1,7 @@
+// Ensure Supabase environment variables exist in CI environments (where .env is gitignored)
+process.env.EXPO_PUBLIC_SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co';
+process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'mock-anon-key-for-jest-tests';
+
 // Tell React 19 test environment that act(...) environment is active
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
