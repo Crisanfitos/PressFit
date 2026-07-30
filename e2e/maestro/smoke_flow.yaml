@@ -81,9 +81,10 @@ appId: com.crisanfitos.PressFit_Expo
 # ===== STEP 7: CLEAN LOGOUT =====
 - tapOn: "Perfil"
 
-- extendedWaitUntil:
-    visible:
+- scrollUntilVisible:
+    element:
       id: "logout-button"
+    direction: DOWN
     timeout: 10000
 
 - tapOn:

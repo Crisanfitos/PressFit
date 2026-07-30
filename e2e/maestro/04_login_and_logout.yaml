@@ -48,10 +48,11 @@ appId: com.crisanfitos.PressFit_Expo
 # 4. Ir a la pestaña de Perfil
 - tapOn: "Perfil"
 
-# 5. Pulsar en Cerrar Sesión
-- extendedWaitUntil:
-    visible:
+# 5. Hacer scroll hasta el botón de Cerrar Sesión (al final de la pantalla de Perfil)
+- scrollUntilVisible:
+    element:
       id: "logout-button"
+    direction: DOWN
     timeout: 10000
 
 - tapOn:
