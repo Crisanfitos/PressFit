@@ -220,6 +220,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                                     autoCorrect={false}
                                     value={email}
                                     onChangeText={setEmail}
+                                    testID="email-input"
                                 />
                             </View>
                         </View>
@@ -237,6 +238,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                                     autoCorrect={false}
                                     defaultValue=""
                                     onChangeText={setPassword}
+                                    testID="password-input"
                                 />
                                 <TouchableOpacity
                                     style={styles.eyeButton}
@@ -260,6 +262,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                             style={styles.loginButton}
                             onPress={handleEmailLogin}
                             disabled={loading}
+                            testID="login-submit-button"
                         >
                             {loading ? (
                                 <ActivityIndicator color={colors.textOnPrimary} />

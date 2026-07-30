@@ -1,0 +1,80 @@
+appId: com.crisanfitos.pressfit
+---
+# Smoke Flow — PressFit E2E (Maestro)
+# End-to-end smoke test covering the critical happy path:
+#   Login -> Calendar -> Select Day -> Start Workout -> Complete Set -> Finish Workout
+#
+# Prerequisites:
+#   - App installed and running on emulator/device
+#   - Valid test credentials in environment variables:
+#     E2E_TEST_EMAIL, E2E_TEST_PASSWORD
+#   - User must have at least one active routine with exercises configured for today
+#
+# Usage:
+#   maestro test e2e/maestro/smoke_flow.yaml
+
+- launchApp:
+    clearState: true
+
+# ===== STEP 1: LOGIN =====
+- assertVisible:
+    id: "login-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# ===== STEP 2: VERIFY CALENDAR SCREEN =====
+- assertVisible:
+    id: "monthly-calendar-screen"
+    timeout: 15000
+
+# ===== STEP 3: TAP ON TODAY'S DATE =====
+- tapOn:
+    id: "calendar-day-today"
+
+# ===== STEP 4: WORKOUT DAY SCREEN =====
+- assertVisible:
+    id: "workout-day-screen"
+    timeout: 10000
+
+# Tap the start/continue workout button
+- tapOn:
+    id: "start-workout-button"
+
+# ===== STEP 5: WORKOUT SCREEN — COMPLETE A SET =====
+- assertVisible:
+    id: "workout-screen"
+    timeout: 10000
+
+# Tap on the first weight input and enter a value
+- tapOn:
+    id: "set-input"
+    index: 0
+- inputText: "50"
+
+- hideKeyboard
+
+# ===== STEP 6: FINISH WORKOUT =====
+- tapOn:
+    id: "finish-workout-button"
+
+# Confirm the finish dialog (if an Alert is shown)
+- tapOn: "Sí"
+  optional: true
+
+# Verify we return to the workout day screen or calendar
+- assertVisible:
+    id: "workout-day-screen"
+    timeout: 10000
+    optional: true

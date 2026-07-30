@@ -455,7 +455,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="workout-day-screen">
             {/* Header */}
             <View style={styles.header}>
                 <View style={styles.backRow}>
@@ -609,6 +609,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                 <TouchableOpacity
                     style={styles.bottomButton}
                     onPress={activeWorkout ? handleContinueWorkout : handleStartWorkout}
+                    testID="start-workout-button"
                 >
                     <LinearGradient
                         colors={[colors.primary, `${colors.primary}CC`]}

@@ -59,6 +59,7 @@ Documentacion/
 coverage/
 coverage-components/
 failed_test.txt
+e2e/.env.e2e
 
 # EAS
 app.json

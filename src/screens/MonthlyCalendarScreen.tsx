@@ -434,7 +434,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
     });
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="monthly-calendar-screen">
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Header with Routine Selector */}
                 <View style={styles.header}>
@@ -553,6 +553,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                                     onPress={() => handleDayPress(day.date)}
                                     disabled={!day.date || dayStyle?.isFuture}
                                     activeOpacity={dayStyle?.isFuture ? 1 : 0.7}
+                                    testID={dayStyle?.isToday ? 'calendar-day-today' : `calendar-day-${index}`}
                                 >
                                     {dayStyle?.inCurrentWeek && isCurrentMonth && (
                                         <View style={styles.weekHighlight} />

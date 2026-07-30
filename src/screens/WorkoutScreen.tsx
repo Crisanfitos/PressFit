@@ -440,7 +440,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="workout-screen">
             {/* Header */}
             <View style={styles.header}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -681,7 +681,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
 
                     {mode === 'ACTIVE' && navMode !== 'edit' && (
                         <View style={styles.finishButtonContainer}>
-                            <TouchableOpacity style={styles.finishButton} onPress={handleFinishWorkout} disabled={saving}>
+                            <TouchableOpacity style={styles.finishButton} onPress={handleFinishWorkout} disabled={saving} testID="finish-workout-button">
                                 {saving ? (
                                     <ActivityIndicator color={colors.background} />
                                 ) : (

@@ -1,0 +1,45 @@
+appId: com.crisanfitos.pressfit
+---
+# Login Flow — PressFit E2E (Maestro)
+# Verifies the email/password login flow and navigation to main screen.
+#
+# Prerequisites:
+#   - App installed and running on emulator/device
+#   - Valid test credentials in environment variables:
+#     E2E_TEST_EMAIL, E2E_TEST_PASSWORD
+#
+# Usage:
+#   maestro test e2e/maestro/login_flow.yaml
+
+- launchApp:
+    clearState: true
+
+# Wait for the login screen to load
+- assertVisible:
+    id: "login-screen"
+    timeout: 10000
+
+# Enter email credentials
+- tapOn:
+    id: "email-input"
+- inputText: ${E2E_TEST_EMAIL}
+
+# Enter password
+- tapOn:
+    id: "password-input"
+- inputText: ${E2E_TEST_PASSWORD}
+
+# Hide keyboard before tapping login
+- hideKeyboard
+
+# Tap the login button
+- tapOn:
+    id: "login-submit-button"
+
+# Wait for navigation to the main calendar screen
+- assertVisible:
+    id: "monthly-calendar-screen"
+    timeout: 15000
+
+# Verify we are on the home screen with a routine
+- assertVisible: "Seleccionar Rutina"

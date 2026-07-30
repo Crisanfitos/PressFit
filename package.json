@@ -16,7 +16,8 @@
     "prebuild": "expo prebuild",
     "detox:build": "detox build",
     "detox:test": "jest --config jest.e2e.config.js",
-    "dashboard": "node .agents/dashboard/server.js"
+    "dashboard": "node .agents/dashboard/server.js",
+    "test:e2e": "maestro test e2e/maestro/"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
