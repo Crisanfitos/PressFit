@@ -1,0 +1,55 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_005_welcome_to_signup.yaml — US-005: Navegación a pantalla de Registro (SignUpScreen) y verificación de inputs
+
+- launchApp:
+    clearState: true
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 1. Esperar a que la pantalla de bienvenida esté visible
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "signup-button"
+
+# 2. Pulsar en el botón "Crear Cuenta"
+- tapOn:
+    id: "signup-button"
+
+# 3. Verificar que la pantalla de registro (SignUpScreen) está visible con todos sus inputs
+- extendedWaitUntil:
+    visible:
+      id: "signup-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "signup-screen"
+
+- assertVisible:
+    id: "signup-fullname-input"
+
+- assertVisible:
+    id: "signup-email-input"
+
+- assertVisible:
+    id: "signup-password-input"
+
+- assertVisible:
+    id: "signup-confirmpassword-input"
+
+- assertVisible:
+    id: "signup-submit-button"

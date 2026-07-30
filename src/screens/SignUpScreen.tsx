@@ -168,7 +168,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
     });
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="signup-screen">
             <TouchableOpacity
                 style={styles.backButton}
                 onPress={() => navigation.goBack()}
@@ -199,6 +199,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                                     placeholderTextColor={colors.textSecondary}
                                     value={fullName}
                                     onChangeText={setFullName}
+                                    testID="signup-fullname-input"
                                 />
                             </View>
                         </View>
@@ -216,6 +217,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                                     autoCorrect={false}
                                     value={email}
                                     onChangeText={setEmail}
+                                    testID="signup-email-input"
                                 />
                             </View>
                         </View>
@@ -233,6 +235,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                                     autoCorrect={false}
                                     defaultValue=""
                                     onChangeText={setPassword}
+                                    testID="signup-password-input"
                                 />
                                 <TouchableOpacity
                                     style={styles.eyeButton}
@@ -261,6 +264,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                                     autoCorrect={false}
                                     defaultValue=""
                                     onChangeText={setConfirmPassword}
+                                    testID="signup-confirmpassword-input"
                                 />
                                 <TouchableOpacity
                                     style={styles.eyeButton}
@@ -280,6 +284,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                             style={styles.signUpButton}
                             onPress={handleSignUp}
                             disabled={loading}
+                            testID="signup-submit-button"
                         >
                             {loading ? (
                                 <ActivityIndicator color={colors.textOnPrimary} />
