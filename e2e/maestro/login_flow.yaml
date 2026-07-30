@@ -42,9 +42,10 @@ appId: com.crisanfitos.PressFit_Expo
       id: "monthly-calendar-screen"
     timeout: 15000
 
-# 5. Clean Logout: Navigate to Profile, scroll down and Sign Out
+# 5. Clean Logout: Navigate to Profile, scroll down to the bottom and Sign Out
 - tapOn: "Perfil"
 
+- scroll
 - scrollUntilVisible:
     element:
       id: "logout-button"

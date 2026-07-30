@@ -81,6 +81,7 @@ appId: com.crisanfitos.PressFit_Expo
 # ===== STEP 7: CLEAN LOGOUT =====
 - tapOn: "Perfil"
 
+- scroll
 - scrollUntilVisible:
     element:
       id: "logout-button"
