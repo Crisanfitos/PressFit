@@ -1,8 +1,17 @@
 appId: com.crisanfitos.PressFit_Expo
 ---
-# 03_tap_button.yaml — Lanza la app, toca el input de email y escribe texto
+# 03_tap_button.yaml — Lanza la app, navega a Login, toca el input de email y escribe texto
 
 - launchApp
+
+- extendedWaitUntil:
+    visible:
+      id: "login-button"
+    timeout: 10000
+
+# Tap on "Iniciar Sesión" to open login screen
+- tapOn:
+    id: "login-button"
 
 - extendedWaitUntil:
     visible:

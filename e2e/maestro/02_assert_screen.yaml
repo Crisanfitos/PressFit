@@ -1,10 +1,13 @@
 appId: com.crisanfitos.PressFit_Expo
 ---
-# 02_assert_screen.yaml — Lanza la app y verifica visibilidad de la pantalla de login
+# 02_assert_screen.yaml — Lanza la app y verifica visibilidad de la pantalla de bienvenida (WelcomeScreen)
 
 - launchApp
 
 - extendedWaitUntil:
     visible:
-      id: "login-screen"
+      id: "welcome-screen"
     timeout: 10000
+
+- assertVisible:
+    id: "login-button"

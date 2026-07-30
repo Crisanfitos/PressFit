@@ -261,6 +261,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         <TouchableOpacity
                             style={styles.logoutButton}
                             onPress={() => setShowLogoutModal(true)}
+                            testID="logout-button"
                         >
                             <MaterialIcons name="logout" size={24} color="#ef4444" />
                             <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>

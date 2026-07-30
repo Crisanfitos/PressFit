@@ -1,23 +1,26 @@
 appId: com.crisanfitos.PressFit_Expo
 ---
-# Login Flow — PressFit E2E (Maestro)
-# Verifies the email/password login flow, navigation to main screen, and clean logout.
+# 04_login_and_logout.yaml — Flujo de Login y Cierre de Sesión (Logout)
+# Verfica el ciclo completo de autenticación y deja el estado limpio
 
 - launchApp:
     clearState: true
 
-# 1. Tap login button on Welcome Screen if present
+# 1. Navegar desde bienvenida a pantalla de Login
+- extendedWaitUntil:
+    visible:
+      id: "login-button"
+    timeout: 10000
+
 - tapOn:
     id: "login-button"
-    optional: true
 
-# 2. Wait for the login screen to load
+# 2. Introducir credenciales de prueba
 - extendedWaitUntil:
     visible:
       id: "email-input"
     timeout: 10000
 
-# 3. Enter credentials
 - tapOn:
     id: "email-input"
 - inputText: ${E2E_TEST_EMAIL}
@@ -31,15 +34,16 @@ appId: com.crisanfitos.PressFit_Expo
 - tapOn:
     id: "login-submit-button"
 
-# 4. Wait for navigation to the main calendar screen
+# 3. Verificar entrada a la app (Calendario Mensual)
 - extendedWaitUntil:
     visible:
       id: "monthly-calendar-screen"
     timeout: 15000
 
-# 5. Clean Logout: Navigate to Profile and Sign Out
+# 4. Ir a la pestaña de Perfil
 - tapOn: "Perfil"
 
+# 5. Pulsar en Cerrar Sesión
 - extendedWaitUntil:
     visible:
       id: "logout-button"
@@ -48,6 +52,7 @@ appId: com.crisanfitos.PressFit_Expo
 - tapOn:
     id: "logout-button"
 
+# 6. Confirmar el modal de cierre de sesión
 - extendedWaitUntil:
     visible:
       id: "logout-confirm-button"
@@ -56,7 +61,7 @@ appId: com.crisanfitos.PressFit_Expo
 - tapOn:
     id: "logout-confirm-button"
 
-# 6. Verify return to Welcome Screen
+# 7. Verificar retorno exitoso a la pantalla de Bienvenida
 - extendedWaitUntil:
     visible:
       id: "welcome-screen"

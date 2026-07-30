@@ -1,9 +1,9 @@
 # 📋 Tablero de Backlog Activo — PressFit Expo
 
-> **Estado**: Activo (Poblado con Issues PF-131 a PF-173)  
-> **Última Actualización del Tablero**: `2026-07-30 09:15:00 CEST`  
+> **Estado**: Activo (Poblado con Issues PF-131 a PF-174)  
+> **Última Actualización del Tablero**: `2026-07-30 09:23:00 CEST`  
 > **Última Issue Histórica**: `PF-130`  
-> **Siguiente Issue Disponible**: `PF-174`
+> **Siguiente Issue Disponible**: `PF-175`
 
 ---
 
@@ -788,6 +788,55 @@ Proveer una suite de pruebas E2E paso a paso (Hello World incremental) para vali
 - `2026-07-30 09:15:00 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Verificadas suites unitarias (267/267) y de componentes (94/94 en verde).
 - `2026-07-30 09:15:00 CEST` | Estado: IN_PROGRESS_TEST ➔ DONE | Antigravity AI | Ticket completado y verificado. Fusionado en main (Commit 53b118d) y subido a remoto.
 ```
+
+---
+
+#### PF-174
+```markdown
+---
+id: PF-174
+title: "[Task]: Reajuste de pantalla inicial E2E a WelcomeScreen e integración de sub-flujo de Logout automático en Maestro"
+epic: EPIC-00-BLOCKING
+status: IN_PROGRESS_TEST
+priority: HIGH
+reporter: Usuario / Antigravity AI
+assignee: Antigravity AI
+created_at: "2026-07-30T09:23:00+02:00"
+updated_at: "2026-07-30T09:26:00+02:00"
+closed_at: null
+related_historical_tickets: [PF-147, PF-BUG-002, PF-173]
+---
+
+### 🎯 Objetivo
+Corregir la aserción de pantalla inicial en la suite Maestro para validar `WelcomeScreen` (pantalla de bienvenida con botones Iniciar Sesión / Crear Cuenta) tras el splash, y crear/integrar la rutina de cierre de sesión (Logout) al finalizar los tests que requieren autenticación.
+
+### 📋 Criterios de Aceptación
+- [x] Actualizado `02_assert_screen.yaml` para asertar la pantalla de bienvenida (`welcome-screen`) y botón "Iniciar Sesión".
+- [x] Creado el flujo incremental `04_login_and_logout.yaml` que inicia sesión, navega a Perfil, cierra sesión y verifica retorno a bienvenida.
+- [x] Agregados `testID`s en `ProfileScreen` y `LogoutConfirmationModal` para garantizar selección unívoca.
+- [x] Actualizados `login_flow.yaml` y `smoke_flow.yaml` para incluir el paso de limpieza mediante Logout final.
+- [x] Preservación del estado verde en la suite completa de unit tests y component tests.
+
+### 🛠️ Archivos Implicados
+- `e2e/maestro/02_assert_screen.yaml`
+- `e2e/maestro/03_tap_button.yaml`
+- `e2e/maestro/04_login_and_logout.yaml`
+- `e2e/maestro/login_flow.yaml`
+- `e2e/maestro/smoke_flow.yaml`
+- `src/screens/ProfileScreen.tsx`
+- `src/components/LogoutConfirmationModal.tsx`
+- `package.json`
+
+### 📜 Historial de Modificaciones
+- `2026-07-30 09:23:00 CEST` | Estado: CREATED ➔ IN_PROGRESS_ANALYSIS | Antigravity AI | Registrada issue PF-174 tras feedback de usuario sobre flujo de bienvenida y cierre de sesión tras tests E2E.
+- `2026-07-30 09:24:00 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Baseline tests en verde. Tránsito a fase de diseño para WelcomeScreen y rutina de Logout en Maestro.
+- `2026-07-30 09:25:00 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Creada rama feature/pf-174-e2e-welcome-logout e inicio de las modificaciones.
+- `2026-07-30 09:26:00 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Aplicados cambios en 02_assert_screen, 03_tap_button, 04_login_and_logout, login_flow, smoke_flow, ProfileScreen y LogoutConfirmationModal. Tránsito a pruebas.
+
+
+
+```
+
 
 
 

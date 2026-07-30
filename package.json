@@ -22,6 +22,7 @@
     "test:e2e:01": "maestro --device emulator-5554 test e2e/maestro/01_hello_world.yaml",
     "test:e2e:02": "maestro --device emulator-5554 test e2e/maestro/02_assert_screen.yaml",
     "test:e2e:03": "maestro --device emulator-5554 test e2e/maestro/03_tap_button.yaml",
+    "test:e2e:04": "maestro --device emulator-5554 test e2e/maestro/04_login_and_logout.yaml",
     "test:e2e:login": "maestro --device emulator-5554 test e2e/maestro/login_flow.yaml",
     "test:e2e:smoke": "maestro --device emulator-5554 test e2e/maestro/smoke_flow.yaml",
     "test:e2e:all": "maestro --device emulator-5554 test e2e/maestro/"

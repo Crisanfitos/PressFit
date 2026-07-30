@@ -2,24 +2,19 @@ appId: com.crisanfitos.PressFit_Expo
 ---
 # Smoke Flow — PressFit E2E (Maestro)
 # End-to-end smoke test covering the critical happy path:
-#   Login -> Calendar -> Select Day -> Start Workout -> Complete Set -> Finish Workout
-#
-# Prerequisites:
-#   - App installed and running on emulator/device
-#   - Valid test credentials in environment variables:
-#     E2E_TEST_EMAIL, E2E_TEST_PASSWORD
-#   - User must have at least one active routine with exercises configured for today
-#
-# Usage:
-#   maestro test e2e/maestro/smoke_flow.yaml
+#   Login -> Calendar -> Select Day -> Start Workout -> Complete Set -> Finish Workout -> Logout
 
 - launchApp:
     clearState: true
 
 # ===== STEP 1: LOGIN =====
+- tapOn:
+    id: "login-button"
+    optional: true
+
 - extendedWaitUntil:
     visible:
-      id: "login-screen"
+      id: "email-input"
     timeout: 10000
 
 - tapOn:
@@ -78,7 +73,27 @@ appId: com.crisanfitos.PressFit_Expo
     text: "Sí"
     optional: true
 
-# Verify we return to the workout day screen or calendar
-- assertVisible:
-    id: "workout-day-screen"
-    optional: true
+# ===== STEP 7: CLEAN LOGOUT =====
+- tapOn: "Perfil"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-button"
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+# Verify return to Welcome Screen
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000

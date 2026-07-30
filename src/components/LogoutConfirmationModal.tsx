@@ -96,10 +96,10 @@ const LogoutConfirmationModal: React.FC<LogoutConfirmationModalProps> = ({ visib
                     <Text style={styles.modalText}>¿Estás seguro de que deseas cerrar sesión en tu cuenta?</Text>
 
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+                        <TouchableOpacity style={styles.cancelButton} onPress={onClose} testID="logout-cancel-button">
                             <MaterialIcons name="close" size={28} color={colors.text} />
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.confirmButton} onPress={onConfirm}>
+                        <TouchableOpacity style={styles.confirmButton} onPress={onConfirm} testID="logout-confirm-button">
                             <MaterialIcons name="check" size={28} color="#fff" />
                         </TouchableOpacity>
                     </View>
