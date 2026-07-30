@@ -17,8 +17,9 @@ appId: com.crisanfitos.pressfit
     clearState: true
 
 # ===== STEP 1: LOGIN =====
-- assertVisible:
-    id: "login-screen"
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
     timeout: 10000
 
 - tapOn:
@@ -35,8 +36,9 @@ appId: com.crisanfitos.pressfit
     id: "login-submit-button"
 
 # ===== STEP 2: VERIFY CALENDAR SCREEN =====
-- assertVisible:
-    id: "monthly-calendar-screen"
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
     timeout: 15000
 
 # ===== STEP 3: TAP ON TODAY'S DATE =====
@@ -44,8 +46,9 @@ appId: com.crisanfitos.pressfit
     id: "calendar-day-today"
 
 # ===== STEP 4: WORKOUT DAY SCREEN =====
-- assertVisible:
-    id: "workout-day-screen"
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
     timeout: 10000
 
 # Tap the start/continue workout button
@@ -53,8 +56,9 @@ appId: com.crisanfitos.pressfit
     id: "start-workout-button"
 
 # ===== STEP 5: WORKOUT SCREEN — COMPLETE A SET =====
-- assertVisible:
-    id: "workout-screen"
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
     timeout: 10000
 
 # Tap on the first weight input and enter a value
@@ -70,11 +74,11 @@ appId: com.crisanfitos.pressfit
     id: "finish-workout-button"
 
 # Confirm the finish dialog (if an Alert is shown)
-- tapOn: "Sí"
-  optional: true
+- tapOn:
+    text: "Sí"
+    optional: true
 
 # Verify we return to the workout day screen or calendar
 - assertVisible:
     id: "workout-day-screen"
-    timeout: 10000
     optional: true
