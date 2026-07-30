@@ -18,14 +18,14 @@
     "detox:test": "jest --config jest.e2e.config.js",
     "dashboard": "node .agents/dashboard/server.js",
     "start:localhost": "expo start --localhost",
-    "test:e2e": "maestro --device emulator-5554 --env-file e2e/.env.e2e test e2e/maestro/01_hello_world.yaml",
-    "test:e2e:01": "maestro --device emulator-5554 --env-file e2e/.env.e2e test e2e/maestro/01_hello_world.yaml",
-    "test:e2e:02": "maestro --device emulator-5554 --env-file e2e/.env.e2e test e2e/maestro/02_assert_screen.yaml",
-    "test:e2e:03": "maestro --device emulator-5554 --env-file e2e/.env.e2e test e2e/maestro/03_tap_button.yaml",
-    "test:e2e:04": "maestro --device emulator-5554 --env-file e2e/.env.e2e test e2e/maestro/04_login_and_logout.yaml",
-    "test:e2e:login": "maestro --device emulator-5554 --env-file e2e/.env.e2e test e2e/maestro/login_flow.yaml",
-    "test:e2e:smoke": "maestro --device emulator-5554 --env-file e2e/.env.e2e test e2e/maestro/smoke_flow.yaml",
-    "test:e2e:all": "maestro --device emulator-5554 --env-file e2e/.env.e2e test e2e/maestro/"
+    "test:e2e": "maestro --device emulator-5554 test e2e/maestro/01_hello_world.yaml",
+    "test:e2e:01": "maestro --device emulator-5554 test e2e/maestro/01_hello_world.yaml",
+    "test:e2e:02": "maestro --device emulator-5554 test e2e/maestro/02_assert_screen.yaml",
+    "test:e2e:03": "maestro --device emulator-5554 test e2e/maestro/03_tap_button.yaml",
+    "test:e2e:04": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/04_login_and_logout.yaml",
+    "test:e2e:login": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/login_flow.yaml",
+    "test:e2e:smoke": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/smoke_flow.yaml",
+    "test:e2e:all": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
