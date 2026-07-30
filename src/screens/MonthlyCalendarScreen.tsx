@@ -453,6 +453,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                             style={styles.routineSelectorButton}
                             onPress={toggleRoutineSelector}
                             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            testID="routine-selector-button"
                         >
                             <MaterialIcons
                                 name="fitness-center"
@@ -512,11 +513,12 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                             style={styles.monthNavButton}
                             onPress={() => navigateMonth('prev')}
                             hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                            testID="prev-month-button"
                         >
                             <MaterialIcons name="chevron-left" size={28} color={colors.text} />
                         </TouchableOpacity>
 
-                        <Text style={styles.monthTitle}>
+                        <Text style={styles.monthTitle} testID="month-title">
                             {monthNames[month]} {year}
                         </Text>
 
@@ -524,6 +526,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                             style={styles.monthNavButton}
                             onPress={() => navigateMonth('next')}
                             hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                            testID="next-month-button"
                         >
                             <MaterialIcons name="chevron-right" size={28} color={colors.text} />
                         </TouchableOpacity>
