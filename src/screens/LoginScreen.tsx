@@ -272,8 +272,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                         </TouchableOpacity>
 
                         {error ? (
-                            <View style={styles.errorContainer}>
-                                <Text style={styles.errorText}>{error}</Text>
+                            <View style={styles.errorContainer} testID="login-error-container">
+                                <Text style={styles.errorText} testID="login-error-text">{error}</Text>
                             </View>
                         ) : null}
                     </View>

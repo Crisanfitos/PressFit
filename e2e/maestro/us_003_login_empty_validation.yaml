@@ -1,0 +1,44 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_003_login_empty_validation.yaml — US-003: Validación de errores de formulario de Login con campos vacíos
+
+- launchApp
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# Esperar pantalla de bienvenida
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 15000
+
+# Pulsar en Iniciar Sesión para ir a LoginScreen
+- tapOn:
+    id: "login-button"
+
+# Esperar pantalla de login
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 10000
+
+# Pulsar el botón de Iniciar Sesión sin rellenar ningún campo
+- tapOn:
+    id: "login-submit-button"
+
+# Verificar que se muestra el mensaje de error de validación de campos vacíos
+- assertVisible:
+    text: "Por favor completa todos los campos"
+
+- assertVisible:
+    id: "login-error-text"
