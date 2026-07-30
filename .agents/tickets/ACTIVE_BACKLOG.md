@@ -797,13 +797,13 @@ Proveer una suite de pruebas E2E paso a paso (Hello World incremental) para vali
 id: PF-174
 title: "[Task]: Reajuste de pantalla inicial E2E a WelcomeScreen e integración de sub-flujo de Logout automático en Maestro"
 epic: EPIC-00-BLOCKING
-status: IN_PROGRESS_TEST
+status: DONE
 priority: HIGH
 reporter: Usuario / Antigravity AI
 assignee: Antigravity AI
 created_at: "2026-07-30T09:23:00+02:00"
-updated_at: "2026-07-30T09:26:00+02:00"
-closed_at: null
+updated_at: "2026-07-30T09:27:00+02:00"
+closed_at: "2026-07-30T09:27:00+02:00"
 related_historical_tickets: [PF-147, PF-BUG-002, PF-173]
 ---
 
@@ -832,6 +832,8 @@ Corregir la aserción de pantalla inicial en la suite Maestro para validar `Welc
 - `2026-07-30 09:24:00 CEST` | Estado: IN_PROGRESS_ANALYSIS ➔ IN_PROGRESS_DESIGN | Antigravity AI | Baseline tests en verde. Tránsito a fase de diseño para WelcomeScreen y rutina de Logout en Maestro.
 - `2026-07-30 09:25:00 CEST` | Estado: IN_PROGRESS_DESIGN ➔ IN_PROGRESS_BUILD | Antigravity AI | Creada rama feature/pf-174-e2e-welcome-logout e inicio de las modificaciones.
 - `2026-07-30 09:26:00 CEST` | Estado: IN_PROGRESS_BUILD ➔ IN_PROGRESS_TEST | Antigravity AI | Aplicados cambios en 02_assert_screen, 03_tap_button, 04_login_and_logout, login_flow, smoke_flow, ProfileScreen y LogoutConfirmationModal. Tránsito a pruebas.
+- `2026-07-30 09:27:00 CEST` | Estado: IN_PROGRESS_TEST ➔ DONE | Antigravity AI | Pruebas unitarias (267/267) y de componentes (94/94) 100% en verde. Fusionado en main (Commit c191056) y subido a remoto. Rama feature/pf-174-e2e-welcome-logout preservada.
+
 
 
 
