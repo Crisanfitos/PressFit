@@ -71,7 +71,7 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({ visible, onClose, menuIt
     >
       <View style={styles.container}>
         <Animated.View style={[styles.overlay, { opacity: overlayOpacity }]}>
-          <TouchableOpacity style={StyleSheet.absoluteFill} onPress={onClose} activeOpacity={1} />
+          <TouchableOpacity style={StyleSheet.absoluteFill} onPress={onClose} activeOpacity={1} testID="drawer-overlay" />
         </Animated.View>
 
         <Animated.View
@@ -84,10 +84,11 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({ visible, onClose, menuIt
               transform: [{ translateX }],
             },
           ]}
+          testID="side-drawer"
         >
           <View style={[styles.drawerHeader, { borderBottomColor: colors.border }]}>
             <MaterialIcons name="fitness-center" size={28} color={colors.primary} />
-            <Text style={[styles.drawerTitle, { color: colors.text }]}>PressFit</Text>
+            <Text style={[styles.drawerTitle, { color: colors.text }]} testID="drawer-title">PressFit</Text>
           </View>
 
           <View style={styles.menuList}>
@@ -100,6 +101,7 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({ visible, onClose, menuIt
                   item.onPress();
                 }}
                 activeOpacity={0.7}
+                testID={`drawer-item-${index}`}
               >
                 <MaterialIcons name={item.icon} size={24} color={colors.textSecondary} />
                 <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>

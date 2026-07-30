@@ -443,6 +443,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                         style={styles.hamburgerButton}
                         onPress={() => setDrawerVisible(true)}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        testID="hamburger-button"
                     >
                         <MaterialIcons name="menu" size={28} color={colors.text} />
                     </TouchableOpacity>
