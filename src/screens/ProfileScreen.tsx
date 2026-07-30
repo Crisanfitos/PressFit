@@ -170,7 +170,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     }), [colors]);
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="profile-screen">
             <View style={styles.header}>
                 <Text style={styles.headerText}>Perfil</Text>
             </View>

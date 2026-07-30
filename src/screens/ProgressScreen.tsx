@@ -67,7 +67,7 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="progress-screen">
             <View style={styles.header}>
                 <Text style={styles.headerText}>Progreso</Text>
             </View>
