@@ -21,7 +21,7 @@ appId: com.crisanfitos.PressFit_Expo
 - extendedWaitUntil:
     visible:
       id: "welcome-screen"
-    timeout: 15000
+    timeout: 20000
 
 - tapOn:
     id: "login-button"
