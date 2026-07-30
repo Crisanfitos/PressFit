@@ -636,7 +636,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                                     <MaterialIcons name="close" size={20} color={colors.textSecondary} />
                                                                 </TouchableOpacity>
                                                             )}
-                                                            {mode === 'ACTIVE' && navMode !== 'edit' && (() => {
+                                                            {navMode !== 'edit' && (() => {
                                                                 const isActiveTimer = lastCompletedSetId === set.id && restTimerVisible;
                                                                 const hasSavedTimerValue = set.descanso_segundos && set.descanso_segundos > 0;
                                                                 const isSaved = hasSavedTimerValue;

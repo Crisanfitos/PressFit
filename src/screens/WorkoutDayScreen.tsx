@@ -605,11 +605,11 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                 )}
             </ScrollView>
 
-            {/* Action Button (only for today and not completed) */}
-            {isToday && exercises.length > 0 && !workoutStats?.isCompleted && (
+            {/* Action Button (only for today) */}
+            {isToday && exercises.length > 0 && (
                 <TouchableOpacity
                     style={styles.bottomButton}
-                    onPress={activeWorkout ? handleContinueWorkout : handleStartWorkout}
+                    onPress={handleStartWorkout}
                     testID="start-workout-button"
                 >
                     <LinearGradient
@@ -619,12 +619,16 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                         style={styles.buttonGradient}
                     >
                         <MaterialIcons
-                            name={activeWorkout ? 'play-arrow' : 'play-circle-filled'}
+                            name={workoutStats?.isCompleted ? 'edit' : activeWorkout ? 'play-arrow' : 'play-circle-filled'}
                             size={24}
                             color={colors.background}
                         />
                         <Text style={styles.buttonText}>
-                            {activeWorkout ? 'Continuar Entrenamiento' : 'Empezar Entrenamiento'}
+                            {workoutStats?.isCompleted
+                                ? 'Ver / Editar Entrenamiento'
+                                : activeWorkout
+                                ? 'Continuar Entrenamiento'
+                                : 'Empezar Entrenamiento'}
                         </Text>
                     </LinearGradient>
                 </TouchableOpacity>
