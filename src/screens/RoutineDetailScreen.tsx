@@ -241,7 +241,7 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
     });
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="routine-detail-screen">
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity
@@ -271,6 +271,7 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
                     return (
                         <TouchableOpacity
                             key={dayName}
+                            testID={`routine-day-card-${dayName.toLowerCase()}`}
                             style={[styles.dayCard, exerciseCount === 0 && styles.emptyDay]}
                             onPress={async () => {
                                 let targetDayId = dayId;

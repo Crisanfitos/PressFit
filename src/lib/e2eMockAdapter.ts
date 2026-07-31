@@ -144,6 +144,52 @@ class E2EMockStore {
         }
         return null;
     }
+
+    addSet(exerciseId: string) {
+        if (!this.currentWorkout) {
+            this.currentWorkout = this.getMockRoutineDay();
+        }
+        const exercises = this.currentWorkout.ejercicios_programados || [];
+        let targetEx = exercises.find((e: any) => e.ejercicio_id === exerciseId || e.id === exerciseId);
+        if (!targetEx && exercises.length > 0) {
+            targetEx = exercises[0];
+        }
+        if (targetEx) {
+            if (!targetEx.series) targetEx.series = [];
+            const nextNum = targetEx.series.length + 1;
+            const newSet = {
+                id: `set-${targetEx.ejercicio_id || exerciseId}-${nextNum}-${Date.now()}`,
+                ejercicio_programado_id: targetEx.id,
+                numero_serie: nextNum,
+                peso_utilizado: 0,
+                repeticiones: 0,
+                rpe: null,
+                descanso_segundos: null,
+                completada: false,
+            };
+            targetEx.series.push(newSet);
+            return newSet;
+        }
+        return null;
+    }
+
+    deleteSet(setId: string) {
+        if (this.currentWorkout?.ejercicios_programados) {
+            for (const ex of this.currentWorkout.ejercicios_programados) {
+                if (ex.series) {
+                    const idx = ex.series.findIndex((s: any) => s.id === setId);
+                    if (idx !== -1) {
+                        ex.series.splice(idx, 1);
+                        ex.series.forEach((s: any, i: number) => {
+                            s.numero_serie = i + 1;
+                        });
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }
 
 export const mockStore = new E2EMockStore();

@@ -273,6 +273,11 @@ export const WorkoutService = {
                 .select()
                 .single();
 
+            if (isE2EMockEnabled()) {
+                const mockAdded = mockStore.addSet(exerciseId);
+                return { data: (mockAdded || data) as any, error: null };
+            }
+
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
@@ -314,6 +319,11 @@ export const WorkoutService = {
 
     async deleteSet(setId: string): Promise<{ error: unknown }> {
         try {
+            if (isE2EMockEnabled()) {
+                mockStore.deleteSet(setId);
+                return { error: null };
+            }
+
             const { error } = await supabase.from('series').delete().eq('id', setId);
 
             if (error) throw error;

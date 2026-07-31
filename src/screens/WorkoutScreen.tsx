@@ -671,7 +671,11 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                             )}
 
                                             {(isStructureEditable || (isInputEditable && mode !== 'ACTIVE')) && (
-                                                <TouchableOpacity style={styles.addSetButton} onPress={() => openAddSetsModal(exercise.id)}>
+                                                <TouchableOpacity
+                                                    testID={`add-set-button-${index}`}
+                                                    style={styles.addSetButton}
+                                                    onPress={() => handleAddSet(exercise.id)}
+                                                >
                                                     <MaterialIcons name="add" size={16} color={colors.primary} />
                                                     <Text style={styles.addSetText}>Añadir Series</Text>
                                                 </TouchableOpacity>

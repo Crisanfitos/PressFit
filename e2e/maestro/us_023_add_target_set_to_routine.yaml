@@ -1,0 +1,139 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_023_add_target_set_to_routine.yaml — US-023: Plantilla semanal: Añadir una serie objetivo a un ejercicio
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Navegar a Editar Rutina Semanal vía FAB
+- tapOn:
+    id: "edit-routine-fab"
+
+- extendedWaitUntil:
+    visible:
+      id: "routine-editor-screen"
+    timeout: 10000
+
+# 2. Entrar a Editar Detalle de la Plantilla Activa
+- tapOn:
+    id: "edit-routine-detail-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "routine-detail-screen"
+    timeout: 10000
+
+# 3. Seleccionar el día Lunes
+- tapOn:
+    id: "routine-day-card-lunes"
+
+- extendedWaitUntil:
+    visible:
+      id: "exercise-card-0"
+    timeout: 10000
+
+# 4. Añadir una serie al primer ejercicio
+- tapOn:
+    id: "add-set-button-0"
+
+# 5. Verificar que la nueva serie existe (set-row-3)
+- extendedWaitUntil:
+    visible:
+      id: "set-row-3"
+    timeout: 5000
+
+- assertVisible:
+    id: "set-row-3"
+
+# 6. Regresar limpiamente
+- back
+
+- extendedWaitUntil:
+    visible:
+      id: "routine-detail-screen"
+    timeout: 5000
+
+- back
+
+- extendedWaitUntil:
+    visible:
+      id: "routine-editor-screen"
+    timeout: 5000
+
+- back
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 5000
+
+# 7. Flujo de Cierre de Sesión (Logout)
+- tapOn:
+    text: "Perfil"
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"

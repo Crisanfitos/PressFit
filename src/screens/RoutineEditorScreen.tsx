@@ -306,7 +306,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
     });
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="routine-editor-screen">
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity
@@ -365,6 +365,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                                     )}
 
                                     <TouchableOpacity
+                                        testID="edit-routine-detail-button"
                                         style={styles.actionButton}
                                         onPress={() => navigation.navigate('RoutineDetail', { routineId: routine.id })}
                                     >

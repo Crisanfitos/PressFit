@@ -660,6 +660,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
 
             {/* FAB for Routine Editor */}
             <TouchableOpacity
+                testID="edit-routine-fab"
                 style={styles.fab}
                 onPress={() => navigation.navigate('RoutineEditor')}
                 activeOpacity={0.8}
