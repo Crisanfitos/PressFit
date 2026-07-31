@@ -1,0 +1,171 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_022_rest_timer_manual_adjustments.yaml — US-022: Controles manuales del cronómetro de descanso (Iniciar, Pausar, Reanudar, Descartar y Confirmar)
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+- tapOn:
+    id: "calendar-day-today"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "start-workout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-screen"
+
+# Marcar primera serie completada para auto-iniciar el RestTimer
+- tapOn:
+    id: "set-complete-checkbox-0"
+
+- extendedWaitUntil:
+    visible:
+      id: "rest-timer-banner"
+    timeout: 10000
+
+- assertVisible:
+    id: "rest-timer-banner"
+
+# 1. Pausar el temporizador pulsando "Parar"
+- tapOn:
+    id: "rest-timer-pause-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "rest-timer-resume-button"
+    timeout: 5000
+
+- assertVisible:
+    id: "rest-timer-resume-button"
+
+- assertVisible:
+    text: "Pausado"
+
+# 2. Reanudar el temporizador pulsando "Play"
+- tapOn:
+    id: "rest-timer-resume-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "rest-timer-pause-button"
+    timeout: 5000
+
+- assertVisible:
+    id: "rest-timer-pause-button"
+
+- assertVisible:
+    text: "Descanso"
+
+# 3. Pausar de nuevo para probar la confirmación
+- tapOn:
+    id: "rest-timer-pause-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "rest-timer-confirm-button"
+    timeout: 5000
+
+# 4. Confirmar/guardar tiempo pulsando "Check"
+- tapOn:
+    id: "rest-timer-confirm-button"
+
+# Comprobar que el banner desaparece
+- assertNotVisible:
+    id: "rest-timer-banner"
+
+# Regresar a WorkoutDayScreen
+- back
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+# Regresar a MonthlyCalendarScreen
+- tapOn:
+    id: "workout-day-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+# Limpieza: Cierre de Sesión
+- tapOn: "Perfil"
+
+- scroll
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000

@@ -312,6 +312,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             {isStopped ? (
                 <>
                     <TouchableOpacity
+                        testID="rest-timer-confirm-button"
                         style={[styles.actionButton, { backgroundColor: '#22c55e' }]}
                         onPress={handleConfirm}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -319,6 +320,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                         <MaterialIcons name="check" size={22} color="#fff" />
                     </TouchableOpacity>
                     <TouchableOpacity
+                        testID="rest-timer-resume-button"
                         style={[styles.actionButton, { backgroundColor: colors.primary }]}
                         onPress={handleResume}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -326,6 +328,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                         <MaterialIcons name="play-arrow" size={22} color={colors.textOnPrimary} />
                     </TouchableOpacity>
                     <TouchableOpacity
+                        testID="rest-timer-discard-button"
                         style={[styles.actionButton, { backgroundColor: '#ef4444' }]}
                         onPress={handleDiscard}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -335,10 +338,10 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                 </>
             ) : (
                 <>
-                    <TouchableOpacity style={styles.stopButton} onPress={handleStop}>
+                    <TouchableOpacity testID="rest-timer-pause-button" style={styles.stopButton} onPress={handleStop}>
                         <Text style={styles.stopButtonText}>Parar</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.dismissButton} onPress={handleDiscard}>
+                    <TouchableOpacity testID="rest-timer-discard-button" style={styles.dismissButton} onPress={handleDiscard}>
                         <MaterialIcons name="close" size={20} color={colors.textSecondary} />
                     </TouchableOpacity>
                 </>
