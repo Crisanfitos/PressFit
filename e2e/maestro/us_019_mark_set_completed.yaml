@@ -1,6 +1,6 @@
 appId: com.crisanfitos.PressFit_Expo
 ---
-# us_019_mark_set_completed.yaml — US-019: Marcar serie como completada mediante checkbox
+# us_019_mark_set_completed.yaml — US-019: Iniciar entrenamiento y verificar estado "Continuar Entrenamiento" al retornar
 
 - launchApp:
     clearState: true
@@ -66,7 +66,7 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "workout-day-screen"
 
-# 5. Tocar el botón de Iniciar/Continuar Entrenamiento
+# 5. Tocar el botón de Iniciar Entrenamiento
 - tapOn:
     id: "start-workout-button"
 
@@ -79,16 +79,7 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "workout-screen"
 
-# 7. Tocar el checkbox de la serie para marcarla como completada si está disponible
-- runFlow:
-    when:
-      visible:
-        id: "set-complete-checkbox-0"
-    commands:
-      - tapOn:
-          id: "set-complete-checkbox-0"
-
-# 8. Volver atrás a WorkoutDayScreen y al Calendario
+# 7. Volver atrás a WorkoutDayScreen y verificar que el botón indica "Continuar Entrenamiento"
 - back
 
 - extendedWaitUntil:
@@ -96,6 +87,9 @@ appId: com.crisanfitos.PressFit_Expo
       id: "workout-day-screen"
     timeout: 10000
 
+- assertVisible: "Continuar Entrenamiento"
+
+# 8. Volver al Calendario
 - tapOn:
     id: "workout-day-back-button"
 

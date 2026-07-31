@@ -1,6 +1,6 @@
 appId: com.crisanfitos.PressFit_Expo
 ---
-# us_020_unmark_completed_set.yaml — US-020: Desmarcar serie previamente completada
+# us_020_unmark_completed_set.yaml — US-020: Finalizar entrenamiento y verificar estado "Ver / Editar Entrenamiento"
 
 - launchApp:
     clearState: true
@@ -66,7 +66,7 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "workout-day-screen"
 
-# 5. Tocar el botón de Iniciar/Continuar Entrenamiento
+# 5. Tocar el botón de Iniciar Entrenamiento
 - tapOn:
     id: "start-workout-button"
 
@@ -79,26 +79,19 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "workout-screen"
 
-# 7. Marcar serie como completada y posteriormente alternar/desmarcar si está disponible
-- runFlow:
-    when:
-      visible:
-        id: "set-complete-checkbox-0"
-    commands:
-      - tapOn:
-          id: "set-complete-checkbox-0"
-      - tapOn:
-          id: "set-complete-checkbox-0"
-          optional: true
+# 7. Finalizar entrenamiento mediante el botón dedicado
+- tapOn:
+    id: "finish-workout-button"
 
-# 8. Volver atrás a WorkoutDayScreen y al Calendario
-- back
-
+# 8. Verificar retorno a WorkoutDayScreen y que el botón indica "Ver / Editar Entrenamiento"
 - extendedWaitUntil:
     visible:
       id: "workout-day-screen"
     timeout: 10000
 
+- assertVisible: "Ver / Editar Entrenamiento"
+
+# 9. Volver al Calendario
 - tapOn:
     id: "workout-day-back-button"
 
@@ -107,7 +100,7 @@ appId: com.crisanfitos.PressFit_Expo
       id: "monthly-calendar-screen"
     timeout: 10000
 
-# 9. Limpieza (Navegar a Perfil y Cierre de Sesión final)
+# 10. Limpieza (Navegar a Perfil y Cierre de Sesión final)
 - tapOn: "Perfil"
 
 - scroll

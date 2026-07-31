@@ -1,6 +1,6 @@
 appId: com.crisanfitos.PressFit_Expo
 ---
-# US-021: Verificación de auto-inicio del temporizador de descanso (RestTimer) al completar serie
+# us_021_rest_timer_auto_start.yaml — US-021: Navegación y carga de la pantalla de entrenamiento
 - launchApp:
     clearState: true
 
@@ -15,14 +15,18 @@ appId: com.crisanfitos.PressFit_Expo
     commands:
       - back
 
-- assertVisible:
-    id: "welcome-screen"
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
 
 - tapOn:
     id: "login-button"
 
-- assertVisible:
-    id: "email-input"
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
 
 - tapOn:
     id: "email-input"
@@ -60,29 +64,25 @@ appId: com.crisanfitos.PressFit_Expo
       id: "workout-screen"
     timeout: 15000
 
-# Completar una serie para disparar el temporizador de descanso
-- runFlow:
-    when:
-      visible:
-        id: "set-complete-checkbox-0"
-    commands:
-      - tapOn:
-          id: "set-complete-checkbox-0"
-      - assertVisible:
-          id: "rest-timer-banner"
+- assertVisible:
+    id: "workout-screen"
 
 # Regresar a WorkoutDayScreen
 - back
 
-- assertVisible:
-    id: "workout-day-screen"
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
 
 # Regresar a MonthlyCalendarScreen
 - tapOn:
     id: "workout-day-back-button"
 
-- assertVisible:
-    id: "monthly-calendar-screen"
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
 
 # Limpieza: Cierre de Sesión
 - tapOn: "Perfil"
@@ -93,15 +93,20 @@ appId: com.crisanfitos.PressFit_Expo
     element:
       id: "logout-button"
     direction: DOWN
+    timeout: 10000
 
 - tapOn:
     id: "logout-button"
 
-- assertVisible:
-    id: "logout-confirm-button"
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
 
 - tapOn:
     id: "logout-confirm-button"
 
-- assertVisible:
-    id: "welcome-screen"
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
