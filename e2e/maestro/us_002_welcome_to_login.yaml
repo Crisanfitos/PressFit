@@ -2,7 +2,8 @@ appId: com.crisanfitos.PressFit_Expo
 ---
 # us_002_welcome_to_login.yaml — US-002: Navegación de Bienvenida a pantalla de Login (LoginScreen)
 
-- launchApp
+- launchApp:
+    clearState: true
 
 # If Expo Dev Launcher screen appears, tap on dev server
 - tapOn:
@@ -48,3 +49,9 @@ appId: com.crisanfitos.PressFit_Expo
 
 - assertVisible:
     id: "login-submit-button"
+
+# Retornar a pantalla de bienvenida
+- back
+
+- assertVisible:
+    id: "welcome-screen"

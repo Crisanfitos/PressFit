@@ -53,3 +53,9 @@ appId: com.crisanfitos.PressFit_Expo
 
 - assertVisible:
     id: "signup-submit-button"
+
+# Retornar a pantalla de bienvenida
+- back
+
+- assertVisible:
+    id: "welcome-screen"

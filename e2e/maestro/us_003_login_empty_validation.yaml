@@ -2,7 +2,8 @@ appId: com.crisanfitos.PressFit_Expo
 ---
 # us_003_login_empty_validation.yaml — US-003: Validación de errores de formulario de Login con campos vacíos
 
-- launchApp
+- launchApp:
+    clearState: true
 
 # If Expo Dev Launcher screen appears, tap on dev server
 - tapOn:
@@ -42,3 +43,9 @@ appId: com.crisanfitos.PressFit_Expo
 
 - assertVisible:
     id: "login-error-text"
+
+# Retornar a pantalla de bienvenida
+- back
+
+- assertVisible:
+    id: "welcome-screen"
