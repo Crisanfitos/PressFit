@@ -629,6 +629,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                             </View>
                                                             {isStructureEditable && (
                                                                 <TouchableOpacity
+                                                                    testID={`delete-set-button-${setIndex}`}
                                                                     style={styles.deleteSetButton}
                                                                     onPress={() => handleDeleteSet(set.id, exercise.id)}
                                                                     hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}

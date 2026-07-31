@@ -377,8 +377,8 @@ export const useWorkoutController = (
         if (!canEdit) return;
         setExercises((prev) =>
             prev.map((ex) => {
-                if (ex.id === exerciseId) {
-                    return { ...ex, sets: ex.sets.filter((s) => s.id !== setId) };
+                if (ex.id === exerciseId || ex.routine_exercise_id === exerciseId) {
+                    return { ...ex, sets: (ex.sets || []).filter((s) => s.id !== setId) };
                 }
                 return ex;
             })
