@@ -152,6 +152,9 @@ export const DailyWorkoutService = {
         userId: string,
         routineDayId: string
     ): Promise<ServiceResponse<WorkoutStats>> {
+        if (isE2EMockEnabled()) {
+            return { data: mockStore.getMockWorkoutStats(routineDayId), error: null };
+        }
         try {
             const startOfWeek = getStartOfWeekUtil(new Date());
 
@@ -246,6 +249,9 @@ export const DailyWorkoutService = {
         date: string,
         startTime: string
     ): Promise<ServiceResponse<RoutineDay>> {
+        if (isE2EMockEnabled()) {
+            return { data: mockStore.startWorkout(routineDayId) as any, error: null };
+        }
         try {
             const { data: templateDay, error: templateError } = await supabase
                 .from('rutinas_diarias')

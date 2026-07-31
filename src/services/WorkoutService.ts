@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { TipoPeso } from '../types/setTypes';
 import { formatLocalDateKey, parseDateKeyAsLocalDate } from '../utils/dateUtils';
+import { isE2EMockEnabled, mockStore } from '../lib/e2eMockAdapter';
 import {
     Serie,
     ScheduledExercise,
@@ -14,6 +15,9 @@ import {
 
 export const WorkoutService = {
     async getWorkoutDetails(workoutId: string): Promise<ServiceResponse<RoutineDay>> {
+        if (isE2EMockEnabled()) {
+            return { data: mockStore.getMockRoutineDay(workoutId) as any, error: null };
+        }
         try {
             const { data, error } = await supabase
                 .from('rutinas_diarias')
@@ -54,6 +58,9 @@ export const WorkoutService = {
     },
 
     async createWorkout(userId: string, routineDayId: string): Promise<ServiceResponse<RoutineDay>> {
+        if (isE2EMockEnabled()) {
+            return { data: mockStore.startWorkout(routineDayId) as any, error: null };
+        }
         try {
             const { data: templateDay, error: templateError } = await supabase
                 .from('rutinas_diarias')
@@ -159,6 +166,9 @@ export const WorkoutService = {
     },
 
     async completeWorkout(workoutId: string, durationMinutes?: number): Promise<ServiceResponse<RoutineDay>> {
+        if (isE2EMockEnabled()) {
+            return { data: mockStore.completeWorkout() as any, error: null };
+        }
         try {
             const { data, error } = await supabase
                 .from('rutinas_diarias')
@@ -288,6 +298,11 @@ export const WorkoutService = {
                 .eq('id', setId)
                 .select()
                 .single();
+
+            if (isE2EMockEnabled()) {
+                const mockUpdated = mockStore.updateSet(setId, dbUpdates);
+                return { data: (mockUpdated || data) as any, error: null };
+            }
 
             if (error) throw error;
             return { data, error: null };

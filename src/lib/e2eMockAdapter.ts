@@ -31,18 +31,25 @@ export const e2eFixtures = {
 };
 
 /**
- * Almacén en memoria para interceptar y servir datos deterministas en pruebas E2E.
+ * Almacén en memoria con estado de transacción mutable para pruebas E2E deterministas.
  */
 class E2EMockStore {
     private activeRoutine = JSON.parse(JSON.stringify(weeklyRoutineFixture));
     private currentWorkout: any = null;
 
+    /**
+     * Resetea el almacén al estado inicial limpio antes de cada prueba E2E.
+     */
     reset() {
         this.activeRoutine = JSON.parse(JSON.stringify(weeklyRoutineFixture));
         this.currentWorkout = null;
     }
 
     getMockRoutineDay(identifier?: string) {
+        if (this.currentWorkout) {
+            return this.currentWorkout;
+        }
+
         const days = this.activeRoutine.dias || [];
         let matchedDay = days.find((d: any) =>
             identifier ? d.nombre.toLowerCase().includes(identifier.toLowerCase()) : true
@@ -57,9 +64,9 @@ class E2EMockStore {
             nombre: matchedDay.nombre,
             descripcion: matchedDay.descripcion || 'Entrenamiento del día E2E',
             dia_semana: matchedDay.dia_semana || 1,
-            hora_inicio: this.currentWorkout?.hora_inicio || null,
-            hora_fin: this.currentWorkout?.hora_fin || null,
-            completada: !!this.currentWorkout?.completada,
+            hora_inicio: null,
+            hora_fin: null,
+            completada: false,
             ejercicios_programados: (matchedDay.ejercicios || []).map((ex: any, idx: number) => ({
                 id: `sch-ex-${ex.id || idx}`,
                 rutina_diaria_id: matchedDay.id || 'day-001',
@@ -85,11 +92,30 @@ class E2EMockStore {
         };
     }
 
+    getMockWorkoutStats(routineDayId?: string) {
+        if (!this.currentWorkout) {
+            return {
+                isCompleted: false,
+                startTime: null,
+                endTime: null,
+                duration: null,
+                exerciseCount: 2,
+            };
+        }
+        return {
+            isCompleted: !!this.currentWorkout.completada,
+            startTime: this.currentWorkout.hora_inicio || null,
+            endTime: this.currentWorkout.hora_fin || null,
+            duration: this.currentWorkout.completada ? 45 : null,
+            exerciseCount: (this.currentWorkout.ejercicios_programados || []).length || 2,
+        };
+    }
+
     startWorkout(dayId: string) {
-        const day = this.getMockRoutineDay(dayId);
+        const baseDay = this.getMockRoutineDay(dayId);
         this.currentWorkout = {
-            ...day,
-            hora_inicio: new Date().toISOString(),
+            ...baseDay,
+            hora_inicio: this.currentWorkout?.hora_inicio || new Date().toISOString(),
             hora_fin: null,
             completada: false,
         };
@@ -102,6 +128,21 @@ class E2EMockStore {
             this.currentWorkout.hora_fin = new Date().toISOString();
         }
         return this.currentWorkout;
+    }
+
+    updateSet(setId: string, updates: any) {
+        if (this.currentWorkout?.ejercicios_programados) {
+            for (const ex of this.currentWorkout.ejercicios_programados) {
+                if (ex.series) {
+                    const targetSet = ex.series.find((s: any) => s.id === setId);
+                    if (targetSet) {
+                        Object.assign(targetSet, updates);
+                        return targetSet;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
 
