@@ -62,6 +62,7 @@ class E2EMockStore {
             id: matchedDay.id || 'day-001',
             rutina_id: this.activeRoutine.id,
             nombre: matchedDay.nombre,
+            nombre_dia: matchedDay.nombre || matchedDay.nombre_dia || 'Lunes',
             descripcion: matchedDay.descripcion || 'Entrenamiento del día E2E',
             dia_semana: matchedDay.dia_semana || 1,
             hora_inicio: null,
@@ -112,10 +113,11 @@ class E2EMockStore {
     }
 
     startWorkout(dayId: string) {
+        this.currentWorkout = null;
         const baseDay = this.getMockRoutineDay(dayId);
         this.currentWorkout = {
             ...baseDay,
-            hora_inicio: this.currentWorkout?.hora_inicio || new Date().toISOString(),
+            hora_inicio: new Date().toISOString(),
             hora_fin: null,
             completada: false,
         };

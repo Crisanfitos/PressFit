@@ -220,6 +220,15 @@ export const DailyWorkoutService = {
 
     async getActiveWorkout(userId: string, routineDayId: string): Promise<ServiceResponse<RoutineDay>> {
         try {
+            if (isE2EMockEnabled()) {
+                const stats = mockStore.getMockWorkoutStats(routineDayId);
+                const dayData = mockStore.getMockRoutineDay(routineDayId);
+                if (stats.startTime && !stats.isCompleted) {
+                    return { data: dayData as any, error: null };
+                }
+                return { data: null, error: null };
+            }
+
             const { data: templateDay } = await this.getRoutineDayById(routineDayId);
             if (!templateDay) return { data: null, error: 'Template not found' };
 
