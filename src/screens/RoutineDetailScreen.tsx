@@ -310,6 +310,7 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
                                 </Text>
                             </View>
                             <TouchableOpacity
+                                testID={`edit-day-desc-button-${dayName.toLowerCase()}`}
                                 style={styles.editDescButton}
                                 onPress={() => handleEditDescription(dayName)}
                                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -339,6 +340,7 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Descripción del día</Text>
                         <TextInput
+                            testID="edit-day-desc-input"
                             style={styles.modalInput}
                             value={editDescription}
                             onChangeText={setEditDescription}
@@ -354,6 +356,7 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
                                 <Text style={{ color: colors.textSecondary }}>Cancelar</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
+                                testID="save-day-desc-button"
                                 style={styles.modalButtonSave}
                                 onPress={handleSaveDescription}
                             >

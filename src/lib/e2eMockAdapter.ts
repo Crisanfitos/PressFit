@@ -192,6 +192,18 @@ class E2EMockStore {
         }
         return false;
     }
+
+    updateDayDescription(dayId: string, descripcion: string) {
+        const days = this.activeRoutine.dias || [];
+        const day = days.find((d: any) => d.id === dayId || d.nombre.toLowerCase().includes(dayId.toLowerCase()));
+        if (day) {
+            day.descripcion = descripcion;
+        }
+        if (this.currentWorkout) {
+            this.currentWorkout.descripcion = descripcion;
+        }
+        return day || { id: dayId, descripcion };
+    }
 }
 
 export const mockStore = new E2EMockStore();

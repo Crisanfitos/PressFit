@@ -512,6 +512,9 @@ export const DailyWorkoutService = {
     },
 
     async updateRoutineDayDescription(dayId: string, descripcion: string): Promise<ServiceResponse<RoutineDay>> {
+        if (isE2EMockEnabled()) {
+            return { data: mockStore.updateDayDescription(dayId, descripcion) as any, error: null };
+        }
         try {
             const { data, error } = await supabase
                 .from('rutinas_diarias')

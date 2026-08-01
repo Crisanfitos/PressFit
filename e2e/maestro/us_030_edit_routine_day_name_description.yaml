@@ -1,0 +1,139 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_030_edit_routine_day_name_description.yaml — US-030: Edición de la descripción del día en RoutineDetailScreen
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Navegar a la pantalla de plantillas y luego al detalle de la rutina
+- tapOn:
+    id: "edit-routine-fab"
+
+- extendedWaitUntil:
+    visible:
+      id: "routine-editor-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "edit-routine-detail-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "routine-detail-screen"
+    timeout: 10000
+
+# 2. Pulsar botón de editar descripción para el día Lunes
+- tapOn:
+    id: "edit-day-desc-button-lunes"
+
+- extendedWaitUntil:
+    visible:
+      id: "edit-day-desc-input"
+    timeout: 5000
+
+- tapOn:
+    id: "edit-day-desc-input"
+
+- inputText: "Fuerza Pecho y Tríceps"
+
+- hideKeyboard
+
+- tapOn:
+    id: "save-day-desc-button"
+
+# 3. Aserción de la nueva descripción actualizada en la tarjeta del Lunes
+- extendedWaitUntil:
+    visible:
+      text: "Fuerza Pecho y Tríceps"
+    timeout: 5000
+
+- assertVisible:
+    text: "Fuerza Pecho y Tríceps"
+
+# 4. Navegación de retorno al Calendario
+- tapOn:
+    id: "routine-detail-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "routine-editor-screen"
+    timeout: 5000
+
+- tapOn:
+    id: "routine-editor-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 5000
+
+# 5. Flujo de Cierre de Sesión (Logout)
+- tapOn:
+    text: "Perfil"
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"
