@@ -310,6 +310,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity
+                    testID="routine-editor-back-button"
                     style={styles.backButton}
                     onPress={() => navigation.goBack()}
                     hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
