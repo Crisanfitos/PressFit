@@ -355,6 +355,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                                 <View style={styles.routineActions}>
                                     {!routine.activa && (
                                         <TouchableOpacity
+                                            testID="activate-routine-button"
                                             style={styles.actionButton}
                                             onPress={() => handleSetActive(routine)}
                                         >
