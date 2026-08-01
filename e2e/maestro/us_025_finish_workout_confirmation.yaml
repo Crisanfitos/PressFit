@@ -1,0 +1,132 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_025_finish_workout_confirmation.yaml — US-025: Finalización del entrenamiento y confirmación modal
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Seleccionar el día de hoy e iniciar sesión de entrenamiento
+- tapOn:
+    id: "calendar-day-today"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "start-workout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 10000
+
+# 2. Pulsar "Finalizar Entrenamiento"
+- tapOn:
+    id: "finish-workout-button"
+
+# 3. Confirmar en el modal de alerta ("Finalizar")
+- extendedWaitUntil:
+    visible: "(?i)finalizar"
+    timeout: 5000
+
+- tapOn:
+    text: "(?i)finalizar"
+
+# 4. Confirmar modal de éxito ("OK")
+- extendedWaitUntil:
+    visible: "OK"
+    timeout: 5000
+
+- tapOn:
+    text: "OK"
+
+# 5. Verificar retorno a WorkoutDayScreen con estado Completado
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+- assertVisible:
+    text: ".*Ver / Editar Entrenamiento.*"
+
+# 6. Regresar al Calendario
+- tapOn:
+    id: "workout-day-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 5000
+
+# 7. Flujo de Cierre de Sesión (Logout)
+- tapOn:
+    text: "Perfil"
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"
