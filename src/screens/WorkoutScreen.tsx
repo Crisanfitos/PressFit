@@ -108,7 +108,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
 
     const navigateToExerciseLibrary = () => {
         needsRefreshRef.current = true;
-        navigation.navigate('ExerciseLibrary', { routineDayId: workout?.id });
+        navigation.navigate('ExerciseLibrary', { routineDayId: workout?.id || routineDayId });
     };
 
     const openAddSetsModal = (exerciseId: string) => {
@@ -490,6 +490,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                             </Text>
                             {isStructureEditable && (
                                 <TouchableOpacity
+                                    testID="add-exercise-button"
                                     style={styles.addExerciseButton}
                                     onPress={navigateToExerciseLibrary}
                                 >
@@ -710,6 +711,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
             {/* FAB */}
             {isStructureEditable && exercises.length > 0 && (
                 <TouchableOpacity
+                    testID="add-exercise-fab"
                     style={styles.fab}
                     onPress={navigateToExerciseLibrary}
                 >

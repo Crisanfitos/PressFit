@@ -204,6 +204,27 @@ class E2EMockStore {
         }
         return day || { id: dayId, descripcion };
     }
+
+    addExercisesToRoutineDay(routineDayId: string, exerciseIds: string[]) {
+        const target = this.currentWorkout || (this.activeRoutine.dias || []).find((d: any) => d.id === routineDayId);
+        if (target) {
+            if (!target.ejercicios_programados) target.ejercicios_programados = [];
+            for (const id of exerciseIds) {
+                const foundCat = (this.catalogExercises || []).find((c: any) => c.id === id);
+                const name = foundCat?.nombre || 'Ejercicio Nuevo';
+                target.ejercicios_programados.push({
+                    id: `ep-${Date.now()}-${id}`,
+                    ejercicio_id: id,
+                    orden_ejecucion: target.ejercicios_programados.length + 1,
+                    ejercicio: { id, nombre: name },
+                    series: [
+                        { id: `s-new-1`, numero_serie: 1, peso_utilizado: 50, repeticiones: 10, rpe: 8 }
+                    ]
+                });
+            }
+        }
+        return true;
+    }
 }
 
 export const mockStore = new E2EMockStore();

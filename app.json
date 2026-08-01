@@ -23,8 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.crisanfitos.PressFit_Expo",
-      "versionCode": 2
+      "package": "com.crisanfitos.PressFit_Expo"
     },
     "web": {
       "favicon": "./assets/favicon.png"

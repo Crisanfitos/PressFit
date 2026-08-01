@@ -67,6 +67,7 @@ const ExerciseItem: React.FC<ExerciseItemProps> = React.memo(
         return (
             <Animated.View style={{ opacity: fadeAnim }}>
                 <TouchableOpacity
+                    testID={`exercise-item-${item.id}`}
                     style={[
                         styles.exerciseCard,
                         {
@@ -327,14 +328,14 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
     );
 
     return (
-        <SafeAreaView style={screenStyles.container}>
+        <SafeAreaView style={screenStyles.container} testID="exercise-library-screen">
             <View style={screenStyles.header}>
                 {isSelectionMode ? (
                     <TouchableOpacity onPress={clearSelection} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
                         <MaterialIcons name="close" size={24} color={colors.text} />
                     </TouchableOpacity>
                 ) : (
-                    <TouchableOpacity onPress={() => navigation.goBack()} style={screenStyles.backButton} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
+                    <TouchableOpacity testID="exercise-library-back-button" onPress={() => navigation.goBack()} style={screenStyles.backButton} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
                         <MaterialIcons name="arrow-back" size={24} color={colors.text} />
                     </TouchableOpacity>
                 )}
@@ -344,7 +345,7 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
                 </Text>
 
                 {isSelectionMode ? (
-                    <TouchableOpacity onPress={handleConfirmSelection} disabled={saving}>
+                    <TouchableOpacity testID="confirm-exercise-selection-button" onPress={handleConfirmSelection} disabled={saving}>
                         {saving ? (
                             <ActivityIndicator size="small" color={colors.primary} />
                         ) : (

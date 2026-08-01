@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { isE2EMockEnabled, mockStore, e2eFixtures } from '../lib/e2eMockAdapter';
 
 interface Exercise {
     id: string;
@@ -17,6 +18,16 @@ interface ServiceResponse<T> {
 
 export const ExerciseService = {
     async getExercises(): Promise<ServiceResponse<Exercise[]>> {
+        if (isE2EMockEnabled()) {
+            return {
+                data: e2eFixtures.exerciseCatalog.map((ex: any) => ({
+                    ...ex,
+                    titulo: ex.nombre || ex.titulo,
+                    grupo_muscular: ex.grupo_muscular || 'General',
+                })),
+                error: null,
+            };
+        }
         try {
             const { data, error } = await supabase
                 .from('ejercicios')
@@ -52,6 +63,10 @@ export const ExerciseService = {
         routineDayId: string,
         exerciseIds: string[]
     ): Promise<ServiceResponse<any[]>> {
+        if (isE2EMockEnabled()) {
+            mockStore.addExercisesToRoutineDay(routineDayId, exerciseIds);
+            return { data: [], error: null };
+        }
         try {
             // 1. Get current max order index
             const { data: currentExercises } = await supabase
