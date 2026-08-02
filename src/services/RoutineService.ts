@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { formatLocalDateKey, getStartOfWeek as getStartOfWeekUtil } from "../utils/dateUtils";
 import { DailyWorkoutService } from './DailyWorkoutService';
+import { isE2EMockEnabled, mockStore } from '../lib/e2eMockAdapter';
 import {
     RoutineDay,
     WeeklyRoutine,
@@ -15,6 +16,9 @@ import {
 
 export const RoutineService = {
     async getWeeklyRoutineWithDays(routineId: string): Promise<ServiceResponse<WeeklyRoutine>> {
+        if (isE2EMockEnabled()) {
+            return { data: mockStore.getActiveRoutine() as any, error: null };
+        }
         try {
             const { data, error } = await supabase
                 .from('rutinas_semanales')
@@ -60,6 +64,9 @@ export const RoutineService = {
     },
 
     async getUserRoutines(userId: string): Promise<ServiceResponse<WeeklyRoutine[]>> {
+        if (isE2EMockEnabled()) {
+            return { data: [mockStore.getActiveRoutine() as any], error: null };
+        }
         try {
             const { data, error } = await supabase
                 .from('rutinas_semanales')

@@ -1,0 +1,173 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_032_reorder_delete_exercises_in_routine.yaml — US-032: Eliminación de ejercicios en un día de rutina
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Navegar a Plantillas y al detalle del planificador
+- tapOn:
+    id: "edit-routine-fab"
+
+- extendedWaitUntil:
+    visible:
+      id: "routine-editor-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "edit-routine-detail-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "routine-detail-screen"
+    timeout: 10000
+
+# 2. Seleccionar el día Lunes para abrir el editor de ejercicios del día
+- tapOn:
+    id: "routine-day-card-lunes"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 10000
+
+# 3. Verificar presencia del primer ejercicio programado ("Press Guillotina")
+- extendedWaitUntil:
+    visible:
+      text: "Press Guillotina"
+    timeout: 10000
+
+# 4. Pulsar el botón de eliminación del primer ejercicio (papelera)
+- tapOn:
+    id: "delete-exercise-button-0"
+
+# 5. Confirmar eliminación en el diálogo modal nativo
+- extendedWaitUntil:
+    visible:
+      text: "Eliminar"
+    timeout: 5000
+
+- tapOn:
+    text: "Eliminar"
+
+# 6. Eliminar el segundo ejercicio restante ("Ab Wheel Rollout")
+- extendedWaitUntil:
+    visible:
+      text: "Ab Wheel Rollout"
+    timeout: 10000
+
+- tapOn:
+    id: "delete-exercise-button-0"
+
+- extendedWaitUntil:
+    visible:
+      text: "Eliminar"
+    timeout: 5000
+
+- tapOn:
+    text: "Eliminar"
+
+# 7. Aserción de eliminación completa: confirmación del estado libre/vacío de ejercicios
+- extendedWaitUntil:
+    visible:
+      id: "add-exercise-button"
+    timeout: 10000
+
+- assertVisible:
+    id: "add-exercise-button"
+
+# 7. Retorno progresivo al Calendario
+- tapOn:
+    id: "workout-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "routine-detail-screen"
+    timeout: 5000
+
+- tapOn:
+    id: "routine-detail-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "routine-editor-screen"
+    timeout: 5000
+
+- tapOn:
+    id: "routine-editor-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 5000
+
+# 8. Flujo de Cierre de Sesión (Logout)
+- tapOn:
+    text: "Perfil"
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"

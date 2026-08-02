@@ -335,6 +335,10 @@ export const WorkoutService = {
     },
 
     async removeExerciseFromRoutine(routineExerciseId: string): Promise<{ error: unknown }> {
+        if (isE2EMockEnabled()) {
+            mockStore.deleteExerciseFromRoutineDay(routineExerciseId);
+            return { error: null };
+        }
         try {
             const { error } = await supabase
                 .from('ejercicios_programados')
@@ -436,6 +440,10 @@ export const WorkoutService = {
         workoutId: string,
         exerciseId: string
     ): Promise<{ error: unknown }> {
+        if (isE2EMockEnabled()) {
+            mockStore.deleteExerciseFromRoutineDay(exerciseId);
+            return { error: null };
+        }
         try {
             const { error } = await supabase
                 .from('ejercicios_programados')

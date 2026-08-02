@@ -543,6 +543,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                 </TouchableOpacity>
                                                 {isStructureEditable && (
                                                     <TouchableOpacity
+                                                        testID={`delete-exercise-button-${index}`}
                                                         style={[styles.actionButton, { borderColor: '#fee2e2' }]}
                                                         onPress={() => handleDeleteExercise(exercise.id, exercise.titulo, exercise.routine_exercise_id)}
                                                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}

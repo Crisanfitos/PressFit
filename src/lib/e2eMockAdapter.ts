@@ -40,9 +40,38 @@ class E2EMockStore {
     /**
      * Resetea el almacén al estado inicial limpio antes de cada prueba E2E.
      */
-    reset() {
-        this.activeRoutine = JSON.parse(JSON.stringify(weeklyRoutineFixture));
-        this.currentWorkout = null;
+    getActiveRoutine() {
+        return {
+            ...this.activeRoutine,
+            rutinas_diarias: (this.activeRoutine.dias || []).map((d: any) => ({
+                id: d.id,
+                dia_semana: d.dia_semana,
+                nombre_dia: d.nombre_dia || (d.dia_semana === 1 ? 'Lunes' : 'Martes'),
+                nombre: d.nombre,
+                descripcion: d.descripcion,
+                ejercicios_programados: (d.ejercicios || []).map((ex: any, idx: number) => ({
+                    id: `sch-ex-${ex.id || idx}`,
+                    rutina_diaria_id: d.id,
+                    ejercicio_id: ex.id,
+                    orden_ejecucion: idx + 1,
+                    tipo_peso: 'total',
+                    ejercicio: {
+                        id: ex.id,
+                        nombre: ex.nombre,
+                        titulo: ex.nombre || ex.titulo,
+                        grupo_muscular: ex.nombre.includes('Banca') ? 'Pecho' : 'Espalda',
+                    },
+                    series: Array.from({ length: ex.series_objetivo || 3 }, (_, sIdx) => ({
+                        id: `set-${ex.id}-${sIdx + 1}`,
+                        ejercicio_programado_id: `sch-ex-${ex.id || idx}`,
+                        numero_serie: sIdx + 1,
+                        peso_utilizado: 60,
+                        repeticiones: 10,
+                        rpe: 8,
+                    })),
+                })),
+            })),
+        };
     }
 
     getMockRoutineDay(identifier?: string) {
@@ -76,7 +105,8 @@ class E2EMockStore {
                 tipo_peso: 'total',
                 ejercicio: {
                     id: ex.id,
-                    titulo: ex.nombre,
+                    nombre: ex.nombre,
+                    titulo: ex.nombre || ex.titulo,
                     grupo_muscular: ex.nombre.includes('Banca') ? 'Pecho' : 'Espalda',
                 },
                 series: Array.from({ length: ex.series_objetivo || 3 }, (_, sIdx) => ({
@@ -221,6 +251,22 @@ class E2EMockStore {
                         { id: `s-new-1`, numero_serie: 1, peso_utilizado: 50, repeticiones: 10, rpe: 8 }
                     ]
                 });
+            }
+        }
+        return true;
+    }
+
+    deleteExerciseFromRoutineDay(routineExerciseIdOrExerciseId: string) {
+        if (this.currentWorkout?.ejercicios_programados) {
+            this.currentWorkout.ejercicios_programados = this.currentWorkout.ejercicios_programados.filter(
+                (e: any) => e.id !== routineExerciseIdOrExerciseId && e.ejercicio_id !== routineExerciseIdOrExerciseId
+            );
+        }
+        for (const day of this.activeRoutine.dias || []) {
+            if (day.ejercicios_programados) {
+                day.ejercicios_programados = day.ejercicios_programados.filter(
+                    (e: any) => e.id !== routineExerciseIdOrExerciseId && e.ejercicio_id !== routineExerciseIdOrExerciseId
+                );
             }
         }
         return true;

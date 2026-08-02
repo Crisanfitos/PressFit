@@ -71,6 +71,7 @@ export const useWorkoutController = (
                 if (workoutData.ejercicios_programados) {
                     finalExercises = workoutData.ejercicios_programados.map((ex: any) => ({
                         ...ex.ejercicio,
+                        titulo: ex.ejercicio?.titulo || ex.ejercicio?.nombre || 'Ejercicio',
                         id: ex.ejercicio.id,
                         routine_exercise_id: ex.id,
                         target_sets: 3,
@@ -102,6 +103,7 @@ export const useWorkoutController = (
 
                         return {
                             ...re.ejercicio,
+                            titulo: re.ejercicio?.titulo || re.ejercicio?.nombre || 'Ejercicio',
                             id: re.ejercicio.id,
                             routine_exercise_id: re.id,
                             target_sets: 3,
