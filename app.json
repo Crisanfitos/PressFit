@@ -41,7 +41,8 @@
           "androidCollapsedTitle": "PressFit Timer",
           "iosDisplayInForeground": true
         }
-      ]
+      ],
+      "expo-font"
     ],
     "extra": {
       "eas": {

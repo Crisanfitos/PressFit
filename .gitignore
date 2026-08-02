@@ -61,6 +61,4 @@ coverage-components/
 failed_test.txt
 e2e/.env.e2e
 
-# EAS
-app.json
-eas.json
+# EAS configuration (tracked by git for EAS Cloud build)
