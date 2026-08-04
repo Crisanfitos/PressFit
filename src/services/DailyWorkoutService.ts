@@ -370,9 +370,13 @@ export const DailyWorkoutService = {
 
     // Get or create a routine day for a specific day of week
     async getOrCreateRoutineDay(userId: string, dayOfWeek: number): Promise<ServiceResponse<RoutineDay>> {
+        const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        const targetDayName = dayNames[dayOfWeek];
+
+        if (isE2EMockEnabled()) {
+            return { data: mockStore.getMockRoutineDay(targetDayName) as any, error: null };
+        }
         try {
-            const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-            const targetDayName = dayNames[dayOfWeek];
 
             // First, try to find an existing routine day by querying rutinas_semanales
             const { data: existingRoutines, error: userRoutinesError } = await supabase

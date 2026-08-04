@@ -334,7 +334,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                     </View>
                 ) : (
                     <>
-                        {routines.map((routine) => (
+                        {routines.map((routine, index) => (
                             <View
                                 key={routine.id}
                                 style={[styles.routineCard, routine.activa && styles.routineCardActive]}
@@ -355,7 +355,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                                 <View style={styles.routineActions}>
                                     {!routine.activa && (
                                         <TouchableOpacity
-                                            testID="activate-routine-button"
+                                            testID={`activate-routine-button-${index}`}
                                             style={styles.actionButton}
                                             onPress={() => handleSetActive(routine)}
                                         >
@@ -367,7 +367,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                                     )}
 
                                     <TouchableOpacity
-                                        testID="edit-routine-detail-button"
+                                        testID={`edit-routine-button-${index}`}
                                         style={styles.actionButton}
                                         onPress={() => navigation.navigate('RoutineDetail', { routineId: routine.id })}
                                     >

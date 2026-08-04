@@ -1,7 +1,11 @@
 import { supabase } from '../lib/supabase';
+import { isE2EMockEnabled, mockStore } from '../lib/e2eMockAdapter';
 
 export const AuthService = {
     async signInWithEmail(email: string, password: string) {
+        if (isE2EMockEnabled()) {
+            mockStore.resetStore();
+        }
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
@@ -25,6 +29,9 @@ export const AuthService = {
     },
 
     async signOut() {
+        if (isE2EMockEnabled()) {
+            mockStore.resetStore();
+        }
         await supabase.auth.signOut();
     },
 

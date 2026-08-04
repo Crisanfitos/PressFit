@@ -40,6 +40,11 @@ class E2EMockStore {
     /**
      * Resetea el almacén al estado inicial limpio antes de cada prueba E2E.
      */
+    resetStore() {
+        this.activeRoutine = JSON.parse(JSON.stringify(weeklyRoutineFixture));
+        this.currentWorkout = null;
+    }
+
     getActiveRoutine() {
         return {
             ...this.activeRoutine,
@@ -81,7 +86,7 @@ class E2EMockStore {
 
         const days = this.activeRoutine.dias || [];
         let matchedDay = days.find((d: any) =>
-            identifier ? d.nombre.toLowerCase().includes(identifier.toLowerCase()) : true
+            identifier ? (d.id === identifier || d.nombre?.toLowerCase().includes(identifier.toLowerCase()) || d.nombre_dia?.toLowerCase().includes(identifier.toLowerCase())) : true
         );
         if (!matchedDay) {
             matchedDay = days[0];
@@ -97,7 +102,9 @@ class E2EMockStore {
             hora_inicio: null,
             hora_fin: null,
             completada: false,
-            ejercicios_programados: (matchedDay.ejercicios || []).map((ex: any, idx: number) => ({
+            ejercicios_programados: matchedDay.ejercicios_programados && matchedDay.ejercicios_programados.length > 0
+                ? matchedDay.ejercicios_programados
+                : (matchedDay.ejercicios || []).map((ex: any, idx: number) => ({
                 id: `sch-ex-${ex.id || idx}`,
                 rutina_diaria_id: matchedDay.id || 'day-001',
                 ejercicio_id: ex.id,
@@ -270,6 +277,32 @@ class E2EMockStore {
             }
         }
         return true;
+    }
+
+    updateSet(setId: string, updates: any) {
+        let updatedSet: any = null;
+        const updateSeriesList = (seriesList: any[]) => {
+            for (const s of seriesList || []) {
+                if (s.id === setId) {
+                    Object.assign(s, updates);
+                    updatedSet = s;
+                }
+            }
+        };
+
+        if (this.currentWorkout?.ejercicios_programados) {
+            for (const ex of this.currentWorkout.ejercicios_programados) {
+                updateSeriesList(ex.series);
+            }
+        }
+        for (const day of this.activeRoutine.dias || []) {
+            if (day.ejercicios_programados) {
+                for (const ex of day.ejercicios_programados) {
+                    updateSeriesList(ex.series);
+                }
+            }
+        }
+        return updatedSet;
     }
 }
 
