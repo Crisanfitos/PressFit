@@ -87,14 +87,14 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
                     <ActivityIndicator size="large" color={colors.primary} />
                 </View>
             ) : totalWorkouts === 0 ? (
-                <View style={styles.emptyState}>
+                <View style={styles.emptyState} testID="weekly-progress-empty-state">
                     <MaterialIcons name="trending-up" size={64} color={colors.textSecondary} />
                     <Text style={styles.emptyStateTitle}>¡Empieza tu semana fuerte!</Text>
                     <Text style={styles.emptyStateText}>Entrena esta semana y verás tu progreso reflejado aquí</Text>
                 </View>
             ) : (
                 <ScrollView style={styles.scrollView}>
-                    <View style={styles.summaryCard}>
+                    <View style={styles.summaryCard} testID="weekly-progress-summary-card">
                         <View style={styles.summaryItem}>
                             <MaterialIcons name="fitness-center" size={24} color={colors.primary} />
                             <Text style={styles.summaryValue}>{totalWorkouts}</Text>
@@ -110,7 +110,7 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
 
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Duración por Día</Text>
-                        <View style={styles.chartContainer}>
+                        <View style={styles.chartContainer} testID="weekly-progress-chart-container">
                             {weekData.map((data, index) => (
                                 <View key={index} style={styles.barContainer}>
                                     <View style={styles.barWrapper}>
