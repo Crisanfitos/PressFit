@@ -1,0 +1,154 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_040_toggle_weight_type_badge.yaml — US-040: Filtrado del catálogo por insignias/badges de filtro
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible: ".*8081.*"
+    timeout: 20000
+
+- tapOn:
+    text: ".*8081.*"
+
+# Manejar posible modal de Expo / Dev Menu (antes de welcome screen)
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- tapOn:
+    text: "Continue"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu (después de welcome screen)
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 60000
+
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Abrir menú lateral y navegar al Catálogo de Ejercicios
+- tapOn:
+    id: "hamburger-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "side-drawer"
+    timeout: 5000
+
+- tapOn:
+    id: "drawer-item-0"
+
+- extendedWaitUntil:
+    visible:
+      id: "exercise-catalog-screen"
+    timeout: 10000
+
+# 2. Seleccionar chip de filtro Músculo Principal "Abdominales"
+- tapOn:
+    text: "Abdominales"
+
+- extendedWaitUntil:
+    visible:
+      text: ".*Ab Wheel Rollout.*"
+    timeout: 5000
+
+- assertVisible:
+    text: ".*Ab Wheel Rollout.*"
+
+# 3. Ocultar y mostrar filtros usando filter-toggle-button
+- tapOn:
+    id: "filter-toggle-button"
+
+- tapOn:
+    id: "filter-toggle-button"
+
+# 4. Deseleccionar chip de filtro "Abdominales"
+- tapOn:
+    text: "Abdominales"
+
+# 5. Retornar al Calendario Mensual
+- tapOn:
+    id: "exercise-catalog-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+# 6. Cierre de sesión limpio
+- tapOn:
+    text: "Perfil"
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"
