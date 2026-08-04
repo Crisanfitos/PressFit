@@ -24,6 +24,7 @@ export const ExerciseService = {
                     ...ex,
                     titulo: ex.nombre || ex.titulo,
                     grupo_muscular: ex.grupo_muscular || 'General',
+                    musculos_primarios: ex.musculos_primarios || ex.grupo_muscular || 'General',
                 })),
                 error: null,
             };

@@ -1,0 +1,147 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_037_filter_exercise_muscle_group.yaml — US-037: Filtrado por categoría de grupo muscular
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible: ".*8081.*"
+    timeout: 20000
+
+- tapOn:
+    text: ".*8081.*"
+
+# Manejar posible modal de Expo / Dev Menu (antes de welcome screen)
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- tapOn:
+    text: "Continue"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu (después de welcome screen)
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 40000
+
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Abrir menú lateral hamburguesa y navegar al Catálogo de Ejercicios
+- tapOn:
+    id: "hamburger-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "side-drawer"
+    timeout: 5000
+
+- tapOn:
+    id: "drawer-item-0"
+
+- extendedWaitUntil:
+    visible:
+      id: "exercise-catalog-screen"
+    timeout: 10000
+
+# 2. Seleccionar chip de filtro "Abdominales"
+- tapOn:
+    id: "filter-chip-abdominales"
+
+# 3. Aserción de filtrado por grupo muscular: Abdominales visible
+- assertVisible:
+    text: ".*Abdominales.*"
+
+# 4. Cambiar chip de filtro a "Aductores"
+- tapOn:
+    id: "filter-chip-aductores"
+
+# 5. Aserción de filtrado por grupo muscular: Aductores visible
+- assertVisible:
+    text: ".*Aductores.*"
+
+# 6. Retornar al Calendario Mensual
+- tapOn:
+    id: "exercise-catalog-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+# 7. Cierre de sesión limpio
+- tapOn:
+    text: "Perfil"
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"
