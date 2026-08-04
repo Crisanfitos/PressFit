@@ -1,0 +1,123 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_035_explore_exercise_catalog.yaml — US-035: Exploración del catálogo de ejercicios por grupo muscular
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Abrir menú lateral hamburguesa
+- tapOn:
+    id: "hamburger-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "side-drawer"
+    timeout: 5000
+
+- assertVisible:
+    id: "side-drawer"
+
+# 2. Navegar al Catálogo de Ejercicios
+- tapOn:
+    id: "drawer-item-0"
+
+- extendedWaitUntil:
+    visible:
+      id: "exercise-catalog-screen"
+    timeout: 10000
+
+# 3. Aserciones de visibilidad del Catálogo de Ejercicios
+- assertVisible:
+    id: "exercise-catalog-screen"
+
+- assertVisible:
+    text: "Catálogo de Ejercicios"
+
+- assertVisible:
+    id: "exercise-catalog-search-input"
+
+- assertVisible:
+    id: "filter-toggle-button"
+
+- assertVisible:
+    id: "exercise-catalog-list"
+
+# 4. Retornar al Calendario Mensual
+- tapOn:
+    id: "exercise-catalog-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+# 5. Cierre de sesión limpio
+- tapOn:
+    text: "Perfil"
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"

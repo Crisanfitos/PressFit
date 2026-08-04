@@ -155,9 +155,14 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
   );
 
   return (
-    <SafeAreaView style={screenStyles.container}>
+    <SafeAreaView style={screenStyles.container} testID="exercise-catalog-screen">
       <View style={screenStyles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={screenStyles.backButton} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={screenStyles.backButton}
+          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+          testID="exercise-catalog-back-button"
+        >
           <MaterialIcons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={screenStyles.headerText}>Catálogo de Ejercicios</Text>
@@ -176,6 +181,7 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
           onBlur={() => {
             if (searchQuery.length === 0) setIsSearchFocused(false);
           }}
+          testID="exercise-catalog-search-input"
         />
         {(searchQuery.length > 0 || isSearchFocused) && (
           <TouchableOpacity onPress={handleClearSearch} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
@@ -189,6 +195,7 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
           <TouchableOpacity
             style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 8 }}
             onPress={() => setShowFilters((prev) => !prev)}
+            testID="filter-toggle-button"
           >
             <MaterialIcons name={showFilters ? 'filter-list-off' : 'filter-list'} size={20} color={colors.textSecondary} />
             <Text style={{ color: colors.textSecondary, fontSize: 13, marginLeft: 6, fontWeight: '500' }}>
@@ -224,6 +231,7 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
                       key={option}
                       style={[screenStyles.categoryChip, activeValue === option && screenStyles.categoryChipSelected]}
                       onPress={() => setFilter(key, activeValue === option ? null : option)}
+                      testID={`filter-chip-${option.toLowerCase().replace(/\s+/g, '-')}`}
                     >
                       <Text style={[screenStyles.categoryText, activeValue === option && screenStyles.categoryTextSelected]}>
                         {option}
@@ -258,6 +266,7 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
           showsVerticalScrollIndicator={false}
           initialNumToRender={8}
           windowSize={5}
+          testID="exercise-catalog-list"
           removeClippedSubviews
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
