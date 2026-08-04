@@ -73,9 +73,9 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
     }), [colors]);
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="weekly-progress-screen">
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} testID="weekly-progress-back-button">
                     <MaterialIcons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
                 <Text style={styles.headerText}>Progreso Semanal</Text>

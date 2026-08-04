@@ -1,0 +1,132 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+- launchApp:
+    clearState: true
+
+# Seleccionar servidor Metro de Expo
+- assertVisible:
+    text: ".*8081.*"
+- tapOn:
+    text: ".*8081.*"
+
+# Manejar posible menú de desarrollador
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 60000
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# Iniciar Sesión
+- tapOn:
+    id: "login-button"
+
+- assertVisible:
+    id: "email-input"
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# Verificar inicio de sesión exitoso
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# Navegar a la pestaña Progreso en la barra inferior
+- tapOn: "Progreso"
+
+- assertVisible:
+    id: "progress-screen"
+
+# 1. Probar navegación a Progreso Mensual
+- tapOn:
+    id: "progress-item-monthly"
+
+- assertVisible:
+    id: "monthly-progress-screen"
+
+- tapOn:
+    id: "monthly-progress-back-button"
+
+- assertVisible:
+    id: "progress-screen"
+
+# 2. Probar navegación a Progreso Semanal
+- tapOn:
+    id: "progress-item-weekly"
+
+- assertVisible:
+    id: "weekly-progress-screen"
+
+- tapOn:
+    id: "weekly-progress-back-button"
+
+- assertVisible:
+    id: "progress-screen"
+
+# 3. Probar navegación a Progreso Diario
+- tapOn:
+    id: "progress-item-daily"
+
+- assertVisible:
+    id: "daily-progress-screen"
+
+- tapOn:
+    id: "daily-progress-back-button"
+
+- assertVisible:
+    id: "progress-screen"
+
+# 4. Probar navegación a Progreso por Ejercicio
+- tapOn:
+    id: "progress-item-exercise"
+
+- assertVisible:
+    id: "exercise-tracking-screen"
+
+- tapOn:
+    id: "exercise-tracking-back-button"
+
+- assertVisible:
+    id: "progress-screen"
+
+# Cierre de sesión limpio
+- tapOn: "Perfil"
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- assertVisible:
+    id: "logout-confirm-button"
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- assertVisible:
+    id: "welcome-screen"

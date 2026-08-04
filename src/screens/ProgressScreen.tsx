@@ -19,11 +19,11 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
     const { theme } = useTheme();
     const { colors } = theme;
 
-    const progressItems: ProgressItem[] = [
-        { icon: 'calendar-view-month', title: 'Progreso Mensual', subtitle: 'Vista general de tu mes', screen: 'MonthlyProgress' },
-        { icon: 'date-range', title: 'Progreso Semanal', subtitle: 'Resumen de tu semana', screen: 'WeeklyProgress' },
-        { icon: 'today', title: 'Progreso Diario', subtitle: 'Detalles de hoy', screen: 'DailyProgress' },
-        { icon: 'fitness-center', title: 'Progreso por Ejercicio', subtitle: 'Evolución en cada ejercicio', screen: 'ExerciseTracking' },
+    const progressItems: (ProgressItem & { testID: string })[] = [
+        { icon: 'calendar-view-month', title: 'Progreso Mensual', subtitle: 'Vista general de tu mes', screen: 'MonthlyProgress', testID: 'progress-item-monthly' },
+        { icon: 'date-range', title: 'Progreso Semanal', subtitle: 'Resumen de tu semana', screen: 'WeeklyProgress', testID: 'progress-item-weekly' },
+        { icon: 'today', title: 'Progreso Diario', subtitle: 'Detalles de hoy', screen: 'DailyProgress', testID: 'progress-item-daily' },
+        { icon: 'fitness-center', title: 'Progreso por Ejercicio', subtitle: 'Evolución en cada ejercicio', screen: 'ExerciseTracking', testID: 'progress-item-exercise' },
     ];
 
     const styles = useMemo(
@@ -76,6 +76,7 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
                 {progressItems.map((item, index) => (
                     <TouchableOpacity
                         key={index}
+                        testID={item.testID}
                         style={styles.progressItem}
                         onPress={() => navigation.navigate(item.screen)}
                     >

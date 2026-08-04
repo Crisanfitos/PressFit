@@ -36,9 +36,9 @@ const DailyProgressScreen: React.FC<DailyProgressScreenProps> = ({ navigation })
     }), [colors]);
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="daily-progress-screen">
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} testID="daily-progress-back-button">
                     <MaterialIcons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
                 <Text style={styles.headerText}>Progreso Diario</Text>

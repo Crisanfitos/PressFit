@@ -96,9 +96,9 @@ const MonthlyProgressScreen: React.FC<MonthlyProgressScreenProps> = ({ navigatio
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="monthly-progress-screen">
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} testID="monthly-progress-back-button">
                     <MaterialIcons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
                 <Text style={styles.headerText}>Progreso Mensual</Text>
