@@ -64,9 +64,9 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
     );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="exercise-tracking-screen">
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} testID="exercise-tracking-back-button">
                     <MaterialIcons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
                 <Text style={styles.headerText}>Progreso por Ejercicio</Text>

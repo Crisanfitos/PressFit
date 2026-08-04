@@ -1,0 +1,173 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_039_exercise_weight_history.yaml — US-039: Consulta de historial de cargas en ExerciseProgressDetailScreen
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible: ".*8081.*"
+    timeout: 20000
+
+- tapOn:
+    text: ".*8081.*"
+
+# Manejar posible modal de Expo / Dev Menu (antes de welcome screen)
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- tapOn:
+    text: "Continue"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu (después de welcome screen)
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 60000
+
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Navegar a la pestaña de Progreso en la barra inferior
+- tapOn:
+    text: "Progreso"
+
+- extendedWaitUntil:
+    visible:
+      id: "progress-screen"
+    timeout: 10000
+
+# 2. Entrar a Progreso por Ejercicio
+- tapOn:
+    text: "Progreso por Ejercicio"
+
+- extendedWaitUntil:
+    visible:
+      id: "exercise-tracking-screen"
+    timeout: 10000
+
+# 3. Seleccionar un ejercicio para abrir ExerciseProgressDetailScreen
+- tapOn:
+    text: ".*Press de Banca.*"
+
+- extendedWaitUntil:
+    visible:
+      id: "exercise-progress-detail-screen"
+    timeout: 10000
+
+# 4. Aserciones de visibilidad en la pantalla de detalle de progreso de ejercicio
+- assertVisible:
+    id: "exercise-progress-detail-screen"
+
+- assertVisible:
+    text: "Max Peso"
+
+- assertVisible:
+    text: "Volumen Total"
+
+- assertVisible:
+    text: "Análisis de IA"
+
+- assertVisible:
+    text: "Historial de Series"
+
+# 5. Alternar pestaña de gráfica a Volumen Total
+- tapOn:
+    text: "Volumen Total"
+
+- assertVisible:
+    text: "Volumen Total"
+
+# 6. Regresar a Progreso por Ejercicio
+- tapOn:
+    id: "exercise-progress-detail-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "exercise-tracking-screen"
+    timeout: 10000
+
+# 7. Regresar al menú principal de Progreso
+- tapOn:
+    id: "exercise-tracking-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "progress-screen"
+    timeout: 10000
+
+# 8. Cierre de sesión limpio en pestaña Perfil
+- tapOn:
+    text: "Perfil"
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"

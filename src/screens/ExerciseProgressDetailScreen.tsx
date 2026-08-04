@@ -290,9 +290,9 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
     const sortedDates = Object.keys(historyListGroupedByDate).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} testID="exercise-progress-detail-screen">
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} testID="exercise-progress-detail-back-button">
                     <MaterialIcons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle} numberOfLines={1}>{exerciseDetails?.titulo || 'Progreso'}</Text>
