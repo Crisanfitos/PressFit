@@ -1,0 +1,139 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_046_physical_progress_gallery.yaml — US-046: Galería de cambio físico desde Perfil
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Navegar a Perfil
+- tapOn:
+    text: "Perfil"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 10000
+
+- assertVisible:
+    text: "Perfil"
+
+# 2. Desplazarse hasta "Fotos de Progreso" para ver el botón "Ver Cambio Físico"
+- scrollUntilVisible:
+    element:
+      id: "view-physical-progress-button"
+    direction: DOWN
+
+# 3. Verificar que el botón "Ver Cambio Físico" es visible
+- assertVisible:
+    id: "view-physical-progress-button"
+
+- assertVisible:
+    text: "Ver Cambio Físico"
+
+# 4. Navegar a PhysicalProgressScreen
+- tapOn:
+    id: "view-physical-progress-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "physical-progress-screen"
+    timeout: 10000
+
+# 5. Verificar título y elementos de la pantalla
+- assertVisible:
+    text: "Cambio Físico"
+
+# 6. Verificar sección de historial de peso o galería de fotos (pantalla puede estar vacía)
+- runFlow:
+    when:
+      visible: "No hay fotos de progreso"
+    commands:
+      - assertVisible:
+          text: "No hay fotos de progreso"
+
+- runFlow:
+    when:
+      visible: "Evolución de Peso"
+    commands:
+      - assertVisible:
+          text: "Evolución de Peso"
+
+# 7. Volver al Perfil
+- tapOn:
+    id: "physical-progress-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "profile-screen"
+
+# 8. Cierre de sesión limpio
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"

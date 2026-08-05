@@ -251,7 +251,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                 <Text style={styles.noPhotosText}>No hay fotos de progreso aún</Text>
                             )}
                         </View>
-                        <TouchableOpacity style={styles.viewProgressButton} onPress={() => navigation.navigate('PhysicalProgress')}>
+                        <TouchableOpacity style={styles.viewProgressButton} onPress={() => navigation.navigate('PhysicalProgress')} testID="view-physical-progress-button">
                             <MaterialIcons name="photo-library" size={24} color={colors.primary} />
                             <Text style={styles.viewProgressButtonText}>Ver Cambio Físico</Text>
                         </TouchableOpacity>
