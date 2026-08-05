@@ -202,7 +202,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                     <View style={styles.section}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                             <Text style={styles.sectionTitle}>Datos Físicos</Text>
-                            <TouchableOpacity onPress={() => setShowEditModal(true)} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
+                            <TouchableOpacity testID="edit-profile-button" onPress={() => setShowEditModal(true)} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
                                 <MaterialIcons name="edit" size={20} color={colors.primary} />
                             </TouchableOpacity>
                         </View>
@@ -361,6 +361,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                 </TouchableOpacity>
                             )}
                             <TouchableOpacity
+                                testID="custom-alert-confirm-button"
                                 style={{
                                     flex: 1, padding: 14, borderRadius: 10, alignItems: 'center', backgroundColor: customAlert.type === 'warning' ? '#ef4444' : colors.primary,
                                     justifyContent: 'center'

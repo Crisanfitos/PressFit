@@ -1,0 +1,139 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_049_edit_body_metrics_modal.yaml — US-049: Edición de métricas corporales mediante EditProfileModal
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Navegar a Perfil
+- tapOn:
+    text: "Perfil"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 10000
+
+# 2. Abrir modal de edición
+- tapOn:
+    id: "edit-profile-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "edit-profile-modal"
+    timeout: 5000
+
+- assertVisible:
+    id: "edit-profile-modal"
+
+- assertVisible:
+    id: "edit-profile-modal-title"
+
+# 3. Editar peso y altura (altura requerida la 1ª vez)
+- tapOn:
+    id: "edit-profile-weight-input"
+
+- eraseText: 10
+
+- inputText: "82.5"
+
+- tapOn:
+    id: "edit-profile-height-input"
+
+- eraseText: 10
+
+- inputText: "180"
+
+- hideKeyboard
+
+# 4. Guardar cambios
+- tapOn:
+    id: "edit-profile-save-button"
+
+- runFlow:
+    when:
+      visible:
+        id: "custom-alert-confirm-button"
+    commands:
+      - tapOn:
+          id: "custom-alert-confirm-button"
+
+- extendedWaitUntil:
+    notVisible:
+      id: "edit-profile-modal"
+    timeout: 10000
+
+# 5. Aserción del nuevo peso en la pantalla de Perfil
+- assertVisible:
+    text: "82.5 kg"
+
+- assertVisible:
+    text: "180 cm"
+
+# 6. Cierre de sesión limpio
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"

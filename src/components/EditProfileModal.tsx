@@ -136,10 +136,10 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
                 dismissOnClickOutside={false}
             >
                 <Pressable style={{ flex: 1 }} onPress={onClose} />
-                <View style={styles.modalContent}>
+                <View style={styles.modalContent} testID="edit-profile-modal">
                     <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Editar Datos Físicos</Text>
-                        <TouchableOpacity onPress={onClose}>
+                        <Text style={styles.modalTitle} testID="edit-profile-modal-title">Editar Datos Físicos</Text>
+                        <TouchableOpacity onPress={onClose} testID="edit-profile-modal-close-button">
                             <MaterialIcons name="close" size={24} color={colors.text} />
                         </TouchableOpacity>
                     </View>
@@ -148,6 +148,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Peso (kg) *</Text>
                             <TextInput
+                                testID="edit-profile-weight-input"
                                 style={styles.input}
                                 value={weight}
                                 onChangeText={setWeight}
@@ -162,6 +163,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
                                 Altura (cm){hasExistingHeight ? ' (opcional)' : ' *'}
                             </Text>
                             <TextInput
+                                testID="edit-profile-height-input"
                                 style={styles.input}
                                 value={height}
                                 onChangeText={setHeight}
@@ -177,7 +179,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
                         </View>
 
                         {showImcPreview && imcValue && (
-                            <View style={styles.imcPreview}>
+                            <View style={styles.imcPreview} testID="imc-preview">
                                 <Text style={styles.imcLabel}>IMC calculado:</Text>
                                 <Text style={styles.imcValue}>{imcValue}</Text>
                             </View>
@@ -185,10 +187,10 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
                     </View>
 
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={styles.cancelButton} onPress={onClose} disabled={loading}>
+                        <TouchableOpacity style={styles.cancelButton} onPress={onClose} disabled={loading} testID="edit-profile-cancel-button">
                             <Text style={styles.cancelButtonText}>Cancelar</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.saveButton, loading && styles.saveButtonDisabled]} onPress={handleSave} disabled={loading}>
+                        <TouchableOpacity style={[styles.saveButton, loading && styles.saveButtonDisabled]} onPress={handleSave} disabled={loading} testID="edit-profile-save-button">
                             {loading ? (
                                 <ActivityIndicator size="small" color={colors.background} />
                             ) : (
