@@ -91,4 +91,22 @@ describe('Rutinas Diarias', () => {
             expect(result.data!.fecha_dia).toBeNull();
         });
     });
+
+    describe('completedWorkoutHandling', () => {
+        it('should preserve completada: true state and not allow resetting to false', async () => {
+            const completedDay = createMockRutinaDiaria({
+                id: 'workout-completed-1',
+                nombre_dia: 'Martes',
+                fecha_dia: '2026-08-04',
+                completada: true,
+                hora_inicio: '2026-08-04T16:12:00Z',
+                hora_fin: '2026-08-04T17:49:00Z',
+            });
+            mockChain.single.mockResolvedValueOnce({ data: completedDay, error: null });
+            const result = await RoutineService.getRoutineDayById('workout-completed-1');
+            expect(result.error).toBeNull();
+            expect(result.data!.completada).toBe(true);
+            expect(getRutinaDiariaEstado(result.data!)).toBe('COMPLETADA');
+        });
+    });
 });

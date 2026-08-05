@@ -207,6 +207,9 @@ export const useWorkoutController = (
                     }
                 } else {
                     setWorkout(workoutData);
+                    if (workoutData?.completada) {
+                        setMode('VIEW');
+                    }
                 }
             }
 

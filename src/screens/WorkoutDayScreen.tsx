@@ -444,6 +444,21 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
         },
     });
 
+    const handleMainButtonPress = () => {
+        if (workoutStats?.isCompleted && dayData) {
+            navigation.navigate('Workout', {
+                workoutId: dayData.id,
+                dayName: dayData.nombre_dia,
+                routineDayId: dayData.id,
+                dayOfWeek: selectedDate.getDay(),
+            });
+        } else if (activeWorkout && dayData) {
+            handleContinueWorkout();
+        } else {
+            handleStartWorkout();
+        }
+    };
+
     if (loading) {
         return (
             <SafeAreaView style={styles.container}>
@@ -609,7 +624,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
             {isToday && exercises.length > 0 && (
                 <TouchableOpacity
                     style={styles.bottomButton}
-                    onPress={handleStartWorkout}
+                    onPress={handleMainButtonPress}
                     testID="start-workout-button"
                 >
                     <LinearGradient
