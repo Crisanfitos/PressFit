@@ -1,0 +1,138 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_045_daily_progress_breakdown.yaml — US-045: Desglose de progreso diario en DailyProgressScreen
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Navegar a la pestaña Progreso
+- tapOn:
+    text: "Progreso"
+
+- extendedWaitUntil:
+    visible:
+      id: "progress-screen"
+    timeout: 10000
+
+# 2. Verificar la opción de Progreso Diario
+- assertVisible:
+    id: "progress-item-daily"
+
+# 3. Navegar a Progreso Diario
+- tapOn:
+    id: "progress-item-daily"
+
+- extendedWaitUntil:
+    visible:
+      id: "daily-progress-screen"
+    timeout: 10000
+
+# 4. Verificar título de la pantalla
+- assertVisible:
+    text: "Progreso Diario"
+
+# 5. Manejo robusto: la pantalla muestra datos o estado vacío según haya entrenamiento hoy
+- runFlow:
+    when:
+      visible: "Sin entrenamientos hoy"
+    commands:
+      - assertVisible:
+          text: "Sin entrenamientos hoy"
+      - assertVisible:
+          text: "Completa un entrenamiento para ver tu progreso del día"
+
+- runFlow:
+    when:
+      visible: "Ejercicios"
+    commands:
+      - assertVisible:
+          text: "Ejercicios"
+      - assertVisible:
+          text: "Series"
+      - assertVisible:
+          text: "Minutos"
+      - assertVisible:
+          text: "Kg Totales"
+
+# 6. Volver a ProgressScreen
+- tapOn:
+    id: "daily-progress-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "progress-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "progress-screen"
+
+# 7. Cierre de sesión limpio
+- tapOn:
+    text: "Perfil"
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"
