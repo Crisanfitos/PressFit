@@ -56,6 +56,7 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
         if (!note) {
             return (
                 <TouchableOpacity
+                    testID="add-note-button"
                     style={styles.contentRow}
                     onPress={() => setModalVisible(true)}
                     activeOpacity={0.7}
@@ -74,7 +75,7 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
         return (
             <View style={styles.contentRow}>
                 <View style={{ flexShrink: 1 }}>
-                    <Text style={[styles.noteText, { color: colors.textSecondary }]}>
+                    <Text testID="note-display-text" style={[styles.noteText, { color: colors.textSecondary }]}>
                         {displayText}
                         {isLongText && (
                             <Text
@@ -87,6 +88,7 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
                     </Text>
                 </View>
                 <TouchableOpacity
+                    testID="edit-note-button"
                     onPress={() => setModalVisible(true)}
                     style={{ paddingLeft: 8, paddingVertical: 2 }}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -106,12 +108,14 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
                 transparent={true}
                 visible={modalVisible}
                 onRequestClose={() => setModalVisible(false)}
+                testID="note-modal"
             >
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                     style={styles.modalOverlay}
                 >
                     <View
+                        testID="note-modal-content"
                         style={[
                             styles.modalContent,
                             {
@@ -132,6 +136,7 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
                                     Esta nota aparecerá siempre que realices este ejercicio.
                                 </Text>
                                 <TextInput
+                                    testID="note-text-input"
                                     style={[
                                         styles.input,
                                         {
@@ -152,6 +157,7 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
                         </ScrollView>
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
+                                testID="note-cancel-button"
                                 style={[styles.button, styles.cancelButton]}
                                 onPress={() => setModalVisible(false)}
                             >
@@ -160,6 +166,7 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
+                                testID="note-save-button"
                                 style={[styles.button, styles.saveButton, { backgroundColor: colors.primary }]}
                                 onPress={handleSave}
                                 disabled={saving}
@@ -179,11 +186,19 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
 };
 
 const styles = StyleSheet.create({
-    container: {},
-    noteContainer: {},
+    container: {
+        flexShrink: 1,
+        minWidth: 0,
+    },
+    noteContainer: {
+        flexShrink: 1,
+        minWidth: 0,
+    },
     contentRow: {
         flexDirection: 'row',
         alignItems: 'flex-start',
+        flexShrink: 1,
+        minWidth: 0,
     },
     noteText: {
         fontSize: 12,

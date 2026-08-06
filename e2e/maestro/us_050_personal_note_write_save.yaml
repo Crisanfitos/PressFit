@@ -1,0 +1,182 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_050_personal_note_write_save.yaml — US-050: Comentarios por ejercicio durante entrenamiento activo
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Navegar a hoy en el calendario — tap en la celda del día de hoy
+- tapOn:
+    id: "calendar-day-today"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+# 2. Iniciar entrenamiento
+- tapOn:
+    id: "start-workout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 3. Expandir el primer ejercicio si está colapsado y toca el botón de nota personal
+- tapOn:
+    id: "exercise-card-0"
+
+# 4. Tap en botón de nota (add si no existe nota, edit si ya existe)
+- runFlow:
+    when:
+      visible:
+        id: "add-note-button"
+    commands:
+      - tapOn:
+          id: "add-note-button"
+
+- runFlow:
+    when:
+      visible:
+        id: "edit-note-button"
+    commands:
+      - tapOn:
+          id: "edit-note-button"
+
+# 5. Esperar y verificar que el modal de nota se abrió
+- extendedWaitUntil:
+    visible:
+      id: "note-modal-content"
+    timeout: 8000
+
+- assertVisible:
+    id: "note-modal-content"
+
+# 6. Escribir nota personal (limpiar campo si ya tiene contenido)
+- tapOn:
+    id: "note-text-input"
+
+- eraseText: 100
+
+- inputText: "Nota de prueba E2E: controlar la bajada"
+
+- hideKeyboard
+
+# 7. Guardar nota
+- tapOn:
+    id: "note-save-button"
+
+- extendedWaitUntil:
+    notVisible:
+      id: "note-modal-content"
+    timeout: 5000
+
+# 8. Verificar que la nota se guardó y aparece en pantalla
+- assertVisible:
+    id: "note-display-text"
+
+# 9. Salir del entrenamiento (back)
+- tapOn:
+    id: "workout-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+# 10. Volver al calendario desde WorkoutDayScreen
+- tapOn:
+    id: "workout-day-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+- scrollUntilVisible:
+    element:
+      text: "Perfil"
+    direction: DOWN
+    optional: true
+
+- tapOn:
+    text: "Perfil"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"
