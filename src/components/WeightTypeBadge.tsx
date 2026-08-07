@@ -42,7 +42,7 @@ export const WeightTypeBadge = ({ tipoPeso, editable = false, onSelect, colors }
 
   return (
     <>
-      <TouchableOpacity onPress={() => setMenuVisible(true)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+      <TouchableOpacity testID="weight-type-badge-button" onPress={() => setMenuVisible(true)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
         {badge}
       </TouchableOpacity>
 
@@ -51,18 +51,21 @@ export const WeightTypeBadge = ({ tipoPeso, editable = false, onSelect, colors }
         transparent
         visible={menuVisible}
         onRequestClose={() => setMenuVisible(false)}
+        testID="weight-type-modal"
       >
         <TouchableOpacity
+          testID="weight-type-modal-overlay"
           style={styles.overlay}
           activeOpacity={1}
           onPress={() => setMenuVisible(false)}
         >
-          <View style={[styles.menu, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View testID="weight-type-menu" style={[styles.menu, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <Text style={[styles.menuTitle, { color: colors.text }]}>Tipo de Peso</Text>
             {WEIGHT_TYPE_OPTIONS.map((tipo) => {
               const isSelected = tipo === tipoPeso;
               return (
                 <TouchableOpacity
+                  testID={`weight-type-option-${tipo}`}
                   key={tipo}
                   style={[
                     styles.menuItem,

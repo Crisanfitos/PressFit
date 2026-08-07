@@ -85,9 +85,9 @@ const LogoutConfirmationModal: React.FC<LogoutConfirmationModalProps> = ({ visib
     }), [colors]);
 
     return (
-        <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
+        <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose} testID="logout-confirmation-modal">
             <View style={styles.overlay}>
-                <View style={styles.modalContent}>
+                <View style={styles.modalContent} testID="logout-confirmation-modal-content">
                     <View style={styles.iconContainer}>
                         <MaterialIcons name="logout" size={24} color="#ef4444" />
                     </View>

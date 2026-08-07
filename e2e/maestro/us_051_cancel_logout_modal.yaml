@@ -1,0 +1,118 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_051_cancel_logout_modal.yaml — US-051: Cancelación del modal de confirmación LogoutConfirmationModal
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Navegar a Perfil
+- scrollUntilVisible:
+    element:
+      text: "Perfil"
+    direction: DOWN
+    optional: true
+
+- tapOn:
+    text: "Perfil"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "profile-screen"
+
+# 2. Scroll hasta el botón de cerrar sesión
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+# 3. Verificar que el modal de confirmación de logout aparece
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirmation-modal-content"
+    timeout: 5000
+
+- assertVisible:
+    id: "logout-confirmation-modal-content"
+
+# 4. Pulsar en Cancelar
+- tapOn:
+    id: "logout-cancel-button"
+
+# 5. Verificar que el modal se cierra y el usuario permanece en ProfileScreen
+- extendedWaitUntil:
+    notVisible:
+      id: "logout-confirmation-modal-content"
+    timeout: 5000
+
+- assertVisible:
+    id: "profile-screen"
+
+# 6. Finalmente cerrar sesión para dejar limpia la prueba
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"

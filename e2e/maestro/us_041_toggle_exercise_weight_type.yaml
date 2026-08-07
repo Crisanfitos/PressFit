@@ -1,0 +1,179 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_041_toggle_exercise_weight_type.yaml — US-041: Cambiar tipo de peso (total / por lado / corporal) en ejercicio de entrenamiento activo
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Seleccionar hoy en el calendario
+- tapOn:
+    id: "calendar-day-today"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+# 2. Iniciar entrenamiento
+- tapOn:
+    id: "start-workout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 3. Expandir primer ejercicio si estuviera colapsado
+- tapOn:
+    id: "exercise-card-0"
+
+# 4. Abrir selector de Tipo de Peso
+- extendedWaitUntil:
+    visible:
+      id: "weight-type-badge-button"
+    timeout: 5000
+
+- tapOn:
+    id: "weight-type-badge-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "weight-type-menu"
+    timeout: 5000
+
+- assertVisible:
+    id: "weight-type-menu"
+
+# 5. Seleccionar "Por Lado"
+- tapOn:
+    id: "weight-type-option-por_lado"
+
+- extendedWaitUntil:
+    notVisible:
+      id: "weight-type-menu"
+    timeout: 5000
+
+- assertVisible:
+    text: ".*Lado.*"
+
+# 6. Cambiar de nuevo a "Total"
+- tapOn:
+    id: "weight-type-badge-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "weight-type-menu"
+    timeout: 5000
+
+- tapOn:
+    id: "weight-type-option-total"
+
+- extendedWaitUntil:
+    notVisible:
+      id: "weight-type-menu"
+    timeout: 5000
+
+- assertVisible:
+    text: "KG"
+
+# 7. Salir del entrenamiento
+- tapOn:
+    id: "workout-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "workout-day-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+# 8. Logout
+- scrollUntilVisible:
+    element:
+      text: "Perfil"
+    direction: DOWN
+    optional: true
+
+- tapOn:
+    text: "Perfil"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"

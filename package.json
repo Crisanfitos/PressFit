@@ -59,6 +59,7 @@
     "test:e2e:us038": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_038_exercise_detail_screen.yaml",
     "test:e2e:us039": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_039_exercise_weight_history.yaml",
     "test:e2e:us040": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_040_toggle_weight_type_badge.yaml",
+    "test:e2e:us041": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_041_toggle_exercise_weight_type.yaml",
     "test:e2e:us042": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_042_progress_screen_navigation.yaml",
     "test:e2e:us043": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_043_weekly_volume_chart.yaml",
     "test:e2e:us044": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_044_monthly_progress_summary.yaml",
@@ -67,6 +68,7 @@
     "test:e2e:us048": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_048_profile_screen_data_verification.yaml",
     "test:e2e:us049": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_049_edit_body_metrics_modal.yaml",
     "test:e2e:us050": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_050_personal_note_write_save.yaml",
+    "test:e2e:us051": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_051_cancel_logout_modal.yaml",
     "test:e2e:all": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/"
   },
   "dependencies": {
