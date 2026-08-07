@@ -1,0 +1,117 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_052_theme_toggle_verification.yaml — US-052: Verificación de cambio de tema (Claro / Oscuro)
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 20000
+
+# Navegar a la pestaña "Perfil"
+- scrollUntilVisible:
+    element:
+      text: "Perfil"
+    direction: DOWN
+    optional: true
+
+- tapOn:
+    text: "Perfil"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 15000
+
+# Hacer scroll hasta la sección Apariencia
+- scrollUntilVisible:
+    element:
+      id: "theme-toggle-status"
+    direction: DOWN
+
+# Verificar estado inicial (Desactivado = modo claro)
+- assertVisible:
+    id: "theme-toggle-status"
+
+# Normalizar: asegurar que estamos en modo CLARO
+# Si ya está en "Activado" (modo oscuro), hacer tap para volver a claro
+- runFlow:
+    when:
+      visible: "Activado"
+    commands:
+      - tapOn:
+          id: "theme-toggle-switch"
+      - extendedWaitUntil:
+          visible:
+            text: "Desactivado"
+          timeout: 5000
+
+# Ahora estamos en modo CLARO (Desactivado). Activar modo OSCURO
+- tapOn:
+    id: "theme-toggle-switch"
+
+- extendedWaitUntil:
+    visible:
+      text: "Activado"
+    timeout: 8000
+
+# Verificar que el texto muestra "Activado"
+- assertVisible:
+    text: "Activado"
+
+# Desactivar modo oscuro → volver a CLARO
+- tapOn:
+    id: "theme-toggle-switch"
+
+- extendedWaitUntil:
+    visible:
+      text: "Desactivado"
+    timeout: 8000
+
+# Verificar que el texto muestra "Desactivado"
+- assertVisible:
+    text: "Desactivado"
+
+# Verificar que seguimos en ProfileScreen
+- assertVisible:
+    id: "profile-screen"

@@ -224,9 +224,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                 <MaterialIcons name={themeMode === 'dark' ? 'dark-mode' : 'light-mode'} size={24} color={colors.textSecondary} />
                                 <View style={styles.settingTextContainer}>
                                     <Text style={styles.settingLabel}>Modo Oscuro</Text>
-                                    <Text style={styles.settingDescription}>{themeMode === 'dark' ? 'Activado' : 'Desactivado'}</Text>
+                                    <Text style={styles.settingDescription} testID="theme-toggle-status">{themeMode === 'dark' ? 'Activado' : 'Desactivado'}</Text>
                                 </View>
                                 <Switch
+                                    testID="theme-toggle-switch"
                                     value={themeMode === 'dark'}
                                     onValueChange={toggleTheme}
                                     trackColor={{ false: colors.border, true: `${colors.primary}50` }}
