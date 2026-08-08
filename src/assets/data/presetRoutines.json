@@ -18,10 +18,30 @@
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 7.5, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
-              { "numero_serie": 4, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 150 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 7.5,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 4,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 150
+              }
             ]
           },
           {
@@ -30,9 +50,24 @@
             "orden_ejecucion": 2,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
@@ -41,9 +76,24 @@
             "orden_ejecucion": 3,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 120
+              }
             ]
           },
           {
@@ -52,20 +102,50 @@
             "orden_ejecucion": 4,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Extensiones de Tríceps en Polea",
+            "nombre_ejercicio": "Extensiones en Polea Alta",
             "grupo_muscular_principal": "Brazos",
             "orden_ejecucion": 5,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              }
             ]
           }
         ]
@@ -81,53 +161,128 @@
             "orden_ejecucion": 1,
             "tipo_peso": "corporal",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 120
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Remo con Barra pronado",
+            "nombre_ejercicio": "Remo con Barra Agarre Pronado",
             "grupo_muscular_principal": "Espalda",
             "orden_ejecucion": 2,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Remo Horizontal en Polea",
+            "nombre_ejercicio": "Remo en Polea Baja Agarre Cerrado",
             "grupo_muscular_principal": "Espalda",
             "orden_ejecucion": 3,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Curl de Bíceps con Barra Z",
+            "nombre_ejercicio": "Curl con Barra Z",
             "grupo_muscular_principal": "Brazos",
             "orden_ejecucion": 4,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Curl Martillo con Mancuernas",
+            "nombre_ejercicio": "Curl Martillo",
             "grupo_muscular_principal": "Brazos",
             "orden_ejecucion": 5,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.5, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9.5,
+                "descanso_segundos": 60
+              }
             ]
           }
         ]
@@ -138,26 +293,61 @@
         "descripcion": "Foco en fuerza de sentadilla y cuádriceps",
         "ejercicios": [
           {
-            "nombre_ejercicio": "Sentadilla Trasera con Barra",
+            "nombre_ejercicio": "Sentadillas con Barra",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 6, "rpe_objetivo": 7.5, "descanso_segundos": 150 },
-              { "numero_serie": 2, "repeticiones_objetivo": 6, "rpe_objetivo": 8.0, "descanso_segundos": 150 },
-              { "numero_serie": 3, "repeticiones_objetivo": 6, "rpe_objetivo": 8.5, "descanso_segundos": 150 },
-              { "numero_serie": 4, "repeticiones_objetivo": 6, "rpe_objetivo": 9.0, "descanso_segundos": 180 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 6,
+                "rpe_objetivo": 7.5,
+                "descanso_segundos": 150
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 6,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 150
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 6,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 150
+              },
+              {
+                "numero_serie": 4,
+                "repeticiones_objetivo": 6,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 180
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Prensa de Piernas 45°",
+            "nombre_ejercicio": "Prensa de Piernas",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 2,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
@@ -166,20 +356,50 @@
             "orden_ejecucion": 3,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Curl Femoral Tumbado",
+            "nombre_ejercicio": "Curl Femoral Acostado",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 4,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              }
             ]
           },
           {
@@ -188,9 +408,24 @@
             "orden_ejecucion": 5,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.5, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 9.5,
+                "descanso_segundos": 60
+              }
             ]
           }
         ]
@@ -201,14 +436,29 @@
         "descripcion": "Énfasis en pectoral superior y deltoides lateral",
         "ejercicios": [
           {
-            "nombre_ejercicio": "Press Inclinado con Barra",
+            "nombre_ejercicio": "Press de Banca Inclinado con Barra",
             "grupo_muscular_principal": "Pecho",
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 120
+              }
             ]
           },
           {
@@ -217,42 +467,102 @@
             "orden_ejecucion": 2,
             "tipo_peso": "corporal",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Press de Hombros con Mancuernas",
+            "nombre_ejercicio": "Press Arnold con Mancuernas",
             "grupo_muscular_principal": "Hombros",
             "orden_ejecucion": 3,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Cruce de Poleas para Pecho",
+            "nombre_ejercicio": "Cruces en Polea Alta",
             "grupo_muscular_principal": "Pecho",
             "orden_ejecucion": 4,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.5, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 9.5,
+                "descanso_segundos": 60
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Press Francés con Barra Z",
+            "nombre_ejercicio": "Press Francés con Barra",
             "grupo_muscular_principal": "Brazos",
             "orden_ejecucion": 5,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              }
             ]
           }
         ]
@@ -268,42 +578,102 @@
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Remo Unilateral con Mancuerna",
+            "nombre_ejercicio": "Remo con Mancuerna a Una Mano",
             "grupo_muscular_principal": "Espalda",
             "orden_ejecucion": 2,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Facepulls en Polea",
+            "nombre_ejercicio": "Face Pulls",
             "grupo_muscular_principal": "Hombros",
             "orden_ejecucion": 3,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.5, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 9.5,
+                "descanso_segundos": 60
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Curl de Bíceps en Banco Inclinado",
+            "nombre_ejercicio": "Curl Inclinado con Mancuernas",
             "grupo_muscular_principal": "Brazos",
             "orden_ejecucion": 4,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              }
             ]
           }
         ]
@@ -314,15 +684,35 @@
         "descripcion": "Énfasis en isquiotibiales, glúteos y lumbar",
         "ejercicios": [
           {
-            "nombre_ejercicio": "Peso Muerto Rumano con Barra",
+            "nombre_ejercicio": "Peso Muerto Rumano",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 7.5, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
-              { "numero_serie": 4, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 150 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 7.5,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 4,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 150
+              }
             ]
           },
           {
@@ -331,20 +721,50 @@
             "orden_ejecucion": 2,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Zancadas Caminando con Mancuernas",
+            "nombre_ejercicio": "Zancadas con Mancuernas",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 3,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              }
             ]
           },
           {
@@ -353,9 +773,24 @@
             "orden_ejecucion": 4,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.5, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 9.5,
+                "descanso_segundos": 60
+              }
             ]
           }
         ]
@@ -380,9 +815,21 @@
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              }
             ]
           },
           {
@@ -391,20 +838,44 @@
             "orden_ejecucion": 2,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Extensiones de Tríceps en Polea",
+            "nombre_ejercicio": "Extensiones en Polea Alta",
             "grupo_muscular_principal": "Brazos",
             "orden_ejecucion": 3,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "descanso_segundos": 60
+              }
             ]
           }
         ]
@@ -419,31 +890,67 @@
             "orden_ejecucion": 1,
             "tipo_peso": "corporal",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Remo con Barra pronado",
+            "nombre_ejercicio": "Remo con Barra Agarre Pronado",
             "grupo_muscular_principal": "Espalda",
             "orden_ejecucion": 2,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Curl de Bíceps con Barra Z",
+            "nombre_ejercicio": "Curl con Barra Z",
             "grupo_muscular_principal": "Brazos",
             "orden_ejecucion": 3,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "descanso_segundos": 60
+              }
             ]
           }
         ]
@@ -453,25 +960,49 @@
         "orden": 3,
         "ejercicios": [
           {
-            "nombre_ejercicio": "Sentadilla Trasera con Barra",
+            "nombre_ejercicio": "Sentadillas con Barra",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Peso Muerto Rumano con Barra",
+            "nombre_ejercicio": "Peso Muerto Rumano",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 2,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
@@ -480,9 +1011,21 @@
             "orden_ejecucion": 3,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 15, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 15, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 15, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 15,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 15,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 15,
+                "descanso_segundos": 60
+              }
             ]
           }
         ]
@@ -507,20 +1050,50 @@
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 6, "rpe_objetivo": 8.0, "descanso_segundos": 150 },
-              { "numero_serie": 2, "repeticiones_objetivo": 6, "rpe_objetivo": 8.5, "descanso_segundos": 150 },
-              { "numero_serie": 3, "repeticiones_objetivo": 6, "rpe_objetivo": 9.0, "descanso_segundos": 150 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 6,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 150
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 6,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 150
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 6,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 150
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Remo con Barra pronado",
+            "nombre_ejercicio": "Remo con Barra Agarre Pronado",
             "grupo_muscular_principal": "Espalda",
             "orden_ejecucion": 2,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 6, "rpe_objetivo": 8.0, "descanso_segundos": 150 },
-              { "numero_serie": 2, "repeticiones_objetivo": 6, "rpe_objetivo": 8.5, "descanso_segundos": 150 },
-              { "numero_serie": 3, "repeticiones_objetivo": 6, "rpe_objetivo": 9.0, "descanso_segundos": 150 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 6,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 150
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 6,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 150
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 6,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 150
+              }
             ]
           },
           {
@@ -529,9 +1102,24 @@
             "orden_ejecucion": 3,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 120
+              }
             ]
           }
         ]
@@ -541,25 +1129,55 @@
         "orden": 2,
         "ejercicios": [
           {
-            "nombre_ejercicio": "Sentadilla Trasera con Barra",
+            "nombre_ejercicio": "Sentadillas con Barra",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 6, "rpe_objetivo": 8.0, "descanso_segundos": 150 },
-              { "numero_serie": 2, "repeticiones_objetivo": 6, "rpe_objetivo": 8.5, "descanso_segundos": 150 },
-              { "numero_serie": 3, "repeticiones_objetivo": 6, "rpe_objetivo": 9.0, "descanso_segundos": 180 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 6,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 150
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 6,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 150
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 6,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 180
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Peso Muerto Rumano con Barra",
+            "nombre_ejercicio": "Peso Muerto Rumano",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 2,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 120
+              }
             ]
           }
         ]
@@ -574,9 +1192,24 @@
             "orden_ejecucion": 1,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
@@ -585,9 +1218,24 @@
             "orden_ejecucion": 2,
             "tipo_peso": "corporal",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           }
         ]
@@ -602,20 +1250,50 @@
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 120
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Prensa de Piernas 45°",
+            "nombre_ejercicio": "Prensa de Piernas",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 2,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.5, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9.5,
+                "descanso_segundos": 90
+              }
             ]
           }
         ]
@@ -635,14 +1313,26 @@
         "orden": 1,
         "ejercicios": [
           {
-            "nombre_ejercicio": "Sentadilla Trasera con Barra",
+            "nombre_ejercicio": "Sentadillas con Barra",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              }
             ]
           },
           {
@@ -651,20 +1341,44 @@
             "orden_ejecucion": 2,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Remo con Barra pronado",
+            "nombre_ejercicio": "Remo con Barra Agarre Pronado",
             "grupo_muscular_principal": "Espalda",
             "orden_ejecucion": 3,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              }
             ]
           }
         ]
@@ -674,14 +1388,26 @@
         "orden": 2,
         "ejercicios": [
           {
-            "nombre_ejercicio": "Peso Muerto Rumano con Barra",
+            "nombre_ejercicio": "Peso Muerto Rumano",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              }
             ]
           },
           {
@@ -690,9 +1416,21 @@
             "orden_ejecucion": 2,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              }
             ]
           },
           {
@@ -701,9 +1439,21 @@
             "orden_ejecucion": 3,
             "tipo_peso": "corporal",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "descanso_segundos": 120
+              }
             ]
           }
         ]
@@ -713,14 +1463,26 @@
         "orden": 3,
         "ejercicios": [
           {
-            "nombre_ejercicio": "Prensa de Piernas 45°",
+            "nombre_ejercicio": "Prensa de Piernas",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
@@ -729,20 +1491,44 @@
             "orden_ejecucion": 2,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Remo Horizontal en Polea",
+            "nombre_ejercicio": "Remo en Polea Baja Agarre Cerrado",
             "grupo_muscular_principal": "Espalda",
             "orden_ejecucion": 3,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "descanso_segundos": 90
+              }
             ]
           }
         ]
@@ -767,9 +1553,24 @@
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
@@ -778,9 +1579,24 @@
             "orden_ejecucion": 2,
             "tipo_peso": "corporal",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           }
         ]
@@ -790,36 +1606,81 @@
         "orden": 2,
         "ejercicios": [
           {
-            "nombre_ejercicio": "Press de Hombros con Mancuernas",
+            "nombre_ejercicio": "Press Arnold con Mancuernas",
             "grupo_muscular_principal": "Hombros",
             "orden_ejecucion": 1,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Curl de Bíceps con Barra Z",
+            "nombre_ejercicio": "Curl con Barra Z",
             "grupo_muscular_principal": "Brazos",
             "orden_ejecucion": 2,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Extensiones de Tríceps en Polea",
+            "nombre_ejercicio": "Extensiones en Polea Alta",
             "grupo_muscular_principal": "Brazos",
             "orden_ejecucion": 3,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              }
             ]
           }
         ]
@@ -829,14 +1690,29 @@
         "orden": 3,
         "ejercicios": [
           {
-            "nombre_ejercicio": "Sentadilla Trasera con Barra",
+            "nombre_ejercicio": "Sentadillas con Barra",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 150 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 150
+              }
             ]
           }
         ]
@@ -851,9 +1727,24 @@
             "orden_ejecucion": 1,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           }
         ]
@@ -868,9 +1759,24 @@
             "orden_ejecucion": 1,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.5, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 9.5,
+                "descanso_segundos": 60
+              }
             ]
           }
         ]
@@ -880,14 +1786,29 @@
         "orden": 6,
         "ejercicios": [
           {
-            "nombre_ejercicio": "Peso Muerto Rumano con Barra",
+            "nombre_ejercicio": "Peso Muerto Rumano",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 120
+              }
             ]
           }
         ]
@@ -912,20 +1833,50 @@
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 5, "rpe_objetivo": 8.0, "descanso_segundos": 180 },
-              { "numero_serie": 2, "repeticiones_objetivo": 5, "rpe_objetivo": 8.5, "descanso_segundos": 180 },
-              { "numero_serie": 3, "repeticiones_objetivo": 5, "rpe_objetivo": 9.0, "descanso_segundos": 180 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 5,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 180
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 5,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 180
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 5,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 180
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Remo con Barra pronado",
+            "nombre_ejercicio": "Remo con Barra Agarre Pronado",
             "grupo_muscular_principal": "Espalda",
             "orden_ejecucion": 2,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 5, "rpe_objetivo": 8.0, "descanso_segundos": 180 },
-              { "numero_serie": 2, "repeticiones_objetivo": 5, "rpe_objetivo": 8.5, "descanso_segundos": 180 },
-              { "numero_serie": 3, "repeticiones_objetivo": 5, "rpe_objetivo": 9.0, "descanso_segundos": 180 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 5,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 180
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 5,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 180
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 5,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 180
+              }
             ]
           }
         ]
@@ -935,14 +1886,29 @@
         "orden": 2,
         "ejercicios": [
           {
-            "nombre_ejercicio": "Sentadilla Trasera con Barra",
+            "nombre_ejercicio": "Sentadillas con Barra",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 5, "rpe_objetivo": 8.0, "descanso_segundos": 180 },
-              { "numero_serie": 2, "repeticiones_objetivo": 5, "rpe_objetivo": 8.5, "descanso_segundos": 180 },
-              { "numero_serie": 3, "repeticiones_objetivo": 5, "rpe_objetivo": 9.0, "descanso_segundos": 180 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 5,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 180
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 5,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 180
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 5,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 180
+              }
             ]
           }
         ]
@@ -957,9 +1923,24 @@
             "orden_ejecucion": 1,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.5, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9.5,
+                "descanso_segundos": 90
+              }
             ]
           }
         ]
@@ -974,9 +1955,24 @@
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.5, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9.5,
+                "descanso_segundos": 90
+              }
             ]
           }
         ]
@@ -1001,21 +1997,56 @@
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 120 },
-              { "numero_serie": 4, "repeticiones_objetivo": 8, "rpe_objetivo": 9.5, "descanso_segundos": 150 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 4,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 9.5,
+                "descanso_segundos": 150
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Peso Muerto Rumano con Barra",
+            "nombre_ejercicio": "Peso Muerto Rumano",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 2,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           }
         ]
@@ -1030,9 +2061,24 @@
             "orden_ejecucion": 1,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 10,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           },
           {
@@ -1041,9 +2087,24 @@
             "orden_ejecucion": 2,
             "tipo_peso": "corporal",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              }
             ]
           }
         ]
@@ -1053,25 +2114,55 @@
         "orden": 3,
         "ejercicios": [
           {
-            "nombre_ejercicio": "Sentadilla Trasera con Barra",
+            "nombre_ejercicio": "Sentadillas con Barra",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
-              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
-              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 120
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 8,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 120
+              }
             ]
           },
           {
-            "nombre_ejercicio": "Zancadas Caminando con Mancuernas",
+            "nombre_ejercicio": "Zancadas con Mancuernas",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 2,
             "tipo_peso": "por_lado",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
-              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 },
-              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.5, "descanso_segundos": 60 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 60
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 12,
+                "rpe_objetivo": 9.5,
+                "descanso_segundos": 60
+              }
             ]
           }
         ]
@@ -1081,14 +2172,29 @@
         "orden": 4,
         "ejercicios": [
           {
-            "nombre_ejercicio": "Prensa de Piernas 45°",
+            "nombre_ejercicio": "Prensa de Piernas",
             "grupo_muscular_principal": "Piernas",
             "orden_ejecucion": 1,
             "tipo_peso": "total",
             "series": [
-              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
-              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 90 },
-              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.5, "descanso_segundos": 90 }
+              {
+                "numero_serie": 1,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 8.5,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 2,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 9,
+                "descanso_segundos": 90
+              },
+              {
+                "numero_serie": 3,
+                "repeticiones_objetivo": 15,
+                "rpe_objetivo": 9.5,
+                "descanso_segundos": 90
+              }
             ]
           }
         ]

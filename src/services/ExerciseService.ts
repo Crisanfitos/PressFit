@@ -74,20 +74,18 @@ export const ExerciseService = {
                 .from('ejercicios')
                 .insert({
                     titulo: exerciseData.titulo,
-                    descripcion: exerciseData.descripcion || '',
-                    grupo_muscular: exerciseData.grupo_muscular,
-
-                    musculos_primarios: exerciseData.musculos_primarios || exerciseData.grupo_muscular,
+                    description: exerciseData.descripcion || '',
+                    categoria: exerciseData.grupo_muscular,
+                    musculos_primarios: [exerciseData.musculos_primarios || exerciseData.grupo_muscular],
                     musculos_secundarios: exerciseData.musculos_secundarios || [],
-                    equipamiento: exerciseData.equipamiento || 'Ninguno',
-                    dificultad: exerciseData.dificultad || 'Intermedio',
-                    instrucciones: exerciseData.instrucciones || [],
+                    dificultad: 'intermediate',
                     url_video: exerciseData.url_video || '',
-                    es_personalizado: true,
-                    creado_por_usuario_id: user?.id || null,
+                    is_custom: true,
+                    created_by: user?.id || null,
                 })
                 .select()
                 .single();
+
 
             if (error) throw error;
             return { data, error: null };

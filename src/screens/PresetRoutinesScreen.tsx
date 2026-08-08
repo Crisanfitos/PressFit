@@ -57,9 +57,12 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
             setIsImporting(false);
 
             if (res.error) {
-                Alert.alert('Error', 'No se pudo importar la rutina predefinida.');
+                Alert.alert('Error', `No se pudo importar: ${JSON.stringify(res.error)}`);
                 return;
             }
+
+
+
 
             setModalVisible(false);
             Alert.alert(
@@ -68,8 +71,9 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                 [
                     {
                         text: 'Ir a Mis Rutinas',
-                        onPress: () => navigation.navigate('WeeklyRoutines'),
+                        onPress: () => navigation.navigate('RoutineEditor'),
                     },
+
                 ]
             );
         } catch (error) {

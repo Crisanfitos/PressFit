@@ -454,14 +454,16 @@ export const RoutineService = {
                     .from('ejercicios')
                     .insert({
                         titulo: name,
-                        grupo_muscular: muscleGroup,
-                        musculos_primarios: muscleGroup,
-                        equipamiento: 'Otro',
-                        dificultad: 'Intermedio',
-                        es_personalizado: false,
+                        categoria: muscleGroup,
+                        musculos_primarios: [muscleGroup],
+                        dificultad: 'intermediate',
+                        is_custom: true,
+                        created_by: userId,
                     })
                     .select('id')
                     .single();
+
+
 
 
                 if (newExError || !newEx) throw newExError || new Error(`Failed to create exercise ${name}`);
@@ -477,13 +479,13 @@ export const RoutineService = {
                     objetivo: preset.categoria,
                     es_plantilla: true,
                     activa: false, // will activate via setActiveRoutine if setActive === true
-                    copiada_de_id: preset.id,
                     fecha_inicio_semana: formatLocalDateKey(getStartOfWeekUtil(new Date())),
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString(),
                 })
                 .select()
                 .single();
+
 
             if (routineError || !newRoutine) throw routineError || new Error('Failed to create weekly routine');
 
@@ -502,7 +504,10 @@ export const RoutineService = {
                         .select()
                         .single();
 
-                    if (dayError || !newDay) continue;
+                    if (dayError || !newDay) {
+                        if (dayError) throw dayError;
+                        continue;
+                    }
 
                     if (day.ejercicios && day.ejercicios.length > 0) {
                         for (const ex of day.ejercicios) {
@@ -524,20 +529,26 @@ export const RoutineService = {
                                 .select()
                                 .single();
 
-                            if (schError || !newScheduledEx) continue;
+                            if (schError || !newScheduledEx) {
+                                if (schError) throw schError;
+                                continue;
+                            }
 
                             if (ex.series && ex.series.length > 0) {
                                 const seriesInserts = ex.series.map((s) => ({
                                     ejercicio_programado_id: newScheduledEx.id,
                                     numero_serie: s.numero_serie,
-                                    repeticiones: s.repeticiones_objetivo,
-                                    peso_utilizado: s.peso_sugerido || null,
-                                    rpe: s.rpe_objetivo || null,
+                                    repeticiones: s.repeticiones_objetivo || 0,
+                                    peso_utilizado: s.peso_sugerido || 0,
+                                    rpe: s.rpe_objetivo ? Math.round(s.rpe_objetivo) : null,
+                                    descanso_segundos: s.descanso_segundos || null,
                                     created_at: new Date().toISOString(),
                                 }));
 
-                                await supabase.from('series').insert(seriesInserts);
+                                const { error: seriesErr } = await supabase.from('series').insert(seriesInserts);
+                                if (seriesErr) throw seriesErr;
                             }
+
                         }
                     }
                 }
@@ -545,7 +556,8 @@ export const RoutineService = {
 
             // 5. Activate routine if requested
             if (setActive) {
-                await this.setActiveRoutine(userId, newRoutine.id);
+                const { error: activeErr } = await this.setActiveRoutine(userId, newRoutine.id);
+                if (activeErr) throw activeErr;
                 newRoutine.activa = true;
             }
 
@@ -556,4 +568,5 @@ export const RoutineService = {
         }
     },
 };
+
 

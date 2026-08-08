@@ -559,16 +559,17 @@ describe('RoutineService Coverage Suite', () => {
         it('should import preset routine and activate it successfully', async () => {
             // Mock catalog exercises to match preset exercise titles
             const catalogList = [
-                { id: 'ex-1', titulo: 'Press de Banca con Barra', nombre: 'Press de Banca con Barra' },
-                { id: 'ex-2', titulo: 'Press Militar con Barra', nombre: 'Press Militar con Barra' },
-                { id: 'ex-3', titulo: 'Extensiones de Tríceps en Polea', nombre: 'Extensiones de Tríceps en Polea' },
-                { id: 'ex-4', titulo: 'Dominadas', nombre: 'Dominadas' },
-                { id: 'ex-5', titulo: 'Remo con Barra pronado', nombre: 'Remo con Barra pronado' },
-                { id: 'ex-6', titulo: 'Curl de Bíceps con Barra Z', nombre: 'Curl de Bíceps con Barra Z' },
-                { id: 'ex-7', titulo: 'Sentadilla Trasera con Barra', nombre: 'Sentadilla Trasera con Barra' },
-                { id: 'ex-8', titulo: 'Peso Muerto Rumano con Barra', nombre: 'Peso Muerto Rumano con Barra' },
-                { id: 'ex-9', titulo: 'Elevación de Gemelos de Pie', nombre: 'Elevación de Gemelos de Pie' },
+                { id: 'ex-1', titulo: 'Press de Banca con Barra' },
+                { id: 'ex-2', titulo: 'Press Militar con Barra' },
+                { id: 'ex-3', titulo: 'Extensiones en Polea Alta' },
+                { id: 'ex-4', titulo: 'Dominadas' },
+                { id: 'ex-5', titulo: 'Remo con Barra Agarre Pronado' },
+                { id: 'ex-6', titulo: 'Curl con Barra Z' },
+                { id: 'ex-7', titulo: 'Sentadillas con Barra' },
+                { id: 'ex-8', titulo: 'Peso Muerto Rumano' },
+                { id: 'ex-9', titulo: 'Elevación de Gemelos de Pie' },
             ];
+
 
             mockChain.then.mockImplementation((resolve: any) =>
                 Promise.resolve({ data: catalogList, error: null }).then(resolve)
