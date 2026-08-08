@@ -96,8 +96,38 @@ appId: com.crisanfitos.PressFit_Expo
 
 - tapOn: "Ir a Mis Rutinas"
 
-# 10. Limpieza (Logout final)
+# 10. Verificar que los días y ejercicios de la rutina importada se muestran correctamente
+- extendedWaitUntil:
+    visible:
+      id: "edit-routine-button-0"
+    timeout: 10000
+
+- tapOn:
+    id: "edit-routine-button-0"
+
+- extendedWaitUntil:
+    visible:
+      id: "routine-detail-screen"
+    timeout: 10000
+
+- assertVisible: "5 ejercicios"
+
+- tapOn:
+    id: "routine-day-card-lunes"
+
+- extendedWaitUntil:
+    visible: "Press de Banca con Barra"
+    timeout: 10000
+
+- tapOn:
+    id: "workout-back-button"
+
+- tapOn:
+    id: "routine-detail-back-button"
+
+# 11. Limpieza (Logout final)
 - tapOn: "Perfil"
+
 
 - scroll
 - scrollUntilVisible:

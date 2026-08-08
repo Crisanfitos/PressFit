@@ -489,70 +489,102 @@ export const RoutineService = {
 
             if (routineError || !newRoutine) throw routineError || new Error('Failed to create weekly routine');
 
-            // 4. Create daily routines and scheduled exercises
-            if (preset.rutinas_diarias && preset.rutinas_diarias.length > 0) {
-                for (const day of preset.rutinas_diarias) {
-                    const { data: newDay, error: dayError } = await supabase
-                        .from('rutinas_diarias')
-                        .insert({
-                            rutina_semanal_id: newRoutine.id,
-                            nombre_dia: day.nombre_dia,
-                            descripcion: day.descripcion || null,
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString(),
-                        })
-                        .select()
-                        .single();
+            // 4. Create daily routines and scheduled exercises for all 7 days of the week (Lunes - Domingo)
+            const daysOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+            const presetDays = preset.rutinas_diarias || [];
 
-                    if (dayError || !newDay) {
-                        if (dayError) throw dayError;
-                        continue;
-                    }
+            const getTemplateDayForIndex = (index: number) => {
+                const count = presetDays.length;
+                if (count === 6) {
+                    return index < 6 ? presetDays[index] : null;
+                }
+                if (count === 5) {
+                    return index < 5 ? presetDays[index] : null;
+                }
+                if (count === 4) {
+                    if (index === 0) return presetDays[0];
+                    if (index === 1) return presetDays[1];
+                    if (index === 3) return presetDays[2];
+                    if (index === 4) return presetDays[3];
+                    return null;
+                }
+                if (count === 3) {
+                    if (index === 0) return presetDays[0];
+                    if (index === 2) return presetDays[1];
+                    if (index === 4) return presetDays[2];
+                    return null;
+                }
+                return index < count ? presetDays[index] : null;
+            };
 
-                    if (day.ejercicios && day.ejercicios.length > 0) {
-                        for (const ex of day.ejercicios) {
-                            const exerciseId = await getExerciseIdByName(
-                                ex.nombre_ejercicio,
-                                ex.grupo_muscular_principal
-                            );
+            for (let i = 0; i < daysOfWeek.length; i++) {
+                const dayName = daysOfWeek[i];
+                const presetDay = getTemplateDayForIndex(i);
 
-                            const { data: newScheduledEx, error: schError } = await supabase
-                                .from('ejercicios_programados')
-                                .insert({
-                                    rutina_diaria_id: newDay.id,
-                                    ejercicio_id: exerciseId,
-                                    orden_ejecucion: ex.orden_ejecucion,
-                                    tipo_peso: ex.tipo_peso || 'total',
-                                    created_at: new Date().toISOString(),
-                                    updated_at: new Date().toISOString(),
-                                })
-                                .select()
-                                .single();
+                const description = presetDay
+                    ? (presetDay.descripcion ? `${presetDay.nombre_dia} - ${presetDay.descripcion}` : presetDay.nombre_dia)
+                    : 'Descanso / Recuperación';
 
-                            if (schError || !newScheduledEx) {
-                                if (schError) throw schError;
-                                continue;
-                            }
+                const { data: newDay, error: dayError } = await supabase
+                    .from('rutinas_diarias')
+                    .insert({
+                        rutina_semanal_id: newRoutine.id,
+                        nombre_dia: dayName,
+                        descripcion: description,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                    })
+                    .select()
+                    .single();
 
-                            if (ex.series && ex.series.length > 0) {
-                                const seriesInserts = ex.series.map((s) => ({
-                                    ejercicio_programado_id: newScheduledEx.id,
-                                    numero_serie: s.numero_serie,
-                                    repeticiones: s.repeticiones_objetivo || 0,
-                                    peso_utilizado: s.peso_sugerido || 0,
-                                    rpe: s.rpe_objetivo ? Math.round(s.rpe_objetivo) : null,
-                                    descanso_segundos: s.descanso_segundos || null,
-                                    created_at: new Date().toISOString(),
-                                }));
+                if (dayError || !newDay) {
+                    if (dayError) throw dayError;
+                    continue;
+                }
 
-                                const { error: seriesErr } = await supabase.from('series').insert(seriesInserts);
-                                if (seriesErr) throw seriesErr;
-                            }
+                if (presetDay && presetDay.ejercicios && presetDay.ejercicios.length > 0) {
+                    for (const ex of presetDay.ejercicios) {
+                        const exerciseId = await getExerciseIdByName(
+                            ex.nombre_ejercicio,
+                            ex.grupo_muscular_principal
+                        );
 
+                        const { data: newScheduledEx, error: schError } = await supabase
+                            .from('ejercicios_programados')
+                            .insert({
+                                rutina_diaria_id: newDay.id,
+                                ejercicio_id: exerciseId,
+                                orden_ejecucion: ex.orden_ejecucion,
+                                tipo_peso: ex.tipo_peso || 'total',
+                                created_at: new Date().toISOString(),
+                                updated_at: new Date().toISOString(),
+                            })
+                            .select()
+                            .single();
+
+                        if (schError || !newScheduledEx) {
+                            if (schError) throw schError;
+                            continue;
+                        }
+
+                        if (ex.series && ex.series.length > 0) {
+                            const seriesInserts = ex.series.map((s) => ({
+                                ejercicio_programado_id: newScheduledEx.id,
+                                numero_serie: s.numero_serie,
+                                repeticiones: s.repeticiones_objetivo || 0,
+                                peso_utilizado: s.peso_sugerido || 0,
+                                rpe: s.rpe_objetivo ? Math.round(s.rpe_objetivo) : null,
+                                descanso_segundos: s.descanso_segundos || null,
+                                created_at: new Date().toISOString(),
+                            }));
+
+                            const { error: seriesErr } = await supabase.from('series').insert(seriesInserts);
+                            if (seriesErr) throw seriesErr;
                         }
                     }
                 }
             }
+
 
             // 5. Activate routine if requested
             if (setActive) {
