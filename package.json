@@ -135,7 +135,15 @@
   "overrides": {
     "react-reconciler": {
       "react": "$react"
-    }
+    },
+    "shell-quote": "^1.8.5",
+    "tmp": "^0.2.6",
+    "ws": "^8.21.0",
+    "postcss": "^8.5.23",
+    "yaml": "^2.8.3",
+    "uuid": "^11.1.1",
+    "minimatch": "^3.1.4",
+    "picomatch": "^2.3.2"
   },
   "expo": {
     "install": {
