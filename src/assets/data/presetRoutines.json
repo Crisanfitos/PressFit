@@ -1,0 +1,1098 @@
+[
+  {
+    "id": "preset-ppl-6d",
+    "nombre": "Push / Pull / Legs (PPL) 6 Días",
+    "descripcion": "Estructura clásica de alta frecuencia (2 veces por semana) enfocada en hipertrofia y máximo volumen efectivo por grupo muscular.",
+    "categoria": "Hipertrofia",
+    "dias_por_semana": 6,
+    "nivel": "Intermedio",
+    "rutinas_diarias": [
+      {
+        "nombre_dia": "Empuje A (Pecho, Hombro, Tríceps)",
+        "orden": 1,
+        "descripcion": "Foco en fuerza básica de empuje horizontal e inclinado",
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Press de Banca con Barra",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 7.5, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
+              { "numero_serie": 4, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 150 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Press Inclinado con Mancuernas",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 2,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Press Militar con Barra",
+            "grupo_muscular_principal": "Hombros",
+            "orden_ejecucion": 3,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Elevaciones Laterales con Mancuernas",
+            "grupo_muscular_principal": "Hombros",
+            "orden_ejecucion": 4,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Extensiones de Tríceps en Polea",
+            "grupo_muscular_principal": "Brazos",
+            "orden_ejecucion": 5,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Tirón A (Espalda, Bíceps, Deltoides Posterior)",
+        "orden": 2,
+        "descripcion": "Foco en tracción vertical y densidad dorsal",
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Dominadas",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 1,
+            "tipo_peso": "corporal",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Remo con Barra pronado",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 2,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Remo Horizontal en Polea",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 3,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Curl de Bíceps con Barra Z",
+            "grupo_muscular_principal": "Brazos",
+            "orden_ejecucion": 4,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Curl Martillo con Mancuernas",
+            "grupo_muscular_principal": "Brazos",
+            "orden_ejecucion": 5,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.5, "descanso_segundos": 60 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Pierna A (Cuádriceps, Glúteos, Gemelos)",
+        "orden": 3,
+        "descripcion": "Foco en fuerza de sentadilla y cuádriceps",
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Sentadilla Trasera con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 6, "rpe_objetivo": 7.5, "descanso_segundos": 150 },
+              { "numero_serie": 2, "repeticiones_objetivo": 6, "rpe_objetivo": 8.0, "descanso_segundos": 150 },
+              { "numero_serie": 3, "repeticiones_objetivo": 6, "rpe_objetivo": 8.5, "descanso_segundos": 150 },
+              { "numero_serie": 4, "repeticiones_objetivo": 6, "rpe_objetivo": 9.0, "descanso_segundos": 180 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Prensa de Piernas 45°",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 2,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Extensiones de Cuádriceps",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 3,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Curl Femoral Tumbado",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 4,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Elevación de Gemelos de Pie",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 5,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.5, "descanso_segundos": 60 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Empuje B (Hipertrofia Superior)",
+        "orden": 4,
+        "descripcion": "Énfasis en pectoral superior y deltoides lateral",
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Press Inclinado con Barra",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Fondos en Paralelas",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 2,
+            "tipo_peso": "corporal",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Press de Hombros con Mancuernas",
+            "grupo_muscular_principal": "Hombros",
+            "orden_ejecucion": 3,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Cruce de Poleas para Pecho",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 4,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.5, "descanso_segundos": 60 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Press Francés con Barra Z",
+            "grupo_muscular_principal": "Brazos",
+            "orden_ejecucion": 5,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Tirón B (Densidad & Isquios)",
+        "orden": 5,
+        "descripcion": "Tracción horizontal pesada y trabajo dorsal específico",
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Jalón al Pecho",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Remo Unilateral con Mancuerna",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 2,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Facepulls en Polea",
+            "grupo_muscular_principal": "Hombros",
+            "orden_ejecucion": 3,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.5, "descanso_segundos": 60 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Curl de Bíceps en Banco Inclinado",
+            "grupo_muscular_principal": "Brazos",
+            "orden_ejecucion": 4,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Pierna B (Cadena Posterior & Peso Muerto)",
+        "orden": 6,
+        "descripcion": "Énfasis en isquiotibiales, glúteos y lumbar",
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Peso Muerto Rumano con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 7.5, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
+              { "numero_serie": 4, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 150 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Hip Thrust con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 2,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Zancadas Caminando con Mancuernas",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 3,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Elevación de Gemelos Sentado",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 4,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.5, "descanso_segundos": 60 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "preset-ppl-3d",
+    "nombre": "Push / Pull / Legs (PPL) 3 Días",
+    "descripcion": "Versión condensada de 3 días para progresar eficientemente con mínima frecuencia y descanso óptimo entre sesiones.",
+    "categoria": "Hipertrofia",
+    "dias_por_semana": 3,
+    "nivel": "Principiante",
+    "rutinas_diarias": [
+      {
+        "nombre_dia": "Día 1: Empuje (Pecho, Hombro, Tríceps)",
+        "orden": 1,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Press de Banca con Barra",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Press Militar con Barra",
+            "grupo_muscular_principal": "Hombros",
+            "orden_ejecucion": 2,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Extensiones de Tríceps en Polea",
+            "grupo_muscular_principal": "Brazos",
+            "orden_ejecucion": 3,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "descanso_segundos": 60 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Día 2: Tirón (Espalda & Bíceps)",
+        "orden": 2,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Dominadas",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 1,
+            "tipo_peso": "corporal",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Remo con Barra pronado",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 2,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Curl de Bíceps con Barra Z",
+            "grupo_muscular_principal": "Brazos",
+            "orden_ejecucion": 3,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "descanso_segundos": 60 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Día 3: Piernas (Tren Inferior)",
+        "orden": 3,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Sentadilla Trasera con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Peso Muerto Rumano con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 2,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Elevación de Gemelos de Pie",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 3,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 15, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 15, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 15, "descanso_segundos": 60 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "preset-upper-lower-4d",
+    "nombre": "Torso / Pierna (Upper / Lower) 4 Días",
+    "descripcion": "Estructura altamente versátil dividida entre días de Torso y Pierna con periodización ondulante de intensidad.",
+    "categoria": "Híbrido",
+    "dias_por_semana": 4,
+    "nivel": "Intermedio",
+    "rutinas_diarias": [
+      {
+        "nombre_dia": "Torso A (Empuje & Tracción Pesada)",
+        "orden": 1,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Press de Banca con Barra",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 6, "rpe_objetivo": 8.0, "descanso_segundos": 150 },
+              { "numero_serie": 2, "repeticiones_objetivo": 6, "rpe_objetivo": 8.5, "descanso_segundos": 150 },
+              { "numero_serie": 3, "repeticiones_objetivo": 6, "rpe_objetivo": 9.0, "descanso_segundos": 150 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Remo con Barra pronado",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 2,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 6, "rpe_objetivo": 8.0, "descanso_segundos": 150 },
+              { "numero_serie": 2, "repeticiones_objetivo": 6, "rpe_objetivo": 8.5, "descanso_segundos": 150 },
+              { "numero_serie": 3, "repeticiones_objetivo": 6, "rpe_objetivo": 9.0, "descanso_segundos": 150 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Press Militar con Barra",
+            "grupo_muscular_principal": "Hombros",
+            "orden_ejecucion": 3,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Pierna A (Enfoque Cuádriceps & Sentadilla)",
+        "orden": 2,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Sentadilla Trasera con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 6, "rpe_objetivo": 8.0, "descanso_segundos": 150 },
+              { "numero_serie": 2, "repeticiones_objetivo": 6, "rpe_objetivo": 8.5, "descanso_segundos": 150 },
+              { "numero_serie": 3, "repeticiones_objetivo": 6, "rpe_objetivo": 9.0, "descanso_segundos": 180 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Peso Muerto Rumano con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 2,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Torso B (Hipertrofia & Volumen)",
+        "orden": 3,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Press Inclinado con Mancuernas",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 1,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Dominadas",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 2,
+            "tipo_peso": "corporal",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Pierna B (Cadena Posterior & Hipertrofia)",
+        "orden": 4,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Hip Thrust con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Prensa de Piernas 45°",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 2,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.5, "descanso_segundos": 90 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "preset-fullbody-3d",
+    "nombre": "Fullbody (Cuerpo Completo) 3 Días",
+    "descripcion": "Diseñada especialmente para principiantes o personas con tiempo ajustado. Estimula todo el cuerpo tres veces por semana con ejercicios básicos de alta demanda.",
+    "categoria": "Principiante",
+    "dias_por_semana": 3,
+    "nivel": "Principiante",
+    "rutinas_diarias": [
+      {
+        "nombre_dia": "Fullbody A",
+        "orden": 1,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Sentadilla Trasera con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Press de Banca con Barra",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 2,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Remo con Barra pronado",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 3,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "descanso_segundos": 90 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Fullbody B",
+        "orden": 2,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Peso Muerto Rumano con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Press Militar con Barra",
+            "grupo_muscular_principal": "Hombros",
+            "orden_ejecucion": 2,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Dominadas",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 3,
+            "tipo_peso": "corporal",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "descanso_segundos": 120 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Fullbody C",
+        "orden": 3,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Prensa de Piernas 45°",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Press Inclinado con Mancuernas",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 2,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Remo Horizontal en Polea",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 3,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "descanso_segundos": 90 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "preset-arnold-6d",
+    "nombre": "Arnold Split 6 Días",
+    "descripcion": "El legendario programa dividiendo Pecho/Espalda, Hombros/Brazos y Piernas para lograr máxima congestión antagonista y estética de la edad de oro del culturismo.",
+    "categoria": "Hipertrofia",
+    "dias_por_semana": 6,
+    "nivel": "Avanzado",
+    "rutinas_diarias": [
+      {
+        "nombre_dia": "Día 1: Pecho & Espalda (Super-series Antagonistas A)",
+        "orden": 1,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Press de Banca con Barra",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Dominadas",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 2,
+            "tipo_peso": "corporal",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Día 2: Hombros & Brazos A",
+        "orden": 2,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Press de Hombros con Mancuernas",
+            "grupo_muscular_principal": "Hombros",
+            "orden_ejecucion": 1,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Curl de Bíceps con Barra Z",
+            "grupo_muscular_principal": "Brazos",
+            "orden_ejecucion": 2,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Extensiones de Tríceps en Polea",
+            "grupo_muscular_principal": "Brazos",
+            "orden_ejecucion": 3,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.0, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Día 3: Piernas A",
+        "orden": 3,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Sentadilla Trasera con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 150 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Día 4: Pecho & Espalda B",
+        "orden": 4,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Press Inclinado con Mancuernas",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 1,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Día 5: Hombros & Brazos B",
+        "orden": 5,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Elevaciones Laterales con Mancuernas",
+            "grupo_muscular_principal": "Hombros",
+            "orden_ejecucion": 1,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.5, "descanso_segundos": 60 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Día 6: Piernas B",
+        "orden": 6,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Peso Muerto Rumano con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "preset-phul-4d",
+    "nombre": "PHUL (Power Hypertrophy Upper Lower) 4 Días",
+    "descripcion": "Combina dos días de fuerza pesada a repeticiones bajas (3-5) con dos días de hipertrofia de volumen medio/alto (8-12) para maximizar masa muscular y fuerza bruta.",
+    "categoria": "Fuerza",
+    "dias_por_semana": 4,
+    "nivel": "Avanzado",
+    "rutinas_diarias": [
+      {
+        "nombre_dia": "Torso Potencia (Fuerza Máxima)",
+        "orden": 1,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Press de Banca con Barra",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 5, "rpe_objetivo": 8.0, "descanso_segundos": 180 },
+              { "numero_serie": 2, "repeticiones_objetivo": 5, "rpe_objetivo": 8.5, "descanso_segundos": 180 },
+              { "numero_serie": 3, "repeticiones_objetivo": 5, "rpe_objetivo": 9.0, "descanso_segundos": 180 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Remo con Barra pronado",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 2,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 5, "rpe_objetivo": 8.0, "descanso_segundos": 180 },
+              { "numero_serie": 2, "repeticiones_objetivo": 5, "rpe_objetivo": 8.5, "descanso_segundos": 180 },
+              { "numero_serie": 3, "repeticiones_objetivo": 5, "rpe_objetivo": 9.0, "descanso_segundos": 180 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Pierna Potencia (Fuerza Máxima)",
+        "orden": 2,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Sentadilla Trasera con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 5, "rpe_objetivo": 8.0, "descanso_segundos": 180 },
+              { "numero_serie": 2, "repeticiones_objetivo": 5, "rpe_objetivo": 8.5, "descanso_segundos": 180 },
+              { "numero_serie": 3, "repeticiones_objetivo": 5, "rpe_objetivo": 9.0, "descanso_segundos": 180 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Torso Hipertrofia (Volumen & Bombeo)",
+        "orden": 3,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Press Inclinado con Mancuernas",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 1,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.5, "descanso_segundos": 90 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Pierna Hipertrofia (Volumen & Aislamiento)",
+        "orden": 4,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Hip Thrust con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.5, "descanso_segundos": 90 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "preset-glute-lower-4d",
+    "nombre": "Tren Inferior & Glúteo 4 Días",
+    "descripcion": "Especialización estética enfocada en hipertrofia de glúteos, femorales y tono muscular, manteniendo un estímulo equilibrado de torso.",
+    "categoria": "Estética",
+    "dias_por_semana": 4,
+    "nivel": "Intermedio",
+    "rutinas_diarias": [
+      {
+        "nombre_dia": "Día 1: Glúteo Máximo & Isquios",
+        "orden": 1,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Hip Thrust con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 120 },
+              { "numero_serie": 4, "repeticiones_objetivo": 8, "rpe_objetivo": 9.5, "descanso_segundos": 150 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Peso Muerto Rumano con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 2,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Día 2: Torso & Core Mantenimiento",
+        "orden": 2,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Press Inclinado con Mancuernas",
+            "grupo_muscular_principal": "Pecho",
+            "orden_ejecucion": 1,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 10, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 10, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 10, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Dominadas",
+            "grupo_muscular_principal": "Espalda",
+            "orden_ejecucion": 2,
+            "tipo_peso": "corporal",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 90 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Día 3: Glúteo Medio & Cuádriceps",
+        "orden": 3,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Sentadilla Trasera con Barra",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 8, "rpe_objetivo": 8.0, "descanso_segundos": 120 },
+              { "numero_serie": 2, "repeticiones_objetivo": 8, "rpe_objetivo": 8.5, "descanso_segundos": 120 },
+              { "numero_serie": 3, "repeticiones_objetivo": 8, "rpe_objetivo": 9.0, "descanso_segundos": 120 }
+            ]
+          },
+          {
+            "nombre_ejercicio": "Zancadas Caminando con Mancuernas",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 2,
+            "tipo_peso": "por_lado",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 12, "rpe_objetivo": 8.5, "descanso_segundos": 60 },
+              { "numero_serie": 2, "repeticiones_objetivo": 12, "rpe_objetivo": 9.0, "descanso_segundos": 60 },
+              { "numero_serie": 3, "repeticiones_objetivo": 12, "rpe_objetivo": 9.5, "descanso_segundos": 60 }
+            ]
+          }
+        ]
+      },
+      {
+        "nombre_dia": "Día 4: Pierna Completa & Bombeo Glúteo",
+        "orden": 4,
+        "ejercicios": [
+          {
+            "nombre_ejercicio": "Prensa de Piernas 45°",
+            "grupo_muscular_principal": "Piernas",
+            "orden_ejecucion": 1,
+            "tipo_peso": "total",
+            "series": [
+              { "numero_serie": 1, "repeticiones_objetivo": 15, "rpe_objetivo": 8.5, "descanso_segundos": 90 },
+              { "numero_serie": 2, "repeticiones_objetivo": 15, "rpe_objetivo": 9.0, "descanso_segundos": 90 },
+              { "numero_serie": 3, "repeticiones_objetivo": 15, "rpe_objetivo": 9.5, "descanso_segundos": 90 }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

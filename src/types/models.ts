@@ -236,25 +236,47 @@ export interface SeriesInsert {
 }
 
 // ============================================================================
-// Nested Query Result Shapes
+// Preset Routines Seed Types (EPIC-08)
 // ============================================================================
 
-/**
- * Row shape returned by the nested Supabase join query in `getExerciseHistory`.
- */
-export interface ExerciseHistoryRow {
-    id: string;
+export interface PresetSeries {
     numero_serie: number;
-    peso_utilizado: number;
-    repeticiones: number;
-    rpe?: number;
-    ejercicios_programados?: {
-        ejercicio_id: string;
-        tipo_peso: TipoPeso;
-        rutinas_diarias?: {
-            id: string;
-            fecha_dia: string;
-            rutinas_semanales?: { usuario_id: string };
-        };
-    };
+    peso_sugerido?: number;
+    repeticiones_objetivo: number;
+    rpe_objetivo?: number;
+    descanso_segundos?: number;
 }
+
+export interface PresetScheduledExercise {
+    nombre_ejercicio: string;
+    grupo_muscular_principal: string;
+    orden_ejecucion: number;
+    tipo_peso: TipoPeso;
+    notas?: string;
+    series: PresetSeries[];
+}
+
+export interface PresetRoutineDay {
+    nombre_dia: string;
+    descripcion?: string;
+    orden: number;
+    ejercicios: PresetScheduledExercise[];
+}
+
+export interface PresetRoutine {
+    id: string;
+    nombre: string;
+    descripcion: string;
+    categoria: 'Hipertrofia' | 'Fuerza' | 'Estética' | 'Principiante' | 'Híbrido';
+    dias_por_semana: number;
+    nivel: 'Principiante' | 'Intermedio' | 'Avanzado';
+    imagen_url?: string;
+    rutinas_diarias: PresetRoutineDay[];
+}
+
+export interface PresetFilterOptions {
+    categoria?: string;
+    dias_por_semana?: number;
+    nivel?: string;
+}
+
