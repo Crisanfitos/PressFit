@@ -1,0 +1,123 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_054_preset_routines_import.yaml — US-054: Exploración, Selección e Importación de Plantillas Predefinidas
+
+- launchApp:
+    clearState: true
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 1. Navegar desde bienvenida a pantalla de Login
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+# 2. Introducir credenciales de prueba
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+- inputText: "${E2E_TEST_EMAIL}"
+
+- tapOn:
+    id: "password-input"
+- inputText: "${E2E_TEST_PASSWORD}"
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# 3. Verificar entrada a la pantalla del Calendario Mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 4. Abrir menú lateral con botón hamburguesa
+- tapOn:
+    id: "hamburger-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "side-drawer"
+    timeout: 5000
+
+# 5. Pulsar la opción "Plantillas Prémium" del menú lateral
+- tapOn: "Plantillas Prémium"
+
+# 6. Verificar entrada a la Galería de Plantillas
+- extendedWaitUntil:
+    visible: "Biblioteca de Rutinas"
+    timeout: 10000
+
+- assertVisible: "Biblioteca de Rutinas"
+
+# 7. Filtrar por categoría Hipertrofia
+- tapOn:
+    id: "filter-category-Hipertrofia"
+
+- assertVisible: "Push / Pull / Legs (PPL) 6 Días"
+
+# 8. Seleccionar una tarjeta de plantilla para abrir la vista previa de detalles
+- tapOn: "Push / Pull / Legs (PPL) 6 Días"
+
+- extendedWaitUntil:
+    visible:
+      id: "confirm-import-button"
+    timeout: 5000
+
+- assertVisible: "Estructura de la Rutina"
+
+# 9. Confirmar la clonación e importación de la plantilla
+- tapOn:
+    id: "confirm-import-button"
+
+- extendedWaitUntil:
+    visible: "¡Rutina Asignada!"
+    timeout: 10000
+
+- tapOn: "Ir a Mis Rutinas"
+
+# 10. Limpieza (Logout final)
+- tapOn: "Perfil"
+
+- scroll
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
