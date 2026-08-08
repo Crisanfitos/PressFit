@@ -10,6 +10,11 @@ jest.mock('@react-native-async-storage/async-storage', () =>
     require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
+// Mock NetInfo globally for React Native network connectivity tests
+jest.mock('@react-native-community/netinfo', () =>
+    require('@react-native-community/netinfo/jest/netinfo-mock')
+);
+
 // Mock @expo/vector-icons
 jest.mock('@expo/vector-icons', () => {
     const mockReact = require('react');
