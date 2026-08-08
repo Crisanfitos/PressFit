@@ -391,6 +391,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
             {/* FAB */}
             {routines.length > 0 && (
                 <TouchableOpacity
+                    testID="create-routine-fab"
                     style={styles.fab}
                     onPress={() => setShowCreateModal(true)}
                 >
