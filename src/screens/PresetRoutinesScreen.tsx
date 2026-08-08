@@ -5,10 +5,12 @@ import {
     ScrollView,
     TouchableOpacity,
     Alert,
-    SafeAreaView,
+    StyleSheet,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { PresetRoutineService } from '../services/PresetRoutineService';
 import { RoutineService } from '../services/RoutineService';
 import { PresetRoutine } from '../types/models';
@@ -20,6 +22,9 @@ const DAYS_FILTERS = [0, 3, 4, 6];
 
 export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const { user } = useAuth();
+    const { theme } = useTheme();
+    const { colors } = theme;
+
     const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
     const [selectedDays, setSelectedDays] = useState<number>(0);
     const [selectedPreset, setSelectedPreset] = useState<PresetRoutine | null>(null);
@@ -74,91 +79,131 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-zinc-950">
-            {/* Header */}
-            <View className="px-5 pt-4 pb-3 flex-row items-center justify-between border-b border-zinc-800/80">
+        <SafeAreaView
+            style={[styles.safeArea, { backgroundColor: colors.background || '#09090B' }]}
+            edges={['top', 'left', 'right']}
+        >
+            {/* Top Navigation Header */}
+            <View style={[styles.headerBar, { borderBottomColor: colors.border || '#27272A' }]}>
                 <TouchableOpacity
                     onPress={() => navigation.goBack()}
                     testID="back-button"
-                    className="p-2 bg-zinc-900 rounded-full"
+                    style={[styles.backBtn, { backgroundColor: colors.surface || '#1E1E1E' }]}
                 >
-                    <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+                    <MaterialIcons name="arrow-back" size={22} color={colors.text || '#FFFFFF'} />
                 </TouchableOpacity>
 
-                <Text className="text-lg font-bold text-white">
+                <Text style={[styles.headerTitle, { color: colors.text || '#FFFFFF' }]}>
                     Plantillas Prémium
                 </Text>
 
-                <View className="w-9" />
+                <View style={styles.headerRightSpacer} />
             </View>
 
-            <ScrollView className="flex-1 px-5 pt-4" showsVerticalScrollIndicator={false}>
-                {/* Intro Title */}
-                <View className="mb-4">
-                    <Text className="text-2xl font-extrabold text-white mb-1">
+            <ScrollView
+                style={styles.scrollContainer}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+            >
+                {/* Intro Title & Description */}
+                <View style={styles.introBlock}>
+                    <Text style={[styles.mainHeading, { color: colors.text || '#FFFFFF' }]}>
                         Biblioteca de Rutinas
                     </Text>
-                    <Text className="text-sm text-zinc-400">
+                    <Text style={[styles.subHeading, { color: colors.textSecondary || '#A1A1AA' }]}>
                         Selecciona un programa probado científicamente para tus objetivos.
                     </Text>
                 </View>
 
-                {/* Category Chips */}
+                {/* Category Chips (Horizontal Scroll) */}
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    className="mb-3 flex-row"
+                    style={styles.chipsScroll}
+                    contentContainerStyle={styles.chipsScrollContent}
                 >
-                    {CATEGORY_FILTERS.map((cat) => (
-                        <TouchableOpacity
-                            key={cat}
-                            onPress={() => setSelectedCategory(cat)}
-                            testID={`filter-category-${cat}`}
-                            className={`px-4 py-2 rounded-full mr-2 border ${
-                                selectedCategory === cat
-                                    ? 'bg-emerald-500 border-emerald-500'
-                                    : 'bg-zinc-900 border-zinc-800'
-                            }`}
-                        >
-                            <Text
-                                className={`text-xs font-semibold ${
-                                    selectedCategory === cat ? 'text-black font-bold' : 'text-zinc-300'
-                                }`}
+                    {CATEGORY_FILTERS.map((cat) => {
+                        const isSelected = selectedCategory === cat;
+                        return (
+                            <TouchableOpacity
+                                key={cat}
+                                onPress={() => setSelectedCategory(cat)}
+                                testID={`filter-category-${cat}`}
+                                style={[
+                                    styles.chip,
+                                    {
+                                        backgroundColor: isSelected
+                                            ? colors.primary || '#10B981'
+                                            : colors.surface || '#18181B',
+                                        borderColor: isSelected
+                                            ? colors.primary || '#10B981'
+                                            : colors.border || '#27272A',
+                                    },
+                                ]}
                             >
-                                {cat}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
+                                <Text
+                                    style={[
+                                        styles.chipText,
+                                        {
+                                            color: isSelected
+                                                ? '#000000'
+                                                : colors.textSecondary || '#D4D4D8',
+                                            fontWeight: isSelected ? '700' : '500',
+                                        },
+                                    ]}
+                                >
+                                    {cat}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    })}
                 </ScrollView>
 
                 {/* Days Filter Chips */}
-                <View className="flex-row items-center mb-5 gap-2">
-                    <Text className="text-xs font-bold text-zinc-400 uppercase tracking-widest mr-1">
+                <View style={styles.daysRow}>
+                    <Text style={[styles.daysLabel, { color: colors.textSecondary || '#71717A' }]}>
                         Frecuencia:
                     </Text>
-                    {DAYS_FILTERS.map((days) => (
-                        <TouchableOpacity
-                            key={`days-${days}`}
-                            onPress={() => setSelectedDays(days)}
-                            testID={`filter-days-${days}`}
-                            className={`px-3 py-1.5 rounded-lg border ${
-                                selectedDays === days
-                                    ? 'bg-zinc-800 border-emerald-500'
-                                    : 'bg-zinc-900 border-zinc-800'
-                            }`}
-                        >
-                            <Text
-                                className={`text-xs font-medium ${
-                                    selectedDays === days ? 'text-emerald-400 font-bold' : 'text-zinc-400'
-                                }`}
-                            >
-                                {days === 0 ? 'Todos' : `${days} días`}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
+                    <View style={styles.daysChipsContainer}>
+                        {DAYS_FILTERS.map((days) => {
+                            const isSelected = selectedDays === days;
+                            return (
+                                <TouchableOpacity
+                                    key={`days-${days}`}
+                                    onPress={() => setSelectedDays(days)}
+                                    testID={`filter-days-${days}`}
+                                    style={[
+                                        styles.dayFilterChip,
+                                        {
+                                            backgroundColor: isSelected
+                                                ? colors.surface || '#1F2937'
+                                                : colors.background || '#18181B',
+                                            borderColor: isSelected
+                                                ? colors.primary || '#10B981'
+                                                : colors.border || '#27272A',
+                                        },
+                                    ]}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.dayFilterText,
+                                            {
+                                                color: isSelected
+                                                    ? colors.primary || '#10B981'
+                                                    : colors.textSecondary || '#A1A1AA',
+                                                fontWeight: isSelected ? '700' : '500',
+                                            },
+                                        ]}
+                                    >
+                                        {days === 0 ? 'Todos' : `${days} días`}
+                                    </Text>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </View>
                 </View>
 
-                {/* Routines Catalog List */}
+                {/* Preset Routines List */}
                 {filteredPresets.length > 0 ? (
                     filteredPresets.map((preset) => (
                         <PresetRoutineCard
@@ -168,15 +213,23 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                         />
                     ))
                 ) : (
-                    <View className="py-12 items-center justify-center bg-zinc-900/50 rounded-2xl border border-zinc-800">
-                        <Ionicons name="fitness-outline" size={40} color="#71717A" />
-                        <Text className="text-base font-semibold text-zinc-400 mt-2">
+                    <View
+                        style={[
+                            styles.emptyState,
+                            {
+                                backgroundColor: colors.surface || '#18181B',
+                                borderColor: colors.border || '#27272A',
+                            },
+                        ]}
+                    >
+                        <MaterialIcons name="fitness-center" size={40} color={colors.textSecondary || '#71717A'} />
+                        <Text style={[styles.emptyText, { color: colors.textSecondary || '#A1A1AA' }]}>
                             No hay plantillas con estos filtros
                         </Text>
                     </View>
                 )}
 
-                <View className="h-8" />
+                <View style={styles.bottomSpacer} />
             </ScrollView>
 
             {/* Routine Detail Modal */}
@@ -190,3 +243,108 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
         </SafeAreaView>
     );
 };
+
+const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+    },
+    headerBar: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+    },
+    backBtn: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    headerTitle: {
+        fontSize: 17,
+        fontWeight: '700',
+    },
+    headerRightSpacer: {
+        width: 36,
+    },
+    scrollContainer: {
+        flex: 1,
+    },
+    scrollContent: {
+        paddingHorizontal: 16,
+        paddingTop: 16,
+    },
+    introBlock: {
+        marginBottom: 16,
+    },
+    mainHeading: {
+        fontSize: 24,
+        fontWeight: '800',
+        marginBottom: 4,
+    },
+    subHeading: {
+        fontSize: 13,
+        lineHeight: 18,
+    },
+    chipsScroll: {
+        marginBottom: 14,
+    },
+    chipsScrollContent: {
+        gap: 8,
+        paddingRight: 16,
+    },
+    chip: {
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 20,
+        borderWidth: 1,
+    },
+    chipText: {
+        fontSize: 12,
+    },
+    daysRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 20,
+        gap: 8,
+    },
+    daysLabel: {
+        fontSize: 11,
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    daysChipsContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    dayFilterChip: {
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 8,
+        borderWidth: 1,
+    },
+    dayFilterText: {
+        fontSize: 12,
+    },
+    emptyState: {
+        paddingVertical: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 16,
+        borderWidth: 1,
+        marginVertical: 20,
+    },
+    emptyText: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginTop: 10,
+    },
+    bottomSpacer: {
+        height: 32,
+    },
+});
