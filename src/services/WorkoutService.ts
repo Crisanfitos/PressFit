@@ -1,7 +1,10 @@
+import NetInfo from '@react-native-community/netinfo';
 import { supabase } from '../lib/supabase';
 import { TipoPeso } from '../types/setTypes';
 import { formatLocalDateKey, parseDateKeyAsLocalDate } from '../utils/dateUtils';
 import { isE2EMockEnabled, mockStore } from '../lib/e2eMockAdapter';
+import { OfflineStorageService } from './OfflineStorageService';
+import { SyncService } from './SyncService';
 import {
     Serie,
     ScheduledExercise,
@@ -13,48 +16,86 @@ import {
     ExerciseHistoryRow,
 } from '../types/models';
 
+async function checkIsOffline(): Promise<boolean> {
+    try {
+        const state = await NetInfo.fetch();
+        return state.isConnected === false || state.isInternetReachable === false;
+    } catch {
+        return false;
+    }
+}
+
+function isNetworkError(error: any): boolean {
+    if (!error) return false;
+    const msg = String(error.message || error.name || error).toLowerCase();
+    return msg.includes('fetch') || msg.includes('network') || msg.includes('offline') || msg.includes('timeout');
+}
+
 export const WorkoutService = {
     async getWorkoutDetails(workoutId: string): Promise<ServiceResponse<RoutineDay>> {
         if (isE2EMockEnabled()) {
             return { data: mockStore.getMockRoutineDay(workoutId) as any, error: null };
         }
-        try {
-            const { data, error } = await supabase
-                .from('rutinas_diarias')
-                .select(`
-          *,
-          ejercicios_programados (
-            *,
-            ejercicio:ejercicios (*),
-            series (*)
-          )
-        `)
-                .eq('id', workoutId)
-                .single();
 
-            if (error) throw error;
+        const offline = await checkIsOffline();
+        if (!offline) {
+            try {
+                const { data, error } = await supabase
+                    .from('rutinas_diarias')
+                    .select(`
+              *,
+              ejercicios_programados (
+                *,
+                ejercicio:ejercicios (*),
+                series (*)
+              )
+            `)
+                    .eq('id', workoutId)
+                    .single();
 
-            // Sort exercises by order
-            if (data?.ejercicios_programados) {
-                data.ejercicios_programados.sort(
-                    (a: ScheduledExercise, b: ScheduledExercise) => (a.orden_ejecucion || 0) - (b.orden_ejecucion || 0)
-                );
+                if (error) {
+                    if (isNetworkError(error)) throw error;
+                    return { data: null, error };
+                }
 
-                // Sort sets by number
-                data.ejercicios_programados.forEach((ex: ScheduledExercise) => {
-                    if (ex.series) {
-                        ex.series.sort(
-                            (a: Serie, b: Serie) => (a.numero_serie || 0) - (b.numero_serie || 0)
-                        );
-                    }
-                });
+                // Sort exercises by order
+                if (data?.ejercicios_programados) {
+                    data.ejercicios_programados.sort(
+                        (a: ScheduledExercise, b: ScheduledExercise) => (a.orden_ejecucion || 0) - (b.orden_ejecucion || 0)
+                    );
+
+                    // Sort sets by number
+                    data.ejercicios_programados.forEach((ex: ScheduledExercise) => {
+                        if (ex.series) {
+                            ex.series.sort(
+                                (a: Serie, b: Serie) => (a.numero_serie || 0) - (b.numero_serie || 0)
+                            );
+                        }
+                    });
+                }
+
+                // Cache workout locally
+                if (data) {
+                    const cachedRes = await OfflineStorageService.getCachedWorkouts();
+                    const currentCached = cachedRes.data || [];
+                    const filtered = currentCached.filter((w) => w.id !== data.id);
+                    await OfflineStorageService.saveWorkouts([...filtered, data]);
+                }
+
+                return { data, error: null };
+            } catch (error) {
+                console.warn('Network query failed for workout details, trying offline cache:', error);
             }
-
-            return { data, error: null };
-        } catch (error) {
-            console.error('Error fetching workout details:', error);
-            return { data: null, error };
         }
+
+        // Offline fallback
+        const cachedRes = await OfflineStorageService.getCachedWorkouts();
+        const cachedWorkout = cachedRes.data?.find((w) => w.id === workoutId);
+        if (cachedWorkout) {
+            return { data: cachedWorkout, error: null };
+        }
+
+        return { data: null, error: new Error('Workout details not available offline') };
     },
 
     async createWorkout(userId: string, routineDayId: string): Promise<ServiceResponse<RoutineDay>> {
@@ -169,23 +210,63 @@ export const WorkoutService = {
         if (isE2EMockEnabled()) {
             return { data: mockStore.completeWorkout() as any, error: null };
         }
-        try {
-            const { data, error } = await supabase
-                .from('rutinas_diarias')
-                .update({
-                    completada: true,
-                    hora_fin: new Date().toISOString(),
-                })
-                .eq('id', workoutId)
-                .select()
-                .single();
 
-            if (error) throw error;
-            return { data, error: null };
-        } catch (error) {
-            console.error('Error completing workout:', error);
-            return { data: null, error };
+        const offline = await checkIsOffline();
+        if (!offline) {
+            try {
+                const { data, error } = await supabase
+                    .from('rutinas_diarias')
+                    .update({
+                        completada: true,
+                        hora_fin: new Date().toISOString(),
+                    })
+                    .eq('id', workoutId)
+                    .select()
+                    .single();
+
+                if (error) {
+                    if (isNetworkError(error)) throw error;
+                    return { data: null, error };
+                }
+
+                // Update local cache
+                if (data) {
+                    const cachedRes = await OfflineStorageService.getCachedWorkouts();
+                    const workouts = cachedRes.data || [];
+                    const updatedList = workouts.map((w) => (w.id === workoutId ? { ...w, completada: true, hora_fin: data.hora_fin } : w));
+                    await OfflineStorageService.saveWorkouts(updatedList);
+                }
+
+                return { data, error: null };
+            } catch (error) {
+                console.warn('Supabase completeWorkout network failure, falling back to offline enqueue:', error);
+            }
         }
+
+        // Offline Fallback: Enqueue mutation & update local cache
+        await SyncService.enqueueOperation('WORKOUT_COMPLETE', { workoutId, durationMinutes, timestamp: Date.now() });
+
+        const cachedRes = await OfflineStorageService.getCachedWorkouts();
+        const workouts = cachedRes.data || [];
+        const nowIso = new Date().toISOString();
+
+        let updatedWorkout: RoutineDay | null = null;
+        const updatedList = workouts.map((w) => {
+            if (w.id === workoutId) {
+                updatedWorkout = { ...w, completada: true, hora_fin: nowIso };
+                return updatedWorkout;
+            }
+            return w;
+        });
+
+        if (updatedList.length > 0) {
+            await OfflineStorageService.saveWorkouts(updatedList);
+        }
+
+        return {
+            data: updatedWorkout || ({ id: workoutId, completada: true, hora_fin: nowIso } as any),
+            error: null,
+        };
     },
 
     // Get all series for a specific exercise within a specific workout
@@ -290,31 +371,86 @@ export const WorkoutService = {
         setId: string,
         updates: { weight?: number; reps?: number; rpe?: number; descanso_segundos?: number }
     ): Promise<ServiceResponse<Serie>> {
-        try {
-            const dbUpdates: SetUpdatePayload = {};
-            if (updates.weight !== undefined) dbUpdates.peso_utilizado = updates.weight;
-            if (updates.reps !== undefined) dbUpdates.repeticiones = updates.reps;
-            if (updates.rpe !== undefined) dbUpdates.rpe = updates.rpe;
-            if (updates.descanso_segundos !== undefined) dbUpdates.descanso_segundos = updates.descanso_segundos;
+        const dbUpdates: SetUpdatePayload = {};
+        if (updates.weight !== undefined) dbUpdates.peso_utilizado = updates.weight;
+        if (updates.reps !== undefined) dbUpdates.repeticiones = updates.reps;
+        if (updates.rpe !== undefined) dbUpdates.rpe = updates.rpe;
+        if (updates.descanso_segundos !== undefined) dbUpdates.descanso_segundos = updates.descanso_segundos;
 
-            const { data, error } = await supabase
-                .from('series')
-                .update(dbUpdates)
-                .eq('id', setId)
-                .select()
-                .single();
-
-            if (isE2EMockEnabled()) {
-                const mockUpdated = mockStore.updateSet(setId, dbUpdates);
-                return { data: (mockUpdated || data) as any, error: null };
-            }
-
-            if (error) throw error;
-            return { data, error: null };
-        } catch (error) {
-            console.error('Error updating set:', error);
-            return { data: null, error };
+        if (isE2EMockEnabled()) {
+            const mockUpdated = mockStore.updateSet(setId, dbUpdates);
+            return { data: mockUpdated as any, error: null };
         }
+
+        const offline = await checkIsOffline();
+        if (!offline) {
+            try {
+                const { data, error } = await supabase
+                    .from('series')
+                    .update(dbUpdates)
+                    .eq('id', setId)
+                    .select()
+                    .single();
+
+                if (error) {
+                    if (isNetworkError(error)) throw error;
+                    return { data: null, error };
+                }
+
+                // Update local cache
+                if (data) {
+                    const cachedRes = await OfflineStorageService.getCachedWorkouts();
+                    const workouts = cachedRes.data || [];
+                    const updatedList = workouts.map((w) => {
+                        if (w.ejercicios_programados) {
+                            w.ejercicios_programados.forEach((ex) => {
+                                if (ex.series) {
+                                    ex.series = ex.series.map((s) => (s.id === setId ? { ...s, ...data } : s));
+                                }
+                            });
+                        }
+                        return w;
+                    });
+                    await OfflineStorageService.saveWorkouts(updatedList);
+                }
+
+                return { data, error: null };
+            } catch (error) {
+                console.warn('Supabase updateSet network failure, falling back to offline enqueue:', error);
+            }
+        }
+
+        // Offline Fallback: Enqueue mutation & update local cache
+        await SyncService.enqueueOperation('SET_UPSERT', { setId, dbUpdates, timestamp: Date.now() });
+
+        const mockSet: Serie = {
+            id: setId,
+            ejercicio_programado_id: 'offline-ex-id',
+            numero_serie: 1,
+            peso_utilizado: dbUpdates.peso_utilizado || 0,
+            repeticiones: dbUpdates.repeticiones || 0,
+            rpe: dbUpdates.rpe,
+            descanso_segundos: dbUpdates.descanso_segundos,
+        };
+
+        const cachedRes = await OfflineStorageService.getCachedWorkouts();
+        const workouts = cachedRes.data || [];
+        const updatedList = workouts.map((w) => {
+            if (w.ejercicios_programados) {
+                w.ejercicios_programados.forEach((ex) => {
+                    if (ex.series) {
+                        ex.series = ex.series.map((s) => (s.id === setId ? { ...s, ...dbUpdates } : s));
+                    }
+                });
+            }
+            return w;
+        });
+
+        if (updatedList.length > 0) {
+            await OfflineStorageService.saveWorkouts(updatedList);
+        }
+
+        return { data: mockSet, error: null };
     },
 
     async deleteSet(setId: string): Promise<{ error: unknown }> {
