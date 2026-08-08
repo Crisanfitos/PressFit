@@ -548,4 +548,56 @@ describe('RoutineService Coverage Suite', () => {
             expect(res.error).not.toBeNull();
         });
     });
+
+    describe('importPresetRoutine', () => {
+        it('should return error when preset routine not found', async () => {
+            const res = await RoutineService.importPresetRoutine('u-1', 'non-existent-preset');
+            expect(res.data).toBeNull();
+            expect(res.error).toBeDefined();
+        });
+
+        it('should import preset routine and activate it successfully', async () => {
+            // Mock catalog exercises to match preset exercise titles
+            const catalogList = [
+                { id: 'ex-1', titulo: 'Press de Banca con Barra', nombre: 'Press de Banca con Barra' },
+                { id: 'ex-2', titulo: 'Press Militar con Barra', nombre: 'Press Militar con Barra' },
+                { id: 'ex-3', titulo: 'Extensiones de Tríceps en Polea', nombre: 'Extensiones de Tríceps en Polea' },
+                { id: 'ex-4', titulo: 'Dominadas', nombre: 'Dominadas' },
+                { id: 'ex-5', titulo: 'Remo con Barra pronado', nombre: 'Remo con Barra pronado' },
+                { id: 'ex-6', titulo: 'Curl de Bíceps con Barra Z', nombre: 'Curl de Bíceps con Barra Z' },
+                { id: 'ex-7', titulo: 'Sentadilla Trasera con Barra', nombre: 'Sentadilla Trasera con Barra' },
+                { id: 'ex-8', titulo: 'Peso Muerto Rumano con Barra', nombre: 'Peso Muerto Rumano con Barra' },
+                { id: 'ex-9', titulo: 'Elevación de Gemelos de Pie', nombre: 'Elevación de Gemelos de Pie' },
+            ];
+
+            mockChain.then.mockImplementation((resolve: any) =>
+                Promise.resolve({ data: catalogList, error: null }).then(resolve)
+            );
+            mockChain.single.mockImplementation(() =>
+                Promise.resolve({ data: { id: 'inserted-uuid-101', activa: false }, error: null })
+            );
+
+            const res = await RoutineService.importPresetRoutine('u-1', 'preset-ppl-3d', true);
+            expect(res.error).toBeNull();
+            expect(res.data).not.toBeNull();
+            expect(res.data?.id).toBe('inserted-uuid-101');
+            expect(res.data?.activa).toBe(true);
+        });
+
+        it('should fallback and create missing exercise in catalog if not matched by name', async () => {
+            mockChain.then.mockImplementation((resolve: any) =>
+                Promise.resolve({ data: [], error: null }).then(resolve)
+            );
+            mockChain.single.mockImplementation(() =>
+                Promise.resolve({ data: { id: 'fallback-ex-uuid' }, error: null })
+            );
+
+            const res = await RoutineService.importPresetRoutine('u-2', 'preset-ppl-3d', false);
+            expect(res.error).toBeNull();
+            expect(res.data).not.toBeNull();
+            expect(res.data?.id).toBe('fallback-ex-uuid');
+        });
+    });
+
 });
+

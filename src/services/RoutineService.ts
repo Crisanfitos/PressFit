@@ -13,6 +13,8 @@ import {
     PostgrestError,
     SeriesInsert,
 } from '../types/models';
+import { PresetRoutineService } from './PresetRoutineService';
+
 
 export const RoutineService = {
     async getWeeklyRoutineWithDays(routineId: string): Promise<ServiceResponse<WeeklyRoutine>> {
@@ -409,4 +411,151 @@ export const RoutineService = {
     async updateRoutineDayDescription(dayId: string, descripcion: string): Promise<ServiceResponse<RoutineDay>> {
         return DailyWorkoutService.updateRoutineDayDescription(dayId, descripcion);
     },
+
+    /**
+     * Imports/clones a pre-defined seed routine into the user's active weekly routine in Supabase.
+     * @param userId The ID of the user importing the routine
+     * @param presetRoutineId The ID of the preset routine (e.g. 'preset-ppl-6d')
+     * @param setActive Whether to automatically set this routine as active (defaults to true)
+     */
+    async importPresetRoutine(
+        userId: string,
+        presetRoutineId: string,
+        setActive: boolean = true
+    ): Promise<ServiceResponse<WeeklyRoutine>> {
+        if (isE2EMockEnabled()) {
+            return { data: mockStore.getActiveRoutine() as any, error: null };
+        }
+        try {
+            // 1. Fetch the preset routine template from local assets
+            const { data: preset, error: presetError } = PresetRoutineService.getPresetById(presetRoutineId);
+            if (presetError || !preset) {
+                throw new Error(`Preset routine '${presetRoutineId}' not found`);
+            }
+
+            // 2. Fetch all exercises from catalog to map exercise names to UUIDs
+            const { data: catalogExercises, error: catalogError } = await supabase
+                .from('ejercicios')
+                .select('id, titulo, nombre');
+
+            if (catalogError) throw catalogError;
+
+            // Helper to find or create an exercise ID by name
+            const getExerciseIdByName = async (name: string, muscleGroup: string): Promise<string> => {
+                const normalized = name.trim().toLowerCase();
+                const matched = (catalogExercises || []).find(
+                    (ex) =>
+                        (ex.titulo && ex.titulo.trim().toLowerCase() === normalized) ||
+                        (ex.nombre && ex.nombre.trim().toLowerCase() === normalized)
+                );
+
+                if (matched) return matched.id;
+
+                // Fallback: create a missing exercise entry in catalog
+                const { data: newEx, error: newExError } = await supabase
+                    .from('ejercicios')
+                    .insert({
+                        titulo: name,
+                        nombre: name,
+                        grupo_muscular: muscleGroup,
+                        musculos_primarios: muscleGroup,
+                        equipamiento: 'Otro',
+                        dificultad: 'Intermedio',
+                        es_personalizado: false,
+                    })
+                    .select('id')
+                    .single();
+
+                if (newExError || !newEx) throw newExError || new Error(`Failed to create exercise ${name}`);
+                return newEx.id;
+            };
+
+            // 3. Create the new weekly routine
+            const { data: newRoutine, error: routineError } = await supabase
+                .from('rutinas_semanales')
+                .insert({
+                    usuario_id: userId,
+                    nombre: preset.nombre,
+                    objetivo: preset.categoria,
+                    es_plantilla: true,
+                    activa: false, // will activate via setActiveRoutine if setActive === true
+                    copiada_de_id: preset.id,
+                    fecha_inicio_semana: formatLocalDateKey(getStartOfWeekUtil(new Date())),
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                })
+                .select()
+                .single();
+
+            if (routineError || !newRoutine) throw routineError || new Error('Failed to create weekly routine');
+
+            // 4. Create daily routines and scheduled exercises
+            if (preset.rutinas_diarias && preset.rutinas_diarias.length > 0) {
+                for (const day of preset.rutinas_diarias) {
+                    const { data: newDay, error: dayError } = await supabase
+                        .from('rutinas_diarias')
+                        .insert({
+                            rutina_semanal_id: newRoutine.id,
+                            nombre_dia: day.nombre_dia,
+                            descripcion: day.descripcion || null,
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString(),
+                        })
+                        .select()
+                        .single();
+
+                    if (dayError || !newDay) continue;
+
+                    if (day.ejercicios && day.ejercicios.length > 0) {
+                        for (const ex of day.ejercicios) {
+                            const exerciseId = await getExerciseIdByName(
+                                ex.nombre_ejercicio,
+                                ex.grupo_muscular_principal
+                            );
+
+                            const { data: newScheduledEx, error: schError } = await supabase
+                                .from('ejercicios_programados')
+                                .insert({
+                                    rutina_diaria_id: newDay.id,
+                                    ejercicio_id: exerciseId,
+                                    orden_ejecucion: ex.orden_ejecucion,
+                                    tipo_peso: ex.tipo_peso || 'total',
+                                    created_at: new Date().toISOString(),
+                                    updated_at: new Date().toISOString(),
+                                })
+                                .select()
+                                .single();
+
+                            if (schError || !newScheduledEx) continue;
+
+                            if (ex.series && ex.series.length > 0) {
+                                const seriesInserts = ex.series.map((s) => ({
+                                    ejercicio_programado_id: newScheduledEx.id,
+                                    numero_serie: s.numero_serie,
+                                    repeticiones: s.repeticiones_objetivo,
+                                    peso_utilizado: s.peso_sugerido || null,
+                                    rpe: s.rpe_objetivo || null,
+                                    created_at: new Date().toISOString(),
+                                }));
+
+                                await supabase.from('series').insert(seriesInserts);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 5. Activate routine if requested
+            if (setActive) {
+                await this.setActiveRoutine(userId, newRoutine.id);
+                newRoutine.activa = true;
+            }
+
+            return { data: newRoutine, error: null };
+        } catch (error) {
+            console.error('Error importing preset routine:', error);
+            return { data: null, error };
+        }
+    },
 };
+
