@@ -58,11 +58,17 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
 
     const drawerMenuItems: MenuItem[] = useMemo(() => [
         {
+            icon: 'stars',
+            label: 'Plantillas Prémium',
+            onPress: () => navigation.navigate('PresetRoutines'),
+        },
+        {
             icon: 'library-books',
             label: 'Catálogo de Ejercicios',
             onPress: () => navigation.navigate('ExerciseCatalog'),
         },
     ], [navigation]);
+
 
     // Get current month info
     const year = currentDate.getFullYear();
