@@ -436,7 +436,7 @@ export const RoutineService = {
             // 2. Fetch all exercises from catalog to map exercise names to UUIDs
             const { data: catalogExercises, error: catalogError } = await supabase
                 .from('ejercicios')
-                .select('id, titulo, nombre');
+                .select('id, titulo');
 
             if (catalogError) throw catalogError;
 
@@ -444,9 +444,7 @@ export const RoutineService = {
             const getExerciseIdByName = async (name: string, muscleGroup: string): Promise<string> => {
                 const normalized = name.trim().toLowerCase();
                 const matched = (catalogExercises || []).find(
-                    (ex) =>
-                        (ex.titulo && ex.titulo.trim().toLowerCase() === normalized) ||
-                        (ex.nombre && ex.nombre.trim().toLowerCase() === normalized)
+                    (ex) => ex.titulo && ex.titulo.trim().toLowerCase() === normalized
                 );
 
                 if (matched) return matched.id;
@@ -456,7 +454,6 @@ export const RoutineService = {
                     .from('ejercicios')
                     .insert({
                         titulo: name,
-                        nombre: name,
                         grupo_muscular: muscleGroup,
                         musculos_primarios: muscleGroup,
                         equipamiento: 'Otro',
@@ -465,6 +462,7 @@ export const RoutineService = {
                     })
                     .select('id')
                     .single();
+
 
                 if (newExError || !newEx) throw newExError || new Error(`Failed to create exercise ${name}`);
                 return newEx.id;

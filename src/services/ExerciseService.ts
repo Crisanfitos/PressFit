@@ -74,9 +74,9 @@ export const ExerciseService = {
                 .from('ejercicios')
                 .insert({
                     titulo: exerciseData.titulo,
-                    nombre: exerciseData.titulo,
                     descripcion: exerciseData.descripcion || '',
                     grupo_muscular: exerciseData.grupo_muscular,
+
                     musculos_primarios: exerciseData.musculos_primarios || exerciseData.grupo_muscular,
                     musculos_secundarios: exerciseData.musculos_secundarios || [],
                     equipamiento: exerciseData.equipamiento || 'Ninguno',
