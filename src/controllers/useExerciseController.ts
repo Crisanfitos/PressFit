@@ -165,6 +165,21 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
         }
     };
 
+    const createCustomExercise = useCallback(async (input: any) => {
+        setSaving(true);
+        try {
+            const { data, error } = await ExerciseService.createCustomExercise(input);
+            if (error) throw error;
+            await fetchExercises();
+            return { data, error: null };
+        } catch (error) {
+            console.error('Error creating custom exercise:', error);
+            return { data: null, error };
+        } finally {
+            setSaving(false);
+        }
+    }, [fetchExercises]);
+
     return {
         exercises: filteredExercises,
         loading,
@@ -181,5 +196,7 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
         toggleSelection,
         saveSelection,
         clearSelection: () => setSelectedExercises([]),
+        createCustomExercise,
+        refetchExercises: fetchExercises,
     };
 };

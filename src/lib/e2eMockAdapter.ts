@@ -36,6 +36,7 @@ export const e2eFixtures = {
 class E2EMockStore {
     private activeRoutine = JSON.parse(JSON.stringify(weeklyRoutineFixture));
     private currentWorkout: any = null;
+    private catalogExercises: any[] = JSON.parse(JSON.stringify(exerciseCatalogFixture));
 
     /**
      * Resetea el almacén al estado inicial limpio antes de cada prueba E2E.
@@ -43,6 +44,30 @@ class E2EMockStore {
     resetStore() {
         this.activeRoutine = JSON.parse(JSON.stringify(weeklyRoutineFixture));
         this.currentWorkout = null;
+        this.catalogExercises = JSON.parse(JSON.stringify(exerciseCatalogFixture));
+    }
+
+    getCatalogExercises() {
+        return this.catalogExercises;
+    }
+
+    addCustomExercise(input: any) {
+        const newEx = {
+            id: `custom-ex-${Date.now()}`,
+            nombre: input.titulo,
+            titulo: input.titulo,
+            descripcion: input.descripcion || '',
+            grupo_muscular: input.grupo_muscular || 'General',
+            musculos_primarios: input.musculos_primarios || input.grupo_muscular || 'General',
+            musculos_secundarios: input.musculos_secundarios || [],
+            equipamiento: input.equipamiento || 'Ninguno',
+            dificultad: input.dificultad || 'Intermedio',
+            instrucciones: input.instrucciones || [],
+            url_video: input.url_video || '',
+            es_personalizado: true,
+        };
+        this.catalogExercises.unshift(newEx);
+        return newEx;
     }
 
     getActiveRoutine() {

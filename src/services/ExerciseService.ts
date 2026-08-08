@@ -1,6 +1,18 @@
 import { supabase } from '../lib/supabase';
 import { isE2EMockEnabled, mockStore, e2eFixtures } from '../lib/e2eMockAdapter';
 
+export interface CustomExerciseInput {
+    titulo: string;
+    descripcion?: string;
+    grupo_muscular: string;
+    musculos_primarios?: string;
+    musculos_secundarios?: string[];
+    equipamiento?: string;
+    dificultad?: string;
+    instrucciones?: string[];
+    url_video?: string;
+}
+
 interface Exercise {
     id: string;
     titulo: string;
@@ -20,7 +32,7 @@ export const ExerciseService = {
     async getExercises(): Promise<ServiceResponse<Exercise[]>> {
         if (isE2EMockEnabled()) {
             return {
-                data: e2eFixtures.exerciseCatalog.map((ex: any) => ({
+                data: mockStore.getCatalogExercises().map((ex: any) => ({
                     ...ex,
                     titulo: ex.nombre || ex.titulo,
                     grupo_muscular: ex.grupo_muscular || 'General',
@@ -39,6 +51,48 @@ export const ExerciseService = {
             return { data, error: null };
         } catch (error) {
             console.error('Error fetching exercises:', error);
+            return { data: null, error };
+        }
+    },
+
+    async createCustomExercise(exerciseData: CustomExerciseInput): Promise<ServiceResponse<Exercise>> {
+        if (isE2EMockEnabled()) {
+            const newEx = mockStore.addCustomExercise(exerciseData);
+            return {
+                data: {
+                    ...newEx,
+                    titulo: newEx.nombre || newEx.titulo,
+                    grupo_muscular: newEx.grupo_muscular || 'General',
+                    musculos_primarios: newEx.musculos_primarios || newEx.grupo_muscular || 'General',
+                },
+                error: null,
+            };
+        }
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            const { data, error } = await supabase
+                .from('ejercicios')
+                .insert({
+                    titulo: exerciseData.titulo,
+                    nombre: exerciseData.titulo,
+                    descripcion: exerciseData.descripcion || '',
+                    grupo_muscular: exerciseData.grupo_muscular,
+                    musculos_primarios: exerciseData.musculos_primarios || exerciseData.grupo_muscular,
+                    musculos_secundarios: exerciseData.musculos_secundarios || [],
+                    equipamiento: exerciseData.equipamiento || 'Ninguno',
+                    dificultad: exerciseData.dificultad || 'Intermedio',
+                    instrucciones: exerciseData.instrucciones || [],
+                    url_video: exerciseData.url_video || '',
+                    es_personalizado: true,
+                    creado_por_usuario_id: user?.id || null,
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+            return { data, error: null };
+        } catch (error) {
+            console.error('Error creating custom exercise:', error);
             return { data: null, error };
         }
     },

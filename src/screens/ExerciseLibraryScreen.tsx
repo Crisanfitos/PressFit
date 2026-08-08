@@ -20,6 +20,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { useExerciseController, FilterKey } from '../controllers/useExerciseController';
+import { CreateCustomExerciseModal } from '../components/CreateCustomExerciseModal';
 
 const { width } = Dimensions.get('window');
 
@@ -200,10 +201,12 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
         toggleSelection,
         saveSelection,
         clearSelection,
+        refetchExercises,
     } = useExerciseController(routineDayId, user?.id);
 
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [videoModalVisible, setVideoModalVisible] = useState(false);
+    const [createModalVisible, setCreateModalVisible] = useState(false);
     const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
     const [showFilters, setShowFilters] = useState(true);
 
@@ -353,7 +356,13 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
                         )}
                     </TouchableOpacity>
                 ) : (
-                    <View style={{ width: 24 }} />
+                    <TouchableOpacity
+                        testID="open-create-custom-exercise-button"
+                        onPress={() => setCreateModalVisible(true)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                        <MaterialIcons name="add" size={24} color={colors.primary} />
+                    </TouchableOpacity>
                 )}
             </View>
 
@@ -512,6 +521,12 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
                     </View>
                 </View>
             </Modal>
+
+            <CreateCustomExerciseModal
+                visible={createModalVisible}
+                onClose={() => setCreateModalVisible(false)}
+                onSuccess={() => refetchExercises()}
+            />
         </SafeAreaView>
     );
 };
