@@ -6,6 +6,7 @@ import { ThemeProvider } from './src/context/ThemeContext';
 import { AlertProvider } from './src/context/AlertContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { SentryService } from './src/services/SentryService';
+import OfflineBanner from './src/components/OfflineBanner';
 
 SentryService.init();
 
@@ -17,6 +18,7 @@ export default function App() {
         <ThemeProvider>
           <AuthProvider>
             <AlertProvider>
+              <OfflineBanner />
               <RootNavigator />
             </AlertProvider>
           </AuthProvider>
