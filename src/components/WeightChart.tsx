@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 
 interface WeightEntry {
@@ -13,9 +13,19 @@ interface WeightChartProps {
     colors: any;
 }
 
+interface SelectedPoint {
+    id: string;
+    peso: number;
+    dateStr: string;
+    label: string;
+    index: number;
+}
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
+    const [selectedPoint, setSelectedPoint] = useState<SelectedPoint | null>(null);
+
     const chartDataResult = useMemo(() => {
         if (data.length === 0) return null;
 
@@ -41,6 +51,26 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
         const diffFromStart = currentWeight - firstWeight;
         const diffFromLast = currentWeight - lastWeight;
 
+        const chartPoints = sortedData.map((d, index) => {
+            const date = new Date(d.created_at);
+            const label = `${date.getDate()}/${date.getMonth() + 1}`;
+            const dateStr = date.toLocaleDateString('es-ES', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+            return {
+                id: d.id,
+                value: d.peso,
+                label,
+                dateStr,
+                dataPointText: `${d.peso} kg`,
+                onPress: () => {
+                    setSelectedPoint({ id: d.id, peso: d.peso, dateStr, label, index });
+                }
+            };
+        });
+
         return {
             currentWeight,
             diffFromStart,
@@ -48,20 +78,13 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
             calculatedMax,
             calculatedMin,
             stepValue,
-            chartPoints: sortedData.map((d) => {
-                const date = new Date(d.created_at);
-                return {
-                    value: d.peso,
-                    label: `${date.getDate()}/${date.getMonth() + 1}`,
-                    dataPointText: `${d.peso} kg`
-                };
-            }),
+            chartPoints,
         };
     }, [data]);
 
     if (!chartDataResult || data.length === 0) {
         return (
-            <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]} testID="weight-chart-empty-state">
                 <Text style={[styles.title, { color: colors.text }]}>Evolución de Peso</Text>
                 <View style={styles.emptyState}>
                     <Text style={{ color: colors.textSecondary, fontSize: 14 }}>
@@ -76,7 +99,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
     const chartWidth = SCREEN_WIDTH - 120; // Accounting for paddings and y-axis
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]} testID="weight-chart-container">
             <View style={styles.headerRow}>
                 <Text style={[styles.title, { color: colors.text }]}>Evolución de Peso</Text>
                 <Text style={[styles.currentWeight, { color: colors.primary }]}>
@@ -84,15 +107,44 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
                 </Text>
             </View>
 
+            {/* Interactive Selected Point Tooltip Banner */}
+            {selectedPoint && (
+                <View
+                    style={[
+                        styles.tooltipBanner,
+                        { backgroundColor: `${colors.primary}15`, borderColor: colors.primary }
+                    ]}
+                    testID="weight-chart-selected-tooltip"
+                >
+                    <View style={styles.tooltipContent}>
+                        <Text style={[styles.tooltipDate, { color: colors.textSecondary }]}>
+                            {selectedPoint.dateStr} (Punto {selectedPoint.index + 1} de {data.length})
+                        </Text>
+                        <Text style={[styles.tooltipValue, { color: colors.primary }]}>
+                            {selectedPoint.peso} kg
+                        </Text>
+                    </View>
+                    <TouchableOpacity
+                        onPress={() => setSelectedPoint(null)}
+                        style={styles.tooltipCloseBtn}
+                        testID="weight-chart-tooltip-close"
+                        accessibilityRole="button"
+                        accessibilityLabel="Cerrar detalle"
+                    >
+                        <Text style={[styles.tooltipCloseText, { color: colors.textSecondary }]}>✕</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+
             {/* Line Chart */}
-            <View style={styles.chartWrapper}>
+            <View style={styles.chartWrapper} testID="weight-chart-wrapper">
                 <LineChart
                     data={chartPoints}
                     width={chartWidth}
                     height={200}
                     maxValue={calculatedMax - calculatedMin}
                     yAxisOffset={calculatedMin}
-                    stepValue={Math.ceil((calculatedMax - calculatedMin) / 4) || 1}
+                    stepValue={stepValue}
                     color={colors.primary}
                     thickness={3}
                     dataPointsColor={colors.primary}
@@ -108,6 +160,36 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
                     endSpacing={40}
                     verticalLinesColor={`${colors.textSecondary}30`}
                     rulesColor={`${colors.textSecondary}30`}
+                    activatePointersOnPress
+                    pointerConfig={{
+                        pointerStripColor: colors.primary,
+                        pointerStripWidth: 2,
+                        pointerColor: colors.primary,
+                        radius: 6,
+                        pointerLabelWidth: 100,
+                        pointerLabelHeight: 60,
+                        activatePointersOnPress: true,
+                        pointerEvents: 'none',
+                        pointerLabelComponent: (items: any) => {
+                            const item = items[0];
+                            if (!item) return null;
+                            return (
+                                <View
+                                    style={[
+                                        styles.pointerLabel,
+                                        { backgroundColor: colors.surface, borderColor: colors.border }
+                                    ]}
+                                >
+                                    <Text style={[styles.pointerValue, { color: colors.text }]}>
+                                        {item.value} kg
+                                    </Text>
+                                    <Text style={[styles.pointerDate, { color: colors.textSecondary }]}>
+                                        {item.label}
+                                    </Text>
+                                </View>
+                            );
+                        },
+                    }}
                 />
             </View>
 
@@ -137,7 +219,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 24,
+        marginBottom: 16,
     },
     title: {
         fontSize: 16,
@@ -147,11 +229,57 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '700',
     },
+    tooltipBanner: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 10,
+        borderWidth: 1,
+        marginBottom: 16,
+    },
+    tooltipContent: {
+        flex: 1,
+    },
+    tooltipDate: {
+        fontSize: 11,
+        fontWeight: '500',
+        marginBottom: 2,
+    },
+    tooltipValue: {
+        fontSize: 15,
+        fontWeight: 'bold',
+    },
+    tooltipCloseBtn: {
+        padding: 6,
+        marginLeft: 8,
+    },
+    tooltipCloseText: {
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
     chartWrapper: {
         alignItems: 'center',
         width: '100%',
         marginLeft: -10, // Adjusting for y-axis offset
         marginBottom: 20,
+    },
+    pointerLabel: {
+        height: 50,
+        width: 90,
+        borderRadius: 8,
+        borderWidth: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 4,
+    },
+    pointerValue: {
+        fontSize: 13,
+        fontWeight: 'bold',
+    },
+    pointerDate: {
+        fontSize: 10,
     },
     emptyState: {
         alignItems: 'center',
