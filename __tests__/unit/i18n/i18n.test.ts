@@ -1,7 +1,9 @@
-import i18n from '../../../src/i18n';
+import i18n, { saveLanguagePreference, loadStoredLanguage, LANGUAGE_STORAGE_KEY } from '../../../src/i18n';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-describe('i18n Configuration (PF-168)', () => {
+describe('i18n Configuration & Persistence (PF-168 & PF-170)', () => {
   beforeEach(async () => {
+    await AsyncStorage.clear();
     await i18n.changeLanguage('es');
   });
 
@@ -25,5 +27,19 @@ describe('i18n Configuration (PF-168)', () => {
   it('should fallback to Spanish for missing keys or unsupported language', async () => {
     await i18n.changeLanguage('fr');
     expect(i18n.t('common.save')).toBe('Guardar');
+  });
+
+  it('should save language preference to AsyncStorage and change language', async () => {
+    await saveLanguagePreference('en');
+    expect(i18n.language).toBe('en');
+    const stored = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
+    expect(stored).toBe('en');
+  });
+
+  it('should load stored language from AsyncStorage on startup', async () => {
+    await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, 'en');
+    const lang = await loadStoredLanguage();
+    expect(lang).toBe('en');
+    expect(i18n.language).toBe('en');
   });
 });

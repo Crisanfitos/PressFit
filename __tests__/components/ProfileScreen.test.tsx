@@ -61,7 +61,7 @@ describe('ProfileScreen Component (RNTL)', () => {
     it('opens EditProfileModal when clicking edit icon button', async () => {
         const { getByTestId, findByText } = await renderProfileScreen();
 
-        fireEvent.press(getByTestId('icon-edit'));
+        fireEvent.press(getByTestId('edit-profile-button'));
         expect(await findByText('Editar Datos Físicos')).toBeTruthy();
     });
 
@@ -78,5 +78,16 @@ describe('ProfileScreen Component (RNTL)', () => {
 
         fireEvent.press(getByText('Ver Cambio Físico'));
         expect(mockNavigation.navigate).toHaveBeenCalledWith('PhysicalProgress');
+    });
+
+    it('renders language selector and changes language on button press', async () => {
+        const { getByTestId } = await renderProfileScreen();
+
+        expect(getByTestId('language-status')).toBeTruthy();
+        expect(getByTestId('language-select-es')).toBeTruthy();
+        expect(getByTestId('language-select-en')).toBeTruthy();
+
+        fireEvent.press(getByTestId('language-select-en'));
+        expect(getByTestId('language-status').props.children).toBe('English');
     });
 });

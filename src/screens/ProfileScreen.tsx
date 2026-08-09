@@ -8,6 +8,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useProfileController } from '../controllers/useProfileController';
 import EditProfileModal from '../components/EditProfileModal';
 import LogoutConfirmationModal from '../components/LogoutConfirmationModal';
+import i18n, { saveLanguagePreference } from '../i18n';
 
 type ProfileScreenProps = { navigation: any };
 
@@ -21,6 +22,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [sourceModalVisible, setSourceModalVisible] = useState(false);
+    const [currentLang, setCurrentLang] = useState(i18n.language || 'es');
+
+    const handleLanguageChange = async (lang: 'es' | 'en') => {
+        setCurrentLang(lang);
+        await saveLanguagePreference(lang);
+    };
 
     // Custom Alert State
     const [customAlert, setCustomAlert] = useState<{
@@ -218,7 +225,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Apariencia</Text>
+                        <Text style={styles.sectionTitle}>Apariencia y Configuración</Text>
                         <View style={styles.settingCard}>
                             <View style={styles.settingRow}>
                                 <MaterialIcons name={themeMode === 'dark' ? 'dark-mode' : 'light-mode'} size={24} color={colors.textSecondary} />
@@ -233,6 +240,43 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                     trackColor={{ false: colors.border, true: `${colors.primary}50` }}
                                     thumbColor={themeMode === 'dark' ? colors.primary : colors.textSecondary}
                                 />
+                            </View>
+                            <View style={[styles.settingRow, { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border }]}>
+                                <MaterialIcons name="language" size={24} color={colors.textSecondary} />
+                                <View style={styles.settingTextContainer}>
+                                    <Text style={styles.settingLabel}>Idioma / Language</Text>
+                                    <Text style={styles.settingDescription} testID="language-status">{currentLang === 'es' ? 'Español' : 'English'}</Text>
+                                </View>
+                                <View style={{ flexDirection: 'row', gap: 6 }}>
+                                    <TouchableOpacity
+                                        testID="language-select-es"
+                                        onPress={() => handleLanguageChange('es')}
+                                        style={{
+                                            paddingHorizontal: 12,
+                                            paddingVertical: 6,
+                                            borderRadius: 8,
+                                            backgroundColor: currentLang === 'es' ? colors.primary : colors.background,
+                                            borderWidth: 1,
+                                            borderColor: colors.border,
+                                        }}
+                                    >
+                                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: currentLang === 'es' ? colors.textOnPrimary : colors.text }}>ES</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        testID="language-select-en"
+                                        onPress={() => handleLanguageChange('en')}
+                                        style={{
+                                            paddingHorizontal: 12,
+                                            paddingVertical: 6,
+                                            borderRadius: 8,
+                                            backgroundColor: currentLang === 'en' ? colors.primary : colors.background,
+                                            borderWidth: 1,
+                                            borderColor: colors.border,
+                                        }}
+                                    >
+                                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: currentLang === 'en' ? colors.textOnPrimary : colors.text }}>EN</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
                     </View>
