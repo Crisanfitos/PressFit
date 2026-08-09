@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIn
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useProfileController } from '../controllers/useProfileController';
@@ -13,6 +14,7 @@ import i18n, { saveLanguagePreference } from '../i18n';
 type ProfileScreenProps = { navigation: any };
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
+    const { t } = useTranslation();
     const authContext = useContext(AuthContext);
     const { signOut, user } = authContext || {};
     const { theme, themeMode, toggleTheme } = useTheme();
@@ -135,10 +137,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     };
 
     const physicalData = [
-        { label: 'Peso', value: metrics?.peso ? `${metrics.peso} kg` : '--' },
-        { label: 'Altura', value: metrics?.altura ? `${metrics.altura} cm` : '--' },
-        { label: 'IMC', value: metrics?.imc ? Number(metrics.imc).toFixed(1) : '--' },
-        { label: 'Grasa Corporal', value: metrics?.grasa_corporal ? `${metrics.grasa_corporal}%` : '--', isEstimated: true },
+        { label: t('profile.weight'), value: metrics?.peso ? `${metrics.peso} kg` : '--' },
+        { label: t('profile.height'), value: metrics?.altura ? `${metrics.altura} cm` : '--' },
+        { label: t('profile.bmi'), value: metrics?.imc ? Number(metrics.imc).toFixed(1) : '--' },
+        { label: t('profile.bodyFat'), value: metrics?.grasa_corporal ? `${metrics.grasa_corporal}%` : '--', isEstimated: true },
     ];
 
     const styles = useMemo(() => StyleSheet.create({
@@ -179,7 +181,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container} testID="profile-screen">
             <View style={styles.header}>
-                <Text style={styles.headerText}>Perfil</Text>
+                <Text style={styles.headerText}>{t('navigation.profile')}</Text>
             </View>
 
             {loading ? (
@@ -208,7 +210,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
                     <View style={styles.section}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                            <Text style={styles.sectionTitle}>Datos Físicos</Text>
+                            <Text style={styles.sectionTitle}>{t('profile.physicalData')}</Text>
                             <TouchableOpacity testID="edit-profile-button" onPress={() => setShowEditModal(true)} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
                                 <MaterialIcons name="edit" size={20} color={colors.primary} />
                             </TouchableOpacity>
@@ -218,19 +220,19 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                 <View key={index} style={styles.dataCard}>
                                     <Text style={styles.dataLabel}>{item.label}</Text>
                                     <Text style={styles.dataValue}>{item.value}</Text>
-                                    {item.isEstimated && <Text style={styles.estimatedText}>Estimado ±10%</Text>}
+                                    {item.isEstimated && <Text style={styles.estimatedText}>{t('profile.estimated')}</Text>}
                                 </View>
                             ))}
                         </View>
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Apariencia y Configuración</Text>
+                        <Text style={styles.sectionTitle}>{t('profile.appearanceSettings')}</Text>
                         <View style={styles.settingCard}>
                             <View style={styles.settingRow}>
                                 <MaterialIcons name={themeMode === 'dark' ? 'dark-mode' : 'light-mode'} size={24} color={colors.textSecondary} />
                                 <View style={styles.settingTextContainer}>
-                                    <Text style={styles.settingLabel}>Modo Oscuro</Text>
+                                    <Text style={styles.settingLabel}>{t('profile.darkMode')}</Text>
                                     <Text style={styles.settingDescription} testID="theme-toggle-status">{themeMode === 'dark' ? 'Activado' : 'Desactivado'}</Text>
                                 </View>
                                 <Switch
@@ -244,7 +246,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                             <View style={[styles.settingRow, { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border }]}>
                                 <MaterialIcons name="language" size={24} color={colors.textSecondary} />
                                 <View style={styles.settingTextContainer}>
-                                    <Text style={styles.settingLabel}>Idioma / Language</Text>
+                                    <Text style={styles.settingLabel}>{t('profile.language')}</Text>
                                     <Text style={styles.settingDescription} testID="language-status">{currentLang === 'es' ? 'Español' : 'English'}</Text>
                                 </View>
                                 <View style={{ flexDirection: 'row', gap: 6 }}>
@@ -282,7 +284,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Fotos de Progreso</Text>
+                        <Text style={styles.sectionTitle}>{t('profile.progressPhotos')}</Text>
                         <View style={styles.photosContainer}>
                             {loadingPhotos ? (
                                 <Text style={styles.noPhotosText}>Cargando fotos...</Text>
@@ -298,7 +300,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         </View>
                         <TouchableOpacity style={styles.viewProgressButton} onPress={() => navigation.navigate('PhysicalProgress')} testID="view-physical-progress-button">
                             <MaterialIcons name="photo-library" size={24} color={colors.primary} />
-                            <Text style={styles.viewProgressButtonText}>Ver Cambio Físico</Text>
+                            <Text style={styles.viewProgressButtonText}>{t('profile.viewPhysicalProgress')}</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -309,7 +311,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                             testID="logout-button"
                         >
                             <MaterialIcons name="logout" size={24} color="#ef4444" />
-                            <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
+                            <Text style={styles.logoutButtonText}>{t('auth.logout')}</Text>
                         </TouchableOpacity>
                     </View>
                 </ScrollView>

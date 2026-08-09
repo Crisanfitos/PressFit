@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 
 interface LogoutConfirmationModalProps {
@@ -10,6 +11,7 @@ interface LogoutConfirmationModalProps {
 }
 
 const LogoutConfirmationModal: React.FC<LogoutConfirmationModalProps> = ({ visible, onClose, onConfirm }) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
 
@@ -92,8 +94,8 @@ const LogoutConfirmationModal: React.FC<LogoutConfirmationModalProps> = ({ visib
                         <MaterialIcons name="logout" size={24} color="#ef4444" />
                     </View>
 
-                    <Text style={styles.modalTitle}>Cerrar Sesión</Text>
-                    <Text style={styles.modalText}>¿Estás seguro de que deseas cerrar sesión en tu cuenta?</Text>
+                    <Text style={styles.modalTitle}>{t('auth.logout')}</Text>
+                    <Text style={styles.modalText}>{t('auth.logoutConfirmation')}</Text>
 
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity style={styles.cancelButton} onPress={onClose} testID="logout-cancel-button">

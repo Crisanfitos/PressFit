@@ -18,6 +18,7 @@
     "login": "Iniciar Sesión",
     "signUp": "Crear Cuenta",
     "logout": "Cerrar Sesión",
+    "logoutConfirmation": "¿Estás seguro de que deseas cerrar sesión en tu cuenta?",
     "email": "Correo Electrónico",
     "password": "Contraseña"
   },
@@ -36,5 +37,19 @@
     "reps": "Repeticiones",
     "weight": "Peso",
     "restTimer": "Temporizador de Descanso"
+  },
+  "profile": {
+    "title": "Perfil",
+    "physicalData": "Datos Físicos",
+    "appearanceSettings": "Apariencia y Configuración",
+    "darkMode": "Modo Oscuro",
+    "language": "Idioma",
+    "progressPhotos": "Fotos de Progreso",
+    "viewPhysicalProgress": "Ver Cambio Físico",
+    "weight": "Peso",
+    "height": "Altura",
+    "bmi": "IMC",
+    "bodyFat": "Grasa Corporal",
+    "estimated": "Estimado ±10%"
   }
 }
