@@ -1,0 +1,175 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_041_create_custom_exercise.yaml — US-041: Creación de ejercicio personalizado desde el catálogo
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Abrir menú hamburguesa y navegar al Catálogo de Ejercicios
+- tapOn:
+    id: "hamburger-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "side-drawer"
+    timeout: 5000
+
+- tapOn:
+    id: "drawer-item-1"
+
+- extendedWaitUntil:
+    visible:
+      id: "exercise-catalog-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "exercise-catalog-screen"
+
+# 2. Abrir Modal de Creación de Ejercicio Personalizado
+- tapOn:
+    id: "open-create-custom-exercise-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "create-custom-exercise-modal"
+    timeout: 5000
+
+- assertVisible:
+    id: "create-custom-exercise-modal"
+
+# 3. Completar el formulario de ejercicio personalizado
+- tapOn:
+    id: "custom-exercise-name-input"
+
+- inputText: "Sentadilla Búlgara E2E"
+
+- tapOn:
+    id: "custom-exercise-muscle-chip-piernas"
+
+- tapOn:
+    id: "custom-exercise-equipment-chip-mancuernas"
+
+- tapOn:
+    id: "custom-exercise-difficulty-chip-intermedio"
+
+- tapOn:
+    id: "custom-exercise-description-input"
+
+- inputText: "Ejercicio unilateral de pierna para fuerza y estabilidad."
+
+- hideKeyboard
+
+# 4. Guardar ejercicio personalizado
+- tapOn:
+    id: "custom-exercise-submit-button"
+
+- extendedWaitUntil:
+    notVisible:
+      id: "create-custom-exercise-modal"
+    timeout: 10000
+
+# 5. Buscar el nuevo ejercicio personalizado en el catálogo
+- tapOn:
+    id: "exercise-catalog-search-input"
+
+- inputText: "Búlgara"
+
+- hideKeyboard
+
+- extendedWaitUntil:
+    visible:
+      text: ".*Búlgara.*"
+    timeout: 5000
+
+- assertVisible:
+    text: ".*Búlgara.*"
+
+# 6. Salir y cerrar sesión
+- tapOn:
+    id: "exercise-catalog-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element:
+      text: "Perfil"
+    direction: DOWN
+    optional: true
+
+- tapOn:
+    text: "Perfil"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"
