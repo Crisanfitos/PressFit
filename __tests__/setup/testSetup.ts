@@ -10,19 +10,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
     require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
-// Mock NetInfo globally for React Native network connectivity tests
-jest.mock('@react-native-community/netinfo', () =>
-    require('@react-native-community/netinfo/jest/netinfo-mock')
-);
 
-// Mock expo-network globally for Expo network connectivity tests
-jest.mock('expo-network', () => ({
-    getNetworkStateAsync: jest.fn().mockResolvedValue({
-        isConnected: true,
-        isInternetReachable: true,
-        type: 'WIFI',
-    }),
-}));
 
 // Mock @expo/vector-icons
 jest.mock('@expo/vector-icons', () => {

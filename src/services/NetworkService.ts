@@ -1,5 +1,3 @@
-import * as Network from 'expo-network';
-
 export interface NetworkState {
   isConnected: boolean | null;
   isInternetReachable: boolean | null;
@@ -16,19 +14,27 @@ let lastKnownState: NetworkState = {
   type: 'WIFI',
 };
 
-async function fetchNetworkState(): Promise<NetworkState> {
+async function checkInternetPing(): Promise<boolean> {
   try {
-    const state = await Network.getNetworkStateAsync();
-    const isConnected = state.isConnected ?? true;
-    const isInternetReachable = state.isInternetReachable ?? true;
-    return {
-      isConnected,
-      isInternetReachable,
-      isOffline: isConnected === false || isInternetReachable === false,
-      type: state.type ? String(state.type) : 'UNKNOWN',
-    };
-  } catch (error) {
-    const online = typeof navigator !== 'undefined' && 'onLine' in navigator ? navigator.onLine : true;
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), 2500) : null;
+
+    const response = await fetch('https://clients3.google.com/generate_204', {
+      method: 'HEAD',
+      cache: 'no-store',
+      ...(controller ? { signal: controller.signal } : {}),
+    });
+
+    if (timer) clearTimeout(timer);
+    return response.status === 204 || response.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function fetchNetworkState(): Promise<NetworkState> {
+  if (typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean') {
+    const online = navigator.onLine;
     return {
       isConnected: online,
       isInternetReachable: online,
@@ -36,6 +42,14 @@ async function fetchNetworkState(): Promise<NetworkState> {
       type: online ? 'WIFI' : 'NONE',
     };
   }
+
+  const isOnline = await checkInternetPing();
+  return {
+    isConnected: isOnline,
+    isInternetReachable: isOnline,
+    isOffline: !isOnline,
+    type: isOnline ? 'WIFI' : 'NONE',
+  };
 }
 
 function startPollingIfNeeded() {
@@ -50,7 +64,7 @@ function startPollingIfNeeded() {
       lastKnownState = newState;
       networkListeners.forEach((listener) => listener(newState));
     }
-  }, 3000);
+  }, 5000);
 }
 
 function stopPollingIfUnused() {
