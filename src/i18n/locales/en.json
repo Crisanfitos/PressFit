@@ -1,0 +1,40 @@
+{
+  "common": {
+    "appName": "PressFit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "search": "Search...",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm"
+  },
+  "auth": {
+    "welcome": "Welcome to PressFit!",
+    "login": "Log In",
+    "signUp": "Sign Up",
+    "logout": "Log Out",
+    "email": "Email Address",
+    "password": "Password"
+  },
+  "navigation": {
+    "calendar": "Calendar",
+    "routines": "Routines",
+    "progress": "Progress",
+    "profile": "Profile",
+    "catalog": "Exercise Catalog"
+  },
+  "workout": {
+    "startWorkout": "Start Workout",
+    "finishWorkout": "Finish Workout",
+    "exercise": "Exercise",
+    "sets": "Sets",
+    "reps": "Reps",
+    "weight": "Weight",
+    "restTimer": "Rest Timer"
+  }
+}
