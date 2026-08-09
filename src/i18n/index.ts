@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import * as Localization from 'expo-localization';
+import { NativeModules, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import es from './locales/es.json';
@@ -13,11 +13,26 @@ const resources = {
   en: { translation: en },
 };
 
+/**
+ * Pure JS detection of device language without native binary modules (Expo Go compatible)
+ */
 export function getDeviceLanguage(): string {
   try {
-    const locales = Localization.getLocales();
-    if (locales && locales.length > 0 && locales[0].languageCode) {
-      const code = locales[0].languageCode.toLowerCase();
+    let locale: string | undefined;
+
+    if (Platform.OS === 'ios') {
+      const settings = NativeModules.SettingsManager?.settings;
+      locale = settings?.AppleLocale || settings?.AppleLanguages?.[0];
+    } else {
+      locale = NativeModules.I18nManager?.localeIdentifier;
+    }
+
+    if (!locale && typeof Intl !== 'undefined' && Intl.DateTimeFormat) {
+      locale = Intl.DateTimeFormat().resolvedOptions().locale;
+    }
+
+    if (locale && typeof locale === 'string') {
+      const code = locale.toLowerCase().split('-')[0].split('_')[0];
       if (code === 'en') return 'en';
     }
   } catch {

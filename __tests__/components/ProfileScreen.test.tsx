@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
 import ProfileScreen from '../../src/screens/ProfileScreen';
 import { AuthContext } from '../../src/context/AuthContext';
 import { useProfileController } from '../../src/controllers/useProfileController';
@@ -87,7 +87,12 @@ describe('ProfileScreen Component (RNTL)', () => {
         expect(getByTestId('language-select-es')).toBeTruthy();
         expect(getByTestId('language-select-en')).toBeTruthy();
 
-        fireEvent.press(getByTestId('language-select-en'));
-        expect(getByTestId('language-status').props.children).toBe('English');
+        await act(async () => {
+            fireEvent.press(getByTestId('language-select-en'));
+        });
+
+        await waitFor(() => {
+            expect(getByTestId('language-status').props.children).toBe('English');
+        });
     });
 });
