@@ -1,20 +1,25 @@
 import React from 'react';
 import TestRenderer, { act } from 'react-test-renderer';
-import NetInfo from '@react-native-community/netinfo';
 import { useNetworkStatus } from '../../../src/hooks/useNetworkStatus';
+import { NetworkService } from '../../../src/services/NetworkService';
+
+jest.mock('../../../src/services/NetworkService');
+
+const mockNetworkService = NetworkService as jest.Mocked<typeof NetworkService>;
 
 describe('useNetworkStatus Hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (NetInfo.fetch as jest.Mock).mockResolvedValue({
-      type: 'wifi',
+    mockNetworkService.getNetworkState.mockResolvedValue({
+      type: 'WIFI',
       isConnected: true,
       isInternetReachable: true,
+      isOffline: false,
     });
-    (NetInfo.addEventListener as jest.Mock).mockReturnValue(jest.fn());
+    mockNetworkService.addNetworkListener.mockReturnValue(jest.fn());
   });
 
-  it('should initialize with online network status and subscribe to NetInfo events', async () => {
+  it('should initialize with online network status and subscribe to NetworkService events', async () => {
     let latestStatus: any = null;
 
     await act(async () => {
@@ -26,15 +31,15 @@ describe('useNetworkStatus Hook', () => {
       );
     });
 
-    expect(NetInfo.fetch).toHaveBeenCalledTimes(1);
-    expect(NetInfo.addEventListener).toHaveBeenCalledTimes(1);
+    expect(mockNetworkService.getNetworkState).toHaveBeenCalledTimes(1);
+    expect(mockNetworkService.addNetworkListener).toHaveBeenCalledTimes(1);
     expect(latestStatus.isConnected).toBe(true);
     expect(latestStatus.isOffline).toBe(false);
   });
 
-  it('should update status when NetInfo emits connectivity changes', async () => {
+  it('should update status when NetworkService emits connectivity changes', async () => {
     let listenerCallback: any = null;
-    (NetInfo.addEventListener as jest.Mock).mockImplementation((cb) => {
+    mockNetworkService.addNetworkListener.mockImplementation((cb) => {
       listenerCallback = cb;
       return jest.fn();
     });
@@ -56,19 +61,20 @@ describe('useNetworkStatus Hook', () => {
       listenerCallback({
         isConnected: false,
         isInternetReachable: false,
-        type: 'none',
+        isOffline: true,
+        type: 'NONE',
       });
     });
 
     expect(latestStatus.isConnected).toBe(false);
     expect(latestStatus.isInternetReachable).toBe(false);
     expect(latestStatus.isOffline).toBe(true);
-    expect(latestStatus.type).toBe('none');
+    expect(latestStatus.type).toBe('NONE');
   });
 
-  it('should unsubscribe from NetInfo listener when component unmounts', async () => {
+  it('should unsubscribe from NetworkService listener when component unmounts', async () => {
     const unsubscribeMock = jest.fn();
-    (NetInfo.addEventListener as jest.Mock).mockReturnValue(unsubscribeMock);
+    mockNetworkService.addNetworkListener.mockReturnValue(unsubscribeMock);
 
     let renderer: any;
     await act(async () => {

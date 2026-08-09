@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
+import { NetworkService, NetworkState } from './NetworkService';
 import { ServiceResponse } from '../types/models';
 
 export type SyncOperationType =
@@ -230,13 +230,13 @@ export const SyncService = {
     },
 
     /**
-     * Listen to NetInfo network status changes and trigger processQueue when internet becomes reachable
+     * Listen to NetworkService status changes and trigger processQueue when internet becomes reachable
      */
     initNetworkListener(
         executorFn?: (op: PendingSyncOperation) => Promise<boolean>
     ): () => void {
-        const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
-            if (state.isConnected && state.isInternetReachable !== false) {
+        const unsubscribe = NetworkService.addNetworkListener((state: NetworkState) => {
+            if (state.isConnected && !state.isOffline) {
                 SyncService.processQueue(executorFn);
             }
         });

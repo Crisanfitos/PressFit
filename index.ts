@@ -1,4 +1,3 @@
-import './src/lib/netInfoPolyfill';
 import { registerRootComponent } from 'expo';
 
 import App from './App';

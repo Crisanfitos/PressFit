@@ -1,4 +1,4 @@
-import NetInfo from '@react-native-community/netinfo';
+import { NetworkService } from './NetworkService';
 import { supabase } from '../lib/supabase';
 import { TipoPeso } from '../types/setTypes';
 import { formatLocalDateKey, parseDateKeyAsLocalDate } from '../utils/dateUtils';
@@ -18,8 +18,7 @@ import {
 
 async function checkIsOffline(): Promise<boolean> {
     try {
-        const state = await NetInfo.fetch();
-        return state.isConnected === false || state.isInternetReachable === false;
+        return await NetworkService.isOffline();
     } catch {
         return false;
     }

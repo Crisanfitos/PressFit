@@ -1,45 +1,22 @@
 import { useState, useEffect } from 'react';
-import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
+import { NetworkService, NetworkState } from '../services/NetworkService';
 
-export interface NetworkStatus {
-  isConnected: boolean | null;
-  isInternetReachable: boolean | null;
-  isOffline: boolean;
-  type: string | null;
-}
+export type NetworkStatus = NetworkState;
 
 /**
- * Custom hook to monitor network connectivity status in real-time using NetInfo.
+ * Custom hook to monitor network connectivity status in real-time using NetworkService (expo-network).
  */
 export const useNetworkStatus = (): NetworkStatus => {
   const [status, setStatus] = useState<NetworkStatus>({
     isConnected: true,
     isInternetReachable: true,
     isOffline: false,
-    type: null,
+    type: 'WIFI',
   });
 
   useEffect(() => {
-    // Fetch initial connection status
-    NetInfo.fetch().then((state: NetInfoState) => {
-      setStatus({
-        isConnected: state.isConnected,
-        isInternetReachable: state.isInternetReachable,
-        isOffline: state.isConnected === false || state.isInternetReachable === false,
-        type: state.type,
-      });
-    });
-
-    // Listen to real-time network connectivity changes
-    const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
-      setStatus({
-        isConnected: state.isConnected,
-        isInternetReachable: state.isInternetReachable,
-        isOffline: state.isConnected === false || state.isInternetReachable === false,
-        type: state.type,
-      });
-    });
-
+    NetworkService.getNetworkState().then(setStatus);
+    const unsubscribe = NetworkService.addNetworkListener(setStatus);
     return () => {
       unsubscribe();
     };

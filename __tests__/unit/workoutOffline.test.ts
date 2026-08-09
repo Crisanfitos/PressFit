@@ -1,7 +1,15 @@
-import NetInfo from '@react-native-community/netinfo';
 import { WorkoutService } from '../../src/services/WorkoutService';
 import { OfflineStorageService } from '../../src/services/OfflineStorageService';
 import { SyncService } from '../../src/services/SyncService';
+import { NetworkService } from '../../src/services/NetworkService';
+
+jest.mock('../../src/services/NetworkService', () => ({
+  NetworkService: {
+    isOffline: jest.fn(),
+    getNetworkState: jest.fn(),
+    addNetworkListener: jest.fn(),
+  },
+}));
 
 describe('WorkoutService Offline Mode (PF-242)', () => {
   const sampleWorkout = {
@@ -33,11 +41,8 @@ describe('WorkoutService Offline Mode (PF-242)', () => {
     await OfflineStorageService.clearAllCache();
     await SyncService.clearQueue();
 
-    // Default NetInfo mock to offline
-    (NetInfo.fetch as jest.Mock).mockResolvedValue({
-      isConnected: false,
-      isInternetReachable: false,
-    });
+    // Default NetworkService mock to offline
+    (NetworkService.isOffline as jest.Mock).mockResolvedValue(true);
   });
 
   describe('getWorkoutDetails offline', () => {
