@@ -66,6 +66,8 @@
     "test:e2e:us044": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_044_monthly_progress_summary.yaml",
     "test:e2e:us045": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_045_daily_progress_breakdown.yaml",
     "test:e2e:us046": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_046_physical_progress_gallery.yaml",
+    "test:e2e:us047": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_047_weight_chart_interaction.yaml",
+    "test:e2e:PF-223": "npm run test:e2e:us047",
     "test:e2e:us048": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_048_profile_screen_data_verification.yaml",
     "test:e2e:us049": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_049_edit_body_metrics_modal.yaml",
     "test:e2e:us050": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_050_personal_note_write_save.yaml",

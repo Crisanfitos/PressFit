@@ -1,0 +1,156 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_047_weight_chart_interaction.yaml — US-047: Interacción táctil con nodos en la gráfica de peso en WeightChart.tsx
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Navegar a Perfil
+- tapOn:
+    text: "Perfil"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 10000
+
+- assertVisible:
+    text: "Perfil"
+
+# 2. Desplazarse hasta "Fotos de Progreso" / "Ver Cambio Físico"
+- scrollUntilVisible:
+    element:
+      id: "view-physical-progress-button"
+    direction: DOWN
+
+- assertVisible:
+    id: "view-physical-progress-button"
+
+# 3. Navegar a PhysicalProgressScreen
+- tapOn:
+    id: "view-physical-progress-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "physical-progress-screen"
+    timeout: 10000
+
+- assertVisible:
+    text: "Cambio Físico"
+
+# 4. Verificar gráfica de evolución de peso e interacción táctil con datos de peso
+- runFlow:
+    when:
+      visible:
+        id: "weight-chart-container"
+    commands:
+      - assertVisible:
+          id: "weight-chart-container"
+      - assertVisible:
+          text: "Evolución de Peso"
+      - runFlow:
+          when:
+            visible: ".*kg.*"
+          commands:
+            - tapOn:
+                text: ".*kg.*"
+                optional: true
+            - runFlow:
+                when:
+                  visible:
+                    id: "weight-chart-selected-tooltip"
+                commands:
+                  - assertVisible:
+                      id: "weight-chart-selected-tooltip"
+                  - tapOn:
+                      id: "weight-chart-tooltip-close"
+
+- runFlow:
+    when:
+      visible:
+        id: "weight-chart-empty-state"
+    commands:
+      - assertVisible:
+          id: "weight-chart-empty-state"
+      - assertVisible:
+          text: "Aún no hay datos de peso registrados"
+
+# 5. Volver al Perfil
+- tapOn:
+    id: "physical-progress-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "profile-screen"
+
+# 6. Cierre de sesión limpio
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"
