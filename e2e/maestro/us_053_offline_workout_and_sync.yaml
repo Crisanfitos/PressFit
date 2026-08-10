@@ -81,7 +81,8 @@ appId: com.crisanfitos.PressFit_Expo
     id: "sync-status-badge"
 
 # 9. Limpieza (Logout final)
-- tapOn: "Perfil"
+- tapOn:
+    text: "Perfil"
     optional: true
 
 - scroll
