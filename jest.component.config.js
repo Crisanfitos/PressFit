@@ -15,7 +15,7 @@ module.exports = {
     setupFiles: ['dotenv/config'],
     setupFilesAfterEnv: ['<rootDir>/__tests__/setup/componentTestSetup.ts'],
     transformIgnorePatterns: [
-        'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|react-native-gifted-charts|gifted-charts-core)'
+        'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|react-native-gifted-charts|gifted-charts-core|react-native-reanimated|react-native-worklets|i18next|react-i18next|react-native-keyboard-aware-scroll-view)'
     ],
     collectCoverageFrom: [
         'src/components/**/*.{ts,tsx}',
