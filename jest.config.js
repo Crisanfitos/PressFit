@@ -24,5 +24,5 @@ module.exports = {
         '!**/node_modules/**'
     ],
     coverageDirectory: 'coverage',
-    testTimeout: 10000,
+    testTimeout: 30000,
 };

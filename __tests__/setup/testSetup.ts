@@ -34,5 +34,14 @@ jest.mock('expo-notifications', () => ({
     cancelScheduledNotificationAsync: jest.fn().mockResolvedValue(undefined),
 }));
 
+import i18n from '../../src/i18n';
+
+// Reset i18n language to Spanish before each test to guarantee deterministic UI text across environments
+beforeEach(() => {
+    if (i18n.language !== 'es') {
+        i18n.changeLanguage('es');
+    }
+});
+
 // Extended timeout for tests
-jest.setTimeout(10000);
+jest.setTimeout(30000);

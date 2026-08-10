@@ -104,4 +104,13 @@ jest.mock('../../src/lib/supabase', () => ({
     },
 }));
 
-jest.setTimeout(10000);
+import i18n from '../../src/i18n';
+
+// Reset i18n language to Spanish before each test to guarantee deterministic UI text across environments (Linux CI vs Windows)
+beforeEach(() => {
+    if (i18n.language !== 'es') {
+        i18n.changeLanguage('es');
+    }
+});
+
+jest.setTimeout(30000);

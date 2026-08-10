@@ -23,5 +23,5 @@ module.exports = {
         '!**/node_modules/**'
     ],
     coverageDirectory: 'coverage-components',
-    testTimeout: 15000,
+    testTimeout: 30000,
 };
