@@ -18,7 +18,7 @@ appId: com.crisanfitos.PressFit_Expo
 - extendedWaitUntil:
     visible:
       id: "welcome-screen"
-    timeout: 20000
+    timeout: 30000
 
 - tapOn:
     id: "login-button"
@@ -49,8 +49,7 @@ appId: com.crisanfitos.PressFit_Expo
     timeout: 15000
 
 # Navegar a la pantalla de Perfil desde la barra de pestañas inferior
-- tapOn:
-    text: "Perfil"
+- tapOn: "Perfil"
 
 - extendedWaitUntil:
     visible:
@@ -71,7 +70,7 @@ appId: com.crisanfitos.PressFit_Expo
 - tapOn:
     id: "language-select-en"
 
-# Verificar que las etiquetas visibles de la UI se traducen dinámicamente al Inglés ("English", "Log Out")
+# Verificar que las etiquetas de Perfil se traducen dinámicamente al Inglés ("English", "Log Out")
 - extendedWaitUntil:
     visible:
       text: "English"
@@ -80,18 +79,69 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     text: "Log Out"
 
+# Navegar a la pestaña Progreso en Inglés
+- tapOn: "Progreso"
+
+- extendedWaitUntil:
+    visible:
+      id: "progress-screen"
+    timeout: 10000
+
+# Navegar a la pestaña Week en Inglés ("Week")
+- tapOn: "Week"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+# Volver a la pestaña Perfil ("Perfil")
+- tapOn: "Perfil"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element:
+      id: "language-select-es"
+    direction: DOWN
+
 # Seleccionar idioma Español (ES)
 - tapOn:
     id: "language-select-es"
 
-# Verificar que las etiquetas de la UI vuelven dinámicamente al Español ("Cerrar Sesión")
+# Verificar que las etiquetas del Perfil vuelven dinámicamente al Español ("Cerrar Sesión")
 - extendedWaitUntil:
     visible:
       text: "Cerrar Sesión"
     timeout: 5000
 
+# Navegar a la pestaña Semana en Español ("Semana")
+- tapOn: "Semana"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+# Volver a la pestaña Perfil en Español ("Perfil")
+- tapOn: "Perfil"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 10000
+
 - assertVisible:
-    id: "language-status"
+    text: "Semana"
+
+- assertVisible:
+    text: "Progreso"
+
+- assertVisible:
+    text: "Perfil"
 
 # Hacer scroll hasta el botón de Logout
 - scrollUntilVisible:

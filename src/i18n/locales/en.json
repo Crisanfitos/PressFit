@@ -23,6 +23,7 @@
     "password": "Password"
   },
   "navigation": {
+    "semana": "Week",
     "calendar": "Calendar",
     "routines": "Routines",
     "progress": "Progress",
