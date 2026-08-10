@@ -9,14 +9,27 @@ on:
       - 'bug/**'
       - 'update/**'
       - 'major/**'
+      - 'refactor/**'
+      - 'chore/**'
+      - 'docs/**'
+      - 'review/**'
+      - 'idea/**'
+      - 'apk/**'
   pull_request:
     branches:
       - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
     name: Run Test Suites
     runs-on: ubuntu-latest
+    env:
+      EXPO_PUBLIC_SUPABASE_URL: https://mock.supabase.co
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: mock-anon-key-for-ci
 
     steps:
       - name: Checkout repository
@@ -25,20 +38,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run Unit Tests
-        env:
-          EXPO_PUBLIC_SUPABASE_URL: https://mock.supabase.co
-          EXPO_PUBLIC_SUPABASE_ANON_KEY: mock-anon-key-for-ci
         run: npm run test:unit
 
       - name: Run Component Tests
-        env:
-          EXPO_PUBLIC_SUPABASE_URL: https://mock.supabase.co
-          EXPO_PUBLIC_SUPABASE_ANON_KEY: mock-anon-key-for-ci
-        run: npm run test:components
+        run: npm run test:components -- --maxWorkers=2
+
