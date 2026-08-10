@@ -1,0 +1,107 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_053_offline_workout_and_sync.yaml — US-053: Ejecución de Entrenamiento en Modo Offline y Sincronización Posterior
+
+- launchApp:
+    clearState: true
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 1. Navegar desde bienvenida a pantalla de Login
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+# 2. Introducir credenciales de prueba
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+- inputText: "${E2E_TEST_EMAIL}"
+
+- tapOn:
+    id: "password-input"
+- inputText: "${E2E_TEST_PASSWORD}"
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# 3. Verificar entrada a la pantalla principal
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 4. Activar Modo Avión (Modo Offline)
+- toggleAirplaneMode
+
+# 5. Verificar presencia del Banner de Offline
+- extendedWaitUntil:
+    visible:
+      id: "offline-banner"
+    timeout: 10000
+
+- assertVisible:
+    id: "offline-banner"
+
+# 6. Iniciar un entrenamiento en modo sin conexión
+- tapOn:
+    id: "start-workout-button"
+    optional: true
+
+# 7. Desactivar Modo Avión (Restaurar Conectividad)
+- toggleAirplaneMode
+
+# 8. Verificar actualización del estado de sincronización (SyncStatusBadge)
+- extendedWaitUntil:
+    visible:
+      id: "sync-status-badge"
+    timeout: 15000
+
+- assertVisible:
+    id: "sync-status-badge"
+
+# 9. Limpieza (Logout final)
+- tapOn: "Perfil"
+    optional: true
+
+- scroll
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+    optional: true
+
+- tapOn:
+    id: "logout-button"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+    optional: true
+
+- tapOn:
+    id: "logout-confirm-button"
+    optional: true
