@@ -48,5 +48,5 @@ jobs:
         run: npm run test:unit
 
       - name: Run Component Tests
-        run: npm run test:components -- --maxWorkers=2
+        run: npm run test:components
 
