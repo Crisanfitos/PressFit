@@ -1,4 +1,5 @@
 import React from 'react';
+import '../../src/i18n';
 import { render, fireEvent } from '@testing-library/react-native';
 import LogoutConfirmationModal from '../../src/components/LogoutConfirmationModal';
 

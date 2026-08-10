@@ -7,7 +7,7 @@ import { ThemeProvider } from './src/context/ThemeContext';
 import { AlertProvider } from './src/context/AlertContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { SentryService } from './src/services/SentryService';
-import OfflineBanner from './src/components/OfflineBanner';
+import { OfflineBanner } from './src/components/OfflineBanner';
 
 SentryService.init();
 

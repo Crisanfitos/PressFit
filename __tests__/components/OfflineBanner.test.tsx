@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import OfflineBanner from '../../src/components/OfflineBanner';
+import { OfflineBanner } from '../../src/components/OfflineBanner';
 import * as networkHook from '../../src/hooks/useNetworkStatus';
 
 describe('OfflineBanner Component (RNTL)', () => {

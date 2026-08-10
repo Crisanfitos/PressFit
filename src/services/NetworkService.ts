@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export interface NetworkState {
   isConnected: boolean | null;
   isInternetReachable: boolean | null;
@@ -17,7 +19,7 @@ let lastKnownState: NetworkState = {
 async function checkInternetPing(): Promise<boolean> {
   try {
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    const timer = controller ? setTimeout(() => controller.abort(), 2500) : null;
+    const timer = controller ? setTimeout(() => controller.abort(), 1500) : null;
 
     const response = await fetch('https://clients3.google.com/generate_204', {
       method: 'HEAD',
@@ -33,7 +35,7 @@ async function checkInternetPing(): Promise<boolean> {
 }
 
 async function fetchNetworkState(): Promise<NetworkState> {
-  if (typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean') {
+  if (Platform.OS === 'web' && typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean') {
     const online = navigator.onLine;
     return {
       isConnected: online,
@@ -64,7 +66,7 @@ function startPollingIfNeeded() {
       lastKnownState = newState;
       networkListeners.forEach((listener) => listener(newState));
     }
-  }, 5000);
+  }, 2000);
 }
 
 function stopPollingIfUnused() {
