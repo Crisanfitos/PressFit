@@ -63,4 +63,6 @@ e2e/.env.e2e
 
 # EAS configuration (tracked by git for EAS Cloud build)
 
-build-*.apk
+build-*.
+
+/scratch/

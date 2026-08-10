@@ -15,6 +15,7 @@ import { AuthContext } from '../context/AuthContext';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator';
 import KeyboardAwareContainer from '../components/KeyboardAwareContainer';
+import { mapAuthError } from '../services/AuthService';
 
 type LoginScreenProps = {
     navigation: NativeStackNavigationProp<AuthStackParamList, 'Login'>;
@@ -33,7 +34,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
     const handleEmailLogin = async () => {
         if (!email || !password) {
-            setError('Por favor completa todos los campos');
+            setError('Please enter both email and password.');
             return;
         }
 
@@ -43,7 +44,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         try {
             await authContext?.signInWithEmail(email, password);
         } catch (err: any) {
-            setError(err.message || 'Error al iniciar sesión');
+            setError(mapAuthError(err));
         } finally {
             setLoading(false);
         }
@@ -56,7 +57,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         try {
             await authContext?.signInWithGoogle();
         } catch (err: any) {
-            setError(err.message || 'Error al iniciar sesión con Google');
+            setError(mapAuthError(err));
         } finally {
             setLoading(false);
         }
@@ -236,7 +237,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                                     secureTextEntry={!showPassword}
                                     autoCapitalize="none"
                                     autoCorrect={false}
-                                    defaultValue=""
+                                    value={password}
                                     onChangeText={setPassword}
                                     testID="password-input"
                                 />

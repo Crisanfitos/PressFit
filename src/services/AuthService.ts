@@ -60,3 +60,29 @@ export const AuthService = {
         return await supabase.auth.setSession(sessionData);
     }
 };
+
+export function mapAuthError(err: any): string {
+    if (!err) return 'Authentication failed. Please try again later.';
+    const msg = typeof err === 'string' ? err : err.message || '';
+    const lowerMsg = msg.toLowerCase();
+
+    if (lowerMsg.includes('invalid login credentials') || lowerMsg.includes('invalid_credentials')) {
+        return 'Invalid email or password. Please check your credentials and try again.';
+    }
+    if (lowerMsg.includes('user not found') || lowerMsg.includes('email not found')) {
+        return 'No account found with this email.';
+    }
+    if (lowerMsg.includes('network') || lowerMsg.includes('fetch failed')) {
+        return 'Network error. Please check your internet connection.';
+    }
+    if (lowerMsg.includes('google') && (lowerMsg.includes('cancel') || lowerMsg.includes('dismiss'))) {
+        return 'Google sign-in was canceled or failed. Please try again.';
+    }
+    if (msg.trim().length > 0 && !lowerMsg.includes('error xx') && !lowerMsg.includes('codigo error')) {
+        if (/^[A-Za-z0-9\s.,!?'-]+$/.test(msg) && msg.length < 100) {
+            return msg;
+        }
+    }
+    return 'Authentication failed. Please try again later.';
+}
+

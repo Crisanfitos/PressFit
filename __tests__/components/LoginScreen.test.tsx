@@ -43,7 +43,22 @@ describe('LoginScreen Component (RNTL)', () => {
         const { getByText, findByText } = await renderLoginScreen();
 
         fireEvent.press(getByText('Iniciar Sesión'));
-        expect(await findByText('Por favor completa todos los campos')).toBeTruthy();
+        expect(await findByText('Please enter both email and password.')).toBeTruthy();
         expect(mockSignInWithEmail).not.toHaveBeenCalled();
     });
+
+    it('displays mapped error message when signInWithEmail throws a raw exception', async () => {
+        mockSignInWithEmail.mockRejectedValueOnce(new Error('Invalid login credentials'));
+        const { getByTestId, findByText } = await renderLoginScreen();
+
+        fireEvent.changeText(getByTestId('email-input'), 'user@test.com');
+        fireEvent.changeText(getByTestId('password-input'), 'wrongpass');
+
+        await act(async () => {});
+
+        fireEvent.press(getByTestId('login-submit-button'));
+
+        expect(await findByText('Invalid email or password. Please check your credentials and try again.')).toBeTruthy();
+    });
 });
+

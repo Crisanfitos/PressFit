@@ -39,7 +39,7 @@ appId: com.crisanfitos.PressFit_Expo
 
 # Verificar que se muestra el mensaje de error de validación de campos vacíos
 - assertVisible:
-    text: "Por favor completa todos los campos"
+    text: "Please enter both email and password."
 
 - assertVisible:
     id: "login-error-text"
