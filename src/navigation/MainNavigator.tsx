@@ -33,11 +33,16 @@ export type MainTabParamList = {
 
 const Tab = createMaterialTopTabNavigator<MainTabParamList>();
 
+import FloatingTimerPill from '../components/FloatingTimerPill';
+import { View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+
 const MainNavigator: React.FC = () => {
     const insets = useSafeAreaInsets();
     const { theme } = useTheme();
     const { colors } = theme;
     const { t } = useTranslation();
+    const navigation = useNavigation<any>();
 
     const getSwipeEnabled = (route: RouteProp<MainTabParamList, keyof MainTabParamList>) => {
         const routeName = getFocusedRouteNameFromRoute(route) ?? 'MonthlyCalendar';
@@ -46,65 +51,72 @@ const MainNavigator: React.FC = () => {
         return !disabledScreens.includes(routeName);
     };
 
+    const handlePillPress = () => {
+        navigation.navigate('Semana', { screen: 'Workout' });
+    };
+
     return (
-        <Tab.Navigator
-            tabBarPosition="bottom"
-            initialRouteName="Semana"
-            screenOptions={{
-                swipeEnabled: true,
-                tabBarStyle: {
-                    backgroundColor: colors.tabBar,
-                    borderTopColor: colors.border,
-                    borderTopWidth: 1,
-                    paddingBottom: insets.bottom,
-                    height: 60 + insets.bottom,
-                },
-                tabBarActiveTintColor: colors.primary,
-                tabBarInactiveTintColor: colors.textSecondary,
-                tabBarIndicatorStyle: {
-                    backgroundColor: colors.primary,
-                    top: 0,
-                },
-                tabBarShowIcon: true,
-                tabBarLabelStyle: {
-                    fontSize: 10,
-                    textTransform: 'none',
-                    marginTop: -5,
-                },
-            }}
-        >
-            <Tab.Screen
-                name="Semana"
-                component={WeeklyPlanNavigatorWithBoundary}
-                options={({ route }) => ({
-                    swipeEnabled: getSwipeEnabled(route),
-                    tabBarLabel: t('navigation.semana', 'Semana'),
-                    tabBarIcon: ({ color }) => (
-                        <MaterialIcons name="calendar-today" size={24} color={color} />
-                    ),
-                })}
-            />
-            <Tab.Screen
-                name="Progreso"
-                component={ProgressNavigatorWithBoundary}
-                options={{
-                    tabBarLabel: t('navigation.progreso', 'Progreso'),
-                    tabBarIcon: ({ color }) => (
-                        <MaterialIcons name="bar-chart" size={24} color={color} />
-                    ),
+        <View style={{ flex: 1 }}>
+            <Tab.Navigator
+                tabBarPosition="bottom"
+                initialRouteName="Semana"
+                screenOptions={{
+                    swipeEnabled: true,
+                    tabBarStyle: {
+                        backgroundColor: colors.tabBar,
+                        borderTopColor: colors.border,
+                        borderTopWidth: 1,
+                        paddingBottom: insets.bottom,
+                        height: 60 + insets.bottom,
+                    },
+                    tabBarActiveTintColor: colors.primary,
+                    tabBarInactiveTintColor: colors.textSecondary,
+                    tabBarIndicatorStyle: {
+                        backgroundColor: colors.primary,
+                        top: 0,
+                    },
+                    tabBarShowIcon: true,
+                    tabBarLabelStyle: {
+                        fontSize: 10,
+                        textTransform: 'none',
+                        marginTop: -5,
+                    },
                 }}
-            />
-            <Tab.Screen
-                name="Perfil"
-                component={ProfileNavigatorWithBoundary}
-                options={{
-                    tabBarLabel: t('navigation.perfil', 'Perfil'),
-                    tabBarIcon: ({ color }) => (
-                        <MaterialIcons name="person" size={24} color={color} />
-                    ),
-                }}
-            />
-        </Tab.Navigator>
+            >
+                <Tab.Screen
+                    name="Semana"
+                    component={WeeklyPlanNavigatorWithBoundary}
+                    options={({ route }) => ({
+                        swipeEnabled: getSwipeEnabled(route),
+                        tabBarLabel: t('navigation.semana', 'Semana'),
+                        tabBarIcon: ({ color }) => (
+                            <MaterialIcons name="calendar-today" size={24} color={color} />
+                        ),
+                    })}
+                />
+                <Tab.Screen
+                    name="Progreso"
+                    component={ProgressNavigatorWithBoundary}
+                    options={{
+                        tabBarLabel: t('navigation.progreso', 'Progreso'),
+                        tabBarIcon: ({ color }) => (
+                            <MaterialIcons name="bar-chart" size={24} color={color} />
+                        ),
+                    }}
+                />
+                <Tab.Screen
+                    name="Perfil"
+                    component={ProfileNavigatorWithBoundary}
+                    options={{
+                        tabBarLabel: t('navigation.perfil', 'Perfil'),
+                        tabBarIcon: ({ color }) => (
+                            <MaterialIcons name="person" size={24} color={color} />
+                        ),
+                    }}
+                />
+            </Tab.Navigator>
+            <FloatingTimerPill onPress={handlePillPress} />
+        </View>
     );
 };
 
