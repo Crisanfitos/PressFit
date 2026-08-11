@@ -12,6 +12,9 @@ import {
 
 export const DailyWorkoutService = {
     async getRoutineDayById(routineDayId: string): Promise<ServiceResponse<RoutineDay>> {
+        if (!routineDayId || routineDayId === 'undefined') {
+            return { data: null, error: null };
+        }
         if (isE2EMockEnabled()) {
             return { data: mockStore.getMockRoutineDay(routineDayId) as any, error: null };
         }

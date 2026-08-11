@@ -123,3 +123,37 @@ export async function checkActiveRestTimer(): Promise<{ active: boolean; elapsed
     } catch (_) { }
     return { active: false, elapsedSeconds: 0 };
 }
+
+// ─── Active Workout Route Params Persistence ───
+const WORKOUT_PARAMS_KEY = '@pressfit_active_workout_params';
+
+export async function saveActiveWorkoutParams(params: {
+    routineDayId?: string;
+    workoutId?: string;
+    dayName?: string;
+    dayOfWeek?: number;
+    mode?: string;
+}): Promise<void> {
+    try {
+        if (params && (params.routineDayId || params.workoutId)) {
+            await AsyncStorage.setItem(WORKOUT_PARAMS_KEY, JSON.stringify(params));
+        }
+    } catch (_) { }
+}
+
+export async function getActiveWorkoutParams(): Promise<any | null> {
+    try {
+        const saved = await AsyncStorage.getItem(WORKOUT_PARAMS_KEY);
+        if (saved) {
+            return JSON.parse(saved);
+        }
+    } catch (_) { }
+    return null;
+}
+
+export async function clearActiveWorkoutParams(): Promise<void> {
+    try {
+        await AsyncStorage.removeItem(WORKOUT_PARAMS_KEY);
+    } catch (_) { }
+}
+

@@ -35,7 +35,8 @@ const Tab = createMaterialTopTabNavigator<MainTabParamList>();
 
 import FloatingTimerPill from '../components/FloatingTimerPill';
 import { View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useNavigationState } from '@react-navigation/native';
+import { getActiveWorkoutParams } from '../services/TimerNotificationService';
 
 const MainNavigator: React.FC = () => {
     const insets = useSafeAreaInsets();
@@ -44,6 +45,15 @@ const MainNavigator: React.FC = () => {
     const { t } = useTranslation();
     const navigation = useNavigation<any>();
 
+    const isWorkoutFocused = useNavigationState((state) => {
+        if (!state) return false;
+        let currentRoute: any = state.routes[state.index];
+        while (currentRoute?.state?.index !== undefined) {
+            currentRoute = currentRoute.state.routes[currentRoute.state.index];
+        }
+        return currentRoute?.name === 'Workout';
+    });
+
     const getSwipeEnabled = (route: RouteProp<MainTabParamList, keyof MainTabParamList>) => {
         const routeName = getFocusedRouteNameFromRoute(route) ?? 'MonthlyCalendar';
         // Disabled swipe on detail screens across all subnavigators
@@ -51,8 +61,16 @@ const MainNavigator: React.FC = () => {
         return !disabledScreens.includes(routeName);
     };
 
-    const handlePillPress = () => {
-        navigation.navigate('Semana', { screen: 'Workout' });
+    const handlePillPress = async () => {
+        const params = await getActiveWorkoutParams();
+        if (params && (params.routineDayId || params.workoutId)) {
+            navigation.navigate('Semana', {
+                screen: 'Workout',
+                params,
+            });
+        } else {
+            navigation.navigate('Semana');
+        }
     };
 
     return (
@@ -115,7 +133,7 @@ const MainNavigator: React.FC = () => {
                     }}
                 />
             </Tab.Navigator>
-            <FloatingTimerPill onPress={handlePillPress} />
+            <FloatingTimerPill visible={isWorkoutFocused ? false : undefined} onPress={handlePillPress} />
         </View>
     );
 };

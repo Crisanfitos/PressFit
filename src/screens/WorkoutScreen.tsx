@@ -22,7 +22,7 @@ import { PersonalNoteButton } from '../components/PersonalNoteButton';
 import RestTimer from '../components/RestTimer';
 import { WeightTypeBadge } from '../components/WeightTypeBadge';
 import { WorkoutService } from '../services/WorkoutService';
-import { checkActiveRestTimer } from '../services/TimerNotificationService';
+import { checkActiveRestTimer, saveActiveWorkoutParams } from '../services/TimerNotificationService';
 import { TIPO_PESO_SHORT_LABELS } from '../types/setTypes';
 
 type WorkoutScreenProps = {
@@ -32,6 +32,12 @@ type WorkoutScreenProps = {
 
 const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
     const { routineDayId, dayName, workoutId: initialWorkoutId, dayOfWeek, mode: navMode } = route.params || {};
+
+    useEffect(() => {
+        if (routineDayId || initialWorkoutId) {
+            saveActiveWorkoutParams({ routineDayId, workoutId: initialWorkoutId, dayName, dayOfWeek, mode: navMode });
+        }
+    }, [routineDayId, initialWorkoutId, dayName, dayOfWeek, navMode]);
     const authContext = useContext(AuthContext);
     const user = authContext?.user;
     const { theme } = useTheme();
