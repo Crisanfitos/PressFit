@@ -35,7 +35,7 @@ const Tab = createMaterialTopTabNavigator<MainTabParamList>();
 
 import FloatingTimerPill from '../components/FloatingTimerPill';
 import { View } from 'react-native';
-import { useNavigation, useNavigationState } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { getActiveWorkoutParams } from '../services/TimerNotificationService';
 
 const MainNavigator: React.FC = () => {
@@ -45,14 +45,23 @@ const MainNavigator: React.FC = () => {
     const { t } = useTranslation();
     const navigation = useNavigation<any>();
 
-    const isWorkoutFocused = useNavigationState((state) => {
-        if (!state) return false;
-        let currentRoute: any = state.routes[state.index];
-        while (currentRoute?.state?.index !== undefined) {
-            currentRoute = currentRoute.state.routes[currentRoute.state.index];
-        }
-        return currentRoute?.name === 'Workout';
-    });
+    const [isWorkoutFocused, setIsWorkoutFocused] = React.useState(false);
+
+    React.useEffect(() => {
+        const checkFocus = () => {
+            const state = navigation.getState?.();
+            if (!state) return;
+            let currentRoute: any = state.routes[state.index];
+            while (currentRoute?.state?.index !== undefined) {
+                currentRoute = currentRoute.state.routes[currentRoute.state.index];
+            }
+            setIsWorkoutFocused(currentRoute?.name === 'Workout');
+        };
+
+        checkFocus();
+        const unsubscribe = navigation.addListener('state', checkFocus);
+        return unsubscribe;
+    }, [navigation]);
 
     const getSwipeEnabled = (route: RouteProp<MainTabParamList, keyof MainTabParamList>) => {
         const routeName = getFocusedRouteNameFromRoute(route) ?? 'MonthlyCalendar';
