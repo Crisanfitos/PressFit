@@ -133,10 +133,16 @@ export async function saveActiveWorkoutParams(params: {
     dayName?: string;
     dayOfWeek?: number;
     mode?: string;
+    activeSetId?: string | null;
 }): Promise<void> {
     try {
-        if (params && (params.routineDayId || params.workoutId)) {
-            await AsyncStorage.setItem(WORKOUT_PARAMS_KEY, JSON.stringify(params));
+        const existing = (await getActiveWorkoutParams()) || {};
+        const updated = { ...existing, ...params };
+        if (params.activeSetId === null) {
+            delete updated.activeSetId;
+        }
+        if (updated.routineDayId || updated.workoutId) {
+            await AsyncStorage.setItem(WORKOUT_PARAMS_KEY, JSON.stringify(updated));
         }
     } catch (_) { }
 }

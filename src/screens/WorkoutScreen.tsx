@@ -22,7 +22,7 @@ import { PersonalNoteButton } from '../components/PersonalNoteButton';
 import RestTimer from '../components/RestTimer';
 import { WeightTypeBadge } from '../components/WeightTypeBadge';
 import { WorkoutService } from '../services/WorkoutService';
-import { checkActiveRestTimer, saveActiveWorkoutParams } from '../services/TimerNotificationService';
+import { checkActiveRestTimer, saveActiveWorkoutParams, getActiveWorkoutParams } from '../services/TimerNotificationService';
 import { TIPO_PESO_SHORT_LABELS } from '../types/setTypes';
 
 type WorkoutScreenProps = {
@@ -92,6 +92,10 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         if (!controllerLoading && mode === 'ACTIVE') {
             (async () => {
                 const { active } = await checkActiveRestTimer();
+                const savedParams = await getActiveWorkoutParams();
+                if (savedParams?.activeSetId) {
+                    setLastCompletedSetId(savedParams.activeSetId);
+                }
                 if (active) {
                     setRestTimerVisible(true);
                 }
@@ -109,6 +113,10 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                 reloadExercises();
             }
             const { active } = await checkActiveRestTimer();
+            const savedParams = await getActiveWorkoutParams();
+            if (savedParams?.activeSetId) {
+                setLastCompletedSetId(savedParams.activeSetId);
+            }
             if (active) {
                 setRestTimerVisible(true);
             }
@@ -148,8 +156,8 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         const prevExercise = previousWorkout.ejercicios_programados.find(
             (ep: any) => ep.ejercicio_id === exerciseId
         );
-        if (!prevExercise?.series) return null;
-        const prevSet = prevExercise.series.find((s: any) => s.numero_serie === setNumber);
+        if (!prevExercise?.series_realizadas) return null;
+        const prevSet = prevExercise.series_realizadas.find((s: any) => s.numero_serie === setNumber);
         if (!prevSet) return null;
 
         let val: number;
@@ -201,20 +209,25 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
 
     const handleStartRestTimer = (setId: string) => {
         setLastCompletedSetId(setId);
+        saveActiveWorkoutParams({ activeSetId: setId });
         setRestTimerVisible(true);
     };
 
     const handleRestTimerStop = async (seconds: number) => {
-        if (lastCompletedSetId && seconds > 0) {
-            await WorkoutService.updateSet(lastCompletedSetId, { descanso_segundos: seconds });
-            setSavedTimerSetIds((prev) => new Set(prev).add(lastCompletedSetId));
+        const savedParams = await getActiveWorkoutParams();
+        const targetSetId = lastCompletedSetId || savedParams?.activeSetId;
+        if (targetSetId && seconds > 0) {
+            await updateSet(targetSetId, 'descanso_segundos', seconds);
+            setSavedTimerSetIds((prev) => new Set(prev).add(targetSetId));
         }
         setLastCompletedSetId(null);
+        await saveActiveWorkoutParams({ activeSetId: null });
     };
 
-    const handleRestTimerDismiss = () => {
+    const handleRestTimerDismiss = async () => {
         setRestTimerVisible(false);
-        // Note: does NOT clear lastCompletedSetId save — discard means no save, handled in RestTimer
+        setLastCompletedSetId(null);
+        await saveActiveWorkoutParams({ activeSetId: null });
     };
 
     const handleFinishWorkout = () => {
