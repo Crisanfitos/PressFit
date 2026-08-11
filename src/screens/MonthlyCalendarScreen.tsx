@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { RoutineService } from '../services/RoutineService';
@@ -40,6 +41,7 @@ type MonthlyCalendarScreenProps = {
 };
 
 const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigation }) => {
+    const { t, i18n } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
     const authContext = useContext(AuthContext);
@@ -59,15 +61,15 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
     const drawerMenuItems: MenuItem[] = useMemo(() => [
         {
             icon: 'stars',
-            label: 'Plantillas Prémium',
+            label: t('drawer.presetRoutines', 'Plantillas Prémium'),
             onPress: () => navigation.navigate('PresetRoutines'),
         },
         {
             icon: 'library-books',
-            label: 'Catálogo de Ejercicios',
+            label: t('drawer.exerciseCatalog', 'Catálogo de Ejercicios'),
             onPress: () => navigation.navigate('ExerciseCatalog'),
         },
-    ], [navigation]);
+    ], [navigation, t]);
 
 
     // Get current month info
@@ -76,13 +78,21 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
     const today = new Date();
     const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
 
-    // Month names in Spanish
-    const monthNames = [
+    // Month names localized
+    const currentLang = i18n.language?.startsWith('en') ? 'en' : 'es';
+    const monthNamesEs = [
         'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
     ];
+    const monthNamesEn = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const monthNames = currentLang === 'en' ? monthNamesEn : monthNamesEs;
 
-    const weekDays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+    const weekDaysEs = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+    const weekDaysEn = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    const weekDays = currentLang === 'en' ? weekDaysEn : weekDaysEs;
 
     // Calculate calendar days
     const calendarDays = useMemo(() => {
@@ -492,7 +502,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                                 color={colors.primary}
                             />
                             <Text style={styles.routineSelectorText}>
-                                {selectedRoutine?.nombre || 'Seleccionar Rutina'}
+                                {selectedRoutine?.nombre || t('calendar.selectRoutine', 'Seleccionar Rutina')}
                             </Text>
                             <MaterialIcons
                                 name={showRoutineSelector ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
@@ -647,19 +657,19 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                 <View style={[styles.legendContainer, { paddingBottom: 100 }]} testID="status-legend">
                     <View style={styles.legendItem} testID="legend-today">
                         <View style={[styles.legendDot, { backgroundColor: colors.primary }]} />
-                        <Text style={styles.legendText}>Hoy</Text>
+                        <Text style={styles.legendText}>{t('calendar.today', 'Hoy')}</Text>
                     </View>
                     <View style={styles.legendItem} testID="legend-completed">
                         <View style={[styles.legendDot, { backgroundColor: (colors as any).timelineCompleted || colors.statusSuccess }]} />
-                        <Text style={styles.legendText}>Completado</Text>
+                        <Text style={styles.legendText}>{t('calendar.completed', 'Completado')}</Text>
                     </View>
                     <View style={styles.legendItem} testID="legend-in-progress">
                         <View style={[styles.legendDot, { backgroundColor: (colors as any).timelineInProgress || colors.statusWarning }]} />
-                        <Text style={styles.legendText}>En Progreso</Text>
+                        <Text style={styles.legendText}>{t('calendar.inProgress', 'En Progreso')}</Text>
                     </View>
                     <View style={styles.legendItem} testID="legend-missed">
                         <View style={[styles.legendDot, { backgroundColor: `${colors.statusError}30` }]} />
-                        <Text style={styles.legendText}>Sin Hacer</Text>
+                        <Text style={styles.legendText}>{t('calendar.missed', 'Sin Hacer')}</Text>
                     </View>
                 </View>
             </ScrollView>

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 
 type ProgressScreenProps = {
@@ -16,14 +17,15 @@ interface ProgressItem {
 }
 
 const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
 
     const progressItems: (ProgressItem & { testID: string })[] = [
-        { icon: 'calendar-view-month', title: 'Progreso Mensual', subtitle: 'Vista general de tu mes', screen: 'MonthlyProgress', testID: 'progress-item-monthly' },
-        { icon: 'date-range', title: 'Progreso Semanal', subtitle: 'Resumen de tu semana', screen: 'WeeklyProgress', testID: 'progress-item-weekly' },
-        { icon: 'today', title: 'Progreso Diario', subtitle: 'Detalles de hoy', screen: 'DailyProgress', testID: 'progress-item-daily' },
-        { icon: 'fitness-center', title: 'Progreso por Ejercicio', subtitle: 'Evolución en cada ejercicio', screen: 'ExerciseTracking', testID: 'progress-item-exercise' },
+        { icon: 'calendar-view-month', title: t('progress.monthly'), subtitle: t('progress.monthlySubtitle'), screen: 'MonthlyProgress', testID: 'progress-item-monthly' },
+        { icon: 'date-range', title: t('progress.weekly'), subtitle: t('progress.weeklySubtitle'), screen: 'WeeklyProgress', testID: 'progress-item-weekly' },
+        { icon: 'today', title: t('progress.daily'), subtitle: t('progress.dailySubtitle'), screen: 'DailyProgress', testID: 'progress-item-daily' },
+        { icon: 'fitness-center', title: t('progress.exercise'), subtitle: t('progress.exerciseSubtitle'), screen: 'ExerciseTracking', testID: 'progress-item-exercise' },
     ];
 
     const styles = useMemo(
@@ -69,7 +71,7 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container} testID="progress-screen">
             <View style={styles.header}>
-                <Text style={styles.headerText}>Progreso</Text>
+                <Text style={styles.headerText}>{t('progress.title')}</Text>
             </View>
 
             <ScrollView style={styles.scrollView}>

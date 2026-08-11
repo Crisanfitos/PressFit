@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator';
@@ -13,6 +14,7 @@ type WelcomeScreenProps = {
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
     const { theme } = useTheme();
     const { colors } = theme;
+    const { t } = useTranslation();
 
     const styles = StyleSheet.create({
         container: {
@@ -79,7 +81,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
                 />
                 <Text style={styles.title} testID="welcome-title">PressFit</Text>
                 <Text style={styles.subtitle} testID="welcome-subtitle">
-                    Tu aplicación de seguimiento de entrenamientos y progreso físico
+                    {t('auth.welcomeSubtitle')}
                 </Text>
 
                 <View style={styles.buttonContainer}>
@@ -88,7 +90,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
                         onPress={() => navigation.navigate('Login')}
                         testID="login-button"
                     >
-                        <Text style={styles.primaryButtonText}>Iniciar Sesión</Text>
+                        <Text style={styles.primaryButtonText}>{t('auth.login')}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -96,7 +98,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
                         onPress={() => navigation.navigate('SignUp')}
                         testID="signup-button"
                     >
-                        <Text style={styles.secondaryButtonText}>Crear Cuenta</Text>
+                        <Text style={styles.secondaryButtonText}>{t('auth.signUp')}</Text>
                     </TouchableOpacity>
                 </View>
             </View>

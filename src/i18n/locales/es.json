@@ -15,19 +15,36 @@
   },
   "auth": {
     "welcome": "¡Bienvenido a PressFit!",
+    "welcomeSubtitle": "Tu aplicación de seguimiento de entrenamientos y progreso físico",
     "login": "Iniciar Sesión",
     "signUp": "Crear Cuenta",
     "logout": "Cerrar Sesión",
     "logoutConfirmation": "¿Estás seguro de que deseas cerrar sesión en tu cuenta?",
     "email": "Correo Electrónico",
-    "password": "Contraseña"
+    "password": "Contraseña",
+    "tagline": "Tu Progreso, Tu Poder",
+    "emailPlaceholder": "tu@correo.com",
+    "passwordPlaceholder": "Ingresa tu contraseña",
+    "forgotPassword": "Olvidé mi contraseña",
+    "orLoginWith": "o inicia sesión con",
+    "noAccount": "¿No tienes una cuenta?",
+    "registerLink": "Regístrate",
+    "joinUs": "Únete a PressFit",
+    "fullName": "Nombre Completo",
+    "fullNamePlaceholder": "Tu nombre",
+    "confirmPassword": "Confirmar Contraseña",
+    "confirmPasswordPlaceholder": "Repite tu contraseña",
+    "passwordMinLength": "Mínimo 6 caracteres",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?"
   },
   "navigation": {
     "semana": "Semana",
     "calendar": "Calendario",
     "routines": "Rutinas",
     "progress": "Progreso",
+    "progreso": "Progreso",
     "profile": "Perfil",
+    "perfil": "Perfil",
     "catalog": "Catálogo de Ejercicios"
   },
   "workout": {
@@ -38,6 +55,13 @@
     "reps": "Repeticiones",
     "weight": "Peso",
     "restTimer": "Temporizador de Descanso"
+  },
+  "calendar": {
+    "today": "Hoy",
+    "completed": "Completado",
+    "inProgress": "En Progreso",
+    "missed": "Sin Hacer",
+    "selectRoutine": "Seleccionar Rutina"
   },
   "profile": {
     "title": "Perfil",
@@ -52,5 +76,31 @@
     "bmi": "IMC",
     "bodyFat": "Grasa Corporal",
     "estimated": "Estimado ±10%"
+  },
+  "progress": {
+    "title": "Progreso",
+    "monthly": "Progreso Mensual",
+    "monthlySubtitle": "Vista general de tu mes",
+    "weekly": "Progreso Semanal",
+    "weeklySubtitle": "Resumen de tu semana",
+    "daily": "Progreso Diario",
+    "dailySubtitle": "Detalles de hoy",
+    "exercise": "Progreso por Ejercicio",
+    "exerciseSubtitle": "Evolución en cada ejercicio"
+  },
+  "drawer": {
+    "presetRoutines": "Plantillas Prémium",
+    "exerciseCatalog": "Catálogo de Ejercicios"
+  },
+  "presetRoutines": {
+    "title": "Plantillas Prémium",
+    "libraryTitle": "Biblioteca de Rutinas",
+    "subtitle": "Selecciona un programa probado científicamente para tus objetivos."
+  },
+  "exerciseCatalog": {
+    "title": "Catálogo de Ejercicios",
+    "searchPlaceholder": "Buscar ejercicio...",
+    "showFilters": "Mostrar filtros",
+    "hideFilters": "Ocultar filtros"
   }
 }

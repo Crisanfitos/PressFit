@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useExerciseController, FilterKey, Exercise } from '../controllers/useExerciseController';
 import { ExerciseItem } from '../components/ExerciseItem';
@@ -24,6 +25,7 @@ type ExerciseCatalogScreenProps = {
 };
 
 const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigation }) => {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const { colors } = theme;
 
@@ -168,7 +170,7 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
         >
           <MaterialIcons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={screenStyles.headerText}>Catálogo de Ejercicios</Text>
+        <Text style={screenStyles.headerText}>{t('exerciseCatalog.title', 'Catálogo de Ejercicios')}</Text>
         <TouchableOpacity
           onPress={() => setCreateModalVisible(true)}
           style={{ padding: 4 }}
@@ -183,7 +185,7 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
         <MaterialIcons name="search" size={20} color={colors.textSecondary} />
         <TextInput
           style={screenStyles.searchInput}
-          placeholder="Buscar ejercicio..."
+          placeholder={t('exerciseCatalog.searchPlaceholder', 'Buscar ejercicio...')}
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -209,7 +211,7 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
           >
             <MaterialIcons name={showFilters ? 'filter-list-off' : 'filter-list'} size={20} color={colors.textSecondary} />
             <Text style={{ color: colors.textSecondary, fontSize: 13, marginLeft: 6, fontWeight: '500' }}>
-              {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
+              {showFilters ? t('exerciseCatalog.hideFilters', 'Ocultar filtros') : t('exerciseCatalog.showFilters', 'Mostrar filtros')}
             </Text>
             {hasActiveFilters && (
               <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary, marginLeft: 6 }} />
