@@ -166,19 +166,15 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                 duration: 200,
                 useNativeDriver: true,
             }).start();
-            setIsRunning(false);
-            setIsStopped(false);
-            setSeconds(0);
-            AsyncStorage.removeItem(TIMER_STORAGE_KEY);
-            cancelTimerNotification();
         }
     }, [visible]);
 
     // ─── setInterval while running in foreground ───
     useEffect(() => {
         if (isRunning && !isStopped) {
-            intervalRef.current = setInterval(() => {
-                setSeconds((prev) => prev + 1);
+            intervalRef.current = setInterval(async () => {
+                const elapsed = await getElapsedSecondsFromStorage();
+                setSeconds(elapsed);
             }, 1000);
         } else {
             if (intervalRef.current) {

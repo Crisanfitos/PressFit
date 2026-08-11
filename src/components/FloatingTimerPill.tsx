@@ -30,7 +30,6 @@ const FloatingTimerPill: React.FC<FloatingTimerPillProps> = ({
     const [timerActive, setTimerActive] = useState(false);
 
     const slideAnim = useRef(new Animated.Value(80)).current;
-    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const isVisible = propVisible !== undefined ? propVisible : timerActive;
 
@@ -44,19 +43,20 @@ const FloatingTimerPill: React.FC<FloatingTimerPillProps> = ({
 
     useEffect(() => {
         syncTimerState();
+        const interval = setInterval(syncTimerState, 1000);
         const appStateSub = AppState.addEventListener('change', (nextState: AppStateStatus) => {
             if (nextState === 'active') {
                 syncTimerState();
             }
         });
-        return () => appStateSub.remove();
+        return () => {
+            clearInterval(interval);
+            appStateSub.remove();
+        };
     }, [syncTimerState]);
 
     useEffect(() => {
         if (isVisible) {
-            intervalRef.current = setInterval(() => {
-                setSeconds((prev) => prev + 1);
-            }, 1000);
             Animated.spring(slideAnim, {
                 toValue: 0,
                 useNativeDriver: true,
@@ -64,23 +64,12 @@ const FloatingTimerPill: React.FC<FloatingTimerPillProps> = ({
                 friction: 12,
             }).start();
         } else {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
-            }
             Animated.timing(slideAnim, {
                 toValue: 80,
                 duration: 200,
                 useNativeDriver: true,
             }).start();
         }
-
-        return () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
-            }
-        };
     }, [isVisible, slideAnim]);
 
     const formatTime = (totalSeconds: number) => {

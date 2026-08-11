@@ -103,10 +103,14 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
     const needsRefreshRef = useRef(false);
 
     useEffect(() => {
-        const unsubscribe = navigation.addListener('focus', () => {
+        const unsubscribe = navigation.addListener('focus', async () => {
             if (needsRefreshRef.current) {
                 needsRefreshRef.current = false;
                 reloadExercises();
+            }
+            const { active } = await checkActiveRestTimer();
+            if (active) {
+                setRestTimerVisible(true);
             }
         });
         return unsubscribe;
