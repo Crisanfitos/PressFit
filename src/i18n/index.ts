@@ -51,7 +51,7 @@ export async function loadStoredLanguage(): Promise<string> {
   } catch {
     // Fallback on storage read error
   }
-  const defaultLang = getDeviceLanguage();
+  const defaultLang = 'es';
   await i18n.changeLanguage(defaultLang);
   return defaultLang;
 }
@@ -69,7 +69,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: getDeviceLanguage(),
+    lng: 'es',
     fallbackLng: 'es',
     interpolation: {
       escapeValue: false,

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -23,6 +24,7 @@ type SignUpScreenProps = {
 const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
     const { theme } = useTheme();
     const { colors } = theme;
+    const { t } = useTranslation();
     const authContext = useContext(AuthContext);
 
     const [fullName, setFullName] = useState('');
@@ -184,18 +186,18 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                             style={{ width: 80, height: 80, marginBottom: 16 }}
                             resizeMode="contain"
                         />
-                        <Text style={styles.title}>Crear Cuenta</Text>
-                        <Text style={styles.subtitle}>Únete a PressFit</Text>
+                        <Text style={styles.title}>{t('auth.signUp')}</Text>
+                        <Text style={styles.subtitle}>{t('auth.joinUs')}</Text>
                     </View>
 
                     <View style={styles.form}>
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Nombre Completo</Text>
+                            <Text style={styles.label}>{t('auth.fullName')}</Text>
                             <View style={styles.inputContainer}>
                                 <MaterialIcons name="person" size={24} color={colors.primary} />
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Tu nombre"
+                                    placeholder={t('auth.fullNamePlaceholder')}
                                     placeholderTextColor={colors.textSecondary}
                                     value={fullName}
                                     onChangeText={setFullName}
@@ -205,12 +207,12 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Correo Electrónico</Text>
+                            <Text style={styles.label}>{t('auth.email')}</Text>
                             <View style={styles.inputContainer}>
                                 <MaterialIcons name="mail" size={24} color={colors.primary} />
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="tu@correo.com"
+                                    placeholder={t('auth.emailPlaceholder')}
                                     placeholderTextColor={colors.textSecondary}
                                     keyboardType="email-address"
                                     autoCapitalize="none"
@@ -223,12 +225,12 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Contraseña</Text>
+                            <Text style={styles.label}>{t('auth.password')}</Text>
                             <View style={styles.inputContainer}>
                                 <MaterialIcons name="lock" size={24} color={colors.primary} />
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Mínimo 6 caracteres"
+                                    placeholder={t('auth.passwordMinLength')}
                                     placeholderTextColor={colors.textSecondary}
                                     secureTextEntry={!showPassword}
                                     autoCapitalize="none"
@@ -253,12 +255,12 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Confirmar Contraseña</Text>
+                            <Text style={styles.label}>{t('auth.confirmPassword')}</Text>
                             <View style={styles.inputContainer}>
                                 <MaterialIcons name="lock-outline" size={24} color={colors.primary} />
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Repite tu contraseña"
+                                    placeholder={t('auth.confirmPasswordPlaceholder')}
                                     placeholderTextColor={colors.textSecondary}
                                     secureTextEntry={!showConfirmPassword}
                                     autoCapitalize="none"
@@ -291,7 +293,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                             {loading ? (
                                 <ActivityIndicator color={colors.textOnPrimary} />
                             ) : (
-                                <Text style={styles.signUpButtonText}>Crear Cuenta</Text>
+                                <Text style={styles.signUpButtonText}>{t('auth.signUp')}</Text>
                             )}
                         </TouchableOpacity>
 
@@ -305,8 +307,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                     <View style={styles.footer}>
                         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                             <Text style={styles.footerText}>
-                                ¿Ya tienes una cuenta?{' '}
-                                <Text style={styles.footerLink}>Iniciar Sesión</Text>
+                                {t('auth.alreadyHaveAccount')}{' '}
+                                <Text style={styles.footerLink}>{t('auth.login')}</Text>
                             </Text>
                         </TouchableOpacity>
                     </View>

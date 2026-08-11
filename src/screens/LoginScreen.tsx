@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -24,6 +25,7 @@ type LoginScreenProps = {
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     const { theme } = useTheme();
     const { colors } = theme;
+    const { t } = useTranslation();
     const authContext = useContext(AuthContext);
 
     const [email, setEmail] = useState('');
@@ -204,17 +206,17 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                             resizeMode="contain"
                         />
                         <Text style={styles.title}>PressFit</Text>
-                        <Text style={styles.subtitle}>Tu Progreso, Tu Poder</Text>
+                        <Text style={styles.subtitle}>{t('auth.tagline')}</Text>
                     </View>
 
                     <View style={styles.form}>
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Correo Electrónico</Text>
+                            <Text style={styles.label}>{t('auth.email')}</Text>
                             <View style={styles.inputContainer}>
                                 <MaterialIcons name="mail" size={24} color={colors.primary} />
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="tu@correo.com"
+                                    placeholder={t('auth.emailPlaceholder')}
                                     placeholderTextColor={colors.textSecondary}
                                     keyboardType="email-address"
                                     autoCapitalize="none"
@@ -227,12 +229,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Contraseña</Text>
+                            <Text style={styles.label}>{t('auth.password')}</Text>
                             <View style={styles.inputContainer}>
                                 <MaterialIcons name="lock" size={24} color={colors.primary} />
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Ingresa tu contraseña"
+                                    placeholder={t('auth.passwordPlaceholder')}
                                     placeholderTextColor={colors.textSecondary}
                                     secureTextEntry={!showPassword}
                                     autoCapitalize="none"
@@ -257,7 +259,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                         </View>
 
                         <TouchableOpacity style={styles.forgotPassword}>
-                            <Text style={styles.forgotPasswordText}>Olvidé mi contraseña</Text>
+                            <Text style={styles.forgotPasswordText}>{t('auth.forgotPassword')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -269,7 +271,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                             {loading ? (
                                 <ActivityIndicator color={colors.textOnPrimary} />
                             ) : (
-                                <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+                                <Text style={styles.loginButtonText}>{t('auth.login')}</Text>
                             )}
                         </TouchableOpacity>
 
@@ -282,7 +284,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
                     <View style={styles.divider}>
                         <View style={styles.dividerLine} />
-                        <Text style={styles.dividerText}>o inicia sesión con</Text>
+                        <Text style={styles.dividerText}>{t('auth.orLoginWith')}</Text>
                         <View style={styles.dividerLine} />
                     </View>
 
@@ -301,8 +303,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                     <View style={styles.footer}>
                         <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
                             <Text style={styles.footerText}>
-                                ¿No tienes una cuenta?{' '}
-                                <Text style={styles.footerLink}>Regístrate</Text>
+                                {t('auth.noAccount')}{' '}
+                                <Text style={styles.footerLink}>{t('auth.registerLink')}</Text>
                             </Text>
                         </TouchableOpacity>
                     </View>

@@ -1,6 +1,7 @@
 appId: com.crisanfitos.PressFit_Expo
 ---
-# us_043_language_switch.yaml — US-043: Cambio dinámico de idioma en la pantalla de Perfil y verificación de textos traducidos
+# us_043_language_switch.yaml — US-043: Inicio en Español, verificación de Auth, Drawer, Plantillas y Catálogo en Español, cambio dinámico a Inglés en Perfil y verificación completa de pantallas en Inglés
+
 - launchApp:
     clearState: true
 
@@ -15,11 +16,54 @@ appId: com.crisanfitos.PressFit_Expo
     commands:
       - back
 
+# 1. Verificación inicial de pantalla de bienvenida en Español
 - extendedWaitUntil:
     visible:
       id: "welcome-screen"
     timeout: 30000
 
+- assertVisible:
+    text: "Iniciar Sesión"
+
+- assertVisible:
+    text: "Crear Cuenta"
+
+# 2. Navegar a Registro (SignUp) y verificar que todo está en Español
+- tapOn:
+    id: "signup-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "signup-screen"
+    timeout: 10000
+
+- assertVisible:
+    text: "Crear Cuenta"
+
+- assertVisible:
+    text: "Únete a PressFit"
+
+- assertVisible:
+    text: "Nombre Completo"
+
+- assertVisible:
+    text: "Correo Electrónico"
+
+- assertVisible:
+    text: "Contraseña"
+
+- assertVisible:
+    text: "Confirmar Contraseña"
+
+# Volver a la pantalla de bienvenida
+- back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+# 3. Navegar a Login y verificar que todo está en Español
 - tapOn:
     id: "login-button"
 
@@ -28,14 +72,28 @@ appId: com.crisanfitos.PressFit_Expo
       id: "email-input"
     timeout: 10000
 
+- assertVisible:
+    text: "Iniciar Sesión"
+
+- assertVisible:
+    text: "Tu Progreso, Tu Poder"
+
+- assertVisible:
+    text: "Correo Electrónico"
+
+- assertVisible:
+    text: "Contraseña"
+
+- assertVisible:
+    text: "Olvidé mi contraseña"
+
+# 4. Iniciar sesión
 - tapOn:
     id: "email-input"
-
 - inputText: ${E2E_TEST_EMAIL}
 
 - tapOn:
     id: "password-input"
-
 - inputText: ${E2E_TEST_PASSWORD}
 
 - hideKeyboard
@@ -48,7 +106,62 @@ appId: com.crisanfitos.PressFit_Expo
       id: "monthly-calendar-screen"
     timeout: 15000
 
-# Navegar a la pantalla de Perfil desde la barra de pestañas inferior
+# 5. Abrir el menú lateral (SideDrawer) en Español y verificar Plantillas y Catálogo
+- tapOn:
+    id: "hamburger-button"
+
+- extendedWaitUntil:
+    visible:
+      text: "Plantillas Prémium"
+    timeout: 5000
+
+- assertVisible:
+    text: "Catálogo de Ejercicios"
+
+# Visitar Plantillas Prémium en Español
+- tapOn: "Plantillas Prémium"
+
+- extendedWaitUntil:
+    visible:
+      text: "Biblioteca de Rutinas"
+    timeout: 10000
+
+- tapOn:
+    id: "back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+# Visitar Catálogo de Ejercicios en Español
+- tapOn:
+    id: "hamburger-button"
+
+- extendedWaitUntil:
+    visible:
+      text: "Catálogo de Ejercicios"
+    timeout: 5000
+
+- tapOn: "Catálogo de Ejercicios"
+
+- extendedWaitUntil:
+    visible:
+      id: "exercise-catalog-screen"
+    timeout: 10000
+
+- assertVisible:
+    text: "Catálogo de Ejercicios"
+
+- tapOn:
+    id: "exercise-catalog-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+# 6. Ir a Perfil y cambiar el idioma a Inglés
 - tapOn: "Perfil"
 
 - extendedWaitUntil:
@@ -56,21 +169,15 @@ appId: com.crisanfitos.PressFit_Expo
       id: "profile-screen"
     timeout: 10000
 
-# Hacer scroll en el perfil hasta la sección de Apariencia y Configuración de Idioma
 - scrollUntilVisible:
     element:
-      id: "language-status"
+      id: "language-select-en"
     direction: DOWN
 
-# Verificar que el selector de idioma está presente
-- assertVisible:
-    id: "language-status"
-
-# Seleccionar idioma Inglés (EN)
 - tapOn:
     id: "language-select-en"
 
-# Verificar que las etiquetas de Perfil se traducen dinámicamente al Inglés ("English", "Log Out")
+# 7. Aserciones de que Perfil se traduce dinámicamente al Inglés
 - extendedWaitUntil:
     visible:
       text: "English"
@@ -79,15 +186,20 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     text: "Log Out"
 
-# Navegar a la pestaña Progreso en Inglés
-- tapOn: "Progreso"
+- assertVisible:
+    text: "Appearance & Settings"
 
-- extendedWaitUntil:
-    visible:
-      id: "progress-screen"
-    timeout: 10000
+# 8. Aserciones de que los nombres de las pestañas están en Inglés
+- assertVisible:
+    text: "Week"
 
-# Navegar a la pestaña Week en Inglés ("Week")
+- assertVisible:
+    text: "Progress"
+
+- assertVisible:
+    text: "Profile"
+
+# 9. Volver a la pestaña Week para acceder al menú lateral (SideDrawer) en Inglés
 - tapOn: "Week"
 
 - extendedWaitUntil:
@@ -95,73 +207,87 @@ appId: com.crisanfitos.PressFit_Expo
       id: "monthly-calendar-screen"
     timeout: 10000
 
-# Volver a la pestaña Perfil ("Perfil")
-- tapOn: "Perfil"
-
-- extendedWaitUntil:
-    visible:
-      id: "profile-screen"
-    timeout: 10000
-
-- scrollUntilVisible:
-    element:
-      id: "language-select-es"
-    direction: DOWN
-
-# Seleccionar idioma Español (ES)
 - tapOn:
-    id: "language-select-es"
+    id: "hamburger-button"
 
-# Verificar que las etiquetas del Perfil vuelven dinámicamente al Español ("Cerrar Sesión")
 - extendedWaitUntil:
     visible:
-      text: "Cerrar Sesión"
+      text: "Premium Templates"
     timeout: 5000
 
-# Navegar a la pestaña Semana en Español ("Semana")
-- tapOn: "Semana"
+- assertVisible:
+    text: "Exercise Catalog"
+
+# Visitar Premium Templates en Inglés
+- tapOn: "Premium Templates"
+
+- extendedWaitUntil:
+    visible:
+      text: "Routine Library"
+    timeout: 10000
+
+- assertVisible:
+    text: "Premium Templates"
+
+- tapOn:
+    id: "back-button"
 
 - extendedWaitUntil:
     visible:
       id: "monthly-calendar-screen"
     timeout: 10000
 
-# Volver a la pestaña Perfil en Español ("Perfil")
-- tapOn: "Perfil"
-
-- extendedWaitUntil:
-    visible:
-      id: "profile-screen"
-    timeout: 10000
-
-- assertVisible:
-    text: "Semana"
-
-- assertVisible:
-    text: "Progreso"
-
-- assertVisible:
-    text: "Perfil"
-
-# Hacer scroll hasta el botón de Logout
-- scrollUntilVisible:
-    element:
-      id: "logout-button"
-    direction: DOWN
-
-# Cerrar sesión limpiamente
+# Visitar Exercise Catalog en Inglés
 - tapOn:
-    id: "logout-button"
+    id: "hamburger-button"
 
 - extendedWaitUntil:
     visible:
-      id: "logout-confirm-button"
+      text: "Exercise Catalog"
     timeout: 5000
 
-- tapOn:
-    id: "logout-confirm-button"
+- tapOn: "Exercise Catalog"
 
 - extendedWaitUntil:
     visible:
-      id: "welcome-screen"
+      id: "exercise-catalog-screen"
     timeout: 10000
+
+- assertVisible:
+    text: "Exercise Catalog"
+
+- tapOn:
+    id: "exercise-catalog-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+# 10. Viajar a la pestaña "Progress" y comprobar apartados en Inglés
+- tapOn: "Progress"
+
+- extendedWaitUntil:
+    visible:
+      id: "progress-screen"
+    timeout: 10000
+
+- assertVisible:
+    text: "Progress"
+
+- assertVisible:
+    text: "Monthly Progress"
+
+- assertVisible:
+    text: "Weekly Progress"
+
+# 11. Viajar a la pestaña "Week" y comprobar leyenda en Inglés
+- tapOn: "Week"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+- assertVisible:
+    text: "Today"

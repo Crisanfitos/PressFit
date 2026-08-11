@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { PresetRoutineService } from '../services/PresetRoutineService';
@@ -21,6 +22,7 @@ const CATEGORY_FILTERS = ['Todas', 'Hipertrofia', 'Fuerza', 'Estética', 'Princi
 const DAYS_FILTERS = [0, 3, 4, 6];
 
 export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { theme } = useTheme();
     const { colors } = theme;
@@ -98,7 +100,7 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                 </TouchableOpacity>
 
                 <Text style={[styles.headerTitle, { color: colors.text || '#FFFFFF' }]}>
-                    Plantillas Prémium
+                    {t('presetRoutines.title', 'Plantillas Prémium')}
                 </Text>
 
                 <View style={styles.headerRightSpacer} />
@@ -112,10 +114,10 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                 {/* Intro Title & Description */}
                 <View style={styles.introBlock}>
                     <Text style={[styles.mainHeading, { color: colors.text || '#FFFFFF' }]}>
-                        Biblioteca de Rutinas
+                        {t('presetRoutines.libraryTitle', 'Biblioteca de Rutinas')}
                     </Text>
                     <Text style={[styles.subHeading, { color: colors.textSecondary || '#A1A1AA' }]}>
-                        Selecciona un programa probado científicamente para tus objetivos.
+                        {t('presetRoutines.subtitle', 'Selecciona un programa probado científicamente para tus objetivos.')}
                     </Text>
                 </View>
 

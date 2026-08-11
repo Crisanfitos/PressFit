@@ -15,19 +15,36 @@
   },
   "auth": {
     "welcome": "Welcome to PressFit!",
+    "welcomeSubtitle": "Your workout tracking and physical progress app",
     "login": "Log In",
     "signUp": "Sign Up",
     "logout": "Log Out",
     "logoutConfirmation": "Are you sure you want to log out of your account?",
     "email": "Email Address",
-    "password": "Password"
+    "password": "Password",
+    "tagline": "Your Progress, Your Power",
+    "emailPlaceholder": "you@email.com",
+    "passwordPlaceholder": "Enter your password",
+    "forgotPassword": "Forgot my password",
+    "orLoginWith": "or log in with",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Register",
+    "joinUs": "Join PressFit",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Your name",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Repeat your password",
+    "passwordMinLength": "Minimum 6 characters",
+    "alreadyHaveAccount": "Already have an account?"
   },
   "navigation": {
     "semana": "Week",
     "calendar": "Calendar",
     "routines": "Routines",
     "progress": "Progress",
+    "progreso": "Progress",
     "profile": "Profile",
+    "perfil": "Profile",
     "catalog": "Exercise Catalog"
   },
   "workout": {
@@ -38,6 +55,13 @@
     "reps": "Reps",
     "weight": "Weight",
     "restTimer": "Rest Timer"
+  },
+  "calendar": {
+    "today": "Today",
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "missed": "Missed",
+    "selectRoutine": "Select Routine"
   },
   "profile": {
     "title": "Profile",
@@ -52,5 +76,31 @@
     "bmi": "BMI",
     "bodyFat": "Body Fat",
     "estimated": "Estimated ±10%"
+  },
+  "progress": {
+    "title": "Progress",
+    "monthly": "Monthly Progress",
+    "monthlySubtitle": "General overview of your month",
+    "weekly": "Weekly Progress",
+    "weeklySubtitle": "Summary of your week",
+    "daily": "Daily Progress",
+    "dailySubtitle": "Details for today",
+    "exercise": "Exercise Progress",
+    "exerciseSubtitle": "Evolution for each exercise"
+  },
+  "drawer": {
+    "presetRoutines": "Premium Templates",
+    "exerciseCatalog": "Exercise Catalog"
+  },
+  "presetRoutines": {
+    "title": "Premium Templates",
+    "libraryTitle": "Routine Library",
+    "subtitle": "Select a scientifically proven program for your goals."
+  },
+  "exerciseCatalog": {
+    "title": "Exercise Catalog",
+    "searchPlaceholder": "Search exercise...",
+    "showFilters": "Show filters",
+    "hideFilters": "Hide filters"
   }
 }
