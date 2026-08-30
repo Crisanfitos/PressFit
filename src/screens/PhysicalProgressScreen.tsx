@@ -10,6 +10,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useProgressController } from '../controllers/useProgressController';
 import { UserService } from '../services/UserService';
 import WeightChart from '../components/WeightChart';
+import AdvancedMetricsCard from '../components/AdvancedMetricsCard';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -319,6 +320,9 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                 <ScrollView style={styles.scrollView}>
                     {/* Weight Evolution Chart */}
                     <WeightChart data={weightHistory} colors={colors} />
+
+                    {/* Advanced 1RM Metrics Dashboard */}
+                    <AdvancedMetricsCard userId={user?.id} />
 
                     {progressPhotos.length === 0 ? (
                         <View style={styles.emptyState}>
