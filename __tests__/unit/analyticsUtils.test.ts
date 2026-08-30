@@ -4,9 +4,11 @@ import {
     calculate1RM,
     calculateMax1RM,
     getBestSetFor1RM,
+    isEffectiveSet,
+    aggregateEffectiveSetsByMuscle,
 } from '../../src/utils/analyticsUtils';
 
-describe('analyticsUtils - 1RM Calculation Engine (PF-154)', () => {
+describe('analyticsUtils - 1RM Calculation Engine & Effective Sets Aggregator (PF-154 & PF-155)', () => {
     describe('calculateBrzycki', () => {
         it('returns exact weight when reps is 1', () => {
             expect(calculateBrzycki(100, 1)).toBe(100);
@@ -14,16 +16,13 @@ describe('analyticsUtils - 1RM Calculation Engine (PF-154)', () => {
         });
 
         it('calculates 1RM correctly for typical low reps (<= 10)', () => {
-            // Formula: 100 * (36 / (37 - 5)) = 100 * (36 / 32) = 112.5
             expect(calculateBrzycki(100, 5)).toBe(112.5);
-            // 80 * (36 / (37 - 10)) = 80 * (36 / 27) = 80 * 1.3333... = 106.67
             expect(calculateBrzycki(80, 10)).toBe(106.67);
         });
 
         it('handles boundary reps (reps >= 37) by safely falling back to Epley', () => {
             const result = calculateBrzycki(50, 37);
             expect(result).toBeGreaterThan(0);
-            // Epley for 50kg, 37 reps: 50 * (1 + 0.0333 * 37) = 50 * (1 + 1.2321) = 111.61
             expect(result).toBe(111.61);
         });
 
@@ -45,9 +44,7 @@ describe('analyticsUtils - 1RM Calculation Engine (PF-154)', () => {
         });
 
         it('calculates 1RM correctly for higher repetition ranges (> 10)', () => {
-            // Formula: 100 * (1 + 0.0333 * 12) = 100 * (1 + 0.3996) = 139.96
             expect(calculateEpley(100, 12)).toBe(139.96);
-            // 60 * (1 + 0.0333 * 15) = 60 * (1 + 0.4995) = 60 * 1.4995 = 89.97
             expect(calculateEpley(60, 15)).toBe(89.97);
         });
 
@@ -67,7 +64,7 @@ describe('analyticsUtils - 1RM Calculation Engine (PF-154)', () => {
             const epleyVal = calculateEpley(100, 12);
 
             expect(calculate1RM(100, 8, 'auto')).toBe(brzyckiVal);
-            expect(calculate1RM(100, 8)).toBe(brzyckiVal); // default is auto
+            expect(calculate1RM(100, 8)).toBe(brzyckiVal);
 
             expect(calculate1RM(100, 12, 'auto')).toBe(epleyVal);
             expect(calculate1RM(100, 12)).toBe(epleyVal);
@@ -97,10 +94,10 @@ describe('analyticsUtils - 1RM Calculation Engine (PF-154)', () => {
     describe('calculateMax1RM', () => {
         it('finds the maximum 1RM from an array of sets', () => {
             const series = [
-                { peso_utilizado: 80, repeticiones: 10 }, // 106.67
-                { peso_utilizado: 90, repeticiones: 6 },  // 90 * (36/31) = 104.52
-                { peso_utilizado: 100, repeticiones: 5 }, // 112.50 (Max)
-                { peso_utilizado: 70, repeticiones: 12 }, // 70 * (1 + 0.0333 * 12) = 97.97
+                { peso_utilizado: 80, repeticiones: 10 },
+                { peso_utilizado: 90, repeticiones: 6 },
+                { peso_utilizado: 100, repeticiones: 5 },
+                { peso_utilizado: 70, repeticiones: 12 },
             ];
 
             expect(calculateMax1RM(series)).toBe(112.5);
@@ -116,9 +113,9 @@ describe('analyticsUtils - 1RM Calculation Engine (PF-154)', () => {
 
     describe('getBestSetFor1RM', () => {
         it('identifies the exact set producing the highest 1RM and identifies formula used', () => {
-            const set1 = { id: 's1', numero_serie: 1, peso_utilizado: 80, repeticiones: 8 }; // Brzycki: 99.31
-            const set2 = { id: 's2', numero_serie: 2, peso_utilizado: 100, repeticiones: 6 }; // Brzycki: 116.13
-            const set3 = { id: 's3', numero_serie: 3, peso_utilizado: 75, repeticiones: 15 }; // Epley: 112.46
+            const set1 = { id: 's1', numero_serie: 1, peso_utilizado: 80, repeticiones: 8 };
+            const set2 = { id: 's2', numero_serie: 2, peso_utilizado: 100, repeticiones: 6 };
+            const set3 = { id: 's3', numero_serie: 3, peso_utilizado: 75, repeticiones: 15 };
 
             const result = getBestSetFor1RM([set1, set2, set3]);
             expect(result).not.toBeNull();
@@ -142,6 +139,133 @@ describe('analyticsUtils - 1RM Calculation Engine (PF-154)', () => {
             expect(getBestSetFor1RM([])).toBeNull();
             expect(getBestSetFor1RM(null as any)).toBeNull();
             expect(getBestSetFor1RM([{ peso_utilizado: 0, repeticiones: 0 }])).toBeNull();
+        });
+    });
+
+    describe('isEffectiveSet (PF-155)', () => {
+        it('returns true for normal working sets with weight and reps', () => {
+            expect(isEffectiveSet({ peso_utilizado: 80, repeticiones: 10 })).toBe(true);
+            expect(isEffectiveSet({ peso_utilizado: 100, repeticiones: 5, rpe: 8 })).toBe(true);
+            expect(isEffectiveSet({ peso_utilizado: 0, repeticiones: 15 })).toBe(true); // bodyweight
+        });
+
+        it('excludes warmup sets explicitly marked via is_warmup or tipo_serie', () => {
+            expect(isEffectiveSet({ peso_utilizado: 40, repeticiones: 15, is_warmup: true })).toBe(false);
+            expect(isEffectiveSet({ peso_utilizado: 50, repeticiones: 12, tipo_serie: 'calentamiento' })).toBe(false);
+            expect(isEffectiveSet({ peso_utilizado: 50, repeticiones: 12, tipo_serie: 'warmup' })).toBe(false);
+            expect(isEffectiveSet({ peso_utilizado: 50, repeticiones: 12, tipo_serie: 'Warm_Up' })).toBe(false);
+        });
+
+        it('excludes sets with invalid reps or negative weights', () => {
+            expect(isEffectiveSet({ peso_utilizado: 50, repeticiones: 0 })).toBe(false);
+            expect(isEffectiveSet({ peso_utilizado: 50, repeticiones: -5 })).toBe(false);
+            expect(isEffectiveSet({ peso_utilizado: -20, repeticiones: 10 })).toBe(false);
+            expect(isEffectiveSet(null as any)).toBe(false);
+            expect(isEffectiveSet(undefined as any)).toBe(false);
+        });
+
+        it('excludes explicit low RPE warmups (RPE < 5)', () => {
+            expect(isEffectiveSet({ peso_utilizado: 60, repeticiones: 10, rpe: 4 })).toBe(false);
+            expect(isEffectiveSet({ peso_utilizado: 60, repeticiones: 10, rpe: 5 })).toBe(true);
+            expect(isEffectiveSet({ peso_utilizado: 60, repeticiones: 10, rpe: 8.5 })).toBe(true);
+        });
+    });
+
+    describe('aggregateEffectiveSetsByMuscle (PF-155)', () => {
+        it('aggregates effective sets across multiple exercises correctly (Pecho, Espalda, Piernas)', () => {
+            const exerciseData = [
+                // Bench Press: 4 sets (1 warmup, 3 effective) -> Pecho
+                {
+                    ejercicio: {
+                        nombre: 'Press Banca',
+                        grupo_muscular_principal: 'Pecho',
+                        grupos_musculares_secundarios: ['Tríceps', 'Hombros'],
+                    },
+                    series: [
+                        { peso_utilizado: 40, repeticiones: 15, is_warmup: true },
+                        { peso_utilizado: 80, repeticiones: 10 },
+                        { peso_utilizado: 85, repeticiones: 8 },
+                        { peso_utilizado: 90, repeticiones: 6 },
+                    ],
+                },
+                // Pull-ups: 4 effective sets -> Espalda
+                {
+                    ejercicio: {
+                        nombre: 'Dominadas',
+                        grupo_muscular_principal: 'Espalda',
+                        grupos_musculares_secundarios: ['Bíceps'],
+                    },
+                    series: [
+                        { peso_utilizado: 0, repeticiones: 10 },
+                        { peso_utilizado: 0, repeticiones: 8 },
+                        { peso_utilizado: 0, repeticiones: 8 },
+                        { peso_utilizado: 0, repeticiones: 6 },
+                    ],
+                },
+                // Squat: 5 sets (1 warmup with rpe 4, 4 effective) -> Piernas
+                {
+                    ejercicio: {
+                        nombre: 'Sentadilla Trasera',
+                        grupo_muscular_principal: 'Piernas',
+                        grupos_musculares_secundarios: ['Glúteos'],
+                    },
+                    series: [
+                        { peso_utilizado: 60, repeticiones: 10, rpe: 4 }, // warmup excluded
+                        { peso_utilizado: 100, repeticiones: 8, rpe: 7 },
+                        { peso_utilizado: 110, repeticiones: 6, rpe: 8 },
+                        { peso_utilizado: 115, repeticiones: 5, rpe: 9 },
+                        { peso_utilizado: 120, repeticiones: 3, rpe: 9.5 },
+                    ],
+                },
+            ];
+
+            const result = aggregateEffectiveSetsByMuscle(exerciseData);
+
+            expect(result.totalSeriesEfectivas).toBe(11); // 3 Pecho + 4 Espalda + 4 Piernas
+            expect(result.porGrupoMuscular['Pecho']).toBe(3);
+            expect(result.porGrupoMuscular['Espalda']).toBe(4);
+            expect(result.porGrupoMuscular['Piernas']).toBe(4);
+
+            // Verify distribution list
+            expect(result.distribucion).toHaveLength(3);
+            expect(result.distribucion[0].series_efectivas).toBe(4);
+            expect(result.distribucion[1].series_efectivas).toBe(4);
+            expect(result.distribucion[2].series_efectivas).toBe(3);
+            expect(result.distribucion[2].grupo_muscular).toBe('Pecho');
+            expect(result.distribucion[2].porcentaje).toBe(27.3); // 3 / 11 = 27.27%
+        });
+
+        it('supports secondary muscle weighting when secondaryWeight > 0', () => {
+            const exerciseData = [
+                {
+                    ejercicio: {
+                        nombre: 'Press Banca',
+                        grupo_muscular_principal: 'Pecho',
+                        grupos_musculares_secundarios: ['Tríceps', 'Hombros'],
+                    },
+                    series: [
+                        { peso_utilizado: 80, repeticiones: 10 },
+                        { peso_utilizado: 80, repeticiones: 10 },
+                    ],
+                },
+            ];
+
+            const result = aggregateEffectiveSetsByMuscle(exerciseData, { secondaryWeight: 0.5 });
+
+            expect(result.porGrupoMuscular['Pecho']).toBe(2);
+            expect(result.porGrupoMuscular['Tríceps']).toBe(1); // 2 * 0.5
+            expect(result.porGrupoMuscular['Hombros']).toBe(1); // 2 * 0.5
+            expect(result.totalSeriesEfectivas).toBe(4); // 2 + 1 + 1
+        });
+
+        it('handles empty or malformed exercise lists cleanly', () => {
+            const emptyResult = aggregateEffectiveSetsByMuscle([]);
+            expect(emptyResult.totalSeriesEfectivas).toBe(0);
+            expect(emptyResult.porGrupoMuscular).toEqual({});
+            expect(emptyResult.distribucion).toEqual([]);
+
+            const nullResult = aggregateEffectiveSetsByMuscle(null as any);
+            expect(nullResult.totalSeriesEfectivas).toBe(0);
         });
     });
 });
