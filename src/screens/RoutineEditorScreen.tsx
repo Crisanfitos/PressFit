@@ -104,8 +104,18 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                     text: 'Eliminar',
                     style: 'destructive',
                     onPress: async () => {
-                        await RoutineService.deleteWeeklyRoutine(routineId);
-                        loadRoutines();
+                        const routineToDelete = routines.find((r) => r.id === routineId);
+                        const wasActive = !!routineToDelete?.activa;
+                        const remainingRoutines = routines.filter((r) => r.id !== routineId);
+
+                        const { error } = await RoutineService.deleteWeeklyRoutine(routineId);
+                        if (!error) {
+                            if (wasActive && remainingRoutines.length > 0) {
+                                const nextActiveRoutine = remainingRoutines[0];
+                                await RoutineService.updateWeeklyRoutine(nextActiveRoutine.id, { activa: true });
+                            }
+                            await loadRoutines();
+                        }
                     },
                 },
             ]
@@ -376,6 +386,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
+                                        testID={`delete-routine-button-${index}`}
                                         style={[styles.actionButton, styles.deleteButton]}
                                         onPress={() => handleDeleteRoutine(routine.id)}
                                     >
