@@ -1,13 +1,18 @@
 import { supabase } from '../lib/supabase';
 import { ServiceResponse } from '../types/models';
-import { parseDateKeyAsLocalDate } from '../utils/dateUtils';
+import { parseDateKeyAsLocalDate, formatLocalDateKey } from '../utils/dateUtils';
 import {
     calculate1RM,
     calculateBrzycki,
     calculateEpley,
     calculateMax1RM,
     getBestSetFor1RM,
+    isEffectiveSet,
+    aggregateEffectiveSetsByMuscle,
     OneRMFormula,
+    EffectiveSetsSummary,
+    ExerciseWithSeriesForVolume,
+    AggregateOptions,
 } from '../utils/analyticsUtils';
 
 export interface OneRMHistoryEntry {
@@ -18,6 +23,12 @@ export interface OneRMHistoryEntry {
     numero_serie: number;
     formula: 'brzycki' | 'epley';
     rutina_id?: string;
+}
+
+export interface GetEffectiveSetsOptions extends AggregateOptions {
+    startDate?: string;
+    endDate?: string;
+    daysLookback?: number;
 }
 
 export const AnalyticsService = {
@@ -59,6 +70,29 @@ export const AnalyticsService = {
         formula: OneRMFormula = 'auto'
     ): number {
         return calculateMax1RM(series, formula);
+    },
+
+    /**
+     * Validates whether a set is considered an effective working set.
+     */
+    isEffectiveSet(set: {
+        peso_utilizado?: number | null;
+        repeticiones?: number | null;
+        rpe?: number | null;
+        tipo_serie?: string | null;
+        is_warmup?: boolean | null;
+    }): boolean {
+        return isEffectiveSet(set);
+    },
+
+    /**
+     * Aggregates effective sets across muscle groups.
+     */
+    aggregateEffectiveSetsByMuscle(
+        exercisesWithSeries: ExerciseWithSeriesForVolume[],
+        options?: AggregateOptions
+    ): EffectiveSetsSummary {
+        return aggregateEffectiveSetsByMuscle(exercisesWithSeries, options);
     },
 
     /**
@@ -157,6 +191,113 @@ export const AnalyticsService = {
             return { data: history, error: null };
         } catch (error) {
             console.error('Error fetching 1RM history:', error);
+            return { data: null, error };
+        }
+    },
+
+    /**
+     * Aggregates effective weekly sets grouped by primary and secondary muscle groups.
+     *
+     * Queries workouts and sets within the specified date window (default: last 7 days),
+     * filters out warmup sets and computes distribution statistics.
+     *
+     * @param userId - ID of the target user.
+     * @param options - Date range and weighting options.
+     * @returns Service response containing the effective sets volume summary.
+     */
+    async getEffectiveSetsByMuscleGroup(
+        userId: string,
+        options: GetEffectiveSetsOptions = {}
+    ): Promise<ServiceResponse<EffectiveSetsSummary>> {
+        try {
+            const {
+                daysLookback = 7,
+                startDate,
+                endDate,
+                secondaryWeight = 0,
+            } = options;
+
+            // Determine date bounds
+            let minDateStr = startDate;
+            let maxDateStr = endDate;
+
+            if (!minDateStr) {
+                const now = new Date();
+                const past = new Date(now);
+                past.setDate(now.getDate() - (daysLookback - 1));
+                minDateStr = formatLocalDateKey(past);
+            }
+            if (!maxDateStr) {
+                maxDateStr = formatLocalDateKey(new Date());
+            }
+
+            const { data, error } = await supabase
+                .from('series')
+                .select(`
+                    id,
+                    numero_serie,
+                    peso_utilizado,
+                    repeticiones,
+                    rpe,
+                    ejercicios_programados!inner(
+                        id,
+                        ejercicio:ejercicios!inner(
+                            id,
+                            nombre,
+                            grupo_muscular_principal,
+                            grupos_musculares_secundarios
+                        ),
+                        rutinas_diarias!inner(
+                            id,
+                            fecha_dia,
+                            rutinas_semanales!inner(usuario_id)
+                        )
+                    )
+                `)
+                .eq('ejercicios_programados.rutinas_diarias.rutinas_semanales.usuario_id', userId)
+                .not('ejercicios_programados.rutinas_diarias.fecha_dia', 'is', null)
+                .gte('ejercicios_programados.rutinas_diarias.fecha_dia', minDateStr)
+                .lte('ejercicios_programados.rutinas_diarias.fecha_dia', maxDateStr);
+
+            if (error) throw error;
+
+            // Group sets by exercise
+            const exerciseMap = new Map<string, ExerciseWithSeriesForVolume>();
+
+            for (const row of (data as any[]) || []) {
+                const epId = row.ejercicios_programados?.id;
+                const ejercicio = row.ejercicios_programados?.ejercicio;
+                if (!epId || !ejercicio) continue;
+
+                if (!exerciseMap.has(epId)) {
+                    exerciseMap.set(epId, {
+                        ejercicio: {
+                            id: ejercicio.id,
+                            nombre: ejercicio.nombre,
+                            grupo_muscular_principal: ejercicio.grupo_muscular_principal,
+                            grupos_musculares_secundarios: ejercicio.grupos_musculares_secundarios,
+                        },
+                        series: [],
+                    });
+                }
+
+                exerciseMap.get(epId)!.series.push({
+                    id: row.id,
+                    numero_serie: row.numero_serie,
+                    peso_utilizado: row.peso_utilizado,
+                    repeticiones: row.repeticiones,
+                    rpe: row.rpe,
+                    tipo_serie: row.tipo_serie,
+                    is_warmup: row.is_warmup,
+                });
+            }
+
+            const exerciseList = Array.from(exerciseMap.values());
+            const summary = aggregateEffectiveSetsByMuscle(exerciseList, { secondaryWeight });
+
+            return { data: summary, error: null };
+        } catch (error) {
+            console.error('Error fetching effective sets by muscle group:', error);
             return { data: null, error };
         }
     },

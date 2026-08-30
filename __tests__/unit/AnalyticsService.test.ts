@@ -6,6 +6,8 @@ const mockChain: any = {
     select: jest.fn().mockReturnThis(),
     eq: jest.fn().mockReturnThis(),
     not: jest.fn().mockReturnThis(),
+    gte: jest.fn().mockReturnThis(),
+    lte: jest.fn().mockReturnThis(),
 };
 
 mockChain.then = jest.fn((resolve: any) =>
@@ -14,7 +16,7 @@ mockChain.then = jest.fn((resolve: any) =>
 
 jest.spyOn(supabase, 'from').mockReturnValue(mockChain);
 
-describe('AnalyticsService (PF-154)', () => {
+describe('AnalyticsService (PF-154 & PF-155)', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         mockChain.then = jest.fn((resolve: any) =>
@@ -22,8 +24,8 @@ describe('AnalyticsService (PF-154)', () => {
         );
     });
 
-    describe('Calculation proxies', () => {
-        it('proxies calculate1RM, calculateBrzycki, calculateEpley and calculateMax1RM', () => {
+    describe('Calculation & Utility proxies', () => {
+        it('proxies calculate1RM, calculateBrzycki, calculateEpley, calculateMax1RM and isEffectiveSet', () => {
             expect(AnalyticsService.calculateBrzycki(100, 5)).toBe(112.5);
             expect(AnalyticsService.calculateEpley(100, 12)).toBe(139.96);
             expect(AnalyticsService.calculate1RM(100, 5)).toBe(112.5);
@@ -32,6 +34,19 @@ describe('AnalyticsService (PF-154)', () => {
                 { peso_utilizado: 80, repeticiones: 10 },
                 { peso_utilizado: 100, repeticiones: 5 }
             ])).toBe(112.5);
+            expect(AnalyticsService.isEffectiveSet({ peso_utilizado: 80, repeticiones: 8 })).toBe(true);
+            expect(AnalyticsService.isEffectiveSet({ peso_utilizado: 80, repeticiones: 8, is_warmup: true })).toBe(false);
+        });
+
+        it('proxies aggregateEffectiveSetsByMuscle', () => {
+            const summary = AnalyticsService.aggregateEffectiveSetsByMuscle([
+                {
+                    ejercicio: { grupo_muscular_principal: 'Pecho' },
+                    series: [{ peso_utilizado: 100, repeticiones: 5 }]
+                }
+            ]);
+            expect(summary.totalSeriesEfectivas).toBe(1);
+            expect(summary.porGrupoMuscular['Pecho']).toBe(1);
         });
     });
 
@@ -57,7 +72,7 @@ describe('AnalyticsService (PF-154)', () => {
                     id: 's-4',
                     numero_serie: 2,
                     peso_utilizado: 100,
-                    repeticiones: 5, // 100 * (36/32) = 112.5 (Best for this session)
+                    repeticiones: 5,
                     ejercicios_programados: {
                         ejercicio_id: 'ex-1',
                         rutinas_diarias: {
@@ -72,7 +87,7 @@ describe('AnalyticsService (PF-154)', () => {
                     id: 's-1',
                     numero_serie: 1,
                     peso_utilizado: 80,
-                    repeticiones: 10, // 80 * (36/27) = 106.67 (Best for this session)
+                    repeticiones: 10,
                     ejercicios_programados: {
                         ejercicio_id: 'ex-1',
                         rutinas_diarias: {
@@ -86,7 +101,7 @@ describe('AnalyticsService (PF-154)', () => {
                     id: 's-2',
                     numero_serie: 2,
                     peso_utilizado: 80,
-                    repeticiones: 8, // 80 * (36/29) = 99.31
+                    repeticiones: 8,
                     ejercicios_programados: {
                         ejercicio_id: 'ex-1',
                         rutinas_diarias: {
@@ -107,7 +122,6 @@ describe('AnalyticsService (PF-154)', () => {
             expect(result.error).toBeNull();
             expect(result.data).toHaveLength(2);
 
-            // Verify chronological order (2026-08-01 first, 2026-08-10 second)
             expect(result.data![0].fecha).toBe('2026-08-01');
             expect(result.data![0].estimated1RM).toBe(106.67);
             expect(result.data![0].peso_utilizado).toBe(80);
@@ -135,7 +149,7 @@ describe('AnalyticsService (PF-154)', () => {
 
         it('handles null data or query errors gracefully', async () => {
             const dbError = new Error('Database connection failed');
-            mockChain.then = jest.fn((resolve: any, reject: any) =>
+            mockChain.then = jest.fn((resolve: any) =>
                 Promise.resolve({ data: null, error: dbError }).then(resolve)
             );
 
@@ -154,6 +168,166 @@ describe('AnalyticsService (PF-154)', () => {
 
             expect(result.data).toBeNull();
             expect(result.error).toBeDefined();
+        });
+    });
+
+    describe('getEffectiveSetsByMuscleGroup (PF-155)', () => {
+        it('queries database with date filters and aggregates effective sets by muscle group', async () => {
+            const rawSets = [
+                // Bench Press: 3 sets (1 warmup, 2 effective) -> Pecho
+                {
+                    id: 's-1',
+                    numero_serie: 1,
+                    peso_utilizado: 40,
+                    repeticiones: 15,
+                    is_warmup: true,
+                    ejercicios_programados: {
+                        id: 'ep-1',
+                        ejercicio: {
+                            id: 'ex-1',
+                            nombre: 'Press Banca',
+                            grupo_muscular_principal: 'Pecho',
+                            grupos_musculares_secundarios: ['Tríceps'],
+                        },
+                        rutinas_diarias: {
+                            id: 'rd-1',
+                            fecha_dia: '2026-08-25',
+                            rutinas_semanales: { usuario_id: 'u-1' }
+                        }
+                    }
+                },
+                {
+                    id: 's-2',
+                    numero_serie: 2,
+                    peso_utilizado: 80,
+                    repeticiones: 10,
+                    ejercicios_programados: {
+                        id: 'ep-1',
+                        ejercicio: {
+                            id: 'ex-1',
+                            nombre: 'Press Banca',
+                            grupo_muscular_principal: 'Pecho',
+                            grupos_musculares_secundarios: ['Tríceps'],
+                        },
+                        rutinas_diarias: {
+                            id: 'rd-1',
+                            fecha_dia: '2026-08-25',
+                            rutinas_semanales: { usuario_id: 'u-1' }
+                        }
+                    }
+                },
+                {
+                    id: 's-3',
+                    numero_serie: 3,
+                    peso_utilizado: 85,
+                    repeticiones: 8,
+                    ejercicios_programados: {
+                        id: 'ep-1',
+                        ejercicio: {
+                            id: 'ex-1',
+                            nombre: 'Press Banca',
+                            grupo_muscular_principal: 'Pecho',
+                            grupos_musculares_secundarios: ['Tríceps'],
+                        },
+                        rutinas_diarias: {
+                            id: 'rd-1',
+                            fecha_dia: '2026-08-25',
+                            rutinas_semanales: { usuario_id: 'u-1' }
+                        }
+                    }
+                },
+                // Squats: 3 sets -> Piernas
+                {
+                    id: 's-4',
+                    numero_serie: 1,
+                    peso_utilizado: 100,
+                    repeticiones: 6,
+                    ejercicios_programados: {
+                        id: 'ep-2',
+                        ejercicio: {
+                            id: 'ex-2',
+                            nombre: 'Sentadilla',
+                            grupo_muscular_principal: 'Piernas',
+                            grupos_musculares_secundarios: [],
+                        },
+                        rutinas_diarias: {
+                            id: 'rd-2',
+                            fecha_dia: '2026-08-27',
+                            rutinas_semanales: { usuario_id: 'u-1' }
+                        }
+                    }
+                },
+                {
+                    id: 's-5',
+                    numero_serie: 2,
+                    peso_utilizado: 105,
+                    repeticiones: 6,
+                    ejercicios_programados: {
+                        id: 'ep-2',
+                        ejercicio: {
+                            id: 'ex-2',
+                            nombre: 'Sentadilla',
+                            grupo_muscular_principal: 'Piernas',
+                            grupos_musculares_secundarios: [],
+                        },
+                        rutinas_diarias: {
+                            id: 'rd-2',
+                            fecha_dia: '2026-08-27',
+                            rutinas_semanales: { usuario_id: 'u-1' }
+                        }
+                    }
+                },
+                {
+                    id: 's-6',
+                    numero_serie: 3,
+                    peso_utilizado: 110,
+                    repeticiones: 5,
+                    ejercicios_programados: {
+                        id: 'ep-2',
+                        ejercicio: {
+                            id: 'ex-2',
+                            nombre: 'Sentadilla',
+                            grupo_muscular_principal: 'Piernas',
+                            grupos_musculares_secundarios: [],
+                        },
+                        rutinas_diarias: {
+                            id: 'rd-2',
+                            fecha_dia: '2026-08-27',
+                            rutinas_semanales: { usuario_id: 'u-1' }
+                        }
+                    }
+                },
+            ];
+
+            mockChain.then = jest.fn((resolve: any) =>
+                Promise.resolve({ data: rawSets, error: null }).then(resolve)
+            );
+
+            const result = await AnalyticsService.getEffectiveSetsByMuscleGroup('u-1', {
+                startDate: '2026-08-20',
+                endDate: '2026-08-28',
+            });
+
+            expect(result.error).toBeNull();
+            expect(result.data).toBeDefined();
+            expect(result.data!.totalSeriesEfectivas).toBe(5); // 2 Pecho + 3 Piernas (1 warmup excluded)
+            expect(result.data!.porGrupoMuscular['Pecho']).toBe(2);
+            expect(result.data!.porGrupoMuscular['Piernas']).toBe(3);
+            expect(result.data!.distribucion[0].grupo_muscular).toBe('Piernas');
+            expect(result.data!.distribucion[0].series_efectivas).toBe(3);
+            expect(result.data!.distribucion[0].porcentaje).toBe(60);
+        });
+
+        it('handles DB error gracefully', async () => {
+            const dbError = new Error('Query error');
+            mockChain.then = jest.fn((resolve: any) =>
+                Promise.resolve({ data: null, error: dbError }).then(resolve)
+            );
+
+            const result = await AnalyticsService.getEffectiveSetsByMuscleGroup('u-1');
+
+            expect(result.data).toBeNull();
+            expect(result.error).toBe(dbError);
         });
     });
 });

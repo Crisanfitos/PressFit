@@ -1,8 +1,9 @@
 /**
  * Utility functions and pure algorithms for athletic analytics and metrics calculation.
  *
- * Implements 1RM (One Repetition Maximum) estimation using the validated
- * Brzycki and Epley mathematical models.
+ * Implements:
+ * 1. 1RM (One Repetition Maximum) estimation using Brzycki and Epley formulas.
+ * 2. Effective Sets Aggregation per Muscle Group with warmup exclusions and distribution stats.
  *
  * @module utils/analyticsUtils
  */
@@ -13,6 +14,91 @@ export interface OneRMBestSetResult<T = unknown> {
     set: T;
     estimated1RM: number;
     formula: 'brzycki' | 'epley';
+}
+
+export interface MuscleVolumeDistribution {
+    grupo_muscular: string;
+    series_efectivas: number;
+    porcentaje: number;
+}
+
+export interface EffectiveSetsSummary {
+    totalSeriesEfectivas: number;
+    porGrupoMuscular: Record<string, number>;
+    distribucion: MuscleVolumeDistribution[];
+}
+
+export interface ExerciseWithSeriesForVolume {
+    ejercicio: {
+        id?: string;
+        nombre?: string;
+        grupo_muscular_principal: string;
+        grupos_musculares_secundarios?: string[] | null;
+    };
+    series: Array<{
+        id?: string;
+        numero_serie?: number;
+        peso_utilizado?: number | null;
+        repeticiones?: number | null;
+        rpe?: number | null;
+        tipo_serie?: string | null;
+        is_warmup?: boolean | null;
+        [key: string]: any;
+    }>;
+}
+
+export interface AggregateOptions {
+    /**
+     * Weight multiplier applied to secondary muscle groups.
+     * Default: 0 (only primary muscle receives sets) or 0.5 when secondary engagement is enabled.
+     */
+    secondaryWeight?: number;
+}
+
+/**
+ * Determines whether a given set qualifies as an effective working set.
+ *
+ * An effective set is a non-warmup set performed with valid repetitions and load/intensity.
+ *
+ * @param set - Set record with reps, weight, RPE and metadata.
+ * @returns True if the set is effective, false if it is a warmup or invalid.
+ */
+export function isEffectiveSet(set: {
+    peso_utilizado?: number | null;
+    repeticiones?: number | null;
+    rpe?: number | null;
+    tipo_serie?: string | null;
+    is_warmup?: boolean | null;
+}): boolean {
+    if (!set || typeof set !== 'object') {
+        return false;
+    }
+
+    // Explicit warmup indicators
+    if (set.is_warmup === true) {
+        return false;
+    }
+    const tipo = typeof set.tipo_serie === 'string' ? set.tipo_serie.trim().toLowerCase() : '';
+    if (tipo === 'calentamiento' || tipo === 'warmup' || tipo === 'warm_up') {
+        return false;
+    }
+
+    const reps = Number(set.repeticiones);
+    if (isNaN(reps) || reps <= 0) {
+        return false;
+    }
+
+    const weight = Number(set.peso_utilizado);
+    if (isNaN(weight) || weight < 0) {
+        return false;
+    }
+
+    // Sub-threshold intensity (explicitly low RPE warmups < 5 when RPE is recorded)
+    if (typeof set.rpe === 'number' && !isNaN(set.rpe) && set.rpe > 0 && set.rpe < 5) {
+        return false;
+    }
+
+    return true;
 }
 
 /**
@@ -170,4 +256,86 @@ export function getBestSetFor1RM<T extends { peso_utilizado?: number | null; rep
     }
 
     return bestResult;
+}
+
+/**
+ * Aggregates effective workout sets across muscle groups.
+ *
+ * Excludes warmups, maps primary and secondary muscle groups according to weights,
+ * and produces structured totals and percentage distributions.
+ *
+ * @param exercisesWithSeries - List of exercises with their performed sets.
+ * @param options - Aggregation options (e.g. secondaryWeight).
+ * @returns Summary containing total effective sets, breakdown by muscle, and sorted distribution.
+ */
+export function aggregateEffectiveSetsByMuscle(
+    exercisesWithSeries: ExerciseWithSeriesForVolume[],
+    options: AggregateOptions = {}
+): EffectiveSetsSummary {
+    const { secondaryWeight = 0 } = options;
+    const totals: Record<string, number> = {};
+
+    if (!Array.isArray(exercisesWithSeries) || exercisesWithSeries.length === 0) {
+        return {
+            totalSeriesEfectivas: 0,
+            porGrupoMuscular: {},
+            distribucion: [],
+        };
+    }
+
+    for (const item of exercisesWithSeries) {
+        const { ejercicio, series } = item;
+        if (!ejercicio || !Array.isArray(series) || series.length === 0) {
+            continue;
+        }
+
+        const effectiveSets = series.filter(isEffectiveSet);
+        const effectiveCount = effectiveSets.length;
+        if (effectiveCount === 0) {
+            continue;
+        }
+
+        // Primary Muscle Group
+        const primary = (ejercicio.grupo_muscular_principal || 'Otros').trim();
+        totals[primary] = (totals[primary] || 0) + effectiveCount;
+
+        // Secondary Muscle Groups (if weighted)
+        if (secondaryWeight > 0 && Array.isArray(ejercicio.grupos_musculares_secundarios)) {
+            for (const sec of ejercicio.grupos_musculares_secundarios) {
+                const secGroup = (sec || '').trim();
+                if (secGroup && secGroup !== primary) {
+                    totals[secGroup] = (totals[secGroup] || 0) + (effectiveCount * secondaryWeight);
+                }
+            }
+        }
+    }
+
+    // Round values to 1 decimal place and calculate total
+    let grandTotal = 0;
+    const cleanMap: Record<string, number> = {};
+
+    for (const [group, count] of Object.entries(totals)) {
+        const roundedCount = Math.round(count * 10) / 10;
+        if (roundedCount > 0) {
+            cleanMap[group] = roundedCount;
+            grandTotal += roundedCount;
+        }
+    }
+
+    grandTotal = Math.round(grandTotal * 10) / 10;
+
+    // Generate distribution array sorted descending by effective sets
+    const distribucion: MuscleVolumeDistribution[] = Object.entries(cleanMap)
+        .map(([grupo_muscular, series_efectivas]) => ({
+            grupo_muscular,
+            series_efectivas,
+            porcentaje: grandTotal > 0 ? Math.round((series_efectivas / grandTotal) * 1000) / 10 : 0,
+        }))
+        .sort((a, b) => b.series_efectivas - a.series_efectivas);
+
+    return {
+        totalSeriesEfectivas: grandTotal,
+        porGrupoMuscular: cleanMap,
+        distribucion,
+    };
 }
