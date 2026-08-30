@@ -9,10 +9,12 @@ import {
     getBestSetFor1RM,
     isEffectiveSet,
     aggregateEffectiveSetsByMuscle,
+    calculateWeeklyFatigue,
     OneRMFormula,
     EffectiveSetsSummary,
     ExerciseWithSeriesForVolume,
     AggregateOptions,
+    FatigueAnalysisResult,
 } from '../utils/analyticsUtils';
 
 export interface OneRMHistoryEntry {
@@ -26,6 +28,12 @@ export interface OneRMHistoryEntry {
 }
 
 export interface GetEffectiveSetsOptions extends AggregateOptions {
+    startDate?: string;
+    endDate?: string;
+    daysLookback?: number;
+}
+
+export interface GetWeeklyFatigueOptions {
     startDate?: string;
     endDate?: string;
     daysLookback?: number;
@@ -93,6 +101,21 @@ export const AnalyticsService = {
         options?: AggregateOptions
     ): EffectiveSetsSummary {
         return aggregateEffectiveSetsByMuscle(exercisesWithSeries, options);
+    },
+
+    /**
+     * Evaluates weekly fatigue analysis from performed workout sets.
+     */
+    calculateWeeklyFatigue(
+        series: Array<{
+            rpe?: number | null;
+            peso_utilizado?: number | null;
+            repeticiones?: number | null;
+            is_warmup?: boolean | null;
+            tipo_serie?: string | null;
+        }>
+    ): FatigueAnalysisResult {
+        return calculateWeeklyFatigue(series);
     },
 
     /**
@@ -298,6 +321,85 @@ export const AnalyticsService = {
             return { data: summary, error: null };
         } catch (error) {
             console.error('Error fetching effective sets by muscle group:', error);
+            return { data: null, error };
+        }
+    },
+
+    /**
+     * Calculates accumulated weekly fatigue and average RPE for the user.
+     *
+     * Queries all recorded sets within the target window (default: last 7 days),
+     * and evaluates fatigue status (Optimal, High, Overtraining).
+     *
+     * @param userId - ID of the target user.
+     * @param options - Date range and lookback parameters.
+     * @returns Service response containing the fatigue analysis result.
+     */
+    async getWeeklyFatigueAnalysis(
+        userId: string,
+        options: GetWeeklyFatigueOptions = {}
+    ): Promise<ServiceResponse<FatigueAnalysisResult>> {
+        try {
+            const {
+                daysLookback = 7,
+                startDate,
+                endDate,
+            } = options;
+
+            let minDateStr = startDate;
+            let maxDateStr = endDate;
+
+            if (!minDateStr) {
+                const now = new Date();
+                const past = new Date(now);
+                past.setDate(now.getDate() - (daysLookback - 1));
+                minDateStr = formatLocalDateKey(past);
+            }
+            if (!maxDateStr) {
+                maxDateStr = formatLocalDateKey(new Date());
+            }
+
+            const { data, error } = await supabase
+                .from('series')
+                .select(`
+                    id,
+                    numero_serie,
+                    peso_utilizado,
+                    repeticiones,
+                    rpe,
+                    is_warmup,
+                    tipo_serie,
+                    ejercicios_programados!inner(
+                        id,
+                        rutinas_diarias!inner(
+                            id,
+                            fecha_dia,
+                            rutinas_semanales!inner(usuario_id)
+                        )
+                    )
+                `)
+                .eq('ejercicios_programados.rutinas_diarias.rutinas_semanales.usuario_id', userId)
+                .not('ejercicios_programados.rutinas_diarias.fecha_dia', 'is', null)
+                .gte('ejercicios_programados.rutinas_diarias.fecha_dia', minDateStr)
+                .lte('ejercicios_programados.rutinas_diarias.fecha_dia', maxDateStr);
+
+            if (error) throw error;
+
+            const seriesList = ((data as any[]) || []).map((row) => ({
+                id: row.id,
+                numero_serie: row.numero_serie,
+                peso_utilizado: row.peso_utilizado,
+                repeticiones: row.repeticiones,
+                rpe: row.rpe,
+                is_warmup: row.is_warmup,
+                tipo_serie: row.tipo_serie,
+            }));
+
+            const analysis = calculateWeeklyFatigue(seriesList);
+
+            return { data: analysis, error: null };
+        } catch (error) {
+            console.error('Error fetching weekly fatigue analysis:', error);
             return { data: null, error };
         }
     },

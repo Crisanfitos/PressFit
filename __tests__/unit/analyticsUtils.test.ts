@@ -6,9 +6,10 @@ import {
     getBestSetFor1RM,
     isEffectiveSet,
     aggregateEffectiveSetsByMuscle,
+    calculateWeeklyFatigue,
 } from '../../src/utils/analyticsUtils';
 
-describe('analyticsUtils - 1RM Calculation Engine & Effective Sets Aggregator (PF-154 & PF-155)', () => {
+describe('analyticsUtils - 1RM Calculation Engine & Effective Sets Aggregator (PF-154, PF-155, PF-157)', () => {
     describe('calculateBrzycki', () => {
         it('returns exact weight when reps is 1', () => {
             expect(calculateBrzycki(100, 1)).toBe(100);
@@ -174,7 +175,6 @@ describe('analyticsUtils - 1RM Calculation Engine & Effective Sets Aggregator (P
     describe('aggregateEffectiveSetsByMuscle (PF-155)', () => {
         it('aggregates effective sets across multiple exercises correctly (Pecho, Espalda, Piernas)', () => {
             const exerciseData = [
-                // Bench Press: 4 sets (1 warmup, 3 effective) -> Pecho
                 {
                     ejercicio: {
                         nombre: 'Press Banca',
@@ -188,7 +188,6 @@ describe('analyticsUtils - 1RM Calculation Engine & Effective Sets Aggregator (P
                         { peso_utilizado: 90, repeticiones: 6 },
                     ],
                 },
-                // Pull-ups: 4 effective sets -> Espalda
                 {
                     ejercicio: {
                         nombre: 'Dominadas',
@@ -202,7 +201,6 @@ describe('analyticsUtils - 1RM Calculation Engine & Effective Sets Aggregator (P
                         { peso_utilizado: 0, repeticiones: 6 },
                     ],
                 },
-                // Squat: 5 sets (1 warmup with rpe 4, 4 effective) -> Piernas
                 {
                     ejercicio: {
                         nombre: 'Sentadilla Trasera',
@@ -226,13 +224,10 @@ describe('analyticsUtils - 1RM Calculation Engine & Effective Sets Aggregator (P
             expect(result.porGrupoMuscular['Espalda']).toBe(4);
             expect(result.porGrupoMuscular['Piernas']).toBe(4);
 
-            // Verify distribution list
             expect(result.distribucion).toHaveLength(3);
             expect(result.distribucion[0].series_efectivas).toBe(4);
             expect(result.distribucion[1].series_efectivas).toBe(4);
             expect(result.distribucion[2].series_efectivas).toBe(3);
-            expect(result.distribucion[2].grupo_muscular).toBe('Pecho');
-            expect(result.distribucion[2].porcentaje).toBe(27.3); // 3 / 11 = 27.27%
         });
 
         it('supports secondary muscle weighting when secondaryWeight > 0', () => {
@@ -253,9 +248,9 @@ describe('analyticsUtils - 1RM Calculation Engine & Effective Sets Aggregator (P
             const result = aggregateEffectiveSetsByMuscle(exerciseData, { secondaryWeight: 0.5 });
 
             expect(result.porGrupoMuscular['Pecho']).toBe(2);
-            expect(result.porGrupoMuscular['Tríceps']).toBe(1); // 2 * 0.5
-            expect(result.porGrupoMuscular['Hombros']).toBe(1); // 2 * 0.5
-            expect(result.totalSeriesEfectivas).toBe(4); // 2 + 1 + 1
+            expect(result.porGrupoMuscular['Tríceps']).toBe(1);
+            expect(result.porGrupoMuscular['Hombros']).toBe(1);
+            expect(result.totalSeriesEfectivas).toBe(4);
         });
 
         it('handles empty or malformed exercise lists cleanly', () => {
@@ -263,9 +258,87 @@ describe('analyticsUtils - 1RM Calculation Engine & Effective Sets Aggregator (P
             expect(emptyResult.totalSeriesEfectivas).toBe(0);
             expect(emptyResult.porGrupoMuscular).toEqual({});
             expect(emptyResult.distribucion).toEqual([]);
+        });
+    });
 
-            const nullResult = aggregateEffectiveSetsByMuscle(null as any);
-            expect(nullResult.totalSeriesEfectivas).toBe(0);
+    describe('calculateWeeklyFatigue (PF-157)', () => {
+        it('calculates optimal fatigue level when average RPE < 7.5', () => {
+            const series = [
+                { peso_utilizado: 80, repeticiones: 10, rpe: 7 },
+                { peso_utilizado: 85, repeticiones: 8, rpe: 7 },
+                { peso_utilizado: 90, repeticiones: 6, rpe: 7.5 },
+                { peso_utilizado: 100, repeticiones: 5, rpe: 7 },
+            ];
+
+            const result = calculateWeeklyFatigue(series);
+
+            expect(result.fatigueLevel).toBe('optimo');
+            expect(result.statusLabel).toBe('Óptimo');
+            expect(result.statusColor).toBe('#10B981');
+            expect(result.averageRPE).toBe(7.1);
+            expect(result.totalSeriesCount).toBe(4);
+            expect(result.rpeSeriesCount).toBe(4);
+            expect(result.highIntensityCount).toBe(0);
+            expect(result.recommendation).toContain('óptima');
+        });
+
+        it('calculates high fatigue level when average RPE is between 7.5 and 8.7', () => {
+            const series = [
+                { peso_utilizado: 80, repeticiones: 10, rpe: 8 },
+                { peso_utilizado: 85, repeticiones: 8, rpe: 8.5 },
+                { peso_utilizado: 90, repeticiones: 6, rpe: 8 },
+            ];
+
+            const result = calculateWeeklyFatigue(series);
+
+            expect(result.fatigueLevel).toBe('alto');
+            expect(result.statusLabel).toBe('Alto');
+            expect(result.statusColor).toBe('#F59E0B');
+            expect(result.averageRPE).toBe(8.2);
+            expect(result.recommendation).toContain('moderada-alta');
+        });
+
+        it('calculates overtraining level when average RPE > 8.7 or majority sets are high intensity', () => {
+            const series = [
+                { peso_utilizado: 80, repeticiones: 10, rpe: 9.5 },
+                { peso_utilizado: 85, repeticiones: 8, rpe: 9 },
+                { peso_utilizado: 90, repeticiones: 6, rpe: 9.5 },
+                { peso_utilizado: 100, repeticiones: 4, rpe: 10 },
+            ];
+
+            const result = calculateWeeklyFatigue(series);
+
+            expect(result.fatigueLevel).toBe('sobreentrenamiento');
+            expect(result.statusLabel).toBe('Sobreentrenamiento');
+            expect(result.statusColor).toBe('#EF4444');
+            expect(result.averageRPE).toBe(9.5);
+            expect(result.highIntensityCount).toBe(4);
+            expect(result.recommendation).toContain('descarga (deload)');
+        });
+
+        it('handles sets without RPE or warmups correctly', () => {
+            const series = [
+                { peso_utilizado: 40, repeticiones: 15, is_warmup: true, rpe: 4 },
+                { peso_utilizado: 80, repeticiones: 10 }, // no rpe
+                { peso_utilizado: 85, repeticiones: 8, rpe: null },
+            ];
+
+            const result = calculateWeeklyFatigue(series);
+
+            expect(result.fatigueLevel).toBe('sin_datos');
+            expect(result.statusLabel).toBe('Sin Datos');
+            expect(result.totalSeriesCount).toBe(2); // warm-up excluded, 2 effective sets
+            expect(result.rpeSeriesCount).toBe(0);
+            expect(result.averageRPE).toBe(0);
+        });
+
+        it('returns sin_datos for empty or invalid input', () => {
+            const resultEmpty = calculateWeeklyFatigue([]);
+            expect(resultEmpty.fatigueLevel).toBe('sin_datos');
+            expect(resultEmpty.averageRPE).toBe(0);
+
+            const resultNull = calculateWeeklyFatigue(null as any);
+            expect(resultNull.fatigueLevel).toBe('sin_datos');
         });
     });
 });

@@ -4,6 +4,7 @@
  * Implements:
  * 1. 1RM (One Repetition Maximum) estimation using Brzycki and Epley formulas.
  * 2. Effective Sets Aggregation per Muscle Group with warmup exclusions and distribution stats.
+ * 3. Weekly Fatigue & RPE analysis with three-tier traffic light status (Optimal, High, Overtraining).
  *
  * @module utils/analyticsUtils
  */
@@ -53,6 +54,19 @@ export interface AggregateOptions {
      * Default: 0 (only primary muscle receives sets) or 0.5 when secondary engagement is enabled.
      */
     secondaryWeight?: number;
+}
+
+export type FatigueLevel = 'optimo' | 'alto' | 'sobreentrenamiento' | 'sin_datos';
+
+export interface FatigueAnalysisResult {
+    averageRPE: number;
+    fatigueLevel: FatigueLevel;
+    totalSeriesCount: number;
+    rpeSeriesCount: number;
+    highIntensityCount: number; // Sets with RPE >= 9
+    statusLabel: string;
+    statusColor: string;
+    recommendation: string;
 }
 
 /**
@@ -337,5 +351,106 @@ export function aggregateEffectiveSetsByMuscle(
         totalSeriesEfectivas: grandTotal,
         porGrupoMuscular: cleanMap,
         distribucion,
+    };
+}
+
+/**
+ * Evaluates weekly training fatigue and RPE load from performed sets.
+ *
+ * Implements a three-tier athletic traffic light status:
+ * - Optimal (< 7.5 RPE)
+ * - High (7.5 - 8.7 RPE)
+ * - Overtraining (> 8.7 RPE or excessive high-intensity strain)
+ *
+ * @param series - List of sets performed during the week.
+ * @returns Structured fatigue assessment with RPE metrics, status label, color and recommendation.
+ */
+export function calculateWeeklyFatigue(
+    series: Array<{
+        rpe?: number | null;
+        peso_utilizado?: number | null;
+        repeticiones?: number | null;
+        is_warmup?: boolean | null;
+        tipo_serie?: string | null;
+    }>
+): FatigueAnalysisResult {
+    if (!Array.isArray(series) || series.length === 0) {
+        return {
+            averageRPE: 0,
+            fatigueLevel: 'sin_datos',
+            totalSeriesCount: 0,
+            rpeSeriesCount: 0,
+            highIntensityCount: 0,
+            statusLabel: 'Sin Datos',
+            statusColor: '#6B7280',
+            recommendation: 'Registra el RPE en tus series de entrenamiento para analizar tu fatiga acumulada.',
+        };
+    }
+
+    // Filter effective sets first
+    const effectiveSets = series.filter(isEffectiveSet);
+    const totalSeriesCount = effectiveSets.length;
+
+    // Filter sets where RPE is recorded (RPE >= 1 and RPE <= 10)
+    const validRPESets = effectiveSets.filter((s) => {
+        const rpe = Number(s.rpe);
+        return !isNaN(rpe) && rpe >= 1 && rpe <= 10;
+    });
+
+    const rpeSeriesCount = validRPESets.length;
+
+    if (rpeSeriesCount === 0) {
+        return {
+            averageRPE: 0,
+            fatigueLevel: 'sin_datos',
+            totalSeriesCount,
+            rpeSeriesCount: 0,
+            highIntensityCount: 0,
+            statusLabel: 'Sin Datos',
+            statusColor: '#6B7280',
+            recommendation: 'Registra el RPE en tus series de entrenamiento para analizar tu fatiga acumulada.',
+        };
+    }
+
+    let rpeSum = 0;
+    let highIntensityCount = 0;
+
+    for (const s of validRPESets) {
+        const rpe = Number(s.rpe);
+        rpeSum += rpe;
+        if (rpe >= 9) {
+            highIntensityCount++;
+        }
+    }
+
+    const averageRPE = Math.round((rpeSum / rpeSeriesCount) * 10) / 10;
+
+    // Determine status level
+    let fatigueLevel: FatigueLevel = 'optimo';
+    let statusLabel = 'Óptimo';
+    let statusColor = '#10B981'; // Green
+    let recommendation = 'Carga de trabajo óptima. Excelente capacidad de asimilación y recuperación.';
+
+    if (averageRPE > 8.7 || (rpeSeriesCount >= 10 && highIntensityCount / rpeSeriesCount >= 0.6)) {
+        fatigueLevel = 'sobreentrenamiento';
+        statusLabel = 'Sobreentrenamiento';
+        statusColor = '#EF4444'; // Red
+        recommendation = 'Alerta de fatiga acumulada crítica. Considera una semana de descarga (deload) o descanso activo.';
+    } else if (averageRPE >= 7.5 || (rpeSeriesCount >= 8 && highIntensityCount >= 4)) {
+        fatigueLevel = 'alto';
+        statusLabel = 'Alto';
+        statusColor = '#F59E0B'; // Yellow / Amber
+        recommendation = 'Fatiga acumulada moderada-alta. Monitorea tu recuperación, sueño y nutrición.';
+    }
+
+    return {
+        averageRPE,
+        fatigueLevel,
+        totalSeriesCount,
+        rpeSeriesCount,
+        highIntensityCount,
+        statusLabel,
+        statusColor,
+        recommendation,
     };
 }

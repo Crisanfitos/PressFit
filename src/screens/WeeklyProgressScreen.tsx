@@ -5,6 +5,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useProgressController } from '../controllers/useProgressController';
+import FatigueLevelCard from '../components/FatigueLevelCard';
 
 type WeeklyProgressScreenProps = { navigation: any };
 
@@ -107,6 +108,9 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
                             <Text style={styles.summaryLabel}>Minutos Totales</Text>
                         </View>
                     </View>
+
+                    {/* Weekly Fatigue & RPE Level Card */}
+                    <FatigueLevelCard userId={user?.id} />
 
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Duración por Día</Text>
