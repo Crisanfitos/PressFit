@@ -85,4 +85,51 @@ describe('SignUpScreen Component (RNTL)', () => {
       expect(mockSignUpWithEmail).toHaveBeenCalledWith('carlos@test.com', '123456', 'Carlos');
     });
   });
+
+  it('configures defensive keyboard properties on password and confirm password inputs (PF-BUG-060)', async () => {
+    const { getByTestId } = await renderSignUpScreen();
+    const passwordInput = getByTestId('signup-password-input');
+    const confirmPasswordInput = getByTestId('signup-confirmpassword-input');
+    const passwordToggle = getByTestId('signup-password-toggle');
+    const confirmPasswordToggle = getByTestId('signup-confirmpassword-toggle');
+
+    // Initial state
+    expect(passwordInput.props.secureTextEntry).toBe(true);
+    expect(passwordInput.props.autoCorrect).toBe(false);
+    expect(passwordInput.props.autoCapitalize).toBe('none');
+    expect(passwordInput.props.spellCheck).toBe(false);
+    expect(passwordInput.props.textContentType).toBe('password');
+    expect(passwordInput.props.autoComplete).toBe('password');
+
+    expect(confirmPasswordInput.props.secureTextEntry).toBe(true);
+    expect(confirmPasswordInput.props.autoCorrect).toBe(false);
+    expect(confirmPasswordInput.props.autoCapitalize).toBe('none');
+    expect(confirmPasswordInput.props.spellCheck).toBe(false);
+    expect(confirmPasswordInput.props.textContentType).toBe('password');
+    expect(confirmPasswordInput.props.autoComplete).toBe('password');
+
+    // Toggle both inputs to visible
+    await act(async () => {
+      fireEvent.press(passwordToggle);
+      fireEvent.press(confirmPasswordToggle);
+    });
+
+    const updatedPasswordInput = getByTestId('signup-password-input');
+    const updatedConfirmPasswordInput = getByTestId('signup-confirmpassword-input');
+
+    // Visible state: secureTextEntry is false, defensive keyboard properties remain
+    expect(updatedPasswordInput.props.secureTextEntry).toBe(false);
+    expect(updatedPasswordInput.props.autoCorrect).toBe(false);
+    expect(updatedPasswordInput.props.autoCapitalize).toBe('none');
+    expect(updatedPasswordInput.props.spellCheck).toBe(false);
+    expect(updatedPasswordInput.props.textContentType).toBe('password');
+    expect(updatedPasswordInput.props.autoComplete).toBe('password');
+
+    expect(updatedConfirmPasswordInput.props.secureTextEntry).toBe(false);
+    expect(updatedConfirmPasswordInput.props.autoCorrect).toBe(false);
+    expect(updatedConfirmPasswordInput.props.autoCapitalize).toBe('none');
+    expect(updatedConfirmPasswordInput.props.spellCheck).toBe(false);
+    expect(updatedConfirmPasswordInput.props.textContentType).toBe('password');
+    expect(updatedConfirmPasswordInput.props.autoComplete).toBe('password');
+  });
 });
