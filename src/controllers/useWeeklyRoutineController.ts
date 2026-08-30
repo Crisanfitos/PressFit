@@ -86,9 +86,20 @@ export const useWeeklyRoutineController = (userId: string | undefined) => {
 
     const deleteRoutine = async (id: string) => {
         try {
+            const routineToDelete = routines.find((r) => r.id === id);
+            const wasActive = !!routineToDelete?.activa;
+            const remainingRoutines = routines.filter((r) => r.id !== id);
+
             const { error: deleteError } = await RoutineService.deleteWeeklyRoutine(id);
             if (deleteError) throw deleteError;
-            setRoutines((prev) => prev.filter((r) => r.id !== id));
+
+            if (wasActive && remainingRoutines.length > 0) {
+                const nextActiveRoutine = remainingRoutines[0];
+                await RoutineService.updateWeeklyRoutine(nextActiveRoutine.id, { activa: true });
+                setRoutines(remainingRoutines.map((r) => (r.id === nextActiveRoutine.id ? { ...r, activa: true } : r)));
+            } else {
+                setRoutines(remainingRoutines);
+            }
             return true;
         } catch (err) {
             console.error('Error deleting routine:', err);
