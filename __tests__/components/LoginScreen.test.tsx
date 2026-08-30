@@ -51,14 +51,45 @@ describe('LoginScreen Component (RNTL)', () => {
         mockSignInWithEmail.mockRejectedValueOnce(new Error('Invalid login credentials'));
         const { getByTestId, findByText } = await renderLoginScreen();
 
-        fireEvent.changeText(getByTestId('email-input'), 'user@test.com');
-        fireEvent.changeText(getByTestId('password-input'), 'wrongpass');
+        await act(async () => {
+            fireEvent.changeText(getByTestId('email-input'), 'user@test.com');
+            fireEvent.changeText(getByTestId('password-input'), 'wrongpass');
+        });
 
-        await act(async () => {});
-
-        fireEvent.press(getByTestId('login-submit-button'));
+        await act(async () => {
+            fireEvent.press(getByTestId('login-submit-button'));
+        });
 
         expect(await findByText('Invalid email or password. Please check your credentials and try again.')).toBeTruthy();
+    });
+
+    it('configures defensive keyboard properties to prevent text suggestions when password visibility is toggled (PF-BUG-060)', async () => {
+        const { getByTestId } = await renderLoginScreen();
+        const passwordInput = getByTestId('password-input');
+        const toggleButton = getByTestId('login-password-toggle');
+
+        // Initial state: password hidden
+        expect(passwordInput.props.secureTextEntry).toBe(true);
+        expect(passwordInput.props.autoCorrect).toBe(false);
+        expect(passwordInput.props.autoCapitalize).toBe('none');
+        expect(passwordInput.props.spellCheck).toBe(false);
+        expect(passwordInput.props.textContentType).toBe('password');
+        expect(passwordInput.props.autoComplete).toBe('password');
+
+        // Toggle visibility to show password
+        await act(async () => {
+            fireEvent.press(toggleButton);
+        });
+
+        const updatedPasswordInput = getByTestId('password-input');
+
+        // Visible state: secureTextEntry is false, but defensive keyboard properties remain
+        expect(updatedPasswordInput.props.secureTextEntry).toBe(false);
+        expect(updatedPasswordInput.props.autoCorrect).toBe(false);
+        expect(updatedPasswordInput.props.autoCapitalize).toBe('none');
+        expect(updatedPasswordInput.props.spellCheck).toBe(false);
+        expect(updatedPasswordInput.props.textContentType).toBe('password');
+        expect(updatedPasswordInput.props.autoComplete).toBe('password');
     });
 });
 

@@ -239,6 +239,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                                     secureTextEntry={!showPassword}
                                     autoCapitalize="none"
                                     autoCorrect={false}
+                                    spellCheck={false}
+                                    textContentType="password"
+                                    autoComplete="password"
                                     value={password}
                                     onChangeText={setPassword}
                                     testID="password-input"

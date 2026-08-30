@@ -235,6 +235,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                                     secureTextEntry={!showPassword}
                                     autoCapitalize="none"
                                     autoCorrect={false}
+                                    spellCheck={false}
+                                    textContentType="password"
+                                    autoComplete="password"
                                     value={password}
                                     onChangeText={setPassword}
                                     testID="signup-password-input"
@@ -265,6 +268,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
                                     secureTextEntry={!showConfirmPassword}
                                     autoCapitalize="none"
                                     autoCorrect={false}
+                                    spellCheck={false}
+                                    textContentType="password"
+                                    autoComplete="password"
                                     value={confirmPassword}
                                     onChangeText={setConfirmPassword}
                                     testID="signup-confirmpassword-input"
