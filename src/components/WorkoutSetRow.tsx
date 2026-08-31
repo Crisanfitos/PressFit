@@ -68,19 +68,23 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
 
     const handleQuickAdjustWeight = (delta: number) => {
         HapticService.selection();
-        const current = set.peso_utilizado > 0
-            ? set.peso_utilizado
-            : (ghostWeight ? parseFloat(ghostWeight) || 0 : 0);
-        const nextVal = Math.max(0, parseFloat((current + delta).toFixed(1)));
-        const valStr = nextVal % 1 === 0 ? String(nextVal) : String(nextVal);
+        const parsedWeight = parseFloat(String(set.peso_utilizado));
+        const parsedGhost = ghostWeight ? parseFloat(String(ghostWeight)) : 0;
+        const current = !isNaN(parsedWeight) && parsedWeight > 0
+            ? parsedWeight
+            : (!isNaN(parsedGhost) && parsedGhost > 0 ? parsedGhost : 0);
+        const nextVal = Math.max(0, Math.round((current + delta) * 10) / 10);
+        const valStr = nextVal % 1 === 0 ? String(nextVal) : nextVal.toFixed(1);
         onSetChange(set.id, 'weight', valStr);
     };
 
     const handleQuickAdjustReps = (delta: number) => {
         HapticService.selection();
-        const current = set.repeticiones > 0
-            ? set.repeticiones
-            : (ghostReps ? parseInt(ghostReps, 10) || 0 : 0);
+        const parsedReps = parseInt(String(set.repeticiones), 10);
+        const parsedGhost = ghostReps ? parseInt(String(ghostReps), 10) : 0;
+        const current = !isNaN(parsedReps) && parsedReps > 0
+            ? parsedReps
+            : (!isNaN(parsedGhost) && parsedGhost > 0 ? parsedGhost : 0);
         const nextVal = Math.max(0, current + delta);
         onSetChange(set.id, 'reps', String(nextVal));
     };

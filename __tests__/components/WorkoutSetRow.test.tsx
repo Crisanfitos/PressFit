@@ -259,4 +259,110 @@ describe('WorkoutSetRow Component (RNTL)', () => {
 
         expect(mockOnStartRestTimer).toHaveBeenCalledWith('set-1');
     });
+
+    it('handles string inputs for peso_utilizado plus (PF-BUG-070)', async () => {
+        const stringSet = {
+            id: 'set-str-1',
+            numero_serie: 1,
+            peso_utilizado: '80' as any,
+            repeticiones: 10,
+            rpe: 8,
+        };
+
+        const { getByTestId } = await render(
+            <WorkoutSetRow
+                set={stringSet}
+                setIndex={0}
+                exerciseId="ex-1"
+                tipoPeso="total"
+                isInputEditable={true}
+                isStructureEditable={false}
+                colors={mockColors}
+                onSetChange={mockOnSetChange}
+            />
+        );
+
+        const plusBtn = getByTestId('quick-adjust-weight-plus-0');
+        expect(() => fireEvent.press(plusBtn)).not.toThrow();
+        expect(mockOnSetChange).toHaveBeenCalledWith('set-str-1', 'weight', '82.5');
+    });
+
+    it('handles string inputs for peso_utilizado minus (PF-BUG-070)', async () => {
+        const stringSet = {
+            id: 'set-str-1',
+            numero_serie: 1,
+            peso_utilizado: '80' as any,
+            repeticiones: 10,
+            rpe: 8,
+        };
+
+        const { getByTestId } = await render(
+            <WorkoutSetRow
+                set={stringSet}
+                setIndex={0}
+                exerciseId="ex-1"
+                tipoPeso="total"
+                isInputEditable={true}
+                isStructureEditable={false}
+                colors={mockColors}
+                onSetChange={mockOnSetChange}
+            />
+        );
+
+        const minusBtn = getByTestId('quick-adjust-weight-minus-0');
+        expect(() => fireEvent.press(minusBtn)).not.toThrow();
+        expect(mockOnSetChange).toHaveBeenCalledWith('set-str-1', 'weight', '77.5');
+    });
+
+    it('handles string inputs for repeticiones plus (PF-BUG-070)', async () => {
+        const stringSet = {
+            id: 'set-str-2',
+            numero_serie: 1,
+            peso_utilizado: 50,
+            repeticiones: '10' as any,
+        };
+
+        const { getByTestId } = await render(
+            <WorkoutSetRow
+                set={stringSet}
+                setIndex={0}
+                exerciseId="ex-1"
+                tipoPeso="total"
+                isInputEditable={true}
+                isStructureEditable={false}
+                colors={mockColors}
+                onSetChange={mockOnSetChange}
+            />
+        );
+
+        const plusRepsBtn = getByTestId('quick-adjust-reps-plus-0');
+        fireEvent.press(plusRepsBtn);
+        expect(mockOnSetChange).toHaveBeenCalledWith('set-str-2', 'reps', '11');
+    });
+
+    it('handles string inputs for repeticiones minus (PF-BUG-070)', async () => {
+        const stringSet = {
+            id: 'set-str-2',
+            numero_serie: 1,
+            peso_utilizado: 50,
+            repeticiones: '10' as any,
+        };
+
+        const { getByTestId } = await render(
+            <WorkoutSetRow
+                set={stringSet}
+                setIndex={0}
+                exerciseId="ex-1"
+                tipoPeso="total"
+                isInputEditable={true}
+                isStructureEditable={false}
+                colors={mockColors}
+                onSetChange={mockOnSetChange}
+            />
+        );
+
+        const minusRepsBtn = getByTestId('quick-adjust-reps-minus-0');
+        fireEvent.press(minusRepsBtn);
+        expect(mockOnSetChange).toHaveBeenCalledWith('set-str-2', 'reps', '9');
+    });
 });
