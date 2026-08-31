@@ -143,4 +143,67 @@ describe('WorkoutScreen Component (RNTL)', () => {
 
     expect(alertSpy).toHaveBeenCalledWith('Eliminar Ejercicio', expect.any(String), expect.any(Array));
   });
+
+  it('renders smart ghost placeholders from previous workout for weight, reps, and rpe', async () => {
+    mockUseWorkoutController.mockReturnValue({
+      workout: { id: 'w-101', fecha_dia: '2026-08-08', descripcion: 'Día de Pecho' },
+      exercises: [
+        {
+          id: 'ex-item-1',
+          titulo: 'Press de Banca',
+          tipo_peso: 'total',
+          routine_exercise_id: 're-1',
+          sets: [
+            { id: 's1', numero_serie: 1, peso_utilizado: 0, repeticiones: 0, rpe: 0, tipo_peso: 'total' },
+            { id: 's2', numero_serie: 2, peso_utilizado: 0, repeticiones: 0, rpe: 0, tipo_peso: 'total' },
+          ],
+        },
+      ],
+      loading: false,
+      mode: 'ACTIVE',
+      previousWorkout: {
+        id: 'prev-w-1',
+        isStale: true,
+        days_diff: 16,
+        ejercicios_programados: [
+          {
+            ejercicio_id: 'ex-item-1',
+            series: [
+              { numero_serie: 1, peso_utilizado: 85, repeticiones: 10, rpe: 8 },
+            ],
+          },
+        ],
+      },
+      startWorkout: jest.fn(),
+      addSet: mockAddSet,
+      addSets: jest.fn(),
+      updateSet: mockUpdateSet,
+      deleteSet: jest.fn(),
+      removeExercise: mockRemoveExercise,
+      finishWorkout: mockFinishWorkout,
+      updateWeightType: jest.fn(),
+      loadSeriesForExercise: jest.fn(),
+      reloadExercises: jest.fn(),
+    } as any);
+
+    const { getByTestId, getAllByPlaceholderText } = await render(
+      <WorkoutScreen navigation={mockNavigation} route={activeRoute} />
+    );
+
+    // Verify stale badge is shown
+    expect(getByTestId('stale-badge')).toBeTruthy();
+
+    // Verify Set 1 has ghost value placeholders: weight=85, reps=10, rpe=8
+    const weightInputSet0 = getByTestId('set-weight-input-0');
+    const repsInputSet0 = getByTestId('set-reps-input-0');
+    const rpeInputSet0 = getByTestId('set-rpe-input-0');
+
+    expect(weightInputSet0.props.placeholder).toBe('85');
+    expect(repsInputSet0.props.placeholder).toBe('10');
+    expect(rpeInputSet0.props.placeholder).toBe('8');
+
+    // Verify Set 2 falls back to the last recorded set (85, 10, 8)
+    const weightInputSet1 = getByTestId('set-weight-input-1');
+    expect(weightInputSet1.props.placeholder).toBe('85');
+  });
 });

@@ -155,17 +155,23 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
     const getGhostValue = (exerciseId: string, setNumber: number, field: 'weight' | 'reps' | 'rpe') => {
         if (!previousWorkout?.ejercicios_programados) return null;
         const prevExercise = previousWorkout.ejercicios_programados.find(
-            (ep: any) => ep.ejercicio_id === exerciseId
+            (ep: any) => ep.ejercicio_id === exerciseId || ep.ejercicio?.id === exerciseId || ep.id === exerciseId
         );
-        if (!prevExercise?.series_realizadas) return null;
-        const prevSet = prevExercise.series_realizadas.find((s: any) => s.numero_serie === setNumber);
+        if (!prevExercise) return null;
+        const sets: any[] = prevExercise.series_realizadas || prevExercise.series || [];
+        if (!sets || sets.length === 0) return null;
+
+        let prevSet = sets.find((s: any) => s.numero_serie === setNumber);
+        if (!prevSet && sets.length > 0) {
+            prevSet = sets[sets.length - 1];
+        }
         if (!prevSet) return null;
 
-        let val: number;
+        let val: number | undefined;
         if (field === 'reps') val = prevSet.repeticiones;
         else if (field === 'rpe') val = prevSet.rpe;
         else val = prevSet.peso_utilizado;
-        return val > 0 ? String(val) : null;
+        return val !== undefined && val > 0 ? String(val) : null;
     };
 
     const handleSetChange = async (setId: string, field: string, value: string) => {
