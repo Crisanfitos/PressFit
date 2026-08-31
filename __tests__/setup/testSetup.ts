@@ -34,6 +34,25 @@ jest.mock('expo-notifications', () => ({
     cancelScheduledNotificationAsync: jest.fn().mockResolvedValue(undefined),
 }));
 
+// Mock Expo Haptics
+jest.mock('expo-haptics', () => ({
+    ImpactFeedbackStyle: {
+        Light: 'light',
+        Medium: 'medium',
+        Heavy: 'heavy',
+        Rigid: 'rigid',
+        Soft: 'soft',
+    },
+    NotificationFeedbackType: {
+        Success: 'success',
+        Warning: 'warning',
+        Error: 'error',
+    },
+    impactAsync: jest.fn().mockResolvedValue(undefined),
+    notificationAsync: jest.fn().mockResolvedValue(undefined),
+    selectionAsync: jest.fn().mockResolvedValue(undefined),
+}));
+
 import i18n from '../../src/i18n';
 
 // Reset i18n language to Spanish before each test to guarantee deterministic UI text across environments

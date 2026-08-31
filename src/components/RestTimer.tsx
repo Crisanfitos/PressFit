@@ -23,6 +23,7 @@ import {
     ACTION_PAUSE,
     ACTION_DISCARD,
 } from '../services/TimerNotificationService';
+import { HapticService } from '../services/HapticService';
 
 const TIMER_STORAGE_KEY = '@pressfit_rest_timer_start';
 
@@ -66,6 +67,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                 const elapsed = await getElapsedSecondsFromStorage();
                 await cancelTimerNotification();
                 await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+                HapticService.timerFinished();
                 onTimerStop(elapsed > 0 ? elapsed : seconds);
                 setIsStopped(false);
                 onDismiss();
@@ -199,6 +201,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
         const elapsed = await getElapsedSecondsFromStorage();
         await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
         await cancelTimerNotification();
+        HapticService.timerFinished();
 
         onTimerStop(elapsed > 0 ? elapsed : seconds);
         setIsStopped(false);

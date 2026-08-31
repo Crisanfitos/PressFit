@@ -22,6 +22,7 @@ import { PersonalNoteButton } from '../components/PersonalNoteButton';
 import RestTimer from '../components/RestTimer';
 import { WeightTypeBadge } from '../components/WeightTypeBadge';
 import { WorkoutService } from '../services/WorkoutService';
+import { HapticService } from '../services/HapticService';
 import { checkActiveRestTimer, saveActiveWorkoutParams, getActiveWorkoutParams } from '../services/TimerNotificationService';
 import { TIPO_PESO_SHORT_LABELS } from '../types/setTypes';
 
@@ -208,6 +209,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
     };
 
     const handleStartRestTimer = (setId: string) => {
+        HapticService.setCompleted();
         setLastCompletedSetId(setId);
         saveActiveWorkoutParams({ activeSetId: setId });
         setRestTimerVisible(true);
