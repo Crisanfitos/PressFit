@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import KeyboardAwareContainer from '../components/KeyboardAwareContainer';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
@@ -33,6 +34,7 @@ type WorkoutScreenProps = {
 };
 
 const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
+    const { t } = useTranslation();
     const { routineDayId, dayName, workoutId: initialWorkoutId, dayOfWeek, mode: navMode } = route.params || {};
 
     useEffect(() => {
@@ -240,24 +242,30 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
     };
 
     const handleFinishWorkout = () => {
-        Alert.alert('Finalizar Entrenamiento', '¿Estás seguro de que quieres finalizar?', [
-            { text: 'Cancelar', style: 'cancel' },
-            {
-                text: 'Finalizar',
-                onPress: async () => {
-                    setSaving(true);
-                    const success = await finishWorkout();
-                    setSaving(false);
-                    if (success) {
-                        Alert.alert('¡Completado!', 'Entrenamiento guardado correctamente', [
-                            { text: 'OK', onPress: () => navigation.goBack() },
-                        ]);
-                    } else {
-                        Alert.alert('Error', 'No se pudo finalizar el entrenamiento');
-                    }
+        Alert.alert(
+            t('workout.finishWorkout', 'Finalizar Entrenamiento'),
+            t('workout.finishWorkoutConfirm', '¿Deseas finalizar este entrenamiento?'),
+            [
+                { text: t('common.cancel', 'Cancelar'), style: 'cancel' },
+                {
+                    text: t('common.finish', 'Finalizar'),
+                    onPress: async () => {
+                        setSaving(true);
+                        const success = await finishWorkout();
+                        setSaving(false);
+                        if (success) {
+                            Alert.alert(
+                                t('workout.workoutCompletedTitle', '¡Completado!'),
+                                t('workout.workoutSavedSuccess', 'Entrenamiento guardado correctamente'),
+                                [{ text: 'OK', onPress: () => navigation.goBack() }]
+                            );
+                        } else {
+                            Alert.alert(t('common.error', 'Error'), 'No se pudo finalizar el entrenamiento');
+                        }
+                    },
                 },
-            },
-        ]);
+            ]
+        );
     };
 
     const isInputEditable = mode === 'ACTIVE' || navMode === 'edit';
@@ -518,7 +526,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                             </View>
                             <Text style={styles.placeholderTitle}>¡Día libre de ejercicios!</Text>
                             <Text style={styles.placeholderText}>
-                                No hay ejercicios programados.{isStructureEditable && ' Añade ejercicios para comenzar.'}
+                                {t('workout.noScheduledExercises', 'No hay ejercicios programados.')}{isStructureEditable && ' Añade ejercicios para comenzar.'}
                             </Text>
                             {isStructureEditable && (
                                 <TouchableOpacity
@@ -527,7 +535,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                     onPress={navigateToExerciseLibrary}
                                 >
                                     <MaterialIcons name="add" size={24} color={colors.background} />
-                                    <Text style={styles.addExerciseButtonText}>Añadir Ejercicio</Text>
+                                    <Text style={styles.addExerciseButtonText}>{t('workout.addExercise', 'Añadir Ejercicio')}</Text>
                                 </TouchableOpacity>
                             )}
                         </View>
@@ -662,7 +670,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                 ) : (
                                     <>
                                         <MaterialIcons name="check-circle" size={24} color={colors.background} />
-                                        <Text style={styles.finishButtonText}>Finalizar Entrenamiento</Text>
+                                        <Text style={styles.finishButtonText}>{t('workout.finishWorkout', 'Finalizar Entrenamiento')}</Text>
                                     </>
                                 )}
                             </TouchableOpacity>

@@ -8,7 +8,8 @@ import { WorkoutService } from '../services/WorkoutService';
 import { AuthContext } from '../context/AuthContext';
 import { ExerciseService } from '../services/ExerciseService';
 import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import { TipoPeso, TIPO_PESO_SHORT_LABELS } from '../types/setTypes';
 
 interface SetData {
@@ -28,6 +29,7 @@ type ExerciseProgressDetailScreenProps = {
 };
 
 const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> = ({ route, navigation }) => {
+    const { t, i18n } = useTranslation();
     const { exerciseId } = route.params;
     const { theme } = useTheme();
     const { colors } = theme;
@@ -89,15 +91,16 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
 
         // Convert grouped data to chart format
         const grouped = Array.from(sessionsMap.values()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        const currentLocale = i18n.language?.startsWith('en') ? enUS : es;
 
         return grouped.map((session) => ({
             value: chartMode === 'peso' ? session.maxWeight : session.totalVolume,
-            label: format(parseISO(session.date), 'd MMM', { locale: es }),
+            label: format(parseISO(session.date), 'd MMM', { locale: currentLocale }),
             dataPointText: chartMode === 'peso' ? `${session.maxWeight} kg` : `${session.totalVolume} kg`,
             date: session.date
         }));
 
-    }, [historyData, chartMode]);
+    }, [historyData, chartMode, i18n.language]);
 
     const recommendation = useMemo(() => {
         if (!historyData.length) return "Aún no hay suficientes datos para dar recomendaciones.";
@@ -308,13 +311,13 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                             style={[styles.toggleButton, chartMode === 'peso' && styles.toggleButtonActive]}
                             onPress={() => setChartMode('peso')}
                         >
-                            <Text style={[styles.toggleText, chartMode === 'peso' && styles.toggleTextActive]}>Max Peso</Text>
+                            <Text style={[styles.toggleText, chartMode === 'peso' && styles.toggleTextActive]}>{t('progress.maxWeight', 'Max Peso')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.toggleButton, chartMode === 'volumen' && styles.toggleButtonActive]}
                             onPress={() => setChartMode('volumen')}
                         >
-                            <Text style={[styles.toggleText, chartMode === 'volumen' && styles.toggleTextActive]}>Volumen Total</Text>
+                            <Text style={[styles.toggleText, chartMode === 'volumen' && styles.toggleTextActive]}>{t('progress.totalVolume', 'Volumen Total')}</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -355,7 +358,7 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                             })()}
                         </View>
                     ) : (
-                        <Text style={{ color: colors.textSecondary, padding: 20 }}>No hay datos suficientes para la gráfica.</Text>
+                        <Text style={{ color: colors.textSecondary, padding: 20 }}>{t('progress.notEnoughDataForChart', 'No hay datos suficientes para la gráfica.')}</Text>
                     )}
                 </View>
 
@@ -363,19 +366,19 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                 <View style={styles.recommendationCard}>
                     <View style={styles.recommendationHeader}>
                         <MaterialIcons name="lightbulb" size={20} color={colors.primary} />
-                        <Text style={styles.recommendationTitle}>Análisis de IA</Text>
+                        <Text style={styles.recommendationTitle}>{t('progress.aiAnalysis', 'Análisis de IA')}</Text>
                     </View>
                     <Text style={styles.recommendationText}>{recommendation}</Text>
                 </View>
 
                 {/* History List */}
-                <Text style={styles.sectionTitle}>Historial de Series</Text>
+                <Text style={styles.sectionTitle}>{t('progress.setsHistory', 'Historial de Series')}</Text>
 
                 {sortedDates.map((date) => (
                     <View key={date} style={styles.sessionCard}>
                         <View style={styles.sessionDateRow}>
                             <MaterialIcons name="event" size={20} color={colors.primary} />
-                            <Text style={styles.sessionDate}>{format(parseISO(date), "EEEE, d 'de' MMMM yyyy", { locale: es })}</Text>
+                            <Text style={styles.sessionDate}>{format(parseISO(date), "EEEE, d 'de' MMMM yyyy", { locale: i18n.language?.startsWith('en') ? enUS : es })}</Text>
                         </View>
 
                         {[...historyListGroupedByDate[date]].sort((a, b) => a.numero_serie - b.numero_serie).map((set) => {
@@ -384,7 +387,7 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                                 : `${set.peso_utilizado} ${TIPO_PESO_SHORT_LABELS[set.tipo_peso || 'total'].toLowerCase()}`;
                             return (
                                 <View key={set.id} style={styles.setRow}>
-                                    <Text style={styles.setNumber}>Serie {set.numero_serie}</Text>
+                                    <Text style={styles.setNumber}>{t('workout.sets', 'Serie')} {set.numero_serie}</Text>
                                     <Text style={styles.setDetails}>{weightLabel} × {set.repeticiones} reps</Text>
                                     {set.rpe ? (
                                         <View style={styles.rpeBadge}>

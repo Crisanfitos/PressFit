@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useProgressController } from '../controllers/useProgressController';
@@ -9,6 +10,7 @@ import { useProgressController } from '../controllers/useProgressController';
 type DailyProgressScreenProps = { navigation: any };
 
 const DailyProgressScreen: React.FC<DailyProgressScreenProps> = ({ navigation }) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
     const authContext = useContext(AuthContext);
@@ -41,7 +43,7 @@ const DailyProgressScreen: React.FC<DailyProgressScreenProps> = ({ navigation })
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} testID="daily-progress-back-button">
                     <MaterialIcons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerText}>Progreso Diario</Text>
+                <Text style={styles.headerText}>{t('progress.dailyProgress', 'Progreso Diario')}</Text>
                 <View style={{ width: 24 }} />
             </View>
 
@@ -52,8 +54,8 @@ const DailyProgressScreen: React.FC<DailyProgressScreenProps> = ({ navigation })
             ) : !dailyStats ? (
                 <View style={styles.emptyState}>
                     <MaterialIcons name="today" size={64} color={colors.textSecondary} />
-                    <Text style={styles.emptyStateTitle}>Sin entrenamientos hoy</Text>
-                    <Text style={styles.emptyStateText}>Completa un entrenamiento para ver tu progreso del día</Text>
+                    <Text style={styles.emptyStateTitle}>{t('progress.noWorkoutsToday', 'Sin entrenamientos hoy')}</Text>
+                    <Text style={styles.emptyStateText}>{t('progress.completeWorkoutPrompt', 'Completa un entrenamiento para ver tu progreso del día')}</Text>
                 </View>
             ) : (
                 <ScrollView style={styles.scrollView}>
@@ -61,22 +63,22 @@ const DailyProgressScreen: React.FC<DailyProgressScreenProps> = ({ navigation })
                         <View style={styles.statCard}>
                             <MaterialIcons name="fitness-center" size={28} color={colors.primary} />
                             <Text style={styles.statValue}>{dailyStats.exercises}</Text>
-                            <Text style={styles.statLabel}>Ejercicios</Text>
+                            <Text style={styles.statLabel}>{t('workout.exercises', 'Ejercicios')}</Text>
                         </View>
                         <View style={styles.statCard}>
                             <MaterialIcons name="repeat" size={28} color={colors.primary} />
                             <Text style={styles.statValue}>{dailyStats.sets}</Text>
-                            <Text style={styles.statLabel}>Series</Text>
+                            <Text style={styles.statLabel}>{t('workout.sets', 'Series')}</Text>
                         </View>
                         <View style={styles.statCard}>
                             <MaterialIcons name="timer" size={28} color={colors.primary} />
                             <Text style={styles.statValue}>{dailyStats.duration}</Text>
-                            <Text style={styles.statLabel}>Minutos</Text>
+                            <Text style={styles.statLabel}>{t('common.minutes', 'Minutos')}</Text>
                         </View>
                         <View style={styles.statCard}>
                             <MaterialIcons name="speed" size={28} color={colors.primary} />
                             <Text style={styles.statValue}>{dailyStats.totalWeight}</Text>
-                            <Text style={styles.statLabel}>Kg Totales</Text>
+                            <Text style={styles.statLabel}>{t('workout.totalWeight', 'Kg Totales')}</Text>
                         </View>
                     </View>
                 </ScrollView>

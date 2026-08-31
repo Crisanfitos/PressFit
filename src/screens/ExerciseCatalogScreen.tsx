@@ -80,11 +80,11 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
   };
 
   const FILTER_ROWS: { key: FilterKey; label: string; options: string[] }[] = useMemo(() => [
-    { key: 'primaryMuscle', label: 'Músculo Principal', options: filterOptions.primaryMuscles },
-    { key: 'secondaryMuscle', label: 'Músculo Secundario', options: filterOptions.secondaryMuscles },
-    { key: 'category', label: 'Categoría', options: filterOptions.categories },
-    { key: 'difficulty', label: 'Dificultad', options: filterOptions.difficulties },
-  ], [filterOptions]);
+    { key: 'primaryMuscle', label: t('exerciseCatalog.primaryMuscle', 'Músculo Principal'), options: filterOptions.primaryMuscles },
+    { key: 'secondaryMuscle', label: t('exerciseCatalog.secondaryMuscle', 'Músculo Secundario'), options: filterOptions.secondaryMuscles },
+    { key: 'category', label: t('exerciseCatalog.category', 'Categoría'), options: filterOptions.categories },
+    { key: 'difficulty', label: t('exerciseCatalog.difficulty', 'Dificultad'), options: filterOptions.difficulties },
+  ], [filterOptions, t]);
 
   const openVideo = (videoId: string | null) => {
     if (videoId) {
@@ -236,7 +236,9 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
                     style={[screenStyles.categoryChip, !activeValue && screenStyles.categoryChipSelected]}
                     onPress={() => clearFilter(key)}
                   >
-                    <Text style={[screenStyles.categoryText, !activeValue && screenStyles.categoryTextSelected]}>Todos</Text>
+                    <Text style={[screenStyles.categoryText, !activeValue && screenStyles.categoryTextSelected]}>
+                      {t('common.all', 'Todos')}
+                    </Text>
                   </TouchableOpacity>
                   {options.map((option) => (
                     <TouchableOpacity
@@ -260,7 +262,9 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
               style={{ alignSelf: 'center', paddingVertical: 6, paddingHorizontal: 16, marginTop: 4, marginBottom: 4 }}
               onPress={clearAllFilters}
             >
-              <Text style={{ color: colors.primary, fontSize: 13, fontWeight: '600' }}>Limpiar Filtros</Text>
+              <Text style={{ color: colors.primary, fontSize: 13, fontWeight: '600' }}>
+                {t('exerciseCatalog.clearFilters', 'Limpiar Filtros')}
+              </Text>
             </TouchableOpacity>
           )}
         </View>
@@ -288,8 +292,8 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
                 <MaterialIcons name={hasActiveFilters || searchQuery.length > 0 ? 'search-off' : 'touch-app'} size={48} color={colors.textSecondary} />
                 <Text style={screenStyles.emptyStateText}>
                   {hasActiveFilters || searchQuery.length > 0
-                    ? 'No se encontraron ejercicios con los filtros actuales'
-                    : 'Usa los filtros o el buscador para encontrar ejercicios'}
+                    ? t('exerciseCatalog.noExercisesFound', 'No se encontraron ejercicios con los filtros actuales')
+                    : t('exerciseCatalog.useFiltersPrompt', 'Usa los filtros o el buscador para encontrar ejercicios')}
                 </Text>
               </View>
             ) : null

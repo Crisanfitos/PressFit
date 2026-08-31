@@ -9,6 +9,7 @@ import {
     StyleSheet,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { PresetRoutine } from '../types/models';
 import { useTheme } from '../context/ThemeContext';
 
@@ -27,6 +28,7 @@ export const PresetRoutineDetailModal: React.FC<PresetRoutineDetailModalProps> =
     onClose,
     onConfirmUse,
 }) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
 
@@ -56,7 +58,7 @@ export const PresetRoutineDetailModal: React.FC<PresetRoutineDetailModalProps> =
                                 {preset.nombre}
                             </Text>
                             <Text style={[styles.subTitle, { color: colors.primary || '#10B981' }]}>
-                                {preset.categoria} • {preset.dias_por_semana} Días/Semana • {preset.nivel}
+                                {preset.categoria} • {preset.dias_por_semana} {t('presetRoutines.day', 'Días')}/Semana • {preset.nivel}
                             </Text>
                         </View>
                         <TouchableOpacity
@@ -75,7 +77,7 @@ export const PresetRoutineDetailModal: React.FC<PresetRoutineDetailModalProps> =
                         </Text>
 
                         <Text style={[styles.sectionTitle, { color: colors.textSecondary || '#A1A1AA' }]}>
-                            Estructura de la Rutina
+                            {t('presetRoutines.routineStructure', 'Estructura de la Rutina')}
                         </Text>
 
                         {/* Daily Routines */}
@@ -95,7 +97,7 @@ export const PresetRoutineDetailModal: React.FC<PresetRoutineDetailModalProps> =
                                         {day.nombre_dia}
                                     </Text>
                                     <Text style={[styles.dayOrder, { color: colors.textSecondary || '#71717A' }]}>
-                                        Día {day.orden}
+                                        {t('presetRoutines.day', 'Día')} {day.orden}
                                     </Text>
                                 </View>
 
@@ -122,7 +124,7 @@ export const PresetRoutineDetailModal: React.FC<PresetRoutineDetailModalProps> =
                                                 {ex.nombre_ejercicio}
                                             </Text>
                                             <Text style={[styles.exSub, { color: colors.textSecondary || '#A1A1AA' }]}>
-                                                {ex.grupo_muscular_principal} • {ex.series.length} series
+                                                {ex.grupo_muscular_principal} • {ex.series.length} {t('workout.sets', 'series').toLowerCase()}
                                             </Text>
                                         </View>
 
@@ -154,7 +156,7 @@ export const PresetRoutineDetailModal: React.FC<PresetRoutineDetailModalProps> =
                                 <>
                                     <MaterialIcons name="check-circle" size={20} color="#000000" />
                                     <Text style={styles.confirmBtnText}>
-                                        Usar esta Rutina
+                                        {t('presetRoutines.useThisRoutine', 'Usar esta Rutina')}
                                     </Text>
                                 </>
                             )}

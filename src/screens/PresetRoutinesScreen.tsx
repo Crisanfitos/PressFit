@@ -49,7 +49,10 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
 
     const handleConfirmImport = async (preset: PresetRoutine) => {
         if (!user?.id) {
-            Alert.alert('Inicia sesión', 'Debes iniciar sesión para asignar una rutina.');
+            Alert.alert(
+                t('presetRoutines.loginRequiredTitle', 'Inicia sesión'),
+                t('presetRoutines.loginRequiredMsg', 'Debes iniciar sesión para asignar una rutina.')
+            );
             return;
         }
 
@@ -59,28 +62,24 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
             setIsImporting(false);
 
             if (res.error) {
-                Alert.alert('Error', `No se pudo importar: ${JSON.stringify(res.error)}`);
+                Alert.alert(t('common.error', 'Error'), `No se pudo importar: ${JSON.stringify(res.error)}`);
                 return;
             }
 
-
-
-
             setModalVisible(false);
             Alert.alert(
-                '¡Rutina Asignada!',
-                `La rutina "${preset.nombre}" ha sido configurada como tu rutina semanal activa.`,
+                t('presetRoutines.routineAssignedTitle', '¡Rutina Asignada!'),
+                t('presetRoutines.routineAssignedSuccess', `La rutina "${preset.nombre}" ha sido configurada como tu rutina semanal activa.`, { name: preset.nombre }),
                 [
                     {
-                        text: 'Ir a Mis Rutinas',
+                        text: t('presetRoutines.goToMyRoutines', 'Ir a Mis Rutinas'),
                         onPress: () => navigation.navigate('RoutineEditor'),
                     },
-
                 ]
             );
         } catch (error) {
             setIsImporting(false);
-            Alert.alert('Error', 'Ocurrió un error inesperado al importar la rutina.');
+            Alert.alert(t('common.error', 'Error'), 'Ocurrió un error inesperado al importar la rutina.');
         }
     };
 
@@ -158,7 +157,7 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                                         },
                                     ]}
                                 >
-                                    {cat}
+                                    {cat === 'Todas' ? t('common.allFem', 'Todas') : cat}
                                 </Text>
                             </TouchableOpacity>
                         );
@@ -201,7 +200,7 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                                             },
                                         ]}
                                     >
-                                        {days === 0 ? 'Todos' : `${days} días`}
+                                        {days === 0 ? t('common.all', 'Todos') : `${days} días`}
                                     </Text>
                                 </TouchableOpacity>
                             );

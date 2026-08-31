@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { RoutineService } from '../services/RoutineService';
@@ -35,6 +36,7 @@ type WorkoutDayScreenProps = {
 };
 
 const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }) => {
+    const { t, i18n } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
     const authContext = useContext(AuthContext);
@@ -51,9 +53,16 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
 
     // Format date for display
     const formatDate = (d: Date) => {
-        const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-        return `${days[d.getDay()]}, ${d.getDate()} de ${months[d.getMonth()]} ${d.getFullYear()}`;
+        const isEn = i18n.language?.startsWith('en');
+        const daysEs = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        const daysEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const monthsEs = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const days = isEn ? daysEn : daysEs;
+        const months = isEn ? monthsEn : monthsEs;
+        return isEn
+            ? `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()} ${d.getFullYear()}`
+            : `${days[d.getDay()]}, ${d.getDate()} de ${months[d.getMonth()]} ${d.getFullYear()}`;
     };
 
     const formatDuration = (minutes: number | null) => {
@@ -497,7 +506,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                     <View style={[styles.statusBadge, { backgroundColor: `${colors.statusSuccess}20` }]} testID="status-badge-completed">
                         <MaterialIcons name="check-circle" size={18} color={colors.statusSuccess} />
                         <Text style={[styles.statusText, { color: colors.statusSuccess }]}>
-                            Completado
+                            {t('workout.statusCompleted', 'Completado')}
                         </Text>
                     </View>
                 )}
@@ -507,7 +516,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                     <View style={styles.heroSummaryContainer}>
                         <View style={styles.heroSummaryItem}>
                             <MaterialIcons name="fitness-center" size={20} color={colors.primary} />
-                            <Text style={styles.heroSummaryText}>{workoutStats.exerciseCount} Ejercicios</Text>
+                            <Text style={styles.heroSummaryText}>{workoutStats.exerciseCount} {t('workout.exercises', 'Ejercicios')}</Text>
                         </View>
                         <View style={styles.heroSummaryItem}>
                             <MaterialIcons name="timer" size={20} color={colors.primary} />
@@ -520,7 +529,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                     <View style={[styles.statusBadge, { backgroundColor: `${colors.statusWarning}20` }]} testID="status-badge-in-progress">
                         <MaterialIcons name="play-circle" size={18} color={colors.statusWarning} />
                         <Text style={[styles.statusText, { color: colors.statusWarning }]}>
-                            En Progreso
+                            {t('workout.statusInProgress', 'En Progreso')}
                         </Text>
                     </View>
                 )}
@@ -528,15 +537,14 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
 
             <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 100 }}>
                 <Text style={styles.sectionTitle}>
-                    {workoutStats?.isCompleted ? 'Ejercicios' : `Ejercicios (${exercises.length})`}
+                    {workoutStats?.isCompleted ? t('workout.exercises', 'Ejercicios') : `${t('workout.exercises', 'Ejercicios')} (${exercises.length})`}
                 </Text>
 
                 {exercises.length === 0 ? (
                     <View style={styles.emptyState}>
                         <MaterialIcons name="fitness-center" size={48} color={colors.textSecondary} />
                         <Text style={styles.emptyText}>
-                            No hay ejercicios programados para este día.
-                            {'\n'}Edita tu rutina para añadir ejercicios.
+                            {t('workout.noScheduledExercises', 'No hay ejercicios programados para este día.')}
                         </Text>
                     </View>
                 ) : (
@@ -554,7 +562,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                                         </View>
                                         <View style={styles.exerciseInfo}>
                                             <Text style={styles.completedExerciseName}>
-                                                {exercise.ejercicio?.titulo || 'Ejercicio'}
+                                                {exercise.ejercicio?.titulo || t('workout.exercise', 'Ejercicio')}
                                             </Text>
                                             <Text style={styles.exerciseMuscle}>
                                                 {exercise.ejercicio?.grupo_muscular || 'Sin grupo'}
@@ -566,7 +574,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                                     {sortedSeries.length > 0 ? (
                                         sortedSeries.map((set) => (
                                             <View key={set.id || set.numero_serie} style={styles.setRow}>
-                                                <Text style={styles.setNumber}>Serie {set.numero_serie}</Text>
+                                                <Text style={styles.setNumber}>{t('workout.sets', 'Serie')} {set.numero_serie}</Text>
                                                 <Text style={styles.setDetails}>
                                                     {set.peso_utilizado || 0} kg × {set.repeticiones || 0} reps
                                                 </Text>
@@ -602,7 +610,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                                 </View>
                                 <View style={styles.exerciseInfo}>
                                     <Text style={styles.exerciseName}>
-                                        {exercise.ejercicio?.titulo || 'Ejercicio'}
+                                        {exercise.ejercicio?.titulo || t('workout.exercise', 'Ejercicio')}
                                     </Text>
                                     <Text style={styles.exerciseMuscle}>
                                         {exercise.ejercicio?.grupo_muscular || 'Sin grupo'}
@@ -612,7 +620,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                                     <Text style={styles.setsNumber}>
                                         {exercise.series?.length || 0}
                                     </Text>
-                                    <Text style={styles.setsLabel}>series</Text>
+                                    <Text style={styles.setsLabel}>{t('workout.sets', 'series').toLowerCase()}</Text>
                                 </View>
                             </View>
                         ))
@@ -640,10 +648,10 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                         />
                         <Text style={styles.buttonText}>
                             {workoutStats?.isCompleted
-                                ? 'Ver / Editar Entrenamiento'
+                                ? t('workout.viewWorkout', 'Ver / Editar Entrenamiento')
                                 : activeWorkout
-                                ? 'Continuar Entrenamiento'
-                                : 'Empezar Entrenamiento'}
+                                ? t('workout.continueWorkout', 'Continuar Entrenamiento')
+                                : t('workout.startWorkout', 'Empezar Entrenamiento')}
                         </Text>
                     </LinearGradient>
                 </TouchableOpacity>

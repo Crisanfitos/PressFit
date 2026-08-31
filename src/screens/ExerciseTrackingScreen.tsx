@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { ExerciseService } from '../services/ExerciseService';
@@ -9,6 +10,7 @@ import { ExerciseService } from '../services/ExerciseService';
 type ExerciseTrackingScreenProps = { navigation: any };
 
 const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigation }) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
     const authContext = useContext(AuthContext);
@@ -69,7 +71,7 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} testID="exercise-tracking-back-button">
                     <MaterialIcons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerText}>Progreso por Ejercicio</Text>
+                <Text style={styles.headerText}>{t('progress.exerciseProgress', 'Progreso por Ejercicio')}</Text>
                 <View style={{ width: 24 }} />
             </View>
 
@@ -77,7 +79,7 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
                 <MaterialIcons name="search" size={20} color={colors.textSecondary} />
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Buscar ejercicio..."
+                    placeholder={t('progress.searchExercise', 'Buscar ejercicio...')}
                     placeholderTextColor={colors.textSecondary}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
@@ -95,6 +97,13 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
+                    ListEmptyComponent={
+                        <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 40 }}>
+                            <Text style={{ color: colors.textSecondary, fontSize: 15 }}>
+                                {t('progress.noExercisesTracked', 'No hay ejercicios registrados todavía')}
+                            </Text>
+                        </View>
+                    }
                 />
             )}
         </SafeAreaView>

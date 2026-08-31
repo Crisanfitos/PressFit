@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect, useRef, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { useProgressController } from '../controllers/useProgressController';
@@ -9,6 +10,7 @@ import { useProgressController } from '../controllers/useProgressController';
 type MonthlyProgressScreenProps = { navigation: any };
 
 const MonthlyProgressScreen: React.FC<MonthlyProgressScreenProps> = ({ navigation }) => {
+    const { t, i18n } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
     const authContext = useContext(AuthContext);
@@ -26,8 +28,12 @@ const MonthlyProgressScreen: React.FC<MonthlyProgressScreenProps> = ({ navigatio
         }
     }, [currentDate, user?.id]);
 
-    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    const getMonthName = (date: Date) => months[date.getMonth()];
+    const monthsEs = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const monthsEn = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const getMonthName = (date: Date) => {
+        const isEn = i18n.language?.startsWith('en');
+        return (isEn ? monthsEn : monthsEs)[date.getMonth()];
+    };
 
     const showWeekInfo = (weekIndex: number) => {
         if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
@@ -39,11 +45,18 @@ const MonthlyProgressScreen: React.FC<MonthlyProgressScreenProps> = ({ navigatio
     };
 
     const formatDurationText = () => {
-        if (!processedMonthlyData) return 'Este mes has entrenado un total de 0 minutos';
+        const isEn = i18n.language?.startsWith('en');
+        if (!processedMonthlyData) return isEn ? 'This month you trained a total of 0 minutes' : 'Este mes has entrenado un total de 0 minutos';
         const { totalHours, totalMinutes } = processedMonthlyData;
-        if (totalHours === 0) return `Este mes has entrenado un total de ${totalMinutes} minutos`;
-        if (totalMinutes === 0) return `Este mes has entrenado un total de ${totalHours} ${totalHours === 1 ? 'hora' : 'horas'}`;
-        return `Este mes has entrenado un total de ${totalHours} ${totalHours === 1 ? 'hora' : 'horas'} y ${totalMinutes} minutos`;
+        if (totalHours === 0) return isEn ? `This month you trained a total of ${totalMinutes} minutes` : `Este mes has entrenado un total de ${totalMinutes} minutos`;
+        if (totalMinutes === 0) {
+            const hLabel = isEn ? (totalHours === 1 ? 'hour' : 'hours') : (totalHours === 1 ? 'hora' : 'horas');
+            return isEn ? `This month you trained a total of ${totalHours} ${hLabel}` : `Este mes has entrenado un total de ${totalHours} ${hLabel}`;
+        }
+        const hLabel = isEn ? (totalHours === 1 ? 'hour' : 'hours') : (totalHours === 1 ? 'hora' : 'horas');
+        return isEn
+            ? `This month you trained a total of ${totalHours} ${hLabel} and ${totalMinutes} minutes`
+            : `Este mes has entrenado un total de ${totalHours} ${hLabel} y ${totalMinutes} minutos`;
     };
 
     const weeklyData = processedMonthlyData?.weeklyData || [];
@@ -101,7 +114,7 @@ const MonthlyProgressScreen: React.FC<MonthlyProgressScreenProps> = ({ navigatio
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} testID="monthly-progress-back-button">
                     <MaterialIcons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerText}>Progreso Mensual</Text>
+                <Text style={styles.headerText}>{t('progress.monthlyProgress', 'Progreso Mensual')}</Text>
                 <View style={{ width: 24 }} />
             </View>
 
@@ -145,7 +158,7 @@ const MonthlyProgressScreen: React.FC<MonthlyProgressScreenProps> = ({ navigatio
                         <View style={styles.summaryCard}>
                             <MaterialIcons name="fitness-center" size={32} color={colors.primary} />
                             <Text style={styles.summaryValue}>{totalWorkouts}</Text>
-                            <Text style={styles.summaryLabel}>Entrenamientos</Text>
+                            <Text style={styles.summaryLabel}>{t('progress.totalWorkouts', 'Entrenamientos')}</Text>
                         </View>
                     </View>
                 </ScrollView>

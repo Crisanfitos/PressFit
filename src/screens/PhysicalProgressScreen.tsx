@@ -5,6 +5,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import KeyboardAwareContainer from '../components/KeyboardAwareContainer';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { useProgressController } from '../controllers/useProgressController';
@@ -13,13 +14,14 @@ import WeightChart from '../components/WeightChart';
 import AdvancedMetricsCard from '../components/AdvancedMetricsCard';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 type PhysicalProgressScreenProps = { navigation: any };
 
 const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigation }) => {
+    const { t, i18n } = useTranslation();
     const { theme, themeMode } = useTheme();
     const { colors } = theme;
     const authContext = useContext(AuthContext);
@@ -307,7 +309,7 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                     <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} testID="physical-progress-back-button">
                         <MaterialIcons name="arrow-back" size={24} color={colors.text} />
                     </TouchableOpacity>
-                    <Text style={styles.headerText}>Cambio Físico</Text>
+                    <Text style={styles.headerText}>{t('physicalProgress.title', 'Cambio Físico')}</Text>
                     <View style={{ width: 24 }} />
                 </View>
             )}
@@ -327,15 +329,15 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                     {progressPhotos.length === 0 ? (
                         <View style={styles.emptyState}>
                             <MaterialIcons name="photo-camera" size={64} color={colors.textSecondary} />
-                            <Text style={styles.emptyStateText}>No hay fotos de progreso aún</Text>
+                            <Text style={styles.emptyStateText}>{t('physicalProgress.noPhotosYet', 'No hay fotos de progreso aún')}</Text>
                         </View>
                     ) : (
                         <View>
                             {(() => {
+                                const currentLocale = i18n.language?.startsWith('en') ? enUS : es;
                                 // Group photos by month
                                 const grouped = progressPhotos.reduce((acc, photo) => {
-                                    // Use created_at if valid, otherwise fallback to current date just in case
-                                    const dateKey = photo.created_at ? format(parseISO(photo.created_at), 'MMMM yyyy', { locale: es }) : 'Desconocido';
+                                    const dateKey = photo.created_at ? format(parseISO(photo.created_at), 'MMMM yyyy', { locale: currentLocale }) : 'Desconocido';
                                     if (!acc[dateKey]) acc[dateKey] = [];
                                     acc[dateKey].push(photo);
                                     return acc;
@@ -365,7 +367,7 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                                                             )}
                                                             <View style={styles.photoOverlay}>
                                                                 <Text style={styles.photoDate}>
-                                                                    {photo.created_at ? format(parseISO(photo.created_at), "d 'de' MMMM", { locale: es }) : ''}
+                                                                    {photo.created_at ? format(parseISO(photo.created_at), "d 'de' MMMM", { locale: currentLocale }) : ''}
                                                                 </Text>
                                                             </View>
                                                         </TouchableOpacity>
@@ -386,7 +388,7 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                 <TouchableOpacity style={styles.fab} onPress={handleAddPhoto}>
                     <View style={styles.fabButton}>
                         <MaterialIcons name="add-a-photo" size={24} color={colors.background} />
-                        <Text style={styles.fabText}>Añadir Foto</Text>
+                        <Text style={styles.fabText}>{t('physicalProgress.addPhoto', 'Añadir Foto')}</Text>
                     </View>
                 </TouchableOpacity>
             )}
@@ -395,9 +397,9 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
             <Modal visible={sourceModalVisible} transparent animationType="fade" onRequestClose={() => setSourceModalVisible(false)}>
                 <View style={styles.modalOverlay}>
                     <View style={[styles.modalContent, { maxWidth: 350 }]}>
-                        <Text style={styles.modalTitle}>Añadir Foto</Text>
+                        <Text style={styles.modalTitle}>{t('physicalProgress.addPhoto', 'Añadir Foto')}</Text>
                         <Text style={{ color: colors.textSecondary, textAlign: 'center', marginBottom: 20, fontSize: 14 }}>
-                            Elige de dónde quieres obtener la foto
+                            {t('common.choosePhotoSource', 'Elige de dónde quieres obtener la foto')}
                         </Text>
                         <TouchableOpacity
                             style={{ flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, backgroundColor: colors.inputBackground, marginBottom: 10, borderWidth: 1, borderColor: colors.border }}
@@ -407,8 +409,8 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                                 <MaterialIcons name="camera-alt" size={24} color={colors.primary} />
                             </View>
                             <View>
-                                <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>Cámara</Text>
-                                <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Tomar una foto ahora</Text>
+                                <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>{t('common.camera', 'Cámara')}</Text>
+                                <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{t('common.takePhotoNow', 'Tomar una foto ahora')}</Text>
                             </View>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -419,8 +421,8 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                                 <MaterialIcons name="photo-library" size={24} color={colors.primary} />
                             </View>
                             <View>
-                                <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>Galería</Text>
-                                <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Seleccionar de tus fotos</Text>
+                                <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>{t('common.gallery', 'Galería')}</Text>
+                                <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{t('common.chooseFromPhotos', 'Seleccionar de tus fotos')}</Text>
                             </View>
                         </TouchableOpacity>
                         <View style={{ flexDirection: 'row' }}>
@@ -428,7 +430,7 @@ const PhysicalProgressScreen: React.FC<PhysicalProgressScreenProps> = ({ navigat
                                 style={[styles.modalButton, styles.cancelButton, { flex: 1, alignItems: 'center' }]}
                                 onPress={() => setSourceModalVisible(false)}
                             >
-                                <Text style={[styles.buttonText, { color: colors.text }]}>Cancelar</Text>
+                                <Text style={[styles.buttonText, { color: colors.text }]}>{t('common.cancel', 'Cancelar')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

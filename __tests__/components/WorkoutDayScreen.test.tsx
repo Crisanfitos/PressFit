@@ -94,7 +94,7 @@ describe('WorkoutDayScreen Component (RNTL)', () => {
       params: { date: '2026-08-08', routineId: 'r-100', isToday: true },
     };
 
-    const { getByText } = await render(
+    const { getByText, getByTestId } = await render(
       <AuthContext.Provider value={mockAuthContext}>
         <ThemeProvider>
           <WorkoutDayScreen navigation={mockNavigation} route={route} />
@@ -106,7 +106,7 @@ describe('WorkoutDayScreen Component (RNTL)', () => {
       expect(getByText('Pierna Hypertrophy')).toBeTruthy();
     });
 
-    const startBtn = getByText(/Empezar Entrenamiento/i);
+    const startBtn = getByTestId('start-workout-button');
     fireEvent.press(startBtn);
 
     await waitFor(() => {
@@ -189,7 +189,7 @@ describe('WorkoutDayScreen Component (RNTL)', () => {
       params: { date: '2026-08-08', routineId: 'r-100', isToday: true },
     };
 
-    const { getByText } = await render(
+    const { getByText, getByTestId } = await render(
       <AuthContext.Provider value={mockAuthContext}>
         <ThemeProvider>
           <WorkoutDayScreen navigation={mockNavigation} route={route} />
@@ -201,7 +201,7 @@ describe('WorkoutDayScreen Component (RNTL)', () => {
       expect(getByText('Hombros')).toBeTruthy();
     });
 
-    const startBtn = getByText(/Empezar Entrenamiento/i);
+    const startBtn = getByTestId('start-workout-button');
     fireEvent.press(startBtn);
 
     await waitFor(() => {

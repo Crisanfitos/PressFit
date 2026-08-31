@@ -77,16 +77,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                 setCustomAlert({
                     visible: true,
                     type: 'success',
-                    title: 'Éxito',
-                    message: 'Foto de perfil actualizada correctamente.',
+                    title: t('common.success', 'Éxito'),
+                    message: t('common.photoUpdatedSuccess', 'Foto de perfil actualizada correctamente.'),
                     onConfirm: closeCustomAlert
                 });
             } catch (error) {
                 setCustomAlert({
                     visible: true,
                     type: 'error',
-                    title: 'Error',
-                    message: 'No se pudo subir la foto de perfil.',
+                    title: t('common.error', 'Error'),
+                    message: t('common.photoUploadError', 'No se pudo subir la foto de perfil.'),
                     onConfirm: closeCustomAlert
                 });
             }
@@ -100,8 +100,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             setCustomAlert({
                 visible: true,
                 type: 'error',
-                title: 'Permiso denegado',
-                message: 'Se necesita acceso a la cámara para tomar una foto de perfil.',
+                title: t('common.permissionDenied', 'Permiso denegado'),
+                message: t('common.cameraPermissionMsg', 'Se necesita acceso a la cámara para tomar una foto de perfil.'),
                 onConfirm: closeCustomAlert
             });
             return;
@@ -120,16 +120,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                 setCustomAlert({
                     visible: true,
                     type: 'success',
-                    title: 'Éxito',
-                    message: 'Foto de perfil actualizada correctamente.',
+                    title: t('common.success', 'Éxito'),
+                    message: t('common.photoUpdatedSuccess', 'Foto de perfil actualizada correctamente.'),
                     onConfirm: closeCustomAlert
                 });
             } catch (error) {
                 setCustomAlert({
                     visible: true,
                     type: 'error',
-                    title: 'Error',
-                    message: 'No se pudo subir la foto de perfil.',
+                    title: t('common.error', 'Error'),
+                    message: t('common.photoUploadError', 'No se pudo subir la foto de perfil.'),
                     onConfirm: closeCustomAlert
                 });
             }
@@ -337,12 +337,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             />
 
             {/* Source Selection Modal */}
+            {/* Source Selection Modal (Camera vs Gallery) */}
             <Modal visible={sourceModalVisible} transparent animationType="fade" onRequestClose={() => setSourceModalVisible(false)}>
                 <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: 20 }}>
                     <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 24, borderWidth: 1, borderColor: colors.border, maxWidth: 350, alignSelf: 'center', width: '100%' }}>
-                        <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.text, marginBottom: 16, textAlign: 'center' }}>Cambiar Foto</Text>
-                        <Text style={{ color: colors.textSecondary, textAlign: 'center', marginBottom: 20, fontSize: 14 }}>
-                            Elige de dónde quieres obtener la foto
+                        <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.text, marginBottom: 16, textAlign: 'center' }}>
+                            {t('profile.progressPhotos', 'Cambiar Foto')}
                         </Text>
                         <TouchableOpacity
                             style={{ flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, backgroundColor: colors.background, marginBottom: 10, borderWidth: 1, borderColor: colors.border }}
@@ -352,8 +352,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                 <MaterialIcons name="camera-alt" size={24} color={colors.primary} />
                             </View>
                             <View>
-                                <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>Cámara</Text>
-                                <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Tomar una foto ahora</Text>
+                                <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>{t('common.camera', 'Cámara')}</Text>
+                                <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{t('common.takePhotoNow', 'Tomar una foto ahora')}</Text>
                             </View>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -364,8 +364,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                 <MaterialIcons name="photo-library" size={24} color={colors.primary} />
                             </View>
                             <View>
-                                <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>Galería</Text>
-                                <Text style={{ color: colors.textSecondary, fontSize: 13 }}>Seleccionar de tus fotos</Text>
+                                <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>{t('common.gallery', 'Galería')}</Text>
+                                <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{t('common.chooseFromPhotos', 'Seleccionar de tus fotos')}</Text>
                             </View>
                         </TouchableOpacity>
                         <View style={{ flexDirection: 'row' }}>
@@ -373,7 +373,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                 style={{ flex: 1, alignItems: 'center', padding: 14, borderRadius: 10, backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border }}
                                 onPress={() => setSourceModalVisible(false)}
                             >
-                                <Text style={{ fontWeight: '600', color: colors.text }}>Cancelar</Text>
+                                <Text style={{ fontWeight: '600', color: colors.text }}>{t('common.cancel', 'Cancelar')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

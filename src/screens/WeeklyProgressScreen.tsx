@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useProgressController } from '../controllers/useProgressController';
@@ -10,6 +11,7 @@ import FatigueLevelCard from '../components/FatigueLevelCard';
 type WeeklyProgressScreenProps = { navigation: any };
 
 const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation }) => {
+    const { t, i18n } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
     const authContext = useContext(AuthContext);
@@ -22,7 +24,8 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
 
     const processWeeklyData = () => {
         if (!weeklyStats) return [];
-        const days = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
+        const isEn = i18n.language?.startsWith('en');
+        const days = isEn ? ['S', 'M', 'T', 'W', 'T', 'F', 'S'] : ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
         return days.map((day, index) => {
             const dayWorkouts = weeklyStats.filter((w: any) => new Date(w.hora_fin).getDay() === index);
             return {
@@ -79,7 +82,7 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} testID="weekly-progress-back-button">
                     <MaterialIcons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerText}>Progreso Semanal</Text>
+                <Text style={styles.headerText}>{t('progress.weeklyProgress', 'Progreso Semanal')}</Text>
                 <View style={{ width: 24 }} />
             </View>
 
@@ -90,8 +93,8 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
             ) : totalWorkouts === 0 ? (
                 <View style={styles.emptyState} testID="weekly-progress-empty-state">
                     <MaterialIcons name="trending-up" size={64} color={colors.textSecondary} />
-                    <Text style={styles.emptyStateTitle}>¡Empieza tu semana fuerte!</Text>
-                    <Text style={styles.emptyStateText}>Entrena esta semana y verás tu progreso reflejado aquí</Text>
+                    <Text style={styles.emptyStateTitle}>{t('progress.startWeekStrong', '¡Empieza tu semana fuerte!')}</Text>
+                    <Text style={styles.emptyStateText}>{t('progress.trainThisWeek', 'Entrena esta semana y verás tu progreso reflejado aquí')}</Text>
                 </View>
             ) : (
                 <ScrollView style={styles.scrollView}>
@@ -99,13 +102,13 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
                         <View style={styles.summaryItem}>
                             <MaterialIcons name="fitness-center" size={24} color={colors.primary} />
                             <Text style={styles.summaryValue}>{totalWorkouts}</Text>
-                            <Text style={styles.summaryLabel}>Entrenamientos</Text>
+                            <Text style={styles.summaryLabel}>{t('progress.totalWorkouts', 'Entrenamientos')}</Text>
                         </View>
                         <View style={styles.summaryDivider} />
                         <View style={styles.summaryItem}>
                             <MaterialIcons name="timer" size={24} color={colors.primary} />
                             <Text style={styles.summaryValue}>{totalDuration}</Text>
-                            <Text style={styles.summaryLabel}>Minutos Totales</Text>
+                            <Text style={styles.summaryLabel}>{t('progress.totalDurationMinutes', 'Minutos Totales')}</Text>
                         </View>
                     </View>
 
@@ -113,7 +116,7 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
                     <FatigueLevelCard userId={user?.id} />
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Duración por Día</Text>
+                        <Text style={styles.sectionTitle}>{t('progress.durationByDay', 'Duración por Día')}</Text>
                         <View style={styles.chartContainer} testID="weekly-progress-chart-container">
                             {weekData.map((data, index) => (
                                 <View key={index} style={styles.barContainer}>
@@ -127,14 +130,14 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Detalles</Text>
+                        <Text style={styles.sectionTitle}>{t('progress.details', 'Detalles')}</Text>
                         {weekData.filter((d) => d.workouts > 0).map((data, index) => (
                             <View key={index} style={styles.detailCard}>
                                 <View style={styles.detailHeader}>
                                     <Text style={styles.detailDay}>{data.day}</Text>
                                     <Text style={styles.detailVolume}>{data.duration} min</Text>
                                 </View>
-                                <Text style={styles.detailWorkouts}>{data.workouts} entrenamiento(s)</Text>
+                                <Text style={styles.detailWorkouts}>{data.workouts} {t('workout.sessionSummary', 'entrenamiento(s)')}</Text>
                             </View>
                         ))}
                     </View>

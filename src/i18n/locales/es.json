@@ -2,6 +2,7 @@
   "common": {
     "appName": "PressFit",
     "save": "Guardar",
+    "saving": "Guardando...",
     "cancel": "Cancelar",
     "delete": "Eliminar",
     "edit": "Editar",
@@ -11,7 +12,23 @@
     "loading": "Cargando...",
     "error": "Error",
     "success": "Éxito",
-    "confirm": "Confirmar"
+    "confirm": "Confirmar",
+    "finish": "Finalizar",
+    "all": "Todos",
+    "allFem": "Todas",
+    "hours": "horas",
+    "hour": "hora",
+    "minutes": "minutos",
+    "minute": "minuto",
+    "camera": "Cámara",
+    "gallery": "Galería",
+    "takePhotoNow": "Tomar una foto ahora",
+    "chooseFromPhotos": "Seleccionar de tus fotos",
+    "choosePhotoSource": "Elige de dónde quieres obtener la foto",
+    "permissionDenied": "Permiso denegado",
+    "cameraPermissionMsg": "Se necesita acceso a la cámara para tomar una foto de perfil.",
+    "photoUpdatedSuccess": "Foto de perfil actualizada correctamente.",
+    "photoUploadError": "No se pudo subir la foto de perfil."
   },
   "auth": {
     "welcome": "¡Bienvenido a PressFit!",
@@ -50,11 +67,35 @@
   "workout": {
     "startWorkout": "Iniciar Entrenamiento",
     "finishWorkout": "Finalizar Entrenamiento",
+    "continueWorkout": "Continuar Entrenamiento",
+    "viewWorkout": "Ver / Editar Entrenamiento",
+    "editRoutine": "Editar Rutina",
     "exercise": "Ejercicio",
     "sets": "Series",
     "reps": "Repeticiones",
     "weight": "Peso",
-    "restTimer": "Temporizador de Descanso"
+    "restTimer": "Temporizador de Descanso",
+    "time": "Tiempo",
+    "volume": "Volumen",
+    "exercises": "Ejercicios",
+    "restDay": "Día de Descanso",
+    "sessionSummary": "Resumen de la Sesión",
+    "scheduledExercises": "Ejercicios Programados",
+    "addSet": "Añadir Serie",
+    "addExercise": "Añadir Ejercicio",
+    "deleteExercise": "Eliminar Ejercicio",
+    "deleteExerciseConfirm": "¿Deseas eliminar este ejercicio de la sesión?",
+    "finishWorkoutConfirm": "¿Deseas finalizar este entrenamiento?",
+    "workoutCompletedTitle": "¡Completado!",
+    "workoutSavedSuccess": "Entrenamiento guardado correctamente",
+    "savingWorkout": "Guardando entrenamiento...",
+    "loadingWorkout": "Cargando entrenamiento...",
+    "noScheduledExercises": "No hay ejercicios programados para este día.",
+    "adjustRest": "Ajustar Descanso",
+    "statusCompleted": "Completado",
+    "statusInProgress": "En Progreso",
+    "statusMissed": "Sin Hacer",
+    "statusRest": "Descanso"
   },
   "calendar": {
     "today": "Hoy",
@@ -86,7 +127,26 @@
     "daily": "Progreso Diario",
     "dailySubtitle": "Detalles de hoy",
     "exercise": "Progreso por Ejercicio",
-    "exerciseSubtitle": "Evolución en cada ejercicio"
+    "exerciseSubtitle": "Evolución en cada ejercicio",
+    "noWorkoutsToday": "Sin entrenamientos hoy",
+    "completeWorkoutPrompt": "Completa un entrenamiento para ver tu progreso del día",
+    "totalWorkouts": "Entrenamientos",
+    "totalTime": "Tiempo Total",
+    "workouts": "entrenamientos",
+    "searchExercise": "Buscar ejercicio...",
+    "noExercisesTracked": "No hay ejercicios registrados todavía",
+    "monthlySummaryText": "Este mes has entrenado un total de {{text}}"
+  },
+  "physicalProgress": {
+    "title": "Cambio Físico",
+    "addPhoto": "Añadir Foto",
+    "editPhoto": "Editar Foto",
+    "commentPlaceholder": "Añade un comentario sobre tu progreso...",
+    "selectDate": "Seleccionar Fecha",
+    "noPhotosYet": "No hay fotos de progreso aún",
+    "noPhotosSubtitle": "Toma tu primera foto para empezar a documentar tu transformación",
+    "deletePhotosConfirm": "¿Estás seguro de que deseas eliminar las fotos seleccionadas?",
+    "photosDeletedSuccess": "Fotos eliminadas correctamente"
   },
   "drawer": {
     "presetRoutines": "Plantillas Prémium",
@@ -95,12 +155,27 @@
   "presetRoutines": {
     "title": "Plantillas Prémium",
     "libraryTitle": "Biblioteca de Rutinas",
-    "subtitle": "Selecciona un programa probado científicamente para tus objetivos."
+    "subtitle": "Selecciona un programa probado científicamente para tus objetivos.",
+    "routineStructure": "Estructura de la Rutina",
+    "day": "Día",
+    "useThisRoutine": "Usar esta Rutina",
+    "routineAssignedTitle": "¡Rutina Asignada!",
+    "routineAssignedSuccess": "La rutina \"{{name}}\" ha sido configurada como tu rutina semanal activa.",
+    "goToMyRoutines": "Ir a Mis Rutinas",
+    "loginRequiredTitle": "Inicia sesión",
+    "loginRequiredMsg": "Debes iniciar sesión para asignar una rutina."
   },
   "exerciseCatalog": {
     "title": "Catálogo de Ejercicios",
     "searchPlaceholder": "Buscar ejercicio...",
     "showFilters": "Mostrar filtros",
-    "hideFilters": "Ocultar filtros"
+    "hideFilters": "Ocultar filtros",
+    "primaryMuscle": "Músculo Principal",
+    "secondaryMuscle": "Músculo Secundario",
+    "category": "Categoría",
+    "difficulty": "Dificultad",
+    "clearFilters": "Limpiar Filtros",
+    "noExercisesFound": "No se encontraron ejercicios con los filtros actuales",
+    "useFiltersPrompt": "Usa los filtros o el buscador para encontrar ejercicios"
   }
 }

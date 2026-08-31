@@ -2,6 +2,7 @@
   "common": {
     "appName": "PressFit",
     "save": "Save",
+    "saving": "Saving...",
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
@@ -11,7 +12,23 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "finish": "Finish",
+    "all": "All",
+    "allFem": "All",
+    "hours": "hours",
+    "hour": "hour",
+    "minutes": "minutes",
+    "minute": "minute",
+    "camera": "Camera",
+    "gallery": "Gallery",
+    "takePhotoNow": "Take a photo now",
+    "chooseFromPhotos": "Select from your photos",
+    "choosePhotoSource": "Choose where to get the photo from",
+    "permissionDenied": "Permission denied",
+    "cameraPermissionMsg": "Camera access is needed to take a profile photo.",
+    "photoUpdatedSuccess": "Profile photo updated successfully.",
+    "photoUploadError": "Could not upload profile photo."
   },
   "auth": {
     "welcome": "Welcome to PressFit!",
@@ -50,11 +67,35 @@
   "workout": {
     "startWorkout": "Start Workout",
     "finishWorkout": "Finish Workout",
+    "continueWorkout": "Continue Workout",
+    "viewWorkout": "View Workout",
+    "editRoutine": "Edit Routine",
     "exercise": "Exercise",
     "sets": "Sets",
     "reps": "Reps",
     "weight": "Weight",
-    "restTimer": "Rest Timer"
+    "restTimer": "Rest Timer",
+    "time": "Time",
+    "volume": "Volume",
+    "exercises": "Exercises",
+    "restDay": "Rest Day",
+    "sessionSummary": "Session Summary",
+    "scheduledExercises": "Scheduled Exercises",
+    "addSet": "Add Set",
+    "addExercise": "Add Exercise",
+    "deleteExercise": "Delete Exercise",
+    "deleteExerciseConfirm": "Do you want to remove this exercise from the session?",
+    "finishWorkoutConfirm": "Do you want to finish this workout?",
+    "workoutCompletedTitle": "Completed!",
+    "workoutSavedSuccess": "Workout saved successfully",
+    "savingWorkout": "Saving workout...",
+    "loadingWorkout": "Loading workout...",
+    "noScheduledExercises": "No exercises scheduled for this day",
+    "adjustRest": "Adjust Rest",
+    "statusCompleted": "COMPLETED",
+    "statusInProgress": "IN PROGRESS",
+    "statusMissed": "MISSED",
+    "statusRest": "REST"
   },
   "calendar": {
     "today": "Today",
@@ -86,7 +127,26 @@
     "daily": "Daily Progress",
     "dailySubtitle": "Details for today",
     "exercise": "Exercise Progress",
-    "exerciseSubtitle": "Evolution for each exercise"
+    "exerciseSubtitle": "Evolution for each exercise",
+    "noWorkoutsToday": "No workouts today",
+    "completeWorkoutPrompt": "Complete a workout to view your daily progress",
+    "totalWorkouts": "Total Workouts",
+    "totalTime": "Total Time",
+    "workouts": "workouts",
+    "searchExercise": "Search exercise...",
+    "noExercisesTracked": "No exercises with recorded sets yet",
+    "monthlySummaryText": "This month you worked out for a total of {{text}}"
+  },
+  "physicalProgress": {
+    "title": "Physical Progress",
+    "addPhoto": "Add Photo",
+    "editPhoto": "Edit Photo",
+    "commentPlaceholder": "Add a comment about your progress...",
+    "selectDate": "Select Date",
+    "noPhotosYet": "No progress photos yet",
+    "noPhotosSubtitle": "Take your first photo to start documenting your transformation",
+    "deletePhotosConfirm": "Are you sure you want to delete the selected photos?",
+    "photosDeletedSuccess": "Photos deleted successfully"
   },
   "drawer": {
     "presetRoutines": "Premium Templates",
@@ -95,12 +155,27 @@
   "presetRoutines": {
     "title": "Premium Templates",
     "libraryTitle": "Routine Library",
-    "subtitle": "Select a scientifically proven program for your goals."
+    "subtitle": "Select a scientifically proven program for your goals.",
+    "routineStructure": "Routine Structure",
+    "day": "Day",
+    "useThisRoutine": "Use This Routine",
+    "routineAssignedTitle": "Routine Assigned!",
+    "routineAssignedSuccess": "The routine \"{{name}}\" has been set as your active weekly routine.",
+    "goToMyRoutines": "Go to My Routines",
+    "loginRequiredTitle": "Log In",
+    "loginRequiredMsg": "You must be logged in to assign a routine."
   },
   "exerciseCatalog": {
     "title": "Exercise Catalog",
     "searchPlaceholder": "Search exercise...",
     "showFilters": "Show filters",
-    "hideFilters": "Hide filters"
+    "hideFilters": "Hide filters",
+    "primaryMuscle": "Primary Muscle",
+    "secondaryMuscle": "Secondary Muscle",
+    "category": "Category",
+    "difficulty": "Difficulty",
+    "clearFilters": "Clear Filters",
+    "noExercisesFound": "No exercises found with the current filters",
+    "useFiltersPrompt": "Use filters or search to find exercises"
   }
 }
