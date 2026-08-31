@@ -18,6 +18,7 @@ import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { useWorkoutController } from '../controllers/useWorkoutController';
 import SetInput from '../components/SetInput';
+import WorkoutSetRow from '../components/WorkoutSetRow';
 import { PersonalNoteButton } from '../components/PersonalNoteButton';
 import RestTimer from '../components/RestTimer';
 import { WeightTypeBadge } from '../components/WeightTypeBadge';
@@ -612,96 +613,28 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                                     </Text>
                                                 </View>
                                             ) : (
-                                                (exercise.sets || []).map((set, setIndex) => {
-                                                    const ghostWeight = getGhostValue(exercise.id, set.numero_serie, 'weight');
-                                                    const ghostReps = getGhostValue(exercise.id, set.numero_serie, 'reps');
-                                                    const ghostRpe = getGhostValue(exercise.id, set.numero_serie, 'rpe');
-                                                    const isBodyweight = exercise.tipo_peso === 'corporal';
-
-                                                    return (
-                                                        <View key={set.id || setIndex} style={styles.setRow} testID={`set-row-${setIndex}`}>
-                                                            <Text style={styles.setNumber}>{set.numero_serie}</Text>
-                                                            <View style={[styles.inputGroup, { maxWidth: 80 }]}>
-                                                                {isBodyweight ? (
-                                                                    <View style={[styles.bodyweightPlaceholder, { backgroundColor: colors.surfaceHighlight, borderColor: colors.border }]}>
-                                                                        <Text style={{ color: colors.textSecondary, fontSize: 14, fontWeight: '600' }}>BW</Text>
-                                                                    </View>
-                                                                ) : (
-                                                                    <SetInput
-                                                                        testID={`set-weight-input-${setIndex}`}
-                                                                        value={set.peso_utilizado > 0 ? set.peso_utilizado : ''}
-                                                                        placeholder={ghostWeight ?? '-'}
-                                                                        onChange={(val) => handleSetChange(set.id, 'weight', val)}
-                                                                        isEditable={isInputEditable}
-                                                                        colors={colors}
-                                                                        maxLength={5}
-                                                                    />
-                                                                )}
-                                                            </View>
-                                                            <View style={[styles.inputGroup, { maxWidth: 80 }]}>
-                                                                <SetInput
-                                                                    testID={`set-reps-input-${setIndex}`}
-                                                                    value={set.repeticiones > 0 ? set.repeticiones : ''}
-                                                                    placeholder={ghostReps ?? '-'}
-                                                                    onChange={(val) => handleSetChange(set.id, 'reps', val)}
-                                                                    isEditable={isInputEditable}
-                                                                    colors={colors}
-                                                                    maxLength={3}
-                                                                />
-                                                            </View>
-                                                            <View style={[styles.inputGroup, { maxWidth: 60 }]}>
-                                                                <SetInput
-                                                                    testID={`set-rpe-input-${setIndex}`}
-                                                                    value={set.rpe && set.rpe > 0 ? set.rpe : ''}
-                                                                    placeholder={ghostRpe ?? '-'}
-                                                                    onChange={(val) => handleSetChange(set.id, 'rpe', val)}
-                                                                    isEditable={isInputEditable}
-                                                                    colors={colors}
-                                                                    maxLength={2}
-                                                                />
-                                                            </View>
-                                                            {isStructureEditable && (
-                                                                <TouchableOpacity
-                                                                    testID={`delete-set-button-${setIndex}`}
-                                                                    style={styles.deleteSetButton}
-                                                                    onPress={() => handleDeleteSet(set.id, exercise.id)}
-                                                                    hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-                                                                >
-                                                                    <MaterialIcons name="close" size={20} color={colors.textSecondary} />
-                                                                </TouchableOpacity>
-                                                            )}
-                                                            {navMode !== 'edit' && (() => {
-                                                                const isActiveTimer = lastCompletedSetId === set.id && restTimerVisible;
-                                                                const hasSavedTimerValue = set.descanso_segundos && set.descanso_segundos > 0;
-                                                                const isSaved = hasSavedTimerValue;
-                                                                const isLocallySaved = savedTimerSetIds.has(set.id);
-
-                                                                const disableInteraction = isSaved || isLocallySaved;
-
-                                                                const timerColor = isActiveTimer
-                                                                    ? colors.primary
-                                                                    : disableInteraction
-                                                                        ? '#22c55e'
-                                                                        : colors.textSecondary;
-                                                                return (
-                                                                    <TouchableOpacity
-                                                                        testID={`set-complete-checkbox-${setIndex}`}
-                                                                        style={{ padding: 4, marginLeft: 4 }}
-                                                                        onPress={() => handleStartRestTimer(set.id)}
-                                                                        disabled={disableInteraction}
-                                                                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                                                                    >
-                                                                        <MaterialIcons
-                                                                            name={disableInteraction ? 'timer-off' : 'timer'}
-                                                                            size={18}
-                                                                            color={timerColor}
-                                                                        />
-                                                                    </TouchableOpacity>
-                                                                );
-                                                            })()}
-                                                        </View>
-                                                    );
-                                                })
+                                                (exercise.sets || []).map((set, setIndex) => (
+                                                    <WorkoutSetRow
+                                                        key={set.id || setIndex}
+                                                        set={set}
+                                                        setIndex={setIndex}
+                                                        exerciseId={exercise.id}
+                                                        tipoPeso={exercise.tipo_peso || 'total'}
+                                                        ghostWeight={getGhostValue(exercise.id, set.numero_serie, 'weight')}
+                                                        ghostReps={getGhostValue(exercise.id, set.numero_serie, 'reps')}
+                                                        ghostRpe={getGhostValue(exercise.id, set.numero_serie, 'rpe')}
+                                                        isInputEditable={isInputEditable}
+                                                        isStructureEditable={isStructureEditable}
+                                                        colors={colors}
+                                                        navMode={navMode}
+                                                        lastCompletedSetId={lastCompletedSetId}
+                                                        restTimerVisible={restTimerVisible}
+                                                        savedTimerSetIds={savedTimerSetIds}
+                                                        onSetChange={handleSetChange}
+                                                        onDeleteSet={handleDeleteSet}
+                                                        onStartRestTimer={handleStartRestTimer}
+                                                    />
+                                                ))
                                             )}
 
                                             {(isStructureEditable || (isInputEditable && mode !== 'ACTIVE')) && (
