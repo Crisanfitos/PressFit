@@ -367,8 +367,6 @@ export const AnalyticsService = {
                     peso_utilizado,
                     repeticiones,
                     rpe,
-                    is_warmup,
-                    tipo_serie,
                     ejercicios_programados!inner(
                         id,
                         rutinas_diarias!inner(

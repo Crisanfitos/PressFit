@@ -312,6 +312,11 @@ describe('AnalyticsService (PF-154, PF-155, PF-157)', () => {
 
             const result = await AnalyticsService.getWeeklyFatigueAnalysis('u-1');
 
+            expect(mockChain.select).toHaveBeenCalled();
+            const selectQuery = mockChain.select.mock.calls[0][0];
+            expect(selectQuery).not.toContain('is_warmup');
+            expect(selectQuery).not.toContain('tipo_serie');
+
             expect(result.error).toBeNull();
             expect(result.data).toBeDefined();
             expect(result.data!.averageRPE).toBe(7.8);
