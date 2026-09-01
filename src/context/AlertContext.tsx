@@ -160,6 +160,7 @@ export const AlertProvider: React.FC<AlertProviderProps> = ({ children }) => {
         <AlertContext.Provider value={{ showAlert, hideAlert }}>
             {children}
             <Modal
+                testID="alert-modal"
                 visible={visible}
                 transparent
                 animationType="fade"
