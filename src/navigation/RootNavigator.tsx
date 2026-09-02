@@ -7,6 +7,7 @@ import SplashScreen from '../screens/SplashScreen';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import ErrorBoundary from '../components/ErrorBoundary';
+import linkingConfig from './linkingConfig';
 
 const RootNavigator: React.FC = () => {
     const authContext = useContext(AuthContext);
@@ -53,7 +54,7 @@ const RootNavigator: React.FC = () => {
                 backgroundColor={theme.colors.background}
             />
             <ErrorBoundary>
-                <NavigationContainer theme={navigationTheme}>
+                <NavigationContainer theme={navigationTheme} linking={linkingConfig}>
                     {isAuthenticated ? <MainNavigator /> : <AuthNavigator />}
                 </NavigationContainer>
             </ErrorBoundary>
