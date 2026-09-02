@@ -1,28 +1,32 @@
-import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useCallback, useRef } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from './ThemeContext';
+import { Toast, ToastConfig, ToastType, ToastPosition } from '../components/Toast';
 
 const { width } = Dimensions.get('window');
 
-type AlertType = 'success' | 'error' | 'warning' | 'info' | 'confirm';
+export type AlertType = 'success' | 'error' | 'warning' | 'info' | 'confirm';
+export { ToastConfig, ToastType, ToastPosition };
 
-interface AlertButton {
+export interface AlertButton {
     text: string;
     onPress?: () => void;
     style?: 'default' | 'cancel' | 'destructive';
 }
 
-interface AlertConfig {
+export interface AlertConfig {
     title?: string;
     message: string;
     type?: AlertType;
     buttons?: AlertButton[];
 }
 
-interface AlertContextType {
+export interface AlertContextType {
     showAlert: (config: AlertConfig) => void;
     hideAlert: () => void;
+    showToast: (config: ToastConfig) => void;
+    hideToast: () => void;
 }
 
 const AlertContext = createContext<AlertContextType | undefined>(undefined);
@@ -34,6 +38,8 @@ interface AlertProviderProps {
 export const AlertProvider: React.FC<AlertProviderProps> = ({ children }) => {
     const { theme } = useTheme();
     const { colors } = theme;
+
+    // Modal Alert state
     const [visible, setVisible] = useState(false);
     const [config, setConfig] = useState<AlertConfig>({
         title: '',
@@ -41,6 +47,12 @@ export const AlertProvider: React.FC<AlertProviderProps> = ({ children }) => {
         type: 'info',
         buttons: [{ text: 'OK' }],
     });
+
+    // Toast & Queue state
+    const [toastVisible, setToastVisible] = useState(false);
+    const [currentToast, setCurrentToast] = useState<ToastConfig | null>(null);
+    const isToastActiveRef = useRef(false);
+    const toastQueueRef = useRef<ToastConfig[]>([]);
 
     const showAlert = useCallback((alertConfig: AlertConfig) => {
         setConfig({
@@ -54,6 +66,30 @@ export const AlertProvider: React.FC<AlertProviderProps> = ({ children }) => {
 
     const hideAlert = useCallback(() => {
         setVisible(false);
+    }, []);
+
+    const hideToast = useCallback(() => {
+        setToastVisible(false);
+        setTimeout(() => {
+            if (toastQueueRef.current.length > 0) {
+                const next = toastQueueRef.current.shift()!;
+                setCurrentToast(next);
+                setToastVisible(true);
+            } else {
+                isToastActiveRef.current = false;
+                setCurrentToast(null);
+            }
+        }, 250);
+    }, []);
+
+    const showToast = useCallback((toastConfig: ToastConfig) => {
+        if (isToastActiveRef.current) {
+            toastQueueRef.current.push(toastConfig);
+        } else {
+            isToastActiveRef.current = true;
+            setCurrentToast(toastConfig);
+            setToastVisible(true);
+        }
     }, []);
 
     const getIconName = (type: AlertType): keyof typeof MaterialIcons.glyphMap => {
@@ -157,8 +193,13 @@ export const AlertProvider: React.FC<AlertProviderProps> = ({ children }) => {
     };
 
     return (
-        <AlertContext.Provider value={{ showAlert, hideAlert }}>
+        <AlertContext.Provider value={{ showAlert, hideAlert, showToast, hideToast }}>
             {children}
+            <Toast
+                visible={toastVisible}
+                config={currentToast}
+                onDismiss={hideToast}
+            />
             <Modal
                 testID="alert-modal"
                 visible={visible}

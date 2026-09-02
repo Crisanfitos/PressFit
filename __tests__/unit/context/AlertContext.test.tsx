@@ -344,4 +344,97 @@ describe('AlertContext (PF-265)', () => {
             });
         });
     });
+
+    describe('Toast and Queue flows (PF-274)', () => {
+        const ToastTester = () => {
+            const { showToast, hideToast } = useAlert();
+
+            return (
+                <View>
+                    <TouchableOpacity
+                        testID="btn-toast-success"
+                        onPress={() =>
+                            showToast({
+                                title: 'Guardado',
+                                message: 'Rutina guardada con éxito',
+                                type: 'success',
+                            })
+                        }
+                    >
+                        <Text>Show Success Toast</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        testID="btn-toast-queue-1"
+                        onPress={() => {
+                            showToast({
+                                message: 'Primer mensaje en cola',
+                                type: 'info',
+                            });
+                            showToast({
+                                message: 'Segundo mensaje en cola',
+                                type: 'warning',
+                            });
+                        }}
+                    >
+                        <Text>Show Queue Toasts</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity testID="btn-hide-toast" onPress={hideToast}>
+                        <Text>Hide Toast</Text>
+                    </TouchableOpacity>
+                </View>
+            );
+        };
+
+        it('shows a toast notification when showToast is invoked', async () => {
+            const { getByTestId, queryByTestId } = await render(
+                <AlertProvider>
+                    <ToastTester />
+                </AlertProvider>
+            );
+
+            expect(queryByTestId('toast-box')).toBeNull();
+
+            fireEvent.press(getByTestId('btn-toast-success'));
+
+            await waitFor(() => {
+                expect(getByTestId('toast-box')).toBeTruthy();
+                expect(getByTestId('toast-title').props.children).toBe('Guardado');
+                expect(getByTestId('toast-message').props.children).toBe('Rutina guardada con éxito');
+            });
+        });
+
+        it('hides active toast and displays next item from queue sequentially', async () => {
+            const { getByTestId, queryByTestId } = await render(
+                <AlertProvider>
+                    <ToastTester />
+                </AlertProvider>
+            );
+
+            fireEvent.press(getByTestId('btn-toast-queue-1'));
+
+            // First toast in queue should be active
+            await waitFor(() => {
+                expect(getByTestId('toast-box')).toBeTruthy();
+                expect(getByTestId('toast-message').props.children).toBe('Primer mensaje en cola');
+            });
+
+            // Hide first toast
+            fireEvent.press(getByTestId('btn-hide-toast'));
+
+            // After hide and transition delay, second toast from queue appears
+            await waitFor(() => {
+                expect(getByTestId('toast-box')).toBeTruthy();
+                expect(getByTestId('toast-message').props.children).toBe('Segundo mensaje en cola');
+            }, { timeout: 1500 });
+
+            // Hide second toast
+            fireEvent.press(getByTestId('btn-hide-toast'));
+
+            await waitFor(() => {
+                expect(queryByTestId('toast-box')).toBeNull();
+            }, { timeout: 1500 });
+        });
+    });
 });
