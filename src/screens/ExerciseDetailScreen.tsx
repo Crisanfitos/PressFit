@@ -10,7 +10,10 @@ import {
     ActivityIndicator,
     Linking,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+    SafeAreaView,
+} from 'react-native-safe-area-context';
+import Reanimated from 'react-native-reanimated';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
@@ -228,12 +231,20 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                         {/* Image Slide */}
                         <View style={{ width: width - 32, height: 220, alignItems: 'center', justifyContent: 'center' }}>
                             {imageUrl ? (
-                                <Image source={{ uri: imageUrl }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                                <Reanimated.Image
+                                    source={{ uri: imageUrl }}
+                                    style={{ width: '100%', height: '100%' }}
+                                    resizeMode="cover"
+                                    sharedTransitionTag={`exercise-image-${exercise.id}`}
+                                />
                             ) : (
-                                <View style={styles.noVideoPlaceholder}>
+                                <Reanimated.View
+                                    style={styles.noVideoPlaceholder}
+                                    sharedTransitionTag={`exercise-image-${exercise.id}`}
+                                >
                                     <MaterialIcons name="image" size={48} color={colors.textSecondary} />
                                     <Text style={{ color: colors.textSecondary, marginTop: 8 }}>Sin imagen</Text>
-                                </View>
+                                </Reanimated.View>
                             )}
                         </View>
 

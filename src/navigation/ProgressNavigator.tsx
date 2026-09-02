@@ -21,7 +21,12 @@ const Stack = createNativeStackNavigator<ProgressStackParamList>();
 
 const ProgressNavigator: React.FC = () => {
     return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator
+            screenOptions={{
+                headerShown: false,
+                animation: 'slide_from_right',
+            }}
+        >
             <Stack.Screen name="ProgressMain" component={ProgressScreen} />
             <Stack.Screen name="MonthlyProgress" component={MonthlyProgressScreen} />
             <Stack.Screen name="WeeklyProgress" component={WeeklyProgressScreen} />

@@ -11,6 +11,7 @@ import {
     Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Reanimated from 'react-native-reanimated';
 import KeyboardAwareContainer from '../components/KeyboardAwareContainer';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -482,7 +483,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
     return (
         <SafeAreaView style={styles.container} testID="workout-screen">
             {/* Header */}
-            <View style={styles.header}>
+            <Reanimated.View style={styles.header} sharedTransitionTag={`workout-header-${routineDayId || workout?.id || 'active'}`}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TouchableOpacity testID="workout-back-button" style={styles.backButton} onPress={() => navigation.goBack()} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
                         <MaterialIcons name="arrow-back" size={24} color={colors.text} />
@@ -499,7 +500,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                         ) : null}
                     </View>
                 </View>
-            </View>
+            </Reanimated.View>
 
             {/* Content */}
             <KeyboardAwareContainer
