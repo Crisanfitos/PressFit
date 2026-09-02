@@ -10,6 +10,7 @@ import {
     Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Reanimated from 'react-native-reanimated';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
@@ -481,7 +482,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
     return (
         <SafeAreaView style={styles.container} testID="workout-day-screen">
             {/* Header */}
-            <View style={styles.header}>
+            <Reanimated.View style={styles.header} sharedTransitionTag={`workout-header-${dayData?.id || routineId}`}>
                 <View style={styles.backRow}>
                     <TouchableOpacity
                         style={styles.backButton}
@@ -533,7 +534,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                         </Text>
                     </View>
                 )}
-            </View>
+            </Reanimated.View>
 
             <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 100 }}>
                 <Text style={styles.sectionTitle}>

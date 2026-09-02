@@ -7,6 +7,7 @@ import {
   Image,
   Animated,
 } from 'react-native';
+import Reanimated from 'react-native-reanimated';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Exercise } from '../controllers/useExerciseController';
 import { ThemeColors } from '../theme/colors';
@@ -69,11 +70,19 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = React.memo(
               disabled={!videoId}
             >
               {thumbnailUrl ? (
-                <Image source={{ uri: thumbnailUrl }} style={styles.thumbnail} resizeMode="cover" />
+                <Reanimated.Image
+                  source={{ uri: thumbnailUrl }}
+                  style={styles.thumbnail}
+                  resizeMode="cover"
+                  sharedTransitionTag={`exercise-image-${item.id}`}
+                />
               ) : (
-                <View style={[styles.thumbnailPlaceholder, { backgroundColor: colors.inputBackground }]}>
+                <Reanimated.View
+                  style={[styles.thumbnailPlaceholder, { backgroundColor: colors.inputBackground }]}
+                  sharedTransitionTag={`exercise-image-${item.id}`}
+                >
                   <MaterialIcons name="fitness-center" size={24} color={colors.primary} />
-                </View>
+                </Reanimated.View>
               )}
               {videoId && (
                 <View style={styles.playIconOverlay}>

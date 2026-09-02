@@ -26,7 +26,12 @@ const Stack = createNativeStackNavigator<WeeklyPlanStackParamList>();
 
 const WeeklyPlanNavigator: React.FC = () => {
     return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator
+            screenOptions={{
+                headerShown: false,
+                animation: 'slide_from_right',
+            }}
+        >
             <Stack.Screen name="MonthlyCalendar" component={MonthlyCalendarScreen} />
             <Stack.Screen name="WorkoutDay" component={WorkoutDayScreen} />
             <Stack.Screen name="Workout" component={WorkoutScreen} />
