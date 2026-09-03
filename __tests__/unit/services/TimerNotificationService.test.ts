@@ -37,7 +37,12 @@ import {
     buildTimerNotificationContent,
     TIMER_NOTIFICATION_COLOR,
     TIMER_NOTIFICATION_PAUSED_COLOR,
+    TIMER_NOTIFICATION_ENABLED_KEY,
+    isTimerNotificationEnabled,
+    setTimerNotificationEnabled,
+    resetTimerNotificationEnabledCacheForTesting,
 } from '../../../src/services/TimerNotificationService';
+import i18n from '../../../src/i18n';
 
 jest.mock('expo-notifications', () => ({
     setNotificationHandler: jest.fn(),
@@ -72,6 +77,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 describe('TimerNotificationService', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        resetTimerNotificationEnabledCacheForTesting();
         (Notifications.dismissNotificationAsync as jest.Mock).mockResolvedValue(undefined);
         (Notifications.cancelScheduledNotificationAsync as jest.Mock).mockResolvedValue(undefined);
     });
@@ -597,6 +603,76 @@ describe('TimerNotificationService', () => {
                         color: TIMER_NOTIFICATION_PAUSED_COLOR,
                     }),
                 })
+            );
+        });
+    });
+
+    describe('Timer notification preferences and i18n (PF-287)', () => {
+        beforeEach(async () => {
+            resetTimerNotificationEnabledCacheForTesting();
+            await i18n.changeLanguage('es');
+        });
+
+        it('isTimerNotificationEnabled defaults to true when not set in storage', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(null);
+            const enabled = await isTimerNotificationEnabled();
+            expect(enabled).toBe(true);
+        });
+
+        it('isTimerNotificationEnabled returns false when stored as "false"', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce('false');
+            const enabled = await isTimerNotificationEnabled();
+            expect(enabled).toBe(false);
+        });
+
+        it('setTimerNotificationEnabled persists value and cancels notification when false', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce('active-id-123');
+            await setTimerNotificationEnabled(false);
+
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_NOTIFICATION_ENABLED_KEY, 'false');
+            expect(Notifications.dismissNotificationAsync).toHaveBeenCalledWith('active-id-123');
+            expect(Notifications.dismissNotificationAsync).toHaveBeenCalledWith(TIMER_NOTIFICATION_IDENTIFIER);
+        });
+
+        it('scheduleTimerNotification returns null without scheduling when preference is disabled', async () => {
+            await setTimerNotificationEnabled(false);
+
+            const result = await scheduleTimerNotification(10);
+            expect(result).toBeNull();
+            expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+        });
+
+        it('translates notification content and actions in Spanish (es)', async () => {
+            await i18n.changeLanguage('es');
+            const content = buildTimerNotificationContent(15, { paused: true });
+            expect(content.title).toBe('PressFit — Descanso en curso');
+            expect(content.body).toBe('⏸ Pausado');
+
+            await setupNotificationCategory();
+            expect(Notifications.setNotificationCategoryAsync).toHaveBeenCalledWith(
+                NOTIFICATION_CATEGORY_ID,
+                expect.arrayContaining([
+                    expect.objectContaining({ identifier: ACTION_OK, buttonTitle: '✅ OK' }),
+                    expect.objectContaining({ identifier: ACTION_PAUSE, buttonTitle: '⏸ Pausar' }),
+                    expect.objectContaining({ identifier: ACTION_DISCARD, buttonTitle: '✕ Descartar' }),
+                ])
+            );
+        });
+
+        it('translates notification content and actions in English (en)', async () => {
+            await i18n.changeLanguage('en');
+            const content = buildTimerNotificationContent(15, { paused: true });
+            expect(content.title).toBe('PressFit — Rest in progress');
+            expect(content.body).toBe('⏸ Paused');
+
+            await setupNotificationCategory();
+            expect(Notifications.setNotificationCategoryAsync).toHaveBeenCalledWith(
+                NOTIFICATION_CATEGORY_ID,
+                expect.arrayContaining([
+                    expect.objectContaining({ identifier: ACTION_OK, buttonTitle: '✅ OK' }),
+                    expect.objectContaining({ identifier: ACTION_PAUSE, buttonTitle: '⏸ Pause' }),
+                    expect.objectContaining({ identifier: ACTION_DISCARD, buttonTitle: '✕ Discard' }),
+                ])
             );
         });
     });

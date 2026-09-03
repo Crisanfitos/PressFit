@@ -1,10 +1,12 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import i18n from '../i18n';
 
 export const TIMER_STORAGE_KEY = '@pressfit_rest_timer_start';
 export const TIMER_PENDING_ACTION_KEY = '@pressfit_timer_action';
 export const TIMER_PAUSED_ELAPSED_KEY = '@pressfit_timer_paused_elapsed';
+export const TIMER_NOTIFICATION_ENABLED_KEY = '@pressfit_timer_notification_enabled';
 
 export type TimerPendingAction = 'OK' | 'PAUSE' | 'DISCARD';
 
@@ -95,23 +97,54 @@ export async function isNotificationChannelEnabled(): Promise<boolean> {
     }
 }
 
+// ─── Notification preference helpers (PF-287) ───
+let timerNotificationEnabled = true;
+
+export function resetTimerNotificationEnabledCacheForTesting(): void {
+    timerNotificationEnabled = true;
+}
+
+export async function isTimerNotificationEnabled(): Promise<boolean> {
+    try {
+        const value = await AsyncStorage.getItem(TIMER_NOTIFICATION_ENABLED_KEY);
+        if (value !== null && value !== undefined) {
+            timerNotificationEnabled = value !== 'false';
+        }
+        return timerNotificationEnabled;
+    } catch {
+        return timerNotificationEnabled;
+    }
+}
+
+export async function setTimerNotificationEnabled(enabled: boolean): Promise<void> {
+    timerNotificationEnabled = enabled;
+    try {
+        await AsyncStorage.setItem(TIMER_NOTIFICATION_ENABLED_KEY, String(enabled));
+        if (!enabled) {
+            await cancelTimerNotification();
+        }
+    } catch (error) {
+        logTimerNotification('warn', 'Failed to set timer notification enabled preference:', error);
+    }
+}
+
 // ─── Register notification category with action buttons ───
 // Button highlight/press ripple is handled automatically by the OS.
 export async function setupNotificationCategory(): Promise<void> {
     await Notifications.setNotificationCategoryAsync(NOTIFICATION_CATEGORY_ID, [
         {
             identifier: ACTION_OK,
-            buttonTitle: '✅ OK',
+            buttonTitle: i18n.t('timer.notification.ok', { defaultValue: '✅ OK' }),
             options: { opensAppToForeground: false },
         },
         {
             identifier: ACTION_PAUSE,
-            buttonTitle: '⏸ Pausar',
+            buttonTitle: i18n.t('timer.notification.pause', { defaultValue: '⏸ Pausar' }),
             options: { opensAppToForeground: false },
         },
         {
             identifier: ACTION_DISCARD,
-            buttonTitle: '✕ Descartar',
+            buttonTitle: i18n.t('timer.notification.discard', { defaultValue: '✕ Descartar' }),
             options: { opensAppToForeground: false },
         },
     ]);
@@ -187,9 +220,14 @@ export function buildTimerNotificationContent(
     const isPaused = !!options?.paused;
     const config = getNotificationPlatformConfig();
 
+    const title = i18n.t('timer.notification.title', { defaultValue: 'PressFit — Descanso en curso' });
+    const body = isPaused
+        ? i18n.t('timer.notification.paused', { defaultValue: '⏸ Pausado' })
+        : `⏱ ${formatTime(elapsedSeconds)}`;
+
     const content: Notifications.NotificationContentInput = {
-        title: 'PressFit — Descanso en curso',
-        body: isPaused ? '⏸ Pausado' : `⏱ ${formatTime(elapsedSeconds)}`,
+        title,
+        body,
         categoryIdentifier: NOTIFICATION_CATEGORY_ID,
         data: { type: 'REST_TIMER' },
         sticky: config.isSticky,
@@ -213,6 +251,11 @@ export async function scheduleTimerNotification(
     options?: BuildTimerNotificationOptions
 ): Promise<string | null> {
     try {
+        if (!timerNotificationEnabled) {
+            logTimerNotification('debug', 'Timer notification disabled by user preference, skipping schedule.');
+            return null;
+        }
+
         const previousId = await AsyncStorage.getItem(TIMER_NOTIFICATION_ID_KEY);
         const content = buildTimerNotificationContent(elapsedSeconds, options);
 

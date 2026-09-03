@@ -11,6 +11,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import {
     setupNotificationChannel,
@@ -45,6 +46,8 @@ interface RestTimerProps {
 }
 
 const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, colors }) => {
+    const { t } = useTranslation();
+
     const [seconds, setSeconds] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
     const [isStopped, setIsStopped] = useState(false);
@@ -400,7 +403,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             </View>
             <View style={{ flex: 1 }}>
                 <Text testID="rest-timer-text" style={styles.timerText}>{formatTime(seconds)}</Text>
-                <Text style={styles.label}>{isStopped ? 'Pausado' : 'Descanso'}</Text>
+                <Text style={styles.label}>{isStopped ? t('timer.paused', 'Pausado') : t('timer.rest', 'Descanso')}</Text>
             </View>
 
             {isStopped ? (
@@ -433,7 +436,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             ) : (
                 <>
                     <TouchableOpacity testID="rest-timer-pause-button" style={styles.stopButton} onPress={handleStop}>
-                        <Text style={styles.stopButtonText}>Parar</Text>
+                        <Text style={styles.stopButtonText}>{t('timer.stop', 'Parar')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity testID="rest-timer-discard-button" style={styles.dismissButton} onPress={handleDiscard}>
                         <MaterialIcons name="close" size={20} color={colors.textSecondary} />
