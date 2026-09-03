@@ -92,6 +92,14 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
         await clearPendingTimerAction();
 
         if (pendingAction === 'OK') {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+            if (notifIntervalRef.current) {
+                clearInterval(notifIntervalRef.current);
+                notifIntervalRef.current = null;
+            }
             const elapsed = await getElapsedSecondsFromStorage();
             await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
             await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
@@ -112,6 +120,14 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             setIsRunning(true);
             setSeconds(elapsed);
         } else if (pendingAction === 'DISCARD') {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+            if (notifIntervalRef.current) {
+                clearInterval(notifIntervalRef.current);
+                notifIntervalRef.current = null;
+            }
             await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
             await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
             await cancelTimerNotification();
@@ -144,6 +160,12 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             } catch (_) { }
 
             await reconcilePendingAction();
+
+            // Ensure no leftover notification exists if no timer is active in storage
+            const { active } = await checkActiveRestTimer();
+            if (!active) {
+                await cancelTimerNotification();
+            }
         })();
     }, [reconcilePendingAction]);
 
@@ -165,6 +187,20 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             const prev = appStateRef.current;
             appStateRef.current = nextState;
             logTimerNotification('debug', `AppState changed from ${prev} to ${nextState}`);
+
+            const { active } = await checkActiveRestTimer();
+            if (!active) {
+                if (intervalRef.current) {
+                    clearInterval(intervalRef.current);
+                    intervalRef.current = null;
+                }
+                if (notifIntervalRef.current) {
+                    clearInterval(notifIntervalRef.current);
+                    notifIntervalRef.current = null;
+                }
+                await cancelTimerNotification();
+                return;
+            }
 
             if (!visibleRef.current) return;
 
@@ -262,6 +298,24 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                 duration: 200,
                 useNativeDriver: true,
             }).start();
+
+            // When becoming invisible, if there is no active timer in storage, clear running state & cancel notification
+            (async () => {
+                const { active } = await checkActiveRestTimer();
+                if (!active) {
+                    setIsRunning(false);
+                    setIsStopped(false);
+                    if (intervalRef.current) {
+                        clearInterval(intervalRef.current);
+                        intervalRef.current = null;
+                    }
+                    if (notifIntervalRef.current) {
+                        clearInterval(notifIntervalRef.current);
+                        notifIntervalRef.current = null;
+                    }
+                    await cancelTimerNotification();
+                }
+            })();
         }
     }, [visible, reconcilePendingAction]);
 
@@ -296,6 +350,17 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
     }, []);
 
     const handleConfirm = useCallback(async () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+        if (notifIntervalRef.current) {
+            clearInterval(notifIntervalRef.current);
+            notifIntervalRef.current = null;
+        }
+        setIsRunning(false);
+        setIsStopped(false);
+
         // Get exact elapsed from AsyncStorage before clearing
         const elapsed = await getElapsedSecondsFromStorage();
         await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
@@ -305,7 +370,6 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
         HapticService.timerFinished();
 
         onTimerStop(elapsed > 0 ? elapsed : seconds);
-        setIsStopped(false);
         onDismiss();
     }, [seconds, onTimerStop, onDismiss]);
 
@@ -323,11 +387,21 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
     }, []);
 
     const handleDiscard = useCallback(async () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+        if (notifIntervalRef.current) {
+            clearInterval(notifIntervalRef.current);
+            notifIntervalRef.current = null;
+        }
+        setIsRunning(false);
+        setIsStopped(false);
+
         await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
         await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
         await clearPendingTimerAction();
         await cancelTimerNotification();
-        setIsStopped(false);
         onDismiss();
     }, [onDismiss]);
 
