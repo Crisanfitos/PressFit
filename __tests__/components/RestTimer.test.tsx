@@ -7,10 +7,13 @@ const mockCheckActiveRestTimer = jest.fn().mockResolvedValue({ active: false, el
 jest.mock('../../src/services/TimerNotificationService', () => ({
     requestNotificationPermissions: jest.fn().mockResolvedValue(true),
     setupNotificationCategory: jest.fn().mockResolvedValue(undefined),
+    setupNotificationChannel: jest.fn().mockResolvedValue(undefined),
     scheduleTimerNotification: jest.fn().mockResolvedValue(undefined),
     cancelTimerNotification: jest.fn().mockResolvedValue(undefined),
     getElapsedSecondsFromStorage: jest.fn().mockResolvedValue(120),
     checkActiveRestTimer: (...args: any[]) => mockCheckActiveRestTimer(...args),
+    setRestTimerUIVisible: jest.fn(),
+    logTimerNotification: jest.fn(),
     ACTION_OK: 'ACTION_OK',
     ACTION_PAUSE: 'ACTION_PAUSE',
     ACTION_DISCARD: 'ACTION_DISCARD',
@@ -112,6 +115,24 @@ describe('RestTimer Component (RNTL)', () => {
             );
 
             expect(await findByText('0:00')).toBeTruthy();
+        });
+    });
+
+    describe('Lifecycle & Visibility reliability (PF-285)', () => {
+        it('registers Android notification channel and synchronizes foreground UI visibility', async () => {
+            const { setRestTimerUIVisible, setupNotificationChannel } = require('../../src/services/TimerNotificationService');
+
+            const { unmount } = await render(
+                <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
+            );
+
+            expect(setupNotificationChannel).toHaveBeenCalled();
+            expect(setRestTimerUIVisible).toHaveBeenCalledWith(true);
+
+            await act(async () => {
+                unmount();
+            });
+            expect(setRestTimerUIVisible).toHaveBeenCalledWith(false);
         });
     });
 });
