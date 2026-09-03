@@ -140,7 +140,7 @@ describe('TimerNotificationService', () => {
     });
 
     describe('setupNotificationCategory', () => {
-        it('should register REST_TIMER category with action buttons', async () => {
+        it('should register REST_TIMER category with action buttons (opensAppToForeground: false to avoid hijacking app UI in PF-293)', async () => {
             await setupNotificationCategory();
 
             expect(Notifications.setNotificationCategoryAsync).toHaveBeenCalledWith(
@@ -149,17 +149,17 @@ describe('TimerNotificationService', () => {
                     {
                         identifier: ACTION_OK,
                         buttonTitle: '✅ OK',
-                        options: { opensAppToForeground: true },
+                        options: { opensAppToForeground: false },
                     },
                     {
                         identifier: ACTION_PAUSE,
                         buttonTitle: '⏸ Pausar',
-                        options: { opensAppToForeground: true },
+                        options: { opensAppToForeground: false },
                     },
                     {
                         identifier: ACTION_DISCARD,
                         buttonTitle: '✕ Descartar',
-                        options: { opensAppToForeground: true },
+                        options: { opensAppToForeground: false },
                     },
                 ]
             );
@@ -582,4 +582,23 @@ describe('TimerNotificationService', () => {
             Object.defineProperty(Platform, 'OS', { value: originalOS, configurable: true });
         });
     });
+
+    describe('scheduleTimerNotification with options (PF-293)', () => {
+        it('schedules notification with paused state and correct content', async () => {
+            (Notifications.scheduleNotificationAsync as jest.Mock).mockResolvedValueOnce('test-notif-paused');
+
+            const id = await scheduleTimerNotification(42, { paused: true });
+
+            expect(id).toBe('test-notif-paused');
+            expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    content: expect.objectContaining({
+                        body: '⏸ Pausado',
+                        color: TIMER_NOTIFICATION_PAUSED_COLOR,
+                    }),
+                })
+            );
+        });
+    });
 });
+
