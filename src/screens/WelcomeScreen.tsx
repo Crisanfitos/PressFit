@@ -69,6 +69,19 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
             fontSize: 18,
             fontWeight: 'bold',
         },
+        onboardingButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            paddingVertical: 12,
+            marginTop: 4,
+        },
+        onboardingButtonText: {
+            color: colors.primary,
+            fontSize: 15,
+            fontWeight: '600',
+        },
     });
 
     return (
@@ -99,6 +112,17 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ navigation }) => {
                         testID="signup-button"
                     >
                         <Text style={styles.secondaryButtonText}>{t('auth.signUp')}</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.onboardingButton}
+                        onPress={() => navigation.navigate('Onboarding')}
+                        testID="onboarding-button"
+                    >
+                        <MaterialIcons name="auto-awesome" size={18} color={colors.primary} />
+                        <Text style={styles.onboardingButtonText}>
+                            {t('auth.startOnboarding', 'Test Inicial / Onboarding')}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>
