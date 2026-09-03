@@ -3,6 +3,9 @@ import { render, fireEvent, act } from '@testing-library/react-native';
 import RestTimer from '../../src/components/RestTimer';
 
 const mockCheckActiveRestTimer = jest.fn().mockResolvedValue({ active: false, elapsedSeconds: 0 });
+const mockGetPendingTimerAction = jest.fn().mockResolvedValue(null);
+const mockClearPendingTimerAction = jest.fn().mockResolvedValue(undefined);
+const mockHandleNotificationAction = jest.fn().mockResolvedValue(null);
 
 jest.mock('../../src/services/TimerNotificationService', () => ({
     requestNotificationPermissions: jest.fn().mockResolvedValue(true),
@@ -14,9 +17,16 @@ jest.mock('../../src/services/TimerNotificationService', () => ({
     checkActiveRestTimer: (...args: any[]) => mockCheckActiveRestTimer(...args),
     setRestTimerUIVisible: jest.fn(),
     logTimerNotification: jest.fn(),
+    handleNotificationAction: (...args: any[]) => mockHandleNotificationAction(...args),
+    getPendingTimerAction: (...args: any[]) => mockGetPendingTimerAction(...args),
+    clearPendingTimerAction: (...args: any[]) => mockClearPendingTimerAction(...args),
+    setPendingTimerAction: jest.fn().mockResolvedValue(undefined),
     ACTION_OK: 'ACTION_OK',
     ACTION_PAUSE: 'ACTION_PAUSE',
     ACTION_DISCARD: 'ACTION_DISCARD',
+    TIMER_STORAGE_KEY: '@pressfit_rest_timer_start',
+    TIMER_PAUSED_ELAPSED_KEY: '@pressfit_timer_paused_elapsed',
+    TIMER_PENDING_ACTION_KEY: '@pressfit_timer_action',
 }));
 
 describe('RestTimer Component (RNTL)', () => {
@@ -133,6 +143,47 @@ describe('RestTimer Component (RNTL)', () => {
                 unmount();
             });
             expect(setRestTimerUIVisible).toHaveBeenCalledWith(false);
+        });
+    });
+
+    describe('Notification Actions & Reconciliation (PF-284)', () => {
+        it('reconciles pending OK action by calling onTimerStop and onDismiss', async () => {
+            mockGetPendingTimerAction.mockResolvedValueOnce('OK');
+            const { getElapsedSecondsFromStorage } = require('../../src/services/TimerNotificationService');
+            getElapsedSecondsFromStorage.mockResolvedValueOnce(95);
+
+            await render(
+                <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
+            );
+
+            expect(mockClearPendingTimerAction).toHaveBeenCalled();
+            expect(mockOnTimerStop).toHaveBeenCalledWith(95);
+            expect(mockOnDismiss).toHaveBeenCalled();
+        });
+
+        it('reconciles pending PAUSE action by setting stopped state and frozen elapsed', async () => {
+            mockGetPendingTimerAction.mockResolvedValueOnce('PAUSE');
+            const { getElapsedSecondsFromStorage } = require('../../src/services/TimerNotificationService');
+            getElapsedSecondsFromStorage.mockResolvedValueOnce(75);
+
+            const { findByText } = await render(
+                <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
+            );
+
+            expect(mockClearPendingTimerAction).toHaveBeenCalled();
+            expect(await findByText('Pausado')).toBeTruthy();
+            expect(await findByText('1:15')).toBeTruthy();
+        });
+
+        it('reconciles pending DISCARD action by dismissing modal', async () => {
+            mockGetPendingTimerAction.mockResolvedValueOnce('DISCARD');
+
+            await render(
+                <RestTimer visible={true} onDismiss={mockOnDismiss} onTimerStop={mockOnTimerStop} colors={colors} />
+            );
+
+            expect(mockClearPendingTimerAction).toHaveBeenCalled();
+            expect(mockOnDismiss).toHaveBeenCalled();
         });
     });
 });

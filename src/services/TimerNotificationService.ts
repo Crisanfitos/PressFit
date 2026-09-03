@@ -2,7 +2,11 @@ import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const TIMER_STORAGE_KEY = '@pressfit_rest_timer_start';
+export const TIMER_STORAGE_KEY = '@pressfit_rest_timer_start';
+export const TIMER_PENDING_ACTION_KEY = '@pressfit_timer_action';
+export const TIMER_PAUSED_ELAPSED_KEY = '@pressfit_timer_paused_elapsed';
+
+export type TimerPendingAction = 'OK' | 'PAUSE' | 'DISCARD';
 
 // Notification identifiers
 export const TIMER_NOTIFICATION_ID_KEY = '@pressfit_timer_notif_id';
@@ -200,9 +204,13 @@ export async function cancelTimerNotification(): Promise<void> {
     }
 }
 
-// ─── Get elapsed seconds from stored start timestamp ───
+// ─── Get elapsed seconds from stored start timestamp (or frozen paused seconds) ───
 export async function getElapsedSecondsFromStorage(): Promise<number> {
     try {
+        const paused = await AsyncStorage.getItem(TIMER_PAUSED_ELAPSED_KEY);
+        if (paused !== null) {
+            return Math.max(0, parseInt(paused, 10) || 0);
+        }
         const saved = await AsyncStorage.getItem(TIMER_STORAGE_KEY);
         if (saved) {
             return Math.max(0, Math.floor((Date.now() - parseInt(saved, 10)) / 1000));
@@ -212,15 +220,105 @@ export async function getElapsedSecondsFromStorage(): Promise<number> {
 }
 
 // ─── Check if a rest timer was active (survives app kill via AsyncStorage) ───
-export async function checkActiveRestTimer(): Promise<{ active: boolean; elapsedSeconds: number }> {
+export async function checkActiveRestTimer(): Promise<{ active: boolean; elapsedSeconds: number; paused?: boolean }> {
     try {
+        const pendingAction = await getPendingTimerAction();
+        if (pendingAction === 'DISCARD') {
+            return { active: false, elapsedSeconds: 0 };
+        }
+        const paused = await AsyncStorage.getItem(TIMER_PAUSED_ELAPSED_KEY);
+        if (paused !== null) {
+            return { active: true, elapsedSeconds: Math.max(0, parseInt(paused, 10) || 0), paused: true };
+        }
         const saved = await AsyncStorage.getItem(TIMER_STORAGE_KEY);
         if (saved) {
             const elapsed = Math.max(0, Math.floor((Date.now() - parseInt(saved, 10)) / 1000));
-            return { active: true, elapsedSeconds: elapsed };
+            return { active: true, elapsedSeconds: elapsed, paused: false };
         }
     } catch (_) { }
     return { active: false, elapsedSeconds: 0 };
+}
+
+// ─── Push Notification Action Persistence & Handlers (PF-284) ───
+
+export async function setPendingTimerAction(action: TimerPendingAction): Promise<void> {
+    try {
+        await AsyncStorage.setItem(TIMER_PENDING_ACTION_KEY, action);
+        logTimerNotification('debug', `Set pending timer action: ${action}`);
+    } catch (error) {
+        logTimerNotification('warn', 'Failed to set pending timer action:', error);
+    }
+}
+
+export async function getPendingTimerAction(): Promise<TimerPendingAction | null> {
+    try {
+        const action = await AsyncStorage.getItem(TIMER_PENDING_ACTION_KEY);
+        if (action === 'OK' || action === 'PAUSE' || action === 'DISCARD') {
+            return action as TimerPendingAction;
+        }
+    } catch (error) {
+        logTimerNotification('warn', 'Failed to get pending timer action:', error);
+    }
+    return null;
+}
+
+export async function clearPendingTimerAction(): Promise<void> {
+    try {
+        await AsyncStorage.removeItem(TIMER_PENDING_ACTION_KEY);
+        logTimerNotification('debug', 'Cleared pending timer action');
+    } catch (error) {
+        logTimerNotification('warn', 'Failed to clear pending timer action:', error);
+    }
+}
+
+/**
+ * Executes immediate side effects for push notification actions.
+ * Guarantees that state is persisted in AsyncStorage even if React components are unmounted.
+ */
+export async function handleNotificationAction(actionId: string): Promise<TimerPendingAction | null> {
+    logTimerNotification('info', `Handling notification action: ${actionId}`);
+    try {
+        if (actionId === ACTION_OK) {
+            const elapsed = await getElapsedSecondsFromStorage();
+            await setPendingTimerAction('OK');
+            await AsyncStorage.setItem(TIMER_PAUSED_ELAPSED_KEY, String(elapsed));
+            await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+            await cancelTimerNotification();
+            return 'OK';
+        } else if (actionId === ACTION_PAUSE) {
+            const elapsed = await getElapsedSecondsFromStorage();
+            await setPendingTimerAction('PAUSE');
+            await AsyncStorage.setItem(TIMER_PAUSED_ELAPSED_KEY, String(elapsed));
+            await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+
+            // Update notification with paused indicator
+            try {
+                await Notifications.scheduleNotificationAsync({
+                    identifier: TIMER_NOTIFICATION_IDENTIFIER,
+                    content: {
+                        title: 'PressFit — Descanso en curso',
+                        body: '⏸ Pausado',
+                        categoryIdentifier: NOTIFICATION_CATEGORY_ID,
+                        data: { type: 'REST_TIMER' },
+                        sticky: true,
+                        autoDismiss: false,
+                        color: '#eab308',
+                    },
+                    trigger: Platform.OS === 'android' ? { channelId: TIMER_CHANNEL_ID } : null,
+                });
+            } catch (_) { }
+            return 'PAUSE';
+        } else if (actionId === ACTION_DISCARD) {
+            await setPendingTimerAction('DISCARD');
+            await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+            await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
+            await cancelTimerNotification();
+            return 'DISCARD';
+        }
+    } catch (error) {
+        logTimerNotification('warn', 'Error executing notification action:', error);
+    }
+    return null;
 }
 
 // ─── Active Workout Route Params Persistence ───

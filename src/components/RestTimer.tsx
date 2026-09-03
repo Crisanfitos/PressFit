@@ -22,13 +22,16 @@ import {
     checkActiveRestTimer,
     setRestTimerUIVisible,
     logTimerNotification,
+    handleNotificationAction,
+    getPendingTimerAction,
+    clearPendingTimerAction,
     ACTION_OK,
     ACTION_PAUSE,
     ACTION_DISCARD,
+    TIMER_STORAGE_KEY,
+    TIMER_PAUSED_ELAPSED_KEY,
 } from '../services/TimerNotificationService';
 import { HapticService } from '../services/HapticService';
-
-const TIMER_STORAGE_KEY = '@pressfit_rest_timer_start';
 
 // Notification update interval: 1s ensures real-time updates (≤ 2s) matching the UI timer.
 // Using stable TIMER_NOTIFICATION_IDENTIFIER eliminates flickering completely without cancel+repost.
@@ -77,14 +80,58 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
         };
     }, [visible]);
 
+    // ─── Reconcile pending push notification actions (PF-284) ───
+    const reconcilePendingAction = useCallback(async (): Promise<string | null> => {
+        const pendingAction = await getPendingTimerAction();
+        if (!pendingAction) return null;
+
+        logTimerNotification('info', `Reconciling pending timer action: ${pendingAction}`);
+        await clearPendingTimerAction();
+
+        if (pendingAction === 'OK') {
+            const elapsed = await getElapsedSecondsFromStorage();
+            await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+            await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
+            await cancelTimerNotification();
+            HapticService.timerFinished();
+            onTimerStopRef.current(elapsed > 0 ? elapsed : secondsRef.current);
+            setIsStopped(false);
+            setIsRunning(false);
+            onDismissRef.current();
+        } else if (pendingAction === 'PAUSE') {
+            const elapsed = await getElapsedSecondsFromStorage();
+            setIsRunning(false);
+            setIsStopped(true);
+            setSeconds(elapsed);
+        } else if (pendingAction === 'DISCARD') {
+            await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+            await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
+            await cancelTimerNotification();
+            setIsStopped(false);
+            setIsRunning(false);
+            onDismissRef.current();
+        }
+        return pendingAction;
+    }, []);
+
     // ─── One-time setup: permissions + Android channel + notification category ───
     useEffect(() => {
         (async () => {
             await requestNotificationPermissions();
             await setupNotificationChannel();
             await setupNotificationCategory();
+
+            // Check if app was launched directly from an action response
+            try {
+                const lastResponse = await Notifications.getLastNotificationResponseAsync();
+                if (lastResponse?.actionIdentifier) {
+                    await handleNotificationAction(lastResponse.actionIdentifier);
+                }
+            } catch (_) { }
+
+            await reconcilePendingAction();
         })();
-    }, []);
+    }, [reconcilePendingAction]);
 
     // ─── Handle notification response (user taps action button in drawer/lock screen) ───
     useEffect(() => {
@@ -92,29 +139,11 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             const actionId = response.actionIdentifier;
             logTimerNotification('debug', `Notification response action: ${actionId}`);
 
-            if (actionId === ACTION_OK) {
-                // Calculate exact elapsed time and save
-                const elapsed = await getElapsedSecondsFromStorage();
-                await cancelTimerNotification();
-                await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
-                HapticService.timerFinished();
-                onTimerStopRef.current(elapsed > 0 ? elapsed : secondsRef.current);
-                setIsStopped(false);
-                onDismissRef.current();
-            } else if (actionId === ACTION_PAUSE) {
-                // Pause in-app timer (user brings app back by tapping the notification)
-                setIsRunning(false);
-                setIsStopped(true);
-                await cancelTimerNotification();
-            } else if (actionId === ACTION_DISCARD) {
-                await cancelTimerNotification();
-                await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
-                setIsStopped(false);
-                onDismissRef.current();
-            }
+            await handleNotificationAction(actionId);
+            await reconcilePendingAction();
         });
         return () => sub.remove();
-    }, []);
+    }, [reconcilePendingAction]);
 
     // ─── AppState listener with stable refs (avoids teardown race conditions) ───
     useEffect(() => {
@@ -151,15 +180,16 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                     notifIntervalRef.current = null;
                 }
 
-                // Cancel the notification since user is back in app
-                await cancelTimerNotification();
+                // Check and reconcile any action performed in background
+                await reconcilePendingAction();
 
-                // Recalculate elapsed time from start timestamp
+                // If running, cancel notification and recalculate elapsed
                 if (
                     (prev === 'background' || prev === 'inactive') &&
                     isRunningRef.current &&
                     !isStoppedRef.current
                 ) {
+                    await cancelTimerNotification();
                     const elapsed = await getElapsedSecondsFromStorage();
                     setSeconds(elapsed);
                 }
@@ -173,25 +203,37 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                 notifIntervalRef.current = null;
             }
         };
-    }, []);
+    }, [reconcilePendingAction]);
 
     // ─── Visibility: animate + start/reset timer (with kill-recovery reconciliation) ───
     useEffect(() => {
         if (visible) {
             // Check if a timer was already running before (survives app kill via AsyncStorage)
             (async () => {
-                const { active, elapsedSeconds } = await checkActiveRestTimer();
+                const actionHandled = await reconcilePendingAction();
+                if (actionHandled) return;
+
+                const { active, elapsedSeconds, paused } = await checkActiveRestTimer();
                 if (active && elapsedSeconds > 0) {
-                    // Reconcile: resume from persisted start timestamp
+                    // Reconcile: resume from persisted start timestamp or paused state
                     setSeconds(elapsedSeconds);
+                    if (paused) {
+                        setIsStopped(true);
+                        setIsRunning(false);
+                    } else {
+                        setIsStopped(false);
+                        setIsRunning(true);
+                    }
                 } else {
                     // Fresh start: store new timestamp
                     const startTs = Date.now();
                     setSeconds(0);
+                    await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
+                    await clearPendingTimerAction();
                     await AsyncStorage.setItem(TIMER_STORAGE_KEY, String(startTs));
+                    setIsStopped(false);
+                    setIsRunning(true);
                 }
-                setIsStopped(false);
-                setIsRunning(true);
             })();
             Animated.spring(slideAnim, {
                 toValue: 0,
@@ -206,7 +248,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                 useNativeDriver: true,
             }).start();
         }
-    }, [visible]);
+    }, [visible, reconcilePendingAction]);
 
     // ─── setInterval while running in foreground ───
     useEffect(() => {
@@ -228,15 +270,21 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
 
     // ─── Actions ───
 
-    const handleStop = useCallback(() => {
+    const handleStop = useCallback(async () => {
         setIsRunning(false);
         setIsStopped(true);
+        const elapsed = await getElapsedSecondsFromStorage();
+        await AsyncStorage.setItem(TIMER_PAUSED_ELAPSED_KEY, String(elapsed));
+        await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+        await cancelTimerNotification();
     }, []);
 
     const handleConfirm = useCallback(async () => {
         // Get exact elapsed from AsyncStorage before clearing
         const elapsed = await getElapsedSecondsFromStorage();
         await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+        await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
+        await clearPendingTimerAction();
         await cancelTimerNotification();
         HapticService.timerFinished();
 
@@ -245,13 +293,20 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
         onDismiss();
     }, [seconds, onTimerStop, onDismiss]);
 
-    const handleResume = useCallback(() => {
+    const handleResume = useCallback(async () => {
         setIsStopped(false);
         setIsRunning(true);
+        const currentSecs = secondsRef.current;
+        await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
+        await clearPendingTimerAction();
+        const adjustedStart = Date.now() - currentSecs * 1000;
+        await AsyncStorage.setItem(TIMER_STORAGE_KEY, String(adjustedStart));
     }, []);
 
     const handleDiscard = useCallback(async () => {
         await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+        await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
+        await clearPendingTimerAction();
         await cancelTimerNotification();
         setIsStopped(false);
         onDismiss();

@@ -26,6 +26,13 @@ import {
     ACTION_OK,
     ACTION_PAUSE,
     ACTION_DISCARD,
+    TIMER_PENDING_ACTION_KEY,
+    TIMER_PAUSED_ELAPSED_KEY,
+    TIMER_STORAGE_KEY,
+    setPendingTimerAction,
+    getPendingTimerAction,
+    clearPendingTimerAction,
+    handleNotificationAction,
 } from '../../../src/services/TimerNotificationService';
 
 jest.mock('expo-notifications', () => ({
@@ -293,7 +300,10 @@ describe('TimerNotificationService', () => {
         it('should calculate non-negative elapsed seconds when timestamp exists', async () => {
             const now = Date.now();
             const start = now - 30000; // 30 seconds ago
-            (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(start.toString());
+            (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) => {
+                if (key === TIMER_STORAGE_KEY) return start.toString();
+                return null;
+            });
 
             const elapsed = await getElapsedSecondsFromStorage();
 
@@ -308,27 +318,136 @@ describe('TimerNotificationService', () => {
 
             expect(elapsed).toBe(0);
         });
+
+        it('should return paused elapsed seconds when TIMER_PAUSED_ELAPSED_KEY is saved', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) => {
+                if (key === TIMER_PAUSED_ELAPSED_KEY) return '85';
+                return null;
+            });
+
+            const elapsed = await getElapsedSecondsFromStorage();
+            expect(elapsed).toBe(85);
+        });
     });
 
     describe('checkActiveRestTimer', () => {
         it('should return { active: false, elapsedSeconds: 0 } when no active timer timestamp exists', async () => {
-            (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(null);
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
 
             const res = await checkActiveRestTimer();
 
             expect(res).toEqual({ active: false, elapsedSeconds: 0 });
         });
 
-        it('should return { active: true, elapsedSeconds: X } when active timer exists', async () => {
+        it('should return { active: true, elapsedSeconds: X, paused: false } when active timer exists', async () => {
             const now = Date.now();
             const start = now - 60000; // 60 seconds ago
-            (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(start.toString());
+            (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) => {
+                if (key === TIMER_STORAGE_KEY) return start.toString();
+                return null;
+            });
 
             const res = await checkActiveRestTimer();
 
             expect(res.active).toBe(true);
+            expect(res.paused).toBe(false);
             expect(res.elapsedSeconds).toBeGreaterThanOrEqual(59);
             expect(res.elapsedSeconds).toBeLessThanOrEqual(61);
+        });
+
+        it('should return { active: true, elapsedSeconds: 45, paused: true } when timer is paused', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) => {
+                if (key === TIMER_PAUSED_ELAPSED_KEY) return '45';
+                return null;
+            });
+
+            const res = await checkActiveRestTimer();
+
+            expect(res).toEqual({ active: true, elapsedSeconds: 45, paused: true });
+        });
+
+        it('should return { active: false, elapsedSeconds: 0 } when pending action is DISCARD', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) => {
+                if (key === TIMER_PENDING_ACTION_KEY) return 'DISCARD';
+                if (key === TIMER_STORAGE_KEY) return String(Date.now() - 10000);
+                return null;
+            });
+
+            const res = await checkActiveRestTimer();
+
+            expect(res).toEqual({ active: false, elapsedSeconds: 0 });
+        });
+    });
+
+    describe('Pending Actions Persistence (PF-284)', () => {
+        it('saves and reads pending actions correctly', async () => {
+            await setPendingTimerAction('OK');
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_PENDING_ACTION_KEY, 'OK');
+
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce('PAUSE');
+            const action = await getPendingTimerAction();
+            expect(action).toBe('PAUSE');
+
+            await clearPendingTimerAction();
+            expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_PENDING_ACTION_KEY);
+        });
+
+        it('returns null for invalid or null pending actions', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce('INVALID');
+            expect(await getPendingTimerAction()).toBeNull();
+
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(null);
+            expect(await getPendingTimerAction()).toBeNull();
+        });
+    });
+
+    describe('handleNotificationAction (PF-284)', () => {
+        it('handles ACTION_OK: saves OK action, freezes elapsed, removes timer start and cancels notification', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) => {
+                if (key === TIMER_STORAGE_KEY) return String(Date.now() - 50000);
+                return null;
+            });
+
+            const result = await handleNotificationAction(ACTION_OK);
+
+            expect(result).toBe('OK');
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_PENDING_ACTION_KEY, 'OK');
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_PAUSED_ELAPSED_KEY, expect.any(String));
+            expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_STORAGE_KEY);
+            expect(Notifications.dismissNotificationAsync).toHaveBeenCalledWith(TIMER_NOTIFICATION_IDENTIFIER);
+        });
+
+        it('handles ACTION_PAUSE: saves PAUSE action, freezes elapsed, removes timer start and updates notification with paused indicator', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) => {
+                if (key === TIMER_STORAGE_KEY) return String(Date.now() - 75000);
+                return null;
+            });
+
+            const result = await handleNotificationAction(ACTION_PAUSE);
+
+            expect(result).toBe('PAUSE');
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_PENDING_ACTION_KEY, 'PAUSE');
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_PAUSED_ELAPSED_KEY, expect.any(String));
+            expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_STORAGE_KEY);
+            expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    identifier: TIMER_NOTIFICATION_IDENTIFIER,
+                    content: expect.objectContaining({
+                        body: '⏸ Pausado',
+                        color: '#eab308',
+                    }),
+                })
+            );
+        });
+
+        it('handles ACTION_DISCARD: saves DISCARD action, removes both storage keys and cancels notification', async () => {
+            const result = await handleNotificationAction(ACTION_DISCARD);
+
+            expect(result).toBe('DISCARD');
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_PENDING_ACTION_KEY, 'DISCARD');
+            expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_STORAGE_KEY);
+            expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_PAUSED_ELAPSED_KEY);
+            expect(Notifications.dismissNotificationAsync).toHaveBeenCalledWith(TIMER_NOTIFICATION_IDENTIFIER);
         });
     });
 
