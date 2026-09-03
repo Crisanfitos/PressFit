@@ -13,12 +13,15 @@ import * as Notifications from 'expo-notifications';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import {
+    setupNotificationChannel,
     setupNotificationCategory,
     requestNotificationPermissions,
     scheduleTimerNotification,
     cancelTimerNotification,
     getElapsedSecondsFromStorage,
     checkActiveRestTimer,
+    setRestTimerUIVisible,
+    logTimerNotification,
     ACTION_OK,
     ACTION_PAUSE,
     ACTION_DISCARD,
@@ -49,10 +52,36 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
     const appStateRef = useRef<AppStateStatus>(AppState.currentState);
     const isInBackgroundRef = useRef(false);
 
-    // ─── One-time setup: permissions + notification category ───
+    // Stable references to prevent stale closures and race conditions in listeners
+    const visibleRef = useRef(visible);
+    const isRunningRef = useRef(isRunning);
+    const isStoppedRef = useRef(isStopped);
+    const secondsRef = useRef(seconds);
+    const onTimerStopRef = useRef(onTimerStop);
+    const onDismissRef = useRef(onDismiss);
+
+    useEffect(() => {
+        visibleRef.current = visible;
+        isRunningRef.current = isRunning;
+        isStoppedRef.current = isStopped;
+        secondsRef.current = seconds;
+        onTimerStopRef.current = onTimerStop;
+        onDismissRef.current = onDismiss;
+    });
+
+    // ─── Foreground UI visibility flag: allow notification banners when RestTimer is not active on screen ───
+    useEffect(() => {
+        setRestTimerUIVisible(visible);
+        return () => {
+            setRestTimerUIVisible(false);
+        };
+    }, [visible]);
+
+    // ─── One-time setup: permissions + Android channel + notification category ───
     useEffect(() => {
         (async () => {
             await requestNotificationPermissions();
+            await setupNotificationChannel();
             await setupNotificationCategory();
         })();
     }, []);
@@ -61,6 +90,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
     useEffect(() => {
         const sub = Notifications.addNotificationResponseReceivedListener(async (response) => {
             const actionId = response.actionIdentifier;
+            logTimerNotification('debug', `Notification response action: ${actionId}`);
 
             if (actionId === ACTION_OK) {
                 // Calculate exact elapsed time and save
@@ -68,9 +98,9 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                 await cancelTimerNotification();
                 await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
                 HapticService.timerFinished();
-                onTimerStop(elapsed > 0 ? elapsed : seconds);
+                onTimerStopRef.current(elapsed > 0 ? elapsed : secondsRef.current);
                 setIsStopped(false);
-                onDismiss();
+                onDismissRef.current();
             } else if (actionId === ACTION_PAUSE) {
                 // Pause in-app timer (user brings app back by tapping the notification)
                 setIsRunning(false);
@@ -80,28 +110,32 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                 await cancelTimerNotification();
                 await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
                 setIsStopped(false);
-                onDismiss();
+                onDismissRef.current();
             }
         });
         return () => sub.remove();
-    }, [seconds, onTimerStop, onDismiss]);
+    }, []);
 
-    // ─── AppState listener ───
+    // ─── AppState listener with stable refs (avoids teardown race conditions) ───
     useEffect(() => {
         const appStateSub = AppState.addEventListener('change', async (nextState: AppStateStatus) => {
             const prev = appStateRef.current;
             appStateRef.current = nextState;
+            logTimerNotification('debug', `AppState changed from ${prev} to ${nextState}`);
 
-            if (!visible) return;
+            if (!visibleRef.current) return;
 
             if (nextState === 'background' || nextState === 'inactive') {
                 // App going to background — show notification
                 isInBackgroundRef.current = true;
-                if (isRunning && !isStopped) {
+                if (isRunningRef.current && !isStoppedRef.current) {
                     const elapsed = await getElapsedSecondsFromStorage();
                     await scheduleTimerNotification(elapsed);
 
                     // Update notification every NOTIFICATION_UPDATE_INTERVAL_MS while in background
+                    if (notifIntervalRef.current) {
+                        clearInterval(notifIntervalRef.current);
+                    }
                     notifIntervalRef.current = setInterval(async () => {
                         const e = await getElapsedSecondsFromStorage();
                         await scheduleTimerNotification(e);
@@ -123,8 +157,8 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                 // Recalculate elapsed time from start timestamp
                 if (
                     (prev === 'background' || prev === 'inactive') &&
-                    isRunning &&
-                    !isStopped
+                    isRunningRef.current &&
+                    !isStoppedRef.current
                 ) {
                     const elapsed = await getElapsedSecondsFromStorage();
                     setSeconds(elapsed);
@@ -134,9 +168,12 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
 
         return () => {
             appStateSub.remove();
-            if (notifIntervalRef.current) clearInterval(notifIntervalRef.current);
+            if (notifIntervalRef.current) {
+                clearInterval(notifIntervalRef.current);
+                notifIntervalRef.current = null;
+            }
         };
-    }, [visible, isRunning, isStopped]);
+    }, []);
 
     // ─── Visibility: animate + start/reset timer (with kill-recovery reconciliation) ───
     useEffect(() => {
