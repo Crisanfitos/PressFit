@@ -188,8 +188,11 @@
       "title": "PressFit — Rest in progress",
       "body": "⏱ {{time}}",
       "paused": "⏸ Paused",
+      "startedAt": "Started: {{time}}",
+      "pausedAt": "Paused: {{time}}",
       "ok": "✅ OK",
       "pause": "⏸ Pause",
+      "resume": "▶️ Resume",
       "discard": "✕ Discard",
       "preferenceLabel": "Rest notification",
       "preferenceDescription": "Show timer in notification drawer"

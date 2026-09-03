@@ -8,12 +8,13 @@ export const TIMER_PENDING_ACTION_KEY = '@pressfit_timer_action';
 export const TIMER_PAUSED_ELAPSED_KEY = '@pressfit_timer_paused_elapsed';
 export const TIMER_NOTIFICATION_ENABLED_KEY = '@pressfit_timer_notification_enabled';
 
-export type TimerPendingAction = 'OK' | 'PAUSE' | 'DISCARD';
+export type TimerPendingAction = 'OK' | 'PAUSE' | 'RESUME' | 'DISCARD';
 
 // Notification identifiers
 export const TIMER_NOTIFICATION_ID_KEY = '@pressfit_timer_notif_id';
 export const TIMER_NOTIFICATION_IDENTIFIER = 'pressfit_rest_timer_notif';
 export const NOTIFICATION_CATEGORY_ID = 'REST_TIMER';
+export const NOTIFICATION_CATEGORY_PAUSED_ID = 'REST_TIMER_PAUSED';
 export const TIMER_CHANNEL_ID = 'pressfit_rest_timer';
 export const TIMER_NOTIFICATION_COLOR = '#102218';
 export const TIMER_NOTIFICATION_PAUSED_COLOR = '#eab308';
@@ -21,6 +22,7 @@ export const TIMER_NOTIFICATION_PAUSED_COLOR = '#eab308';
 // Action identifiers
 export const ACTION_OK = 'TIMER_OK';
 export const ACTION_PAUSE = 'TIMER_PAUSE';
+export const ACTION_RESUME = 'TIMER_RESUME';
 export const ACTION_DISCARD = 'TIMER_DISCARD';
 
 // ─── Diagnostic Logger ───
@@ -131,6 +133,7 @@ export async function setTimerNotificationEnabled(enabled: boolean): Promise<voi
 // ─── Register notification category with action buttons ───
 // Button highlight/press ripple is handled automatically by the OS.
 export async function setupNotificationCategory(): Promise<void> {
+    // Running category: OK, Pause, Discard
     await Notifications.setNotificationCategoryAsync(NOTIFICATION_CATEGORY_ID, [
         {
             identifier: ACTION_OK,
@@ -140,6 +143,25 @@ export async function setupNotificationCategory(): Promise<void> {
         {
             identifier: ACTION_PAUSE,
             buttonTitle: i18n.t('timer.notification.pause', { defaultValue: '⏸ Pausar' }),
+            options: { opensAppToForeground: false },
+        },
+        {
+            identifier: ACTION_DISCARD,
+            buttonTitle: i18n.t('timer.notification.discard', { defaultValue: '✕ Descartar' }),
+            options: { opensAppToForeground: false },
+        },
+    ]);
+
+    // Paused category: OK, Resume, Discard
+    await Notifications.setNotificationCategoryAsync(NOTIFICATION_CATEGORY_PAUSED_ID, [
+        {
+            identifier: ACTION_OK,
+            buttonTitle: i18n.t('timer.notification.ok', { defaultValue: '✅ OK' }),
+            options: { opensAppToForeground: false },
+        },
+        {
+            identifier: ACTION_RESUME,
+            buttonTitle: i18n.t('timer.notification.resume', { defaultValue: '▶️ Reanudar' }),
             options: { opensAppToForeground: false },
         },
         {
@@ -211,6 +233,7 @@ export function getNotificationPlatformConfig(): NotificationPlatformConfig {
 
 export interface BuildTimerNotificationOptions {
     paused?: boolean;
+    startTimeMs?: number;
 }
 
 export function buildTimerNotificationContent(
@@ -221,15 +244,24 @@ export function buildTimerNotificationContent(
     const config = getNotificationPlatformConfig();
 
     const title = i18n.t('timer.notification.title', { defaultValue: 'PressFit — Descanso en curso' });
+    const formattedElapsed = formatTime(elapsedSeconds);
     const body = isPaused
-        ? i18n.t('timer.notification.paused', { defaultValue: '⏸ Pausado' })
-        : `⏱ ${formatTime(elapsedSeconds)}`;
+        ? `${i18n.t('timer.notification.paused', { defaultValue: '⏸ Pausado' })} (${formattedElapsed})`
+        : `⏱ ${formattedElapsed}`;
+
+    const startTime = options?.startTimeMs || (Date.now() - elapsedSeconds * 1000);
+    const startDate = new Date(startTime);
+    const timeStr = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const subtitle = isPaused
+        ? i18n.t('timer.notification.pausedAt', { time: timeStr, defaultValue: `Pausado: ${timeStr}` })
+        : i18n.t('timer.notification.startedAt', { time: timeStr, defaultValue: `Inicio: ${timeStr}` });
 
     const content: Notifications.NotificationContentInput = {
         title,
+        subtitle,
         body,
-        categoryIdentifier: NOTIFICATION_CATEGORY_ID,
-        data: { type: 'REST_TIMER' },
+        categoryIdentifier: isPaused ? NOTIFICATION_CATEGORY_PAUSED_ID : NOTIFICATION_CATEGORY_ID,
+        data: { type: 'REST_TIMER', isPaused, startTimeMs: startTime },
         sticky: config.isSticky,
         autoDismiss: false,
         color: isPaused ? TIMER_NOTIFICATION_PAUSED_COLOR : config.brandColor,
@@ -349,7 +381,7 @@ export async function setPendingTimerAction(action: TimerPendingAction): Promise
 export async function getPendingTimerAction(): Promise<TimerPendingAction | null> {
     try {
         const action = await AsyncStorage.getItem(TIMER_PENDING_ACTION_KEY);
-        if (action === 'OK' || action === 'PAUSE' || action === 'DISCARD') {
+        if (action === 'OK' || action === 'PAUSE' || action === 'RESUME' || action === 'DISCARD') {
             return action as TimerPendingAction;
         }
     } catch (error) {
@@ -397,6 +429,24 @@ export async function handleNotificationAction(actionId: string): Promise<TimerP
                 });
             } catch (_) { }
             return 'PAUSE';
+        } else if (actionId === ACTION_RESUME) {
+            const pausedStr = await AsyncStorage.getItem(TIMER_PAUSED_ELAPSED_KEY);
+            const elapsed = pausedStr !== null ? (parseInt(pausedStr, 10) || 0) : await getElapsedSecondsFromStorage();
+            await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
+            const adjustedStart = Date.now() - (elapsed * 1000);
+            await AsyncStorage.setItem(TIMER_STORAGE_KEY, String(adjustedStart));
+            await setPendingTimerAction('RESUME');
+
+            // Update notification back to running state with pause button
+            try {
+                const runningContent = buildTimerNotificationContent(elapsed, { paused: false, startTimeMs: adjustedStart });
+                await Notifications.scheduleNotificationAsync({
+                    identifier: TIMER_NOTIFICATION_IDENTIFIER,
+                    content: runningContent,
+                    trigger: Platform.OS === 'android' ? { channelId: TIMER_CHANNEL_ID } : null,
+                });
+            } catch (_) { }
+            return 'RESUME';
         } else if (actionId === ACTION_DISCARD) {
             await setPendingTimerAction('DISCARD');
             await AsyncStorage.removeItem(TIMER_STORAGE_KEY);

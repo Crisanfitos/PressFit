@@ -21,10 +21,12 @@ import {
     TIMER_NOTIFICATION_ID_KEY,
     TIMER_NOTIFICATION_IDENTIFIER,
     NOTIFICATION_CATEGORY_ID,
+    NOTIFICATION_CATEGORY_PAUSED_ID,
     TIMER_CHANNEL_ID,
     formatTime,
     ACTION_OK,
     ACTION_PAUSE,
+    ACTION_RESUME,
     ACTION_DISCARD,
     TIMER_PENDING_ACTION_KEY,
     TIMER_PAUSED_ELAPSED_KEY,
@@ -238,16 +240,15 @@ describe('TimerNotificationService', () => {
             expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
                 expect.objectContaining({
                     identifier: TIMER_NOTIFICATION_IDENTIFIER,
-                    content: {
+                    content: expect.objectContaining({
                         title: 'PressFit — Descanso en curso',
                         body: '⏱ 2:05',
                         categoryIdentifier: NOTIFICATION_CATEGORY_ID,
-                        data: { type: 'REST_TIMER' },
                         sticky: true,
                         autoDismiss: false,
                         color: TIMER_NOTIFICATION_COLOR,
                         priority: 'high',
-                    },
+                    }),
                     trigger: { channelId: TIMER_CHANNEL_ID },
                 })
             );
@@ -450,8 +451,9 @@ describe('TimerNotificationService', () => {
                 expect.objectContaining({
                     identifier: TIMER_NOTIFICATION_IDENTIFIER,
                     content: expect.objectContaining({
-                        body: '⏸ Pausado',
+                        body: '⏸ Pausado (1:15)',
                         color: '#eab308',
+                        categoryIdentifier: NOTIFICATION_CATEGORY_PAUSED_ID,
                     }),
                 })
             );
@@ -542,16 +544,18 @@ describe('TimerNotificationService', () => {
 
             const content = buildTimerNotificationContent(75);
 
-            expect(content).toEqual({
-                title: 'PressFit — Descanso en curso',
-                body: '⏱ 1:15',
-                categoryIdentifier: NOTIFICATION_CATEGORY_ID,
-                data: { type: 'REST_TIMER' },
-                sticky: true,
-                autoDismiss: false,
-                color: TIMER_NOTIFICATION_COLOR,
-                priority: 'high',
-            });
+            expect(content).toEqual(
+                expect.objectContaining({
+                    title: 'PressFit — Descanso en curso',
+                    body: '⏱ 1:15',
+                    categoryIdentifier: NOTIFICATION_CATEGORY_ID,
+                    sticky: true,
+                    autoDismiss: false,
+                    color: TIMER_NOTIFICATION_COLOR,
+                    priority: 'high',
+                })
+            );
+            expect(content.subtitle).toBeDefined();
 
             Object.defineProperty(Platform, 'OS', { value: originalOS, configurable: true });
         });
@@ -562,16 +566,18 @@ describe('TimerNotificationService', () => {
 
             const content = buildTimerNotificationContent(90, { paused: true });
 
-            expect(content).toEqual({
-                title: 'PressFit — Descanso en curso',
-                body: '⏸ Pausado',
-                categoryIdentifier: NOTIFICATION_CATEGORY_ID,
-                data: { type: 'REST_TIMER' },
-                sticky: true,
-                autoDismiss: false,
-                color: TIMER_NOTIFICATION_PAUSED_COLOR,
-                priority: 'high',
-            });
+            expect(content).toEqual(
+                expect.objectContaining({
+                    title: 'PressFit — Descanso en curso',
+                    body: '⏸ Pausado (1:30)',
+                    categoryIdentifier: NOTIFICATION_CATEGORY_PAUSED_ID,
+                    sticky: true,
+                    autoDismiss: false,
+                    color: TIMER_NOTIFICATION_PAUSED_COLOR,
+                    priority: 'high',
+                })
+            );
+            expect(content.subtitle).toBeDefined();
 
             Object.defineProperty(Platform, 'OS', { value: originalOS, configurable: true });
         });
@@ -599,8 +605,9 @@ describe('TimerNotificationService', () => {
             expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
                 expect.objectContaining({
                     content: expect.objectContaining({
-                        body: '⏸ Pausado',
+                        body: '⏸ Pausado (0:42)',
                         color: TIMER_NOTIFICATION_PAUSED_COLOR,
+                        categoryIdentifier: NOTIFICATION_CATEGORY_PAUSED_ID,
                     }),
                 })
             );
@@ -646,7 +653,7 @@ describe('TimerNotificationService', () => {
             await i18n.changeLanguage('es');
             const content = buildTimerNotificationContent(15, { paused: true });
             expect(content.title).toBe('PressFit — Descanso en curso');
-            expect(content.body).toBe('⏸ Pausado');
+            expect(content.body).toBe('⏸ Pausado (0:15)');
 
             await setupNotificationCategory();
             expect(Notifications.setNotificationCategoryAsync).toHaveBeenCalledWith(
@@ -657,13 +664,21 @@ describe('TimerNotificationService', () => {
                     expect.objectContaining({ identifier: ACTION_DISCARD, buttonTitle: '✕ Descartar' }),
                 ])
             );
+            expect(Notifications.setNotificationCategoryAsync).toHaveBeenCalledWith(
+                NOTIFICATION_CATEGORY_PAUSED_ID,
+                expect.arrayContaining([
+                    expect.objectContaining({ identifier: ACTION_OK, buttonTitle: '✅ OK' }),
+                    expect.objectContaining({ identifier: ACTION_RESUME, buttonTitle: '▶️ Reanudar' }),
+                    expect.objectContaining({ identifier: ACTION_DISCARD, buttonTitle: '✕ Descartar' }),
+                ])
+            );
         });
 
         it('translates notification content and actions in English (en)', async () => {
             await i18n.changeLanguage('en');
             const content = buildTimerNotificationContent(15, { paused: true });
             expect(content.title).toBe('PressFit — Rest in progress');
-            expect(content.body).toBe('⏸ Paused');
+            expect(content.body).toBe('⏸ Paused (0:15)');
 
             await setupNotificationCategory();
             expect(Notifications.setNotificationCategoryAsync).toHaveBeenCalledWith(
@@ -674,6 +689,92 @@ describe('TimerNotificationService', () => {
                     expect.objectContaining({ identifier: ACTION_DISCARD, buttonTitle: '✕ Discard' }),
                 ])
             );
+            expect(Notifications.setNotificationCategoryAsync).toHaveBeenCalledWith(
+                NOTIFICATION_CATEGORY_PAUSED_ID,
+                expect.arrayContaining([
+                    expect.objectContaining({ identifier: ACTION_OK, buttonTitle: '✅ OK' }),
+                    expect.objectContaining({ identifier: ACTION_RESUME, buttonTitle: '▶️ Resume' }),
+                    expect.objectContaining({ identifier: ACTION_DISCARD, buttonTitle: '✕ Discard' }),
+                ])
+            );
+        });
+    });
+
+    describe('Resume action and background notification optimization (PF-294)', () => {
+        beforeEach(async () => {
+            await i18n.changeLanguage('es');
+            (Notifications.scheduleNotificationAsync as jest.Mock).mockResolvedValue('test-notif-id');
+        });
+
+        it('buildTimerNotificationContent includes formatted subtitle with start time', () => {
+            const fixedStart = new Date(2026, 8, 3, 14, 30, 0).getTime();
+            const content = buildTimerNotificationContent(60, { paused: false, startTimeMs: fixedStart });
+
+            expect(content.subtitle).toBeDefined();
+            expect(content.subtitle).toContain('Inicio:');
+            expect(content.categoryIdentifier).toBe(NOTIFICATION_CATEGORY_ID);
+        });
+
+        it('buildTimerNotificationContent switches to NOTIFICATION_CATEGORY_PAUSED_ID when paused', () => {
+            const fixedStart = new Date(2026, 8, 3, 14, 30, 0).getTime();
+            const content = buildTimerNotificationContent(60, { paused: true, startTimeMs: fixedStart });
+
+            expect(content.categoryIdentifier).toBe(NOTIFICATION_CATEGORY_PAUSED_ID);
+            expect(content.subtitle).toContain('Pausado:');
+        });
+
+        it('handleNotificationAction(ACTION_RESUME) restores running timer in storage and updates notification', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) => {
+                if (key === TIMER_PAUSED_ELAPSED_KEY) return '45';
+                return null;
+            });
+
+            const actionResult = await handleNotificationAction(ACTION_RESUME);
+
+            expect(actionResult).toBe('RESUME');
+            expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_PAUSED_ELAPSED_KEY);
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_STORAGE_KEY, expect.any(String));
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_PENDING_ACTION_KEY, 'RESUME');
+
+            // Verifies that notification was scheduled back to running category
+            expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    content: expect.objectContaining({
+                        categoryIdentifier: NOTIFICATION_CATEGORY_ID,
+                        color: TIMER_NOTIFICATION_COLOR,
+                    }),
+                })
+            );
+        });
+
+        it('handleNotificationAction(ACTION_PAUSE) persists paused elapsed and updates notification with paused category', async () => {
+            const fakeStart = Date.now() - 30000;
+            (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) => {
+                if (key === TIMER_STORAGE_KEY) return String(fakeStart);
+                return null;
+            });
+
+            const actionResult = await handleNotificationAction(ACTION_PAUSE);
+
+            expect(actionResult).toBe('PAUSE');
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_PAUSED_ELAPSED_KEY, expect.any(String));
+            expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_STORAGE_KEY);
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_PENDING_ACTION_KEY, 'PAUSE');
+
+            expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    content: expect.objectContaining({
+                        categoryIdentifier: NOTIFICATION_CATEGORY_PAUSED_ID,
+                        color: TIMER_NOTIFICATION_PAUSED_COLOR,
+                    }),
+                })
+            );
+        });
+
+        it('getPendingTimerAction returns RESUME when set', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce('RESUME');
+            const action = await getPendingTimerAction();
+            expect(action).toBe('RESUME');
         });
     });
 });
