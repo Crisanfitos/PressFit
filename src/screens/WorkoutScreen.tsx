@@ -1,33 +1,26 @@
-import React, { useContext, useState, useEffect, useMemo, useRef } from 'react';
-import {
-    View,
-    Text,
-    ScrollView,
-    TouchableOpacity,
-    StyleSheet,
-    ActivityIndicator,
-    Modal,
-    Alert,
-    Platform,
-} from 'react-native';
+import React, { useContext, useEffect } from 'react';
+import { View, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Reanimated from 'react-native-reanimated';
-import KeyboardAwareContainer from '../components/KeyboardAwareContainer';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
+import KeyboardAwareContainer from '../components/KeyboardAwareContainer';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { useWorkoutController } from '../controllers/useWorkoutController';
-import SetInput from '../components/SetInput';
-import WorkoutSetRow from '../components/WorkoutSetRow';
-import { PersonalNoteButton } from '../components/PersonalNoteButton';
-import RestTimer from '../components/RestTimer';
-import { WeightTypeBadge } from '../components/WeightTypeBadge';
-import { WorkoutService } from '../services/WorkoutService';
-import { HapticService } from '../services/HapticService';
-import { checkActiveRestTimer, saveActiveWorkoutParams, getActiveWorkoutParams } from '../services/TimerNotificationService';
-import { TIPO_PESO_SHORT_LABELS } from '../types/setTypes';
+import { saveActiveWorkoutParams } from '../services/TimerNotificationService';
+import {
+    WorkoutHeader,
+    ExerciseCard,
+    WorkoutActions,
+    WorkoutPlaceholder,
+    WorkoutModals,
+    StaleWarningBanner,
+    getGhostValue,
+    confirmDeleteExercise,
+    confirmDeleteSet,
+    useWorkoutScreenState,
+} from '../components/workout';
 
 type WorkoutScreenProps = {
     navigation: any;
@@ -37,16 +30,14 @@ type WorkoutScreenProps = {
 const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
     const { t } = useTranslation();
     const { routineDayId, dayName, workoutId: initialWorkoutId, dayOfWeek, mode: navMode } = route.params || {};
+    const { colors } = useTheme().theme;
+    const user = useContext(AuthContext)?.user;
 
     useEffect(() => {
         if (routineDayId || initialWorkoutId) {
             saveActiveWorkoutParams({ routineDayId, workoutId: initialWorkoutId, dayName, dayOfWeek, mode: navMode });
         }
     }, [routineDayId, initialWorkoutId, dayName, dayOfWeek, navMode]);
-    const authContext = useContext(AuthContext);
-    const user = authContext?.user;
-    const { theme } = useTheme();
-    const { colors } = theme;
 
     const {
         workout,
@@ -54,7 +45,6 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         loading: controllerLoading,
         mode,
         previousWorkout,
-        startWorkout,
         addSet,
         addSets,
         updateSet,
@@ -62,417 +52,51 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         removeExercise,
         finishWorkout,
         updateWeightType,
-        loadSeriesForExercise,
         reloadExercises,
-    } = useWorkoutController(
-        initialWorkoutId || null,
-        routineDayId,
-        user?.id || '',
-        dayOfWeek || 0,
-        navMode === 'edit'  // isEditingTemplate
-    );
+    } = useWorkoutController(initialWorkoutId || null, routineDayId, user?.id || '', dayOfWeek || 0, navMode === 'edit');
 
-    const [collapsedExercises, setCollapsedExercises] = useState<Record<string, boolean>>({});
-    const [saving, setSaving] = useState(false);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [setsToAdd, setSetsToAdd] = useState(1);
-    const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(null);
-    const [restTimerVisible, setRestTimerVisible] = useState(false);
-    const [lastCompletedSetId, setLastCompletedSetId] = useState<string | null>(null);
-    const [savedTimerSetIds, setSavedTimerSetIds] = useState<Set<string>>(new Set());
-
-    const hasInitializedCollapse = useRef(false);
-
-    useEffect(() => {
-        if (!controllerLoading && exercises.length > 0 && !hasInitializedCollapse.current) {
-            hasInitializedCollapse.current = true;
-            const initial: Record<string, boolean> = {};
-            exercises.slice(1).forEach((ex) => (initial[ex.id] = true));
-            setCollapsedExercises(initial);
-        }
-    }, [controllerLoading, exercises.length]);
-
-    // ─── Detect active rest timer left from a killed session ───
-    useEffect(() => {
-        if (!controllerLoading && mode === 'ACTIVE') {
-            (async () => {
-                const { active } = await checkActiveRestTimer();
-                const savedParams = await getActiveWorkoutParams();
-                if (savedParams?.activeSetId) {
-                    setLastCompletedSetId(savedParams.activeSetId);
-                }
-                if (active) {
-                    setRestTimerVisible(true);
-                }
-            })();
-        }
-    }, [controllerLoading, mode]);
-
-    // Flag to track if we need to refresh exercises when returning from ExerciseLibrary
-    const needsRefreshRef = useRef(false);
-
-    useEffect(() => {
-        const unsubscribe = navigation.addListener('focus', async () => {
-            if (needsRefreshRef.current) {
-                needsRefreshRef.current = false;
-                reloadExercises();
-            }
-            const { active } = await checkActiveRestTimer();
-            const savedParams = await getActiveWorkoutParams();
-            if (savedParams?.activeSetId) {
-                setLastCompletedSetId(savedParams.activeSetId);
-            }
-            if (active) {
-                setRestTimerVisible(true);
-            }
-        });
-        return unsubscribe;
-    }, [navigation, reloadExercises]);
+    const state = useWorkoutScreenState({
+        controllerLoading,
+        mode,
+        exercises,
+        addSets,
+        updateSet,
+        reloadExercises,
+        navigation,
+    });
 
     const navigateToExerciseLibrary = () => {
-        needsRefreshRef.current = true;
+        state.needsRefreshRef.current = true;
         navigation.navigate('ExerciseLibrary', { routineDayId: workout?.id || routineDayId });
     };
 
-    const openAddSetsModal = (exerciseId: string) => {
-        setSelectedExerciseId(exerciseId);
-        setSetsToAdd(1);
-        setModalVisible(true);
-    };
-
-    const handleConfirmAddSets = async () => {
-        if (!selectedExerciseId) return;
-        setModalVisible(false);
-        setSaving(true);
-        await addSets(selectedExerciseId, setsToAdd);
-        setSaving(false);
-        setSelectedExerciseId(null);
-    };
-
-    const toggleExerciseCollapsed = (exerciseId: string) => {
-        setCollapsedExercises((prev) => ({
-            ...prev,
-            [exerciseId]: !prev[exerciseId],
-        }));
-    };
-
-    const getGhostValue = (exerciseId: string, setNumber: number, field: 'weight' | 'reps' | 'rpe') => {
-        if (!previousWorkout?.ejercicios_programados) return null;
-        const prevExercise = previousWorkout.ejercicios_programados.find(
-            (ep: any) => ep.ejercicio_id === exerciseId || ep.ejercicio?.id === exerciseId || ep.id === exerciseId
-        );
-        if (!prevExercise) return null;
-        const sets: any[] = prevExercise.series_realizadas || prevExercise.series || [];
-        if (!sets || sets.length === 0) return null;
-
-        let prevSet = sets.find((s: any) => s.numero_serie === setNumber);
-        if (!prevSet && sets.length > 0) {
-            prevSet = sets[sets.length - 1];
-        }
-        if (!prevSet) return null;
-
-        let val: number | undefined;
-        if (field === 'reps') val = prevSet.repeticiones;
-        else if (field === 'rpe') val = prevSet.rpe;
-        else val = prevSet.peso_utilizado;
-        return val !== undefined && val > 0 ? String(val) : null;
-    };
-
-    const handleSetChange = async (setId: string, field: string, value: string) => {
-        await updateSet(setId, field, value);
-    };
-
-    const handleDeleteExercise = (exerciseId: string, exerciseName: string, routineExerciseId: string) => {
-        Alert.alert('Eliminar Ejercicio', `¿Estás seguro de eliminar "${exerciseName}"?`, [
-            { text: 'Cancelar', style: 'cancel' },
-            {
-                text: 'Eliminar',
-                style: 'destructive',
-                onPress: async () => {
-                    setSaving(true);
-                    await removeExercise(exerciseId, routineExerciseId);
-                    setSaving(false);
-                },
-            },
-        ]);
-    };
-
-    const handleAddSet = async (exerciseId: string) => {
-        setSaving(true);
-        await addSet(exerciseId);
-        setSaving(false);
-    };
-
-    const handleDeleteSet = (setId: string, exerciseId: string) => {
-        Alert.alert('Eliminar Serie', '¿Estás seguro de eliminar esta serie?', [
-            { text: 'Cancelar', style: 'cancel' },
-            {
-                text: 'Eliminar',
-                style: 'destructive',
-                onPress: async () => {
-                    setSaving(true);
-                    await deleteSet(setId, exerciseId);
-                    setSaving(false);
-                },
-            },
-        ]);
-    };
-
-    const handleStartRestTimer = (setId: string) => {
-        HapticService.setCompleted();
-        setLastCompletedSetId(setId);
-        saveActiveWorkoutParams({ activeSetId: setId });
-        setRestTimerVisible(true);
-    };
-
-    const handleRestTimerStop = async (seconds: number) => {
-        const savedParams = await getActiveWorkoutParams();
-        const targetSetId = lastCompletedSetId || savedParams?.activeSetId;
-        if (targetSetId && seconds > 0) {
-            await updateSet(targetSetId, 'descanso_segundos', seconds);
-            setSavedTimerSetIds((prev) => new Set(prev).add(targetSetId));
-        }
-        setLastCompletedSetId(null);
-        await saveActiveWorkoutParams({ activeSetId: null });
-    };
-
-    const handleRestTimerDismiss = async () => {
-        setRestTimerVisible(false);
-        setLastCompletedSetId(null);
-        await saveActiveWorkoutParams({ activeSetId: null });
-    };
-
     const handleFinishWorkout = () => {
-        Alert.alert(
-            t('workout.finishWorkout', 'Finalizar Entrenamiento'),
-            t('workout.finishWorkoutConfirm', '¿Deseas finalizar este entrenamiento?'),
-            [
-                { text: t('common.cancel', 'Cancelar'), style: 'cancel' },
-                {
-                    text: t('common.finish', 'Finalizar'),
-                    onPress: async () => {
-                        setSaving(true);
-                        const success = await finishWorkout();
-                        setSaving(false);
-                        if (success) {
-                            Alert.alert(
-                                t('workout.workoutCompletedTitle', '¡Completado!'),
-                                t('workout.workoutSavedSuccess', 'Entrenamiento guardado correctamente'),
-                                [{ text: 'OK', onPress: () => navigation.goBack() }]
-                            );
-                        } else {
-                            Alert.alert(t('common.error', 'Error'), 'No se pudo finalizar el entrenamiento');
-                        }
-                    },
+        Alert.alert(t('workout.finishWorkout', 'Finalizar Entrenamiento'), t('workout.finishWorkoutConfirm', '¿Deseas finalizar este entrenamiento?'), [
+            { text: t('common.cancel', 'Cancelar'), style: 'cancel' },
+            {
+                text: t('common.finish', 'Finalizar'),
+                onPress: async () => {
+                    state.setSaving(true);
+                    const success = await finishWorkout();
+                    state.setSaving(false);
+                    if (success) {
+                        Alert.alert(t('workout.workoutCompletedTitle', '¡Completado!'), t('workout.workoutSavedSuccess', 'Entrenamiento guardado correctamente'), [
+                            { text: 'OK', onPress: () => navigation.goBack() },
+                        ]);
+                    } else {
+                        Alert.alert(t('common.error', 'Error'), 'No se pudo finalizar el entrenamiento');
+                    }
                 },
-            ]
-        );
+            },
+        ]);
     };
 
     const isInputEditable = mode === 'ACTIVE' || navMode === 'edit';
     const isStructureEditable = navMode === 'edit';
 
-    const styles = useMemo(
-        () =>
-            StyleSheet.create({
-                container: { flex: 1, backgroundColor: colors.background },
-                header: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    paddingHorizontal: 20,
-                    paddingVertical: 16,
-                    borderBottomWidth: 1,
-                    borderBottomColor: colors.border,
-                },
-                backButton: { padding: 8, marginLeft: -8 },
-                headerText: { fontSize: 18, fontWeight: '600', color: colors.text },
-                loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-                scrollView: { flex: 1, paddingHorizontal: 16, paddingTop: 16 },
-                staleWarningBanner: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    backgroundColor: '#fef3c7',
-                    borderColor: '#f59e0b',
-                    borderWidth: 1,
-                    borderRadius: 12,
-                    padding: 12,
-                    marginBottom: 16,
-                },
-                staleWarningText: {
-                    flex: 1,
-                    fontSize: 13,
-                    fontWeight: '600',
-                    color: '#92400e',
-                },
-                staleBadge: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    backgroundColor: '#fef3c7',
-                    borderColor: '#f59e0b',
-                    borderWidth: 1,
-                    borderRadius: 12,
-                    paddingHorizontal: 8,
-                    paddingVertical: 2,
-                },
-                staleBadgeText: {
-                    fontSize: 11,
-                    fontWeight: '600',
-                    color: '#92400e',
-                },
-                exerciseCard: {
-                    backgroundColor: colors.surface,
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                    borderRadius: 16,
-                    padding: 16,
-                    marginBottom: 12,
-                },
-                exerciseHeader: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                },
-                exerciseHeaderLeft: { flex: 1, flexDirection: 'row', alignItems: 'center' },
-                exerciseName: { fontSize: 16, fontWeight: '600', color: colors.text, flex: 1 },
-                exerciseActions: { flexDirection: 'row', gap: 8 },
-                actionButton: {
-                    padding: 8,
-                    borderRadius: 8,
-                    backgroundColor: colors.surface,
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                },
-                setsContainer: { marginTop: 16 },
-                setRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-                setNumber: { width: 40, fontSize: 16, color: colors.textSecondary, textAlign: 'center' },
-                inputGroup: { flex: 1, marginHorizontal: 4, alignItems: 'center', justifyContent: 'center' },
-                referenceText: { fontSize: 11, color: colors.primary, textAlign: 'center', marginTop: 4 },
-                bodyweightPlaceholder: {
-                    flex: 1,
-                    borderWidth: 1,
-                    borderRadius: 8,
-                    padding: 12,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                },
-                deleteSetButton: { padding: 4, marginLeft: 6 },
-                addSetButton: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 12,
-                    borderRadius: 8,
-                    backgroundColor: `${colors.primary}20`,
-                    borderWidth: 1,
-                    borderColor: colors.primary,
-                    borderStyle: 'dashed',
-                    marginTop: 8,
-                    gap: 6,
-                },
-                addSetText: { color: colors.primary, fontSize: 14, fontWeight: '600' },
-                finishButtonContainer: { padding: 16, marginBottom: 20 },
-                finishButton: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: colors.primary,
-                    paddingVertical: 16,
-                    borderRadius: 12,
-                },
-                finishButtonText: { fontSize: 16, fontWeight: '600', color: colors.background, marginLeft: 8 },
-                placeholderContainer: {
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    paddingVertical: 60,
-                    paddingHorizontal: 20,
-                },
-                placeholderIconContainer: {
-                    width: 80,
-                    height: 80,
-                    borderRadius: 40,
-                    backgroundColor: `${colors.primary}20`,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginBottom: 24,
-                },
-                placeholderTitle: { fontSize: 20, fontWeight: '700', color: colors.text, marginBottom: 12, textAlign: 'center' },
-                placeholderText: { fontSize: 16, color: colors.textSecondary, textAlign: 'center', marginBottom: 32, lineHeight: 24 },
-                addExerciseButton: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    backgroundColor: colors.primary,
-                    paddingVertical: 12,
-                    paddingHorizontal: 24,
-                    borderRadius: 9999,
-                },
-                addExerciseButtonText: { fontSize: 16, fontWeight: '600', color: colors.background, marginLeft: 8 },
-                fab: {
-                    position: 'absolute',
-                    bottom: 90,
-                    right: 16,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 4.65,
-                    elevation: 8,
-                },
-                fabButton: {
-                    width: 56,
-                    height: 56,
-                    borderRadius: 28,
-                    backgroundColor: colors.primary,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                },
-                modalOverlay: {
-                    flex: 1,
-                    backgroundColor: 'rgba(0,0,0,0.5)',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: 20,
-                },
-                modalContent: {
-                    width: '100%',
-                    maxWidth: 340,
-                    borderRadius: 20,
-                    padding: 20,
-                    backgroundColor: colors.surface,
-                },
-                modalHeader: {
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: 20,
-                },
-                modalTitle: { fontSize: 20, fontWeight: 'bold', color: colors.text },
-                counterContainer: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 24,
-                    marginBottom: 24,
-                },
-                counterButton: {
-                    width: 48,
-                    height: 48,
-                    borderRadius: 24,
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                },
-                counterText: { fontSize: 32, fontWeight: 'bold', color: colors.text, minWidth: 40, textAlign: 'center' },
-                confirmAddButton: { paddingVertical: 14, borderRadius: 12, alignItems: 'center', backgroundColor: '#22c55e' },
-                confirmAddButtonText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
-            }),
-        [colors]
-    );
-
     if (controllerLoading) {
         return (
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={colors.primary} />
                 </View>
@@ -481,255 +105,82 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
     }
 
     return (
-        <SafeAreaView style={styles.container} testID="workout-screen">
-            {/* Header */}
-            <Reanimated.View style={styles.header} sharedTransitionTag={`workout-header-${routineDayId || workout?.id || 'active'}`}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TouchableOpacity testID="workout-back-button" style={styles.backButton} onPress={() => navigation.goBack()} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
-                        <MaterialIcons name="arrow-back" size={24} color={colors.text} />
-                    </TouchableOpacity>
-                    <View style={{ marginLeft: 12 }}>
-                        <Text style={styles.headerText}>
-                            {dayName || 'Entrenamiento'}
-                            {workout?.fecha_dia ? ` — ${new Date(workout.fecha_dia + 'T00:00:00').getDate()}/${(new Date(workout.fecha_dia + 'T00:00:00').getMonth() + 1).toString().padStart(2, '0')}` : ''}
-                        </Text>
-                        {workout?.descripcion ? (
-                            <Text style={{ fontSize: 12, color: colors.primary, fontStyle: 'italic', marginTop: 2 }}>
-                                {workout.descripcion}
-                            </Text>
-                        ) : null}
-                    </View>
-                </View>
-            </Reanimated.View>
-
-            {/* Content */}
-            <KeyboardAwareContainer
-                style={{ flex: 1 }}
-                contentContainerStyle={{ paddingBottom: 100, flexGrow: 1 }}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-                nestedScrollEnabled={true}
-            >
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} testID="workout-screen">
+            <WorkoutHeader
+                dayName={dayName}
+                fechaDia={workout?.fecha_dia}
+                descripcion={workout?.descripcion}
+                routineDayId={routineDayId}
+                workoutId={workout?.id}
+                colors={colors}
+                onBack={() => navigation.goBack()}
+            />
+            <KeyboardAwareContainer style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 100, flexGrow: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" nestedScrollEnabled={true}>
                 <View style={styles.scrollView}>
-                    {previousWorkout?.isStale && (
-                        <View style={styles.staleWarningBanner} testID="stale-warning-banner">
-                            <MaterialIcons name="warning-amber" size={20} color="#d97706" style={{ marginRight: 8 }} />
-                            <Text style={styles.staleWarningText}>
-                                Referencia de hace {previousWorkout.days_diff ?? '15+'} días (&gt;14 días). Considera ajustar las cargas sugeridas.
-                            </Text>
-                        </View>
-                    )}
-
+                    {previousWorkout?.isStale && <StaleWarningBanner daysDiff={previousWorkout.days_diff} />}
                     {exercises.length === 0 ? (
-                        <View style={styles.placeholderContainer}>
-                            <View style={styles.placeholderIconContainer}>
-                                <MaterialIcons name="fitness-center" size={40} color={colors.primary} />
-                            </View>
-                            <Text style={styles.placeholderTitle}>¡Día libre de ejercicios!</Text>
-                            <Text style={styles.placeholderText}>
-                                {t('workout.noScheduledExercises', 'No hay ejercicios programados.')}{isStructureEditable && ' Añade ejercicios para comenzar.'}
-                            </Text>
-                            {isStructureEditable && (
-                                <TouchableOpacity
-                                    testID="add-exercise-button"
-                                    style={styles.addExerciseButton}
-                                    onPress={navigateToExerciseLibrary}
-                                >
-                                    <MaterialIcons name="add" size={24} color={colors.background} />
-                                    <Text style={styles.addExerciseButtonText}>{t('workout.addExercise', 'Añadir Ejercicio')}</Text>
-                                </TouchableOpacity>
-                            )}
-                        </View>
+                        <WorkoutPlaceholder isStructureEditable={isStructureEditable} colors={colors} t={t} onAddExercise={navigateToExerciseLibrary} />
                     ) : (
-                        exercises.map((exercise, index) => {
-                            const isCollapsed = collapsedExercises[exercise.id];
-
-                            return (
-                                <View key={`${exercise.id}-${index}`} style={styles.exerciseCard} testID={`exercise-card-${index}`}>
-                                    <TouchableOpacity onPress={() => toggleExerciseCollapsed(exercise.id)} activeOpacity={0.7}>
-                                        <View style={styles.exerciseHeader}>
-                                            <View style={styles.exerciseHeaderLeft}>
-                                                <MaterialIcons
-                                                    name={isCollapsed ? 'expand-more' : 'expand-less'}
-                                                    size={24}
-                                                    color={colors.primary}
-                                                    style={{ marginRight: 8, marginTop: 2, alignSelf: 'flex-start' }}
-                                                />
-                                                <View style={{ flex: 1, flexDirection: 'column' }}>
-                                                    <Text style={styles.exerciseName} numberOfLines={2}>{exercise.titulo}</Text>
-                                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, flexWrap: 'wrap', gap: 8 }}>
-                                                        <WeightTypeBadge
-                                                            tipoPeso={exercise.tipo_peso || 'total'}
-                                                            editable={isInputEditable}
-                                                            onSelect={(tipo) => updateWeightType(exercise.routine_exercise_id, exercise.id, tipo)}
-                                                            colors={colors}
-                                                        />
-                                                        {previousWorkout?.isStale && (
-                                                            <View style={styles.staleBadge} testID="stale-badge">
-                                                                <MaterialIcons name="schedule" size={12} color="#92400e" style={{ marginRight: 2 }} />
-                                                                <Text style={styles.staleBadgeText}>Referencia de hace {previousWorkout.days_diff ?? '15+'} días</Text>
-                                                            </View>
-                                                        )}
-                                                        <PersonalNoteButton exerciseId={exercise.id} />
-                                                    </View>
-                                                </View>
-                                            </View>
-                                            <View style={styles.exerciseActions}>
-                                                <TouchableOpacity
-                                                    style={styles.actionButton}
-                                                    onPress={() => navigation.navigate('ExerciseDetail', { exerciseId: exercise.id })}
-                                                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                                                >
-                                                    <MaterialIcons name="info-outline" size={20} color={colors.textSecondary} />
-                                                </TouchableOpacity>
-                                                {isStructureEditable && (
-                                                    <TouchableOpacity
-                                                        testID={`delete-exercise-button-${index}`}
-                                                        style={[styles.actionButton, { borderColor: '#fee2e2' }]}
-                                                        onPress={() => handleDeleteExercise(exercise.id, exercise.titulo, exercise.routine_exercise_id)}
-                                                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                                                    >
-                                                        <MaterialIcons name="delete-outline" size={20} color="#ef4444" />
-                                                    </TouchableOpacity>
-                                                )}
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-
-                                    {!isCollapsed && (
-                                        <View style={styles.setsContainer}>
-                                            {/* Header Row */}
-                                            <View style={[styles.setRow, { marginBottom: 8 }]}>
-                                                <Text style={[styles.setNumber, { fontSize: 12 }]}>Serie</Text>
-                                                <View style={[styles.inputGroup, { maxWidth: 80 }]}>
-                                                    <Text style={styles.referenceText}>
-                                                        {TIPO_PESO_SHORT_LABELS[exercise.tipo_peso || 'total']}
-                                                    </Text>
-                                                </View>
-                                                <View style={[styles.inputGroup, { maxWidth: 80 }]}>
-                                                    <Text style={styles.referenceText}>REPS</Text>
-                                                </View>
-                                                <View style={[styles.inputGroup, { maxWidth: 60 }]}>
-                                                    <Text style={styles.referenceText}>RPE</Text>
-                                                </View>
-                                                {isStructureEditable && <View style={{ width: 28 }} />}
-                                            </View>
-
-                                            {(exercise.sets || []).length === 0 ? (
-                                                <View style={{ paddingVertical: 16, alignItems: 'center' }}>
-                                                    <Text style={{ color: colors.textSecondary, fontSize: 14, fontStyle: 'italic' }}>
-                                                        No hay series todavía
-                                                    </Text>
-                                                </View>
-                                            ) : (
-                                                (exercise.sets || []).map((set, setIndex) => (
-                                                    <WorkoutSetRow
-                                                        key={set.id || setIndex}
-                                                        set={set}
-                                                        setIndex={setIndex}
-                                                        exerciseId={exercise.id}
-                                                        tipoPeso={exercise.tipo_peso || 'total'}
-                                                        ghostWeight={getGhostValue(exercise.id, set.numero_serie, 'weight')}
-                                                        ghostReps={getGhostValue(exercise.id, set.numero_serie, 'reps')}
-                                                        ghostRpe={getGhostValue(exercise.id, set.numero_serie, 'rpe')}
-                                                        isInputEditable={isInputEditable}
-                                                        isStructureEditable={isStructureEditable}
-                                                        colors={colors}
-                                                        navMode={navMode}
-                                                        lastCompletedSetId={lastCompletedSetId}
-                                                        restTimerVisible={restTimerVisible}
-                                                        savedTimerSetIds={savedTimerSetIds}
-                                                        onSetChange={handleSetChange}
-                                                        onDeleteSet={handleDeleteSet}
-                                                        onStartRestTimer={handleStartRestTimer}
-                                                    />
-                                                ))
-                                            )}
-
-                                            {(isStructureEditable || (isInputEditable && mode !== 'ACTIVE')) && (
-                                                <TouchableOpacity
-                                                    testID={`add-set-button-${index}`}
-                                                    style={styles.addSetButton}
-                                                    onPress={() => handleAddSet(exercise.id)}
-                                                >
-                                                    <MaterialIcons name="add" size={16} color={colors.primary} />
-                                                    <Text style={styles.addSetText}>Añadir Series</Text>
-                                                </TouchableOpacity>
-                                            )}
-                                        </View>
-                                    )}
-                                </View>
-                            );
-                        })
+                        exercises.map((exercise, index) => (
+                            <ExerciseCard
+                                key={`${exercise.id}-${index}`}
+                                exercise={exercise}
+                                index={index}
+                                isCollapsed={!!state.collapsedExercises[exercise.id]}
+                                isInputEditable={isInputEditable}
+                                isStructureEditable={isStructureEditable}
+                                mode={mode}
+                                navMode={navMode}
+                                colors={colors}
+                                previousWorkout={previousWorkout}
+                                lastCompletedSetId={state.lastCompletedSetId}
+                                restTimerVisible={state.restTimerVisible}
+                                savedTimerSetIds={state.savedTimerSetIds}
+                                onToggleCollapse={state.toggleExerciseCollapsed}
+                                onUpdateWeightType={updateWeightType}
+                                onNavigateDetail={(id) => navigation.navigate('ExerciseDetail', { exerciseId: id })}
+                                onDeleteExercise={(id, name, reId) => confirmDeleteExercise(name, async () => { state.setSaving(true); await removeExercise(id, reId); state.setSaving(false); })}
+                                onSetChange={updateSet}
+                                onDeleteSet={(sId, eId) => confirmDeleteSet(async () => { state.setSaving(true); await deleteSet(sId, eId); state.setSaving(false); })}
+                                onStartRestTimer={state.handleStartRestTimer}
+                                onAddSet={async (id) => { state.setSaving(true); await addSet(id); state.setSaving(false); }}
+                                getGhostValue={(eId, sNum, fld) => getGhostValue(previousWorkout, eId, sNum, fld)}
+                            />
+                        ))
                     )}
-
-                    {mode === 'ACTIVE' && navMode !== 'edit' && (
-                        <View style={styles.finishButtonContainer}>
-                            <TouchableOpacity style={styles.finishButton} onPress={handleFinishWorkout} disabled={saving} testID="finish-workout-button">
-                                {saving ? (
-                                    <ActivityIndicator color={colors.background} />
-                                ) : (
-                                    <>
-                                        <MaterialIcons name="check-circle" size={24} color={colors.background} />
-                                        <Text style={styles.finishButtonText}>{t('workout.finishWorkout', 'Finalizar Entrenamiento')}</Text>
-                                    </>
-                                )}
-                            </TouchableOpacity>
-                        </View>
-                    )}
-
+                    <WorkoutActions mode={mode} navMode={navMode} saving={state.saving} colors={colors} t={t} onFinishWorkout={handleFinishWorkout} />
                     <View style={{ height: 100 }} />
                 </View>
             </KeyboardAwareContainer>
-
-            {/* FAB */}
             {isStructureEditable && exercises.length > 0 && (
-                <TouchableOpacity
-                    testID="add-exercise-fab"
-                    style={styles.fab}
-                    onPress={navigateToExerciseLibrary}
-                >
-                    <View style={styles.fabButton}>
+                <TouchableOpacity testID="add-exercise-fab" style={styles.fab} onPress={navigateToExerciseLibrary}>
+                    <View style={[styles.fabButton, { backgroundColor: colors.primary }]}>
                         <MaterialIcons name="add" size={24} color={colors.background} />
                     </View>
                 </TouchableOpacity>
             )}
-
-            {/* Add Sets Modal */}
-            <Modal animationType="fade" transparent visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Añadir Series</Text>
-                            <TouchableOpacity onPress={() => setModalVisible(false)} style={{ padding: 4 }} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
-                                <MaterialIcons name="close" size={24} color={colors.textSecondary} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.counterContainer}>
-                            <TouchableOpacity style={styles.counterButton} onPress={() => setSetsToAdd(Math.max(1, setsToAdd - 1))}>
-                                <MaterialIcons name="remove" size={24} color={colors.primary} />
-                            </TouchableOpacity>
-                            <Text style={styles.counterText}>{setsToAdd}</Text>
-                            <TouchableOpacity style={styles.counterButton} onPress={() => setSetsToAdd(setsToAdd + 1)}>
-                                <MaterialIcons name="add" size={24} color={colors.primary} />
-                            </TouchableOpacity>
-                        </View>
-                        <TouchableOpacity style={styles.confirmAddButton} onPress={handleConfirmAddSets}>
-                            <Text style={styles.confirmAddButtonText}>Añadir</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
-
-            {/* Rest Timer */}
-            <RestTimer
-                visible={restTimerVisible}
-                onDismiss={handleRestTimerDismiss}
-                onTimerStop={handleRestTimerStop}
+            <WorkoutModals
+                modalVisible={state.modalVisible}
+                setsToAdd={state.setsToAdd}
                 colors={colors}
+                onCloseModal={() => state.setModalVisible(false)}
+                onIncrementSets={() => state.setSetsToAdd((v) => v + 1)}
+                onDecrementSets={() => state.setSetsToAdd((v) => Math.max(1, v - 1))}
+                onConfirmAddSets={state.handleConfirmAddSets}
+                restTimerVisible={state.restTimerVisible}
+                onRestTimerDismiss={state.handleRestTimerDismiss}
+                onRestTimerStop={state.handleRestTimerStop}
             />
         </SafeAreaView>
     );
 };
+
+const styles = StyleSheet.create({
+    container: { flex: 1 },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    scrollView: { flex: 1, paddingHorizontal: 16, paddingTop: 16 },
+    fab: { position: 'absolute', bottom: 90, right: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 4.65, elevation: 8 },
+    fabButton: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center' },
+});
 
 export default WorkoutScreen;
