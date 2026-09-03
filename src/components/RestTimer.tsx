@@ -183,15 +183,15 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                 // Check and reconcile any action performed in background
                 await reconcilePendingAction();
 
-                // If running, cancel notification and recalculate elapsed
+                // If running, recalculate elapsed and keep notification synchronized
                 if (
                     (prev === 'background' || prev === 'inactive') &&
                     isRunningRef.current &&
                     !isStoppedRef.current
                 ) {
-                    await cancelTimerNotification();
                     const elapsed = await getElapsedSecondsFromStorage();
                     setSeconds(elapsed);
+                    await scheduleTimerNotification(elapsed);
                 }
             }
         });
@@ -231,6 +231,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                     await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
                     await clearPendingTimerAction();
                     await AsyncStorage.setItem(TIMER_STORAGE_KEY, String(startTs));
+                    await scheduleTimerNotification(0);
                     setIsStopped(false);
                     setIsRunning(true);
                 }
@@ -256,6 +257,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             intervalRef.current = setInterval(async () => {
                 const elapsed = await getElapsedSecondsFromStorage();
                 setSeconds(elapsed);
+                await scheduleTimerNotification(elapsed);
             }, 1000);
         } else {
             if (intervalRef.current) {
@@ -276,7 +278,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
         const elapsed = await getElapsedSecondsFromStorage();
         await AsyncStorage.setItem(TIMER_PAUSED_ELAPSED_KEY, String(elapsed));
         await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
-        await cancelTimerNotification();
+        await scheduleTimerNotification(elapsed, { paused: true });
     }, []);
 
     const handleConfirm = useCallback(async () => {
@@ -301,6 +303,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
         await clearPendingTimerAction();
         const adjustedStart = Date.now() - currentSecs * 1000;
         await AsyncStorage.setItem(TIMER_STORAGE_KEY, String(adjustedStart));
+        await scheduleTimerNotification(currentSecs);
     }, []);
 
     const handleDiscard = useCallback(async () => {

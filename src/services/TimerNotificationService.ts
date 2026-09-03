@@ -102,17 +102,17 @@ export async function setupNotificationCategory(): Promise<void> {
         {
             identifier: ACTION_OK,
             buttonTitle: '✅ OK',
-            options: { opensAppToForeground: true },
+            options: { opensAppToForeground: false },
         },
         {
             identifier: ACTION_PAUSE,
             buttonTitle: '⏸ Pausar',
-            options: { opensAppToForeground: true },
+            options: { opensAppToForeground: false },
         },
         {
             identifier: ACTION_DISCARD,
             buttonTitle: '✕ Descartar',
-            options: { opensAppToForeground: true },
+            options: { opensAppToForeground: false },
         },
     ]);
 }
@@ -208,10 +208,13 @@ export function buildTimerNotificationContent(
 // ─── Schedule (or update) the timer notification ───
 // Uses a stable identifier (TIMER_NOTIFICATION_IDENTIFIER) to update existing notification in-place.
 // This eliminates visible flickering completely (no cancel+repost cycle needed) and provides real-time updates.
-export async function scheduleTimerNotification(elapsedSeconds: number): Promise<string | null> {
+export async function scheduleTimerNotification(
+    elapsedSeconds: number,
+    options?: BuildTimerNotificationOptions
+): Promise<string | null> {
     try {
         const previousId = await AsyncStorage.getItem(TIMER_NOTIFICATION_ID_KEY);
-        const content = buildTimerNotificationContent(elapsedSeconds);
+        const content = buildTimerNotificationContent(elapsedSeconds, options);
 
         const newId = await Notifications.scheduleNotificationAsync({
             identifier: TIMER_NOTIFICATION_IDENTIFIER,
