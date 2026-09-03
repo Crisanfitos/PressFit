@@ -10,6 +10,11 @@ import { useProfileController } from '../controllers/useProfileController';
 import EditProfileModal from '../components/EditProfileModal';
 import LogoutConfirmationModal from '../components/LogoutConfirmationModal';
 import i18n, { saveLanguagePreference } from '../i18n';
+import {
+    isTimerNotificationEnabled,
+    setTimerNotificationEnabled,
+    setupNotificationCategory,
+} from '../services/TimerNotificationService';
 
 type ProfileScreenProps = { navigation: any };
 
@@ -25,10 +30,21 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [sourceModalVisible, setSourceModalVisible] = useState(false);
     const [currentLang, setCurrentLang] = useState(i18n.language || 'es');
+    const [timerNotifEnabled, setTimerNotifEnabled] = useState(true);
+
+    useEffect(() => {
+        isTimerNotificationEnabled().then(setTimerNotifEnabled);
+    }, []);
 
     const handleLanguageChange = async (lang: 'es' | 'en') => {
         setCurrentLang(lang);
         await saveLanguagePreference(lang);
+        await setupNotificationCategory();
+    };
+
+    const handleTimerNotifToggle = async (val: boolean) => {
+        setTimerNotifEnabled(val);
+        await setTimerNotificationEnabled(val);
     };
 
     // Custom Alert State
@@ -279,6 +295,22 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                         <Text style={{ fontSize: 12, fontWeight: 'bold', color: currentLang === 'en' ? colors.textOnPrimary : colors.text }}>EN</Text>
                                     </TouchableOpacity>
                                 </View>
+                            </View>
+                            <View style={[styles.settingRow, { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border }]}>
+                                <MaterialIcons name="notifications-active" size={24} color={colors.textSecondary} />
+                                <View style={styles.settingTextContainer}>
+                                    <Text style={styles.settingLabel}>{t('timer.notification.preferenceLabel', 'Notificación de descanso')}</Text>
+                                    <Text style={styles.settingDescription} testID="timer-notification-toggle-status">
+                                        {timerNotifEnabled ? t('profile.activated', 'Activado') : t('profile.deactivated', 'Desactivado')}
+                                    </Text>
+                                </View>
+                                <Switch
+                                    testID="timer-notification-toggle-switch"
+                                    value={timerNotifEnabled}
+                                    onValueChange={handleTimerNotifToggle}
+                                    trackColor={{ false: colors.border, true: `${colors.primary}50` }}
+                                    thumbColor={timerNotifEnabled ? colors.primary : colors.textSecondary}
+                                />
                             </View>
                         </View>
                     </View>

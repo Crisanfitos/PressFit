@@ -116,7 +116,9 @@
     "height": "Altura",
     "bmi": "IMC",
     "bodyFat": "Grasa Corporal",
-    "estimated": "Estimado ±10%"
+    "estimated": "Estimado ±10%",
+    "activated": "Activado",
+    "deactivated": "Desactivado"
   },
   "progress": {
     "title": "Progreso",
@@ -177,5 +179,20 @@
     "clearFilters": "Limpiar Filtros",
     "noExercisesFound": "No se encontraron ejercicios con los filtros actuales",
     "useFiltersPrompt": "Usa los filtros o el buscador para encontrar ejercicios"
+  },
+  "timer": {
+    "rest": "Descanso",
+    "paused": "Pausado",
+    "stop": "Parar",
+    "notification": {
+      "title": "PressFit — Descanso en curso",
+      "body": "⏱ {{time}}",
+      "paused": "⏸ Pausado",
+      "ok": "✅ OK",
+      "pause": "⏸ Pausar",
+      "discard": "✕ Descartar",
+      "preferenceLabel": "Notificación de descanso",
+      "preferenceDescription": "Mostrar temporizador en la barra de notificaciones"
+    }
   }
 }

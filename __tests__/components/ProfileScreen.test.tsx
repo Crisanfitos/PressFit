@@ -95,4 +95,23 @@ describe('ProfileScreen Component (RNTL)', () => {
             expect(getByTestId('language-status').props.children).toBe('English');
         });
     });
+
+    it('renders timer notification switch and toggles preference (PF-287)', async () => {
+        const { getByTestId } = await renderProfileScreen();
+
+        await waitFor(() => {
+            expect(getByTestId('timer-notification-toggle-switch')).toBeTruthy();
+        });
+
+        const toggle = getByTestId('timer-notification-toggle-switch');
+        expect(toggle.props.value).toBe(true);
+
+        await act(async () => {
+            fireEvent(toggle, 'valueChange', false);
+        });
+
+        await waitFor(() => {
+            expect(getByTestId('timer-notification-toggle-switch').props.value).toBe(false);
+        });
+    });
 });

@@ -116,7 +116,9 @@
     "height": "Height",
     "bmi": "BMI",
     "bodyFat": "Body Fat",
-    "estimated": "Estimated ±10%"
+    "estimated": "Estimated ±10%",
+    "activated": "Enabled",
+    "deactivated": "Disabled"
   },
   "progress": {
     "title": "Progress",
@@ -177,5 +179,20 @@
     "clearFilters": "Clear Filters",
     "noExercisesFound": "No exercises found with the current filters",
     "useFiltersPrompt": "Use filters or search to find exercises"
+  },
+  "timer": {
+    "rest": "Rest",
+    "paused": "Paused",
+    "stop": "Stop",
+    "notification": {
+      "title": "PressFit — Rest in progress",
+      "body": "⏱ {{time}}",
+      "paused": "⏸ Paused",
+      "ok": "✅ OK",
+      "pause": "⏸ Pause",
+      "discard": "✕ Discard",
+      "preferenceLabel": "Rest notification",
+      "preferenceDescription": "Show timer in notification drawer"
+    }
   }
 }
