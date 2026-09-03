@@ -45,4 +45,14 @@ describe('WelcomeScreen Integration (RNTL)', () => {
 
         expect(mockNavigation.navigate).toHaveBeenCalledWith('SignUp');
     });
+
+    it('navigates to OnboardingScreen when onboarding button is pressed', async () => {
+        const { getByTestId } = await render(
+            <WelcomeScreen navigation={mockNavigation} />
+        );
+
+        fireEvent.press(getByTestId('onboarding-button'));
+
+        expect(mockNavigation.navigate).toHaveBeenCalledWith('Onboarding');
+    });
 });
