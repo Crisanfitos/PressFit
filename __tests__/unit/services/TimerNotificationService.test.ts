@@ -19,8 +19,10 @@ import {
     getActiveWorkoutParams,
     clearActiveWorkoutParams,
     TIMER_NOTIFICATION_ID_KEY,
+    TIMER_NOTIFICATION_IDENTIFIER,
     NOTIFICATION_CATEGORY_ID,
     TIMER_CHANNEL_ID,
+    formatTime,
     ACTION_OK,
     ACTION_PAUSE,
     ACTION_DISCARD,
@@ -195,29 +197,53 @@ describe('TimerNotificationService', () => {
         });
     });
 
-    describe('scheduleTimerNotification', () => {
-        it('should schedule new notification before dismissing old notification and save ID to AsyncStorage', async () => {
-            (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce('old_notif_123');
-            (Notifications.scheduleNotificationAsync as jest.Mock).mockResolvedValueOnce('new_notif_456');
+    describe('formatTime (PF-283)', () => {
+        it('formats various durations into M:SS strings', () => {
+            expect(formatTime(0)).toBe('0:00');
+            expect(formatTime(9)).toBe('0:09');
+            expect(formatTime(59)).toBe('0:59');
+            expect(formatTime(60)).toBe('1:00');
+            expect(formatTime(125)).toBe('2:05');
+            expect(formatTime(3600)).toBe('60:00');
+        });
+    });
+
+    describe('scheduleTimerNotification (PF-283)', () => {
+        it('should schedule/update notification in-place using stable identifier', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(TIMER_NOTIFICATION_IDENTIFIER);
+            (Notifications.scheduleNotificationAsync as jest.Mock).mockResolvedValueOnce(TIMER_NOTIFICATION_IDENTIFIER);
 
             const result = await scheduleTimerNotification(125); // 2 mins 5 secs -> 2:05
 
-            expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith({
-                content: {
-                    title: 'PressFit — Descanso en curso',
-                    body: '⏱ 2:05',
-                    categoryIdentifier: NOTIFICATION_CATEGORY_ID,
-                    data: { type: 'REST_TIMER' },
-                    sticky: true,
-                    autoDismiss: false,
-                    color: '#22c55e',
-                },
-                trigger: null,
-            });
-            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_NOTIFICATION_ID_KEY, 'new_notif_456');
-            expect(Notifications.dismissNotificationAsync).toHaveBeenCalledWith('old_notif_123');
-            expect(Notifications.cancelScheduledNotificationAsync).toHaveBeenCalledWith('old_notif_123');
-            expect(result).toBe('new_notif_456');
+            expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    identifier: TIMER_NOTIFICATION_IDENTIFIER,
+                    content: {
+                        title: 'PressFit — Descanso en curso',
+                        body: '⏱ 2:05',
+                        categoryIdentifier: NOTIFICATION_CATEGORY_ID,
+                        data: { type: 'REST_TIMER' },
+                        sticky: true,
+                        autoDismiss: false,
+                        color: '#22c55e',
+                    },
+                })
+            );
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_NOTIFICATION_ID_KEY, TIMER_NOTIFICATION_IDENTIFIER);
+            // Updating in-place: no dismissal needed when using the same identifier
+            expect(Notifications.dismissNotificationAsync).not.toHaveBeenCalled();
+            expect(result).toBe(TIMER_NOTIFICATION_IDENTIFIER);
+        });
+
+        it('should clean up legacy notification if previousId differs from new identifier', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce('legacy_uuid_123');
+            (Notifications.scheduleNotificationAsync as jest.Mock).mockResolvedValueOnce(TIMER_NOTIFICATION_IDENTIFIER);
+
+            const result = await scheduleTimerNotification(30);
+
+            expect(Notifications.dismissNotificationAsync).toHaveBeenCalledWith('legacy_uuid_123');
+            expect(Notifications.cancelScheduledNotificationAsync).toHaveBeenCalledWith('legacy_uuid_123');
+            expect(result).toBe(TIMER_NOTIFICATION_IDENTIFIER);
         });
 
         it('should handle errors during scheduling gracefully and return null', async () => {
@@ -230,28 +256,28 @@ describe('TimerNotificationService', () => {
         });
     });
 
-    describe('cancelTimerNotification', () => {
-        it('should dismiss, cancel notification and remove ID from storage if ID exists', async () => {
+    describe('cancelTimerNotification (PF-283)', () => {
+        it('should dismiss and cancel both stored ID and TIMER_NOTIFICATION_IDENTIFIER', async () => {
             (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce('active_notif_789');
-            (Notifications.dismissNotificationAsync as jest.Mock).mockResolvedValueOnce(undefined);
-            (Notifications.cancelScheduledNotificationAsync as jest.Mock).mockResolvedValueOnce(undefined);
+            (Notifications.dismissNotificationAsync as jest.Mock).mockResolvedValue(undefined);
+            (Notifications.cancelScheduledNotificationAsync as jest.Mock).mockResolvedValue(undefined);
 
             await cancelTimerNotification();
 
             expect(AsyncStorage.getItem).toHaveBeenCalledWith(TIMER_NOTIFICATION_ID_KEY);
             expect(Notifications.dismissNotificationAsync).toHaveBeenCalledWith('active_notif_789');
-            expect(Notifications.cancelScheduledNotificationAsync).toHaveBeenCalledWith('active_notif_789');
+            expect(Notifications.dismissNotificationAsync).toHaveBeenCalledWith(TIMER_NOTIFICATION_IDENTIFIER);
             expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_NOTIFICATION_ID_KEY);
         });
 
-        it('should do nothing if no active notification ID is stored', async () => {
+        it('should dismiss TIMER_NOTIFICATION_IDENTIFIER even if no ID is stored in storage', async () => {
             (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(null);
 
             await cancelTimerNotification();
 
-            expect(Notifications.dismissNotificationAsync).not.toHaveBeenCalled();
-            expect(Notifications.cancelScheduledNotificationAsync).not.toHaveBeenCalled();
-            expect(AsyncStorage.removeItem).not.toHaveBeenCalled();
+            expect(Notifications.dismissNotificationAsync).toHaveBeenCalledWith(TIMER_NOTIFICATION_IDENTIFIER);
+            expect(Notifications.cancelScheduledNotificationAsync).toHaveBeenCalledWith(TIMER_NOTIFICATION_IDENTIFIER);
+            expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_NOTIFICATION_ID_KEY);
         });
     });
 

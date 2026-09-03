@@ -30,9 +30,9 @@ import { HapticService } from '../services/HapticService';
 
 const TIMER_STORAGE_KEY = '@pressfit_rest_timer_start';
 
-// Notification update interval: 10s is smooth enough without causing flicker.
-// 1s caused visible flickering due to the cancel+repost cycle.
-const NOTIFICATION_UPDATE_INTERVAL_MS = 10_000;
+// Notification update interval: 1s ensures real-time updates (≤ 2s) matching the UI timer.
+// Using stable TIMER_NOTIFICATION_IDENTIFIER eliminates flickering completely without cancel+repost.
+const NOTIFICATION_UPDATE_INTERVAL_MS = 1_000;
 
 interface RestTimerProps {
     visible: boolean;

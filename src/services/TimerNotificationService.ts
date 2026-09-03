@@ -6,6 +6,7 @@ const TIMER_STORAGE_KEY = '@pressfit_rest_timer_start';
 
 // Notification identifiers
 export const TIMER_NOTIFICATION_ID_KEY = '@pressfit_timer_notif_id';
+export const TIMER_NOTIFICATION_IDENTIFIER = 'pressfit_rest_timer_notif';
 export const NOTIFICATION_CATEGORY_ID = 'REST_TIMER';
 export const TIMER_CHANNEL_ID = 'pressfit_rest_timer';
 
@@ -137,20 +138,21 @@ export async function getNotificationPermissionStatus(): Promise<Notifications.P
 }
 
 // ─── Format seconds as M:SS ───
-function formatTime(totalSeconds: number): string {
+export function formatTime(totalSeconds: number): string {
     const mins = Math.floor(totalSeconds / 60);
     const secs = totalSeconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 // ─── Schedule (or update) the timer notification ───
-// Inverted sequence: schedule new notification first, save ID, then dismiss old one.
-// This prevents orphan cancellations where notification disappears if app process is killed.
+// Uses a stable identifier (TIMER_NOTIFICATION_IDENTIFIER) to update existing notification in-place.
+// This eliminates visible flickering completely (no cancel+repost cycle needed) and provides real-time updates.
 export async function scheduleTimerNotification(elapsedSeconds: number): Promise<string | null> {
     try {
         const previousId = await AsyncStorage.getItem(TIMER_NOTIFICATION_ID_KEY);
 
         const newId = await Notifications.scheduleNotificationAsync({
+            identifier: TIMER_NOTIFICATION_IDENTIFIER,
             content: {
                 title: 'PressFit — Descanso en curso',
                 body: `⏱ ${formatTime(elapsedSeconds)}`,
@@ -160,14 +162,14 @@ export async function scheduleTimerNotification(elapsedSeconds: number): Promise
                 autoDismiss: false,
                 color: '#22c55e',
             },
-            trigger: null, // Immediate
+            trigger: Platform.OS === 'android' ? { channelId: TIMER_CHANNEL_ID } : null,
         });
 
         await AsyncStorage.setItem(TIMER_NOTIFICATION_ID_KEY, newId);
-        logTimerNotification('debug', `Scheduled notification ${newId}, elapsed: ${elapsedSeconds}s`);
+        logTimerNotification('debug', `Scheduled/updated notification ${newId}, elapsed: ${elapsedSeconds}s`);
 
-        // Clean up previous notification only after new one is successfully scheduled
-        if (previousId && previousId !== newId) {
+        // Clean up legacy notification only if a different ID was previously stored
+        if (previousId && previousId !== newId && previousId !== TIMER_NOTIFICATION_IDENTIFIER) {
             await Notifications.dismissNotificationAsync(previousId).catch(() => { });
             await Notifications.cancelScheduledNotificationAsync(previousId).catch(() => { });
         }
@@ -183,12 +185,16 @@ export async function scheduleTimerNotification(elapsedSeconds: number): Promise
 export async function cancelTimerNotification(): Promise<void> {
     try {
         const id = await AsyncStorage.getItem(TIMER_NOTIFICATION_ID_KEY);
-        if (id) {
-            await Notifications.dismissNotificationAsync(id).catch(() => { });
-            await Notifications.cancelScheduledNotificationAsync(id).catch(() => { });
-            await AsyncStorage.removeItem(TIMER_NOTIFICATION_ID_KEY);
-            logTimerNotification('debug', `Cancelled notification ${id}`);
+        const idsToCancel = new Set([TIMER_NOTIFICATION_IDENTIFIER]);
+        if (id) idsToCancel.add(id);
+
+        for (const notifId of idsToCancel) {
+            await Notifications.dismissNotificationAsync(notifId).catch(() => { });
+            await Notifications.cancelScheduledNotificationAsync(notifId).catch(() => { });
         }
+
+        await AsyncStorage.removeItem(TIMER_NOTIFICATION_ID_KEY);
+        logTimerNotification('debug', `Cancelled notification: ${Array.from(idsToCancel).join(', ')}`);
     } catch (error) {
         logTimerNotification('warn', 'Failed to cancel:', error);
     }
