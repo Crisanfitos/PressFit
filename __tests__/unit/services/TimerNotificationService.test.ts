@@ -33,6 +33,10 @@ import {
     getPendingTimerAction,
     clearPendingTimerAction,
     handleNotificationAction,
+    getNotificationPlatformConfig,
+    buildTimerNotificationContent,
+    TIMER_NOTIFICATION_COLOR,
+    TIMER_NOTIFICATION_PAUSED_COLOR,
 } from '../../../src/services/TimerNotificationService';
 
 jest.mock('expo-notifications', () => ({
@@ -108,7 +112,7 @@ describe('TimerNotificationService', () => {
                 expect.objectContaining({
                     name: 'Temporizador de Descanso',
                     importance: 4,
-                    lightColor: '#22c55e',
+                    lightColor: TIMER_NOTIFICATION_COLOR,
                 })
             );
 
@@ -217,6 +221,9 @@ describe('TimerNotificationService', () => {
 
     describe('scheduleTimerNotification (PF-283)', () => {
         it('should schedule/update notification in-place using stable identifier', async () => {
+            const originalOS = Platform.OS;
+            Object.defineProperty(Platform, 'OS', { value: 'android', configurable: true });
+
             (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(TIMER_NOTIFICATION_IDENTIFIER);
             (Notifications.scheduleNotificationAsync as jest.Mock).mockResolvedValueOnce(TIMER_NOTIFICATION_IDENTIFIER);
 
@@ -232,14 +239,18 @@ describe('TimerNotificationService', () => {
                         data: { type: 'REST_TIMER' },
                         sticky: true,
                         autoDismiss: false,
-                        color: '#22c55e',
+                        color: TIMER_NOTIFICATION_COLOR,
+                        priority: 'high',
                     },
+                    trigger: { channelId: TIMER_CHANNEL_ID },
                 })
             );
             expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_NOTIFICATION_ID_KEY, TIMER_NOTIFICATION_IDENTIFIER);
             // Updating in-place: no dismissal needed when using the same identifier
             expect(Notifications.dismissNotificationAsync).not.toHaveBeenCalled();
             expect(result).toBe(TIMER_NOTIFICATION_IDENTIFIER);
+
+            Object.defineProperty(Platform, 'OS', { value: originalOS, configurable: true });
         });
 
         it('should clean up legacy notification if previousId differs from new identifier', async () => {
@@ -468,6 +479,107 @@ describe('TimerNotificationService', () => {
 
             await clearActiveWorkoutParams();
             expect(AsyncStorage.removeItem).toHaveBeenCalledWith('@pressfit_active_workout_params');
+        });
+    });
+
+    describe('Platform Capabilities & Configuration (PF-286)', () => {
+        it('returns Android configuration when platform is android', () => {
+            const originalOS = Platform.OS;
+            Object.defineProperty(Platform, 'OS', { value: 'android', configurable: true });
+
+            const config = getNotificationPlatformConfig();
+
+            expect(config.platform).toBe('android');
+            expect(config.supportsNativeChronometer).toBe(false);
+            expect(config.updateCadenceMs).toBe(1000);
+            expect(config.channelId).toBe(TIMER_CHANNEL_ID);
+            expect(config.channelPriority).toBe('high');
+            expect(config.isSticky).toBe(true);
+            expect(config.brandColor).toBe(TIMER_NOTIFICATION_COLOR);
+
+            Object.defineProperty(Platform, 'OS', { value: originalOS, configurable: true });
+        });
+
+        it('returns iOS configuration when platform is ios', () => {
+            const originalOS = Platform.OS;
+            Object.defineProperty(Platform, 'OS', { value: 'ios', configurable: true });
+
+            const config = getNotificationPlatformConfig();
+
+            expect(config.platform).toBe('ios');
+            expect(config.supportsNativeChronometer).toBe(false);
+            expect(config.channelId).toBeUndefined();
+            expect(config.isSticky).toBe(false);
+            expect(config.brandColor).toBe(TIMER_NOTIFICATION_COLOR);
+
+            Object.defineProperty(Platform, 'OS', { value: originalOS, configurable: true });
+        });
+
+        it('returns default fallback configuration for unknown platforms', () => {
+            const originalOS = Platform.OS;
+            Object.defineProperty(Platform, 'OS', { value: 'windows', configurable: true });
+
+            const config = getNotificationPlatformConfig();
+
+            expect(config.platform).toBe('default');
+            expect(config.channelId).toBeUndefined();
+            expect(config.isSticky).toBe(false);
+
+            Object.defineProperty(Platform, 'OS', { value: originalOS, configurable: true });
+        });
+    });
+
+    describe('buildTimerNotificationContent (PF-286)', () => {
+        it('builds standard active timer content with brand color and formatted time', () => {
+            const originalOS = Platform.OS;
+            Object.defineProperty(Platform, 'OS', { value: 'android', configurable: true });
+
+            const content = buildTimerNotificationContent(75);
+
+            expect(content).toEqual({
+                title: 'PressFit — Descanso en curso',
+                body: '⏱ 1:15',
+                categoryIdentifier: NOTIFICATION_CATEGORY_ID,
+                data: { type: 'REST_TIMER' },
+                sticky: true,
+                autoDismiss: false,
+                color: TIMER_NOTIFICATION_COLOR,
+                priority: 'high',
+            });
+
+            Object.defineProperty(Platform, 'OS', { value: originalOS, configurable: true });
+        });
+
+        it('builds paused timer content with warning color and paused body', () => {
+            const originalOS = Platform.OS;
+            Object.defineProperty(Platform, 'OS', { value: 'android', configurable: true });
+
+            const content = buildTimerNotificationContent(90, { paused: true });
+
+            expect(content).toEqual({
+                title: 'PressFit — Descanso en curso',
+                body: '⏸ Pausado',
+                categoryIdentifier: NOTIFICATION_CATEGORY_ID,
+                data: { type: 'REST_TIMER' },
+                sticky: true,
+                autoDismiss: false,
+                color: TIMER_NOTIFICATION_PAUSED_COLOR,
+                priority: 'high',
+            });
+
+            Object.defineProperty(Platform, 'OS', { value: originalOS, configurable: true });
+        });
+
+        it('includes interruptionLevel active on iOS', () => {
+            const originalOS = Platform.OS;
+            Object.defineProperty(Platform, 'OS', { value: 'ios', configurable: true });
+
+            const content = buildTimerNotificationContent(30);
+
+            expect((content as any).interruptionLevel).toBe('active');
+            expect(content.sticky).toBe(false);
+
+            Object.defineProperty(Platform, 'OS', { value: originalOS, configurable: true });
         });
     });
 });

@@ -13,6 +13,8 @@ export const TIMER_NOTIFICATION_ID_KEY = '@pressfit_timer_notif_id';
 export const TIMER_NOTIFICATION_IDENTIFIER = 'pressfit_rest_timer_notif';
 export const NOTIFICATION_CATEGORY_ID = 'REST_TIMER';
 export const TIMER_CHANNEL_ID = 'pressfit_rest_timer';
+export const TIMER_NOTIFICATION_COLOR = '#102218';
+export const TIMER_NOTIFICATION_PAUSED_COLOR = '#eab308';
 
 // Action identifiers
 export const ACTION_OK = 'TIMER_OK';
@@ -69,7 +71,7 @@ export async function setupNotificationChannel(): Promise<void> {
                 name: 'Temporizador de Descanso',
                 importance: Notifications.AndroidImportance.HIGH,
                 vibrationPattern: [0, 250, 250, 250],
-                lightColor: '#22c55e',
+                lightColor: TIMER_NOTIFICATION_COLOR,
                 lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
                 bypassDnd: false,
                 showBadge: false,
@@ -148,24 +150,72 @@ export function formatTime(totalSeconds: number): string {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
+// ─── Platform Capabilities & Configuration (PF-286) ───
+export interface NotificationPlatformConfig {
+    platform: 'android' | 'ios' | 'default';
+    supportsNativeChronometer: boolean;
+    updateCadenceMs: number;
+    channelId?: string;
+    channelPriority: 'high' | 'default';
+    isSticky: boolean;
+    brandColor: string;
+}
+
+export function getNotificationPlatformConfig(): NotificationPlatformConfig {
+    const isAndroid = Platform.OS === 'android';
+    const isIOS = Platform.OS === 'ios';
+
+    return {
+        platform: isAndroid ? 'android' : isIOS ? 'ios' : 'default',
+        supportsNativeChronometer: false, // expo-notifications does not expose Android chronometer API in JS
+        updateCadenceMs: 1000,
+        channelId: isAndroid ? TIMER_CHANNEL_ID : undefined,
+        channelPriority: 'high',
+        isSticky: isAndroid,
+        brandColor: TIMER_NOTIFICATION_COLOR,
+    };
+}
+
+export interface BuildTimerNotificationOptions {
+    paused?: boolean;
+}
+
+export function buildTimerNotificationContent(
+    elapsedSeconds: number,
+    options?: BuildTimerNotificationOptions
+): Notifications.NotificationContentInput {
+    const isPaused = !!options?.paused;
+    const config = getNotificationPlatformConfig();
+
+    const content: Notifications.NotificationContentInput = {
+        title: 'PressFit — Descanso en curso',
+        body: isPaused ? '⏸ Pausado' : `⏱ ${formatTime(elapsedSeconds)}`,
+        categoryIdentifier: NOTIFICATION_CATEGORY_ID,
+        data: { type: 'REST_TIMER' },
+        sticky: config.isSticky,
+        autoDismiss: false,
+        color: isPaused ? TIMER_NOTIFICATION_PAUSED_COLOR : config.brandColor,
+        priority: config.channelPriority === 'high' ? 'high' : 'default',
+    };
+
+    if (Platform.OS === 'ios') {
+        (content as any).interruptionLevel = 'active';
+    }
+
+    return content;
+}
+
 // ─── Schedule (or update) the timer notification ───
 // Uses a stable identifier (TIMER_NOTIFICATION_IDENTIFIER) to update existing notification in-place.
 // This eliminates visible flickering completely (no cancel+repost cycle needed) and provides real-time updates.
 export async function scheduleTimerNotification(elapsedSeconds: number): Promise<string | null> {
     try {
         const previousId = await AsyncStorage.getItem(TIMER_NOTIFICATION_ID_KEY);
+        const content = buildTimerNotificationContent(elapsedSeconds);
 
         const newId = await Notifications.scheduleNotificationAsync({
             identifier: TIMER_NOTIFICATION_IDENTIFIER,
-            content: {
-                title: 'PressFit — Descanso en curso',
-                body: `⏱ ${formatTime(elapsedSeconds)}`,
-                categoryIdentifier: NOTIFICATION_CATEGORY_ID,
-                data: { type: 'REST_TIMER' },
-                sticky: true,
-                autoDismiss: false,
-                color: '#22c55e',
-            },
+            content,
             trigger: Platform.OS === 'android' ? { channelId: TIMER_CHANNEL_ID } : null,
         });
 
@@ -293,17 +343,10 @@ export async function handleNotificationAction(actionId: string): Promise<TimerP
 
             // Update notification with paused indicator
             try {
+                const pausedContent = buildTimerNotificationContent(elapsed, { paused: true });
                 await Notifications.scheduleNotificationAsync({
                     identifier: TIMER_NOTIFICATION_IDENTIFIER,
-                    content: {
-                        title: 'PressFit — Descanso en curso',
-                        body: '⏸ Pausado',
-                        categoryIdentifier: NOTIFICATION_CATEGORY_ID,
-                        data: { type: 'REST_TIMER' },
-                        sticky: true,
-                        autoDismiss: false,
-                        color: '#eab308',
-                    },
+                    content: pausedContent,
                     trigger: Platform.OS === 'android' ? { channelId: TIMER_CHANNEL_ID } : null,
                 });
             } catch (_) { }
