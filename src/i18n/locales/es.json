@@ -188,8 +188,11 @@
       "title": "PressFit — Descanso en curso",
       "body": "⏱ {{time}}",
       "paused": "⏸ Pausado",
+      "startedAt": "Inicio: {{time}}",
+      "pausedAt": "Pausado: {{time}}",
       "ok": "✅ OK",
       "pause": "⏸ Pausar",
+      "resume": "▶️ Reanudar",
       "discard": "✕ Descartar",
       "preferenceLabel": "Notificación de descanso",
       "preferenceDescription": "Mostrar temporizador en la barra de notificaciones"

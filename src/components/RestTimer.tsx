@@ -106,6 +106,11 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             setIsRunning(false);
             setIsStopped(true);
             setSeconds(elapsed);
+        } else if (pendingAction === 'RESUME') {
+            const elapsed = await getElapsedSecondsFromStorage();
+            setIsStopped(false);
+            setIsRunning(true);
+            setSeconds(elapsed);
         } else if (pendingAction === 'DISCARD') {
             await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
             await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
@@ -124,11 +129,17 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             await setupNotificationChannel();
             await setupNotificationCategory();
 
-            // Check if app was launched directly from an action response
+            // Check if app was launched directly from an action response without re-executing handled actions
             try {
                 const lastResponse = await Notifications.getLastNotificationResponseAsync();
-                if (lastResponse?.actionIdentifier) {
-                    await handleNotificationAction(lastResponse.actionIdentifier);
+                if (
+                    lastResponse?.actionIdentifier &&
+                    lastResponse.actionIdentifier !== Notifications.DEFAULT_ACTION_IDENTIFIER
+                ) {
+                    const pending = await getPendingTimerAction();
+                    if (pending) {
+                        await reconcilePendingAction();
+                    }
                 }
             } catch (_) { }
 
@@ -234,7 +245,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                     await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
                     await clearPendingTimerAction();
                     await AsyncStorage.setItem(TIMER_STORAGE_KEY, String(startTs));
-                    await scheduleTimerNotification(0);
+                    await scheduleTimerNotification(0, { paused: false, startTimeMs: startTs });
                     setIsStopped(false);
                     setIsRunning(true);
                 }
@@ -301,12 +312,14 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
     const handleResume = useCallback(async () => {
         setIsStopped(false);
         setIsRunning(true);
-        const currentSecs = secondsRef.current;
+        const pausedStr = await AsyncStorage.getItem(TIMER_PAUSED_ELAPSED_KEY);
+        const currentSecs = pausedStr !== null ? (parseInt(pausedStr, 10) || 0) : (secondsRef.current || 0);
         await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
         await clearPendingTimerAction();
         const adjustedStart = Date.now() - currentSecs * 1000;
         await AsyncStorage.setItem(TIMER_STORAGE_KEY, String(adjustedStart));
-        await scheduleTimerNotification(currentSecs);
+        setSeconds(currentSecs);
+        await scheduleTimerNotification(currentSecs, { paused: false, startTimeMs: adjustedStart });
     }, []);
 
     const handleDiscard = useCallback(async () => {
