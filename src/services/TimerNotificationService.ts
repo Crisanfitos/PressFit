@@ -234,6 +234,7 @@ export function getNotificationPlatformConfig(): NotificationPlatformConfig {
 export interface BuildTimerNotificationOptions {
     paused?: boolean;
     startTimeMs?: number;
+    skipActiveCheck?: boolean;
 }
 
 export function buildTimerNotificationContent(
@@ -268,6 +269,10 @@ export function buildTimerNotificationContent(
         priority: config.channelPriority === 'high' ? 'high' : 'default',
     };
 
+    if (Platform.OS === 'android') {
+        (content as any).vibrate = [0, 0];
+    }
+
     if (Platform.OS === 'ios') {
         (content as any).interruptionLevel = 'active';
     }
@@ -286,6 +291,15 @@ export async function scheduleTimerNotification(
         if (!timerNotificationEnabled) {
             logTimerNotification('debug', 'Timer notification disabled by user preference, skipping schedule.');
             return null;
+        }
+
+        if (!options?.skipActiveCheck) {
+            const { active } = await checkActiveRestTimer();
+            if (!active) {
+                logTimerNotification('debug', 'No active rest timer in storage, cancelling dangling notification.');
+                await cancelTimerNotification();
+                return null;
+            }
         }
 
         const previousId = await AsyncStorage.getItem(TIMER_NOTIFICATION_ID_KEY);

@@ -235,7 +235,7 @@ describe('TimerNotificationService', () => {
             (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(TIMER_NOTIFICATION_IDENTIFIER);
             (Notifications.scheduleNotificationAsync as jest.Mock).mockResolvedValueOnce(TIMER_NOTIFICATION_IDENTIFIER);
 
-            const result = await scheduleTimerNotification(125); // 2 mins 5 secs -> 2:05
+            const result = await scheduleTimerNotification(125, { skipActiveCheck: true }); // 2 mins 5 secs -> 2:05
 
             expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -264,7 +264,7 @@ describe('TimerNotificationService', () => {
             (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce('legacy_uuid_123');
             (Notifications.scheduleNotificationAsync as jest.Mock).mockResolvedValueOnce(TIMER_NOTIFICATION_IDENTIFIER);
 
-            const result = await scheduleTimerNotification(30);
+            const result = await scheduleTimerNotification(30, { skipActiveCheck: true });
 
             expect(Notifications.dismissNotificationAsync).toHaveBeenCalledWith('legacy_uuid_123');
             expect(Notifications.cancelScheduledNotificationAsync).toHaveBeenCalledWith('legacy_uuid_123');
@@ -275,9 +275,17 @@ describe('TimerNotificationService', () => {
             (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(null);
             (Notifications.scheduleNotificationAsync as jest.Mock).mockRejectedValueOnce(new Error('Notification error'));
 
-            const result = await scheduleTimerNotification(45);
+            const result = await scheduleTimerNotification(45, { skipActiveCheck: true });
 
             expect(result).toBeNull();
+        });
+
+        it('returns null and cancels dangling notification if no timer is active in storage (PF-295)', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
+            const result = await scheduleTimerNotification(10);
+            expect(result).toBeNull();
+            expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+            expect(Notifications.dismissNotificationAsync).toHaveBeenCalledWith(TIMER_NOTIFICATION_IDENTIFIER);
         });
     });
 
@@ -599,7 +607,7 @@ describe('TimerNotificationService', () => {
         it('schedules notification with paused state and correct content', async () => {
             (Notifications.scheduleNotificationAsync as jest.Mock).mockResolvedValueOnce('test-notif-paused');
 
-            const id = await scheduleTimerNotification(42, { paused: true });
+            const id = await scheduleTimerNotification(42, { paused: true, skipActiveCheck: true });
 
             expect(id).toBe('test-notif-paused');
             expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(

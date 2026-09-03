@@ -8,11 +8,20 @@ import { AlertProvider } from './src/context/AlertContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { SentryService } from './src/services/SentryService';
 import { OfflineBanner } from './src/components/OfflineBanner';
+import { checkActiveRestTimer, cancelTimerNotification } from './src/services/TimerNotificationService';
 
 SentryService.init();
 
 
 export default function App() {
+  React.useEffect(() => {
+    checkActiveRestTimer().then(({ active }) => {
+      if (!active) {
+        cancelTimerNotification().catch(() => { });
+      }
+    }).catch(() => { });
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
