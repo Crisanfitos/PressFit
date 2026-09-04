@@ -21,6 +21,18 @@ jest.mock('@expo/vector-icons', () => {
     };
 });
 
+// Mock expo-linear-gradient
+jest.mock('expo-linear-gradient', () => {
+    const mockReact = require('react');
+    const { View: mockView } = require('react-native');
+    const MockGradient = (props: any) => mockReact.createElement(mockView, props, props.children);
+    return {
+        __esModule: true,
+        default: MockGradient,
+        LinearGradient: MockGradient,
+    };
+});
+
 // Mock react-native-gifted-charts
 jest.mock('react-native-gifted-charts', () => {
     const mockReact = require('react');
