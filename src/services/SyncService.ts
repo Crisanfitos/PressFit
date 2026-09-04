@@ -10,12 +10,21 @@ export type SyncOperationType =
     | 'SET_DELETE'
     | 'CUSTOM';
 
+export interface RetryLogEntry {
+    timestamp: number;
+    attempt: number;
+    error: string;
+}
+
 export interface PendingSyncOperation {
     id: string;
     type: SyncOperationType;
     payload: any;
     timestamp: number;
     attempts: number;
+    nextRetryTimestamp?: number;
+    retryLogs?: RetryLogEntry[];
+    lastError?: string;
 }
 
 export type ConflictResolutionStrategy = 'LAST_WRITE_WINS' | 'SERVER_WINS' | 'LOCAL_WINS';
@@ -34,10 +43,28 @@ export interface TimestampedEntity {
     [key: string]: any;
 }
 
-const SYNC_QUEUE_STORAGE_KEY = '@pressfit_sync_queue';
+export const SYNC_QUEUE_STORAGE_KEY = '@pressfit_sync_queue';
+export const DEAD_LETTER_QUEUE_STORAGE_KEY = '@pressfit_dead_letter_queue';
+export const MAX_SYNC_RETRIES = 5;
+export const BASE_BACKOFF_DELAY_MS = 2000;
+export const MAX_BACKOFF_DELAY_MS = 60000;
 
 export const SyncService = {
     SYNC_QUEUE_STORAGE_KEY,
+    DEAD_LETTER_QUEUE_STORAGE_KEY,
+    MAX_SYNC_RETRIES,
+    BASE_BACKOFF_DELAY_MS,
+    MAX_BACKOFF_DELAY_MS,
+
+    /**
+     * Calculate exponential backoff delay in ms based on attempts count:
+     * 2s -> 4s -> 8s -> 16s -> 32s (capped at 60s)
+     */
+    calculateBackoff(attempts: number): number {
+        const exponent = Math.max(0, attempts);
+        const delay = BASE_BACKOFF_DELAY_MS * Math.pow(2, exponent);
+        return Math.min(delay, MAX_BACKOFF_DELAY_MS);
+    },
 
     /**
      * Helper to extract epoch timestamp in ms from an entity's date/timestamp fields
@@ -179,8 +206,51 @@ export const SyncService = {
     },
 
     /**
-     * Process pending operations in strict FIFO order using a provided executor function.
-     * Failed operations increment `attempts` counter.
+     * Retrieve all operations moved to Dead Letter Queue
+     */
+    async getDeadLetterQueue(): Promise<ServiceResponse<PendingSyncOperation[]>> {
+        try {
+            const raw = await AsyncStorage.getItem(DEAD_LETTER_QUEUE_STORAGE_KEY);
+            if (!raw) return { data: [], error: null };
+            const dlq: PendingSyncOperation[] = JSON.parse(raw);
+            return { data: dlq, error: null };
+        } catch (error) {
+            return { data: [], error };
+        }
+    },
+
+    /**
+     * Clear all dead-lettered sync operations
+     */
+    async clearDeadLetterQueue(): Promise<ServiceResponse<boolean>> {
+        try {
+            await AsyncStorage.removeItem(DEAD_LETTER_QUEUE_STORAGE_KEY);
+            return { data: true, error: null };
+        } catch (error) {
+            return { data: false, error };
+        }
+    },
+
+    /**
+     * Append an operation to Dead Letter Queue
+     */
+    async addToDeadLetterQueue(op: PendingSyncOperation): Promise<ServiceResponse<boolean>> {
+        try {
+            const dlqRes = await SyncService.getDeadLetterQueue();
+            const currentDlq = dlqRes.data || [];
+            const updatedDlq = [...currentDlq, op];
+            await AsyncStorage.setItem(DEAD_LETTER_QUEUE_STORAGE_KEY, JSON.stringify(updatedDlq));
+            return { data: true, error: null };
+        } catch (error) {
+            return { data: false, error };
+        }
+    },
+
+    /**
+     * Process pending operations in queue using a provided executor function.
+     * Failed operations increment attempts counter, calculate exponential backoff (2s -> 4s -> 8s -> 16s -> 32s, max 60s),
+     * log failed attempts, and move to dead-letter queue if exceeding MAX_SYNC_RETRIES (5).
+     * Operations waiting for backoff do not block subsequent operations.
      */
     async processQueue(
         executorFn?: (op: PendingSyncOperation) => Promise<boolean>
@@ -199,12 +269,24 @@ export const SyncService = {
             const remainingQueue: PendingSyncOperation[] = [];
 
             for (const op of queue) {
+                const now = Date.now();
+                if (op.nextRetryTimestamp && now < op.nextRetryTimestamp) {
+                    // Backoff delay has not elapsed yet; keep in queue and do NOT block other operations
+                    remainingQueue.push(op);
+                    continue;
+                }
+
                 let success = false;
+                let failureError = 'Execution failed';
                 if (executorFn) {
                     try {
                         success = await executorFn(op);
-                    } catch {
+                        if (!success) {
+                            failureError = 'Executor returned false';
+                        }
+                    } catch (err: any) {
                         success = false;
+                        failureError = err?.message || String(err);
                     }
                 } else {
                     // Default fallback: simulate successful processing
@@ -215,10 +297,32 @@ export const SyncService = {
                     processedCount++;
                 } else {
                     failedCount++;
-                    remainingQueue.push({
-                        ...op,
-                        attempts: op.attempts + 1,
-                    });
+                    const newAttempts = (op.attempts || 0) + 1;
+                    const logEntry: RetryLogEntry = {
+                        timestamp: Date.now(),
+                        attempt: newAttempts,
+                        error: failureError,
+                    };
+                    const updatedLogs = [...(op.retryLogs || []), logEntry];
+
+                    if (newAttempts >= MAX_SYNC_RETRIES) {
+                        // Max retries reached -> move to Dead Letter Queue
+                        await SyncService.addToDeadLetterQueue({
+                            ...op,
+                            attempts: newAttempts,
+                            retryLogs: updatedLogs,
+                            lastError: failureError,
+                        });
+                    } else {
+                        const backoffDelay = SyncService.calculateBackoff(op.attempts || 0);
+                        remainingQueue.push({
+                            ...op,
+                            attempts: newAttempts,
+                            nextRetryTimestamp: Date.now() + backoffDelay,
+                            retryLogs: updatedLogs,
+                            lastError: failureError,
+                        });
+                    }
                 }
             }
 

@@ -123,6 +123,169 @@ describe('SyncService', () => {
                 expect.stringContaining('op2')
             );
         });
+
+        it('should log failed attempt details and set nextRetryTimestamp with exponential backoff', async () => {
+            const queue: PendingSyncOperation[] = [
+                { id: 'op_fail', type: 'WORKOUT_START', payload: {}, timestamp: 1, attempts: 0 },
+            ];
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(queue));
+
+            const executorMock = jest.fn().mockRejectedValue(new Error('Network timeout 504'));
+
+            const beforeTime = Date.now();
+            const res = await SyncService.processQueue(executorMock);
+            expect(res.data).toEqual({ processed: 0, failed: 1 });
+
+            // Expect AsyncStorage.setItem with updated operation
+            const lastCall = (AsyncStorage.setItem as jest.Mock).mock.calls.find(
+                (call) => call[0] === SyncService.SYNC_QUEUE_STORAGE_KEY
+            );
+            expect(lastCall).toBeDefined();
+            const savedQueue: PendingSyncOperation[] = JSON.parse(lastCall[1]);
+            expect(savedQueue).toHaveLength(1);
+            expect(savedQueue[0].attempts).toBe(1);
+            expect(savedQueue[0].lastError).toBe('Network timeout 504');
+            expect(savedQueue[0].retryLogs).toHaveLength(1);
+            expect(savedQueue[0].retryLogs![0]).toEqual(
+                expect.objectContaining({
+                    attempt: 1,
+                    error: 'Network timeout 504',
+                })
+            );
+            expect(savedQueue[0].nextRetryTimestamp).toBeGreaterThanOrEqual(beforeTime + 2000);
+        });
+
+        it('should NOT block subsequent operations when an earlier operation is waiting for backoff', async () => {
+            const futureTime = Date.now() + 10000;
+            const queue: PendingSyncOperation[] = [
+                {
+                    id: 'op_waiting',
+                    type: 'WORKOUT_START',
+                    payload: {},
+                    timestamp: 1,
+                    attempts: 1,
+                    nextRetryTimestamp: futureTime,
+                },
+                {
+                    id: 'op_ready',
+                    type: 'SET_UPSERT',
+                    payload: {},
+                    timestamp: 2,
+                    attempts: 0,
+                },
+            ];
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(queue));
+
+            const executorMock = jest.fn().mockImplementation(async (op: PendingSyncOperation) => {
+                return op.id === 'op_ready';
+            });
+
+            const res = await SyncService.processQueue(executorMock);
+            // op_waiting was skipped without executing, op_ready succeeded
+            expect(executorMock).toHaveBeenCalledTimes(1);
+            expect(executorMock).toHaveBeenCalledWith(expect.objectContaining({ id: 'op_ready' }));
+            expect(res.data).toEqual({ processed: 1, failed: 0 });
+
+            // remaining queue should still contain op_waiting
+            const lastCall = (AsyncStorage.setItem as jest.Mock).mock.calls.find(
+                (call) => call[0] === SyncService.SYNC_QUEUE_STORAGE_KEY
+            );
+            const savedQueue: PendingSyncOperation[] = JSON.parse(lastCall[1]);
+            expect(savedQueue).toHaveLength(1);
+            expect(savedQueue[0].id).toBe('op_waiting');
+        });
+
+        it('should move operation to Dead Letter Queue when reaching MAX_SYNC_RETRIES (5)', async () => {
+            const queue: PendingSyncOperation[] = [
+                {
+                    id: 'op_doomed',
+                    type: 'WORKOUT_UPDATE',
+                    payload: {},
+                    timestamp: 1,
+                    attempts: 4, // 5th attempt will fail and trigger DLQ
+                },
+            ];
+            (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) => {
+                if (key === SyncService.SYNC_QUEUE_STORAGE_KEY) {
+                    return JSON.stringify(queue);
+                }
+                if (key === SyncService.DEAD_LETTER_QUEUE_STORAGE_KEY) {
+                    return JSON.stringify([]);
+                }
+                return null;
+            });
+
+            const executorMock = jest.fn().mockResolvedValue(false);
+
+            const res = await SyncService.processQueue(executorMock);
+            expect(res.data).toEqual({ processed: 0, failed: 1 });
+
+            // Active queue should now be empty
+            const activeQueueCall = (AsyncStorage.setItem as jest.Mock).mock.calls.find(
+                (call) => call[0] === SyncService.SYNC_QUEUE_STORAGE_KEY
+            );
+            expect(JSON.parse(activeQueueCall[1])).toEqual([]);
+
+            // DLQ should have received op_doomed with attempts = 5
+            const dlqCall = (AsyncStorage.setItem as jest.Mock).mock.calls.find(
+                (call) => call[0] === SyncService.DEAD_LETTER_QUEUE_STORAGE_KEY
+            );
+            expect(dlqCall).toBeDefined();
+            const savedDlq: PendingSyncOperation[] = JSON.parse(dlqCall[1]);
+            expect(savedDlq).toHaveLength(1);
+            expect(savedDlq[0].id).toBe('op_doomed');
+            expect(savedDlq[0].attempts).toBe(5);
+            expect(savedDlq[0].lastError).toBe('Executor returned false');
+            expect(savedDlq[0].retryLogs).toHaveLength(1);
+        });
+    });
+
+    describe('calculateBackoff', () => {
+        it('should calculate exponential backoff from 2s to 32s and cap at 60s', () => {
+            expect(SyncService.calculateBackoff(0)).toBe(2000);   // 2s
+            expect(SyncService.calculateBackoff(1)).toBe(4000);   // 4s
+            expect(SyncService.calculateBackoff(2)).toBe(8000);   // 8s
+            expect(SyncService.calculateBackoff(3)).toBe(16000);  // 16s
+            expect(SyncService.calculateBackoff(4)).toBe(32000);  // 32s
+            expect(SyncService.calculateBackoff(5)).toBe(60000);  // 60s cap
+            expect(SyncService.calculateBackoff(10)).toBe(60000); // capped at 60s
+        });
+    });
+
+    describe('Dead Letter Queue (DLQ)', () => {
+        it('should get empty array when no items in DLQ', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
+
+            const res = await SyncService.getDeadLetterQueue();
+            expect(res.data).toEqual([]);
+            expect(res.error).toBeNull();
+        });
+
+        it('should return parsed DLQ items', async () => {
+            const dlqItems: PendingSyncOperation[] = [
+                { id: 'dead_1', type: 'CUSTOM', payload: {}, timestamp: 100, attempts: 5 },
+            ];
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(dlqItems));
+
+            const res = await SyncService.getDeadLetterQueue();
+            expect(res.data).toEqual(dlqItems);
+            expect(res.error).toBeNull();
+        });
+
+        it('should handle error when reading DLQ', async () => {
+            const err = new Error('AsyncStorage read error');
+            (AsyncStorage.getItem as jest.Mock).mockRejectedValue(err);
+
+            const res = await SyncService.getDeadLetterQueue();
+            expect(res.data).toEqual([]);
+            expect(res.error).toBe(err);
+        });
+
+        it('should clear DLQ using clearDeadLetterQueue', async () => {
+            const res = await SyncService.clearDeadLetterQueue();
+            expect(res.data).toBe(true);
+            expect(AsyncStorage.removeItem).toHaveBeenCalledWith(SyncService.DEAD_LETTER_QUEUE_STORAGE_KEY);
+        });
     });
 
     describe('initNetworkListener', () => {
