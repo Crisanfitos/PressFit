@@ -9,12 +9,14 @@ import RootNavigator from './src/navigation/RootNavigator';
 import { SentryService } from './src/services/SentryService';
 import { OfflineBanner } from './src/components/OfflineBanner';
 import { checkActiveRestTimer, cancelTimerNotification } from './src/services/TimerNotificationService';
+import { OfflineStorageService } from './src/services/OfflineStorageService';
 
 SentryService.init();
 
 
 export default function App() {
   React.useEffect(() => {
+    OfflineStorageService.initialize().catch(() => { });
     checkActiveRestTimer().then(({ active }) => {
       if (!active) {
         cancelTimerNotification().catch(() => { });
