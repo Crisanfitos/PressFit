@@ -32,4 +32,14 @@ describe('SyncStatusBadge Component (RNTL)', () => {
     expect(getByTestId('sync-status-badge')).toBeTruthy();
     expect(getByText('Sincronizado')).toBeTruthy();
   });
+
+  it('should render "Sincronizado" when alwaysShow is true and queue is empty', async () => {
+    const { getByText, getByTestId } = await render(
+      <ThemeProvider>
+        <SyncStatusBadge alwaysShow={true} />
+      </ThemeProvider>
+    );
+    expect(getByTestId('sync-status-badge')).toBeTruthy();
+    expect(getByText('Sincronizado')).toBeTruthy();
+  });
 });

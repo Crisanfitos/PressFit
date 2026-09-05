@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
@@ -7,24 +7,36 @@ import { SyncService } from '../services/SyncService';
 interface SyncStatusBadgeProps {
   hasPendingSync?: boolean;
   isSynced?: boolean;
+  alwaysShow?: boolean;
   compact?: boolean;
 }
 
 export const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
   hasPendingSync,
   isSynced,
+  alwaysShow = false,
   compact = false,
 }) => {
   const { colors, isDark } = useTheme();
   const [pendingCount, setPendingCount] = useState<number>(0);
+  const [justSynced, setJustSynced] = useState<boolean>(false);
+  const prevCountRef = useRef<number>(0);
   const fadeAnim = useState(new Animated.Value(1))[0];
 
   useEffect(() => {
     let isMounted = true;
     const checkQueue = async () => {
       const res = await SyncService.getQueue();
+      const count = res.data?.length || 0;
       if (isMounted) {
-        setPendingCount(res.data?.length || 0);
+        if (prevCountRef.current > 0 && count === 0) {
+          setJustSynced(true);
+          setTimeout(() => {
+            if (isMounted) setJustSynced(false);
+          }, 4000);
+        }
+        prevCountRef.current = count;
+        setPendingCount(count);
       }
     };
     checkQueue();
@@ -36,7 +48,7 @@ export const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
   }, []);
 
   const showPending = hasPendingSync !== undefined ? hasPendingSync : pendingCount > 0;
-  const showSynced = isSynced !== undefined ? isSynced : false;
+  const showSynced = isSynced !== undefined ? isSynced : (justSynced || (alwaysShow && pendingCount === 0));
 
   if (!showPending && !showSynced) {
     return null;

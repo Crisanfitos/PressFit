@@ -74,6 +74,7 @@
     "test:e2e:us052": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_052_theme_toggle_verification.yaml",
     "test:e2e:us053": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_053_offline_workout_and_sync.yaml",
     "test:e2e:PF-244": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_053_offline_workout_and_sync.yaml",
+    "test:e2e:PF-277": "npm run test:e2e:us053",
     "test:e2e:us054": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/us_054_preset_routines_import.yaml",
     "test:e2e:all": "maestro --device emulator-5554 test -e E2E_TEST_EMAIL=test2@pressfit.com -e E2E_TEST_PASSWORD=test2@pressfit e2e/maestro/"
   },

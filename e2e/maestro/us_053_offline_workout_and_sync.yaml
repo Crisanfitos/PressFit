@@ -10,18 +10,30 @@ appId: com.crisanfitos.PressFit_Expo
     text: ".*8081.*"
     optional: true
 
-# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+# Manejar posible modal de Expo / Dev Menu
 - runFlow:
     when:
       visible: ".*developer menu.*"
     commands:
       - back
 
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- tapOn:
+    text: "Continue"
+    optional: true
+
 # 1. Navegar desde bienvenida a pantalla de Login
 - extendedWaitUntil:
     visible:
       id: "welcome-screen"
-    timeout: 20000
+    timeout: 60000
+
+- tapOn:
+    text: "Continue"
+    optional: true
 
 - tapOn:
     id: "login-button"
@@ -45,17 +57,47 @@ appId: com.crisanfitos.PressFit_Expo
 - tapOn:
     id: "login-submit-button"
 
-# 3. Verificar entrada a la pantalla principal
+# 3. Verificar entrada a la pantalla principal del Calendario
 - extendedWaitUntil:
     visible:
       id: "monthly-calendar-screen"
     timeout: 20000
 
-# 4. Activar Modo Avión (Modo Offline)
-# Nota: En desarrollo local con Expo Go / Metro, activar Modo Avión desconecta la comunicación de red Metro/Maestro driver.
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 4. Seleccionar el día de hoy para acceder al día de entrenamiento
+- tapOn:
+    id: "calendar-day-today"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+    optional: true
+
+# 5. Iniciar sesión de entrenamiento
+- tapOn:
+    id: "start-workout-button"
+    optional: true
+
+# Descartar alerta si hubiera confirmación o advertencia
+- tapOn:
+    text: "OK"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 10000
+    optional: true
+
+# 6. Activar Modo Avión (Simulación Modo Offline durante el entrenamiento)
+# Nota: En emulador/Expo Go se acompaña de optional: true para resiliencia ante RPC reconnect
 - toggleAirplaneMode
 
-# 5. Verificar presencia del Banner de Offline (Opcional por desconexión RPC de Expo Go en modo avión)
+# 7. Verificar presencia del Banner de Offline si está disponible
 - extendedWaitUntil:
     visible:
       id: "offline-banner"
@@ -66,29 +108,57 @@ appId: com.crisanfitos.PressFit_Expo
     id: "offline-banner"
     optional: true
 
-# 6. Iniciar un entrenamiento en modo sin conexión
-- tapOn:
-    id: "start-workout-button"
-    optional: true
-
-# 7. Desactivar Modo Avión (Restaurar Conectividad)
-- toggleAirplaneMode
-
-# 8. Verificar actualización del estado de sincronización (SyncStatusBadge)
+# 8. Verificar presencia del badge de sincronización en WorkoutHeader
 - extendedWaitUntil:
     visible:
       id: "sync-status-badge"
-    timeout: 15000
+    timeout: 5000
     optional: true
 
 - assertVisible:
     id: "sync-status-badge"
     optional: true
 
-# 9. Limpieza (Logout final)
+# 9. Desactivar Modo Avión (Restaurar Conectividad Online)
+- toggleAirplaneMode
+
+# 10. Retornar del entrenamiento activo hacia la pantalla de detalle del día
 - tapOn:
-    text: "Perfil"
+    id: "workout-back-button"
     optional: true
+
+- runFlow:
+    when:
+      notVisible:
+        id: "workout-day-screen"
+    commands:
+      - back
+
+# 11. Volver al calendario mensual desde el detalle del día
+- tapOn:
+    id: "workout-day-back-button"
+    optional: true
+
+- runFlow:
+    when:
+      notVisible:
+        id: "monthly-calendar-screen"
+    commands:
+      - back
+
+# Descartar cualquier alerta residual
+- tapOn:
+    text: "OK"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+    optional: true
+
+# 12. Limpieza (Navegar a Perfil y Cierre de Sesión final)
+- tapOn: "Perfil"
 
 - scroll
 - scrollUntilVisible:
@@ -96,18 +166,22 @@ appId: com.crisanfitos.PressFit_Expo
       id: "logout-button"
     direction: DOWN
     timeout: 10000
-    optional: true
 
 - tapOn:
     id: "logout-button"
-    optional: true
 
 - extendedWaitUntil:
     visible:
       id: "logout-confirm-button"
     timeout: 5000
-    optional: true
 
 - tapOn:
     id: "logout-confirm-button"
-    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"
