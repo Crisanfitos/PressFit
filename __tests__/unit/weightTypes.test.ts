@@ -10,6 +10,14 @@ jest.mock('../../src/lib/supabase', () => ({
     supabase: require('../helpers/mockSupabase').mockSupabase,
 }));
 
+jest.mock('../../src/services/NetworkService', () => ({
+    NetworkService: {
+        isOffline: jest.fn().mockResolvedValue(false),
+        getNetworkState: jest.fn().mockResolvedValue({ isConnected: true, isInternetReachable: true, isOffline: false, type: 'WIFI' }),
+        addNetworkListener: jest.fn(() => jest.fn()),
+    },
+}));
+
 import { TipoPeso, TIPO_PESO_LABELS, TIPO_PESO_SHORT_LABELS, TIPO_PESO_ICONS } from '../../src/types/setTypes';
 import { WorkoutService } from '../../src/services/WorkoutService';
 

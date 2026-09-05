@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Reanimated from 'react-native-reanimated';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ThemeColors } from '../../types/theme';
+import { SyncStatusBadge } from '../SyncStatusBadge';
 
 export interface WorkoutHeaderProps {
     dayName?: string;
@@ -53,6 +54,7 @@ export const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
                     ) : null}
                 </View>
             </View>
+            <SyncStatusBadge compact alwaysShow />
         </Reanimated.View>
     );
 };

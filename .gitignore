@@ -66,3 +66,4 @@ e2e/.env.e2e
 build-*.
 
 /scratch/
+*.apk
