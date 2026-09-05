@@ -1,11 +1,11 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import ImageViewer from 'react-native-image-zoom-viewer';
+import ImageViewing from 'react-native-image-viewing';
 
 export interface PhotoViewerModalProps {
     visible: boolean;
-    images: { url: string }[];
+    images: { url?: string; uri?: string }[];
     currentIndex: number;
     photos: any[];
     onIndexChange: (index: number) => void;
@@ -22,47 +22,58 @@ export const PhotoViewerModal: React.FC<PhotoViewerModalProps> = ({
     onClose,
     onEditPhoto,
 }) => {
-    const currentPhoto = photos[currentIndex];
+    const formattedImages = useMemo(
+        () => images.map((img) => ({ uri: img.uri || img.url || '' })),
+        [images]
+    );
+
+    const renderHeader = () => (
+        <View style={styles.topActions}>
+            <TouchableOpacity style={styles.actionButton} onPress={onEditPhoto} testID="photo-viewer-edit-button">
+                <MaterialIcons name="edit" size={24} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionButton} onPress={onClose} testID="photo-viewer-close-button">
+                <MaterialIcons name="close" size={24} color="#fff" />
+            </TouchableOpacity>
+        </View>
+    );
+
+    const renderFooter = ({ imageIndex }: { imageIndex: number }) => {
+        const currentPhoto = photos[imageIndex];
+        return (
+            <View style={styles.viewerFooter}>
+                <Text style={styles.viewerDateText}>
+                    {currentPhoto?.created_at
+                        ? new Date(currentPhoto.created_at).toLocaleDateString()
+                        : ''}
+                </Text>
+                {currentPhoto?.comentario ? (
+                    <Text style={styles.viewerCommentText}>{currentPhoto.comentario}</Text>
+                ) : null}
+                <Text style={styles.viewerCountText}>
+                    {imageIndex + 1} / {photos.length}
+                </Text>
+            </View>
+        );
+    };
+
+    if (images.length === 0) {
+        return null;
+    }
 
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-            <View style={{ flex: 1, backgroundColor: '#000' }}>
-                <View style={styles.topActions}>
-                    <TouchableOpacity style={styles.actionButton} onPress={onEditPhoto}>
-                        <MaterialIcons name="edit" size={24} color="#fff" />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton} onPress={onClose}>
-                        <MaterialIcons name="close" size={24} color="#fff" />
-                    </TouchableOpacity>
-                </View>
-
-                {images.length > 0 && (
-                    <ImageViewer
-                        imageUrls={images}
-                        index={currentIndex}
-                        onChange={(index) => index !== undefined && onIndexChange(index)}
-                        enableSwipeDown
-                        onSwipeDown={onClose}
-                        backgroundColor="#000"
-                        renderIndicator={() => <></>}
-                    />
-                )}
-
-                <View style={styles.viewerFooter}>
-                    <Text style={styles.viewerDateText}>
-                        {currentPhoto?.created_at
-                            ? new Date(currentPhoto.created_at).toLocaleDateString()
-                            : ''}
-                    </Text>
-                    {currentPhoto?.comentario ? (
-                        <Text style={styles.viewerCommentText}>{currentPhoto.comentario}</Text>
-                    ) : null}
-                    <Text style={styles.viewerCountText}>
-                        {currentIndex + 1} / {photos.length}
-                    </Text>
-                </View>
-            </View>
-        </Modal>
+        <ImageViewing
+            images={formattedImages}
+            imageIndex={currentIndex}
+            visible={visible}
+            onRequestClose={onClose}
+            onImageIndexChange={onIndexChange}
+            swipeToCloseEnabled={true}
+            doubleTapToZoomEnabled={true}
+            backgroundColor="#000"
+            HeaderComponent={renderHeader}
+            FooterComponent={renderFooter}
+        />
     );
 };
 

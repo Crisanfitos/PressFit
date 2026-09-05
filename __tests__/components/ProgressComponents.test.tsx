@@ -13,14 +13,18 @@ import {
     ProgressCustomAlertModal,
 } from '../../src/components/progress';
 
-jest.mock('react-native-image-zoom-viewer', () => {
+jest.mock('react-native-image-viewing', () => {
     const React = require('react');
-    const { View, Text } = require('react-native');
-    return (props: any) => (
-        <View testID="mock-image-viewer">
-            <Text>ImageViewer Mock</Text>
-        </View>
-    );
+    const { View } = require('react-native');
+    return ({ visible, HeaderComponent, FooterComponent, imageIndex = 0 }: any) => {
+        if (!visible) return null;
+        return (
+            <View testID="mock-image-viewing">
+                {HeaderComponent && <HeaderComponent imageIndex={imageIndex} />}
+                {FooterComponent && <FooterComponent imageIndex={imageIndex} />}
+            </View>
+        );
+    };
 });
 
 const mockColors: any = {
