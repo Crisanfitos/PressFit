@@ -9,7 +9,6 @@ module.exports = {
     ],
     testPathIgnorePatterns: [
         '/node_modules/',
-        '__tests__/e2e/',
         '__tests__/components/'
     ],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
