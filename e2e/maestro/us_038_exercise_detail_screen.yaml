@@ -86,7 +86,7 @@ appId: com.crisanfitos.PressFit_Expo
     timeout: 5000
 
 - tapOn:
-    id: "drawer-item-0"
+    id: "(drawer-item-exercise-catalog|drawer-item-1)"
 
 - extendedWaitUntil:
     visible:

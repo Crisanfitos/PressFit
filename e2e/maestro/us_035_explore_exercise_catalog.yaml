@@ -62,7 +62,7 @@ appId: com.crisanfitos.PressFit_Expo
 
 # 2. Navegar al Catálogo de Ejercicios
 - tapOn:
-    id: "drawer-item-0"
+    id: "(drawer-item-exercise-catalog|drawer-item-1)"
 
 - extendedWaitUntil:
     visible:

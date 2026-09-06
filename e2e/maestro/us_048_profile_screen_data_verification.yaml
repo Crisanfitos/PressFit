@@ -78,7 +78,7 @@ appId: com.crisanfitos.PressFit_Expo
     text: "Altura"
 
 - assertVisible:
-    text: "Apariencia"
+    text: ".*Apariencia.*"
 
 - assertVisible:
     text: "Modo Oscuro"

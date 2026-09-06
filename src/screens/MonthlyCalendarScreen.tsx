@@ -60,11 +60,13 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
             icon: 'stars',
             label: t('drawer.presetRoutines', 'Plantillas Prémium'),
             onPress: () => navigation.navigate('PresetRoutines'),
+            testID: 'drawer-item-preset-routines',
         },
         {
             icon: 'library-books',
             label: t('drawer.exerciseCatalog', 'Catálogo de Ejercicios'),
             onPress: () => navigation.navigate('ExerciseCatalog'),
+            testID: 'drawer-item-exercise-catalog',
         },
     ], [navigation, t]);
 

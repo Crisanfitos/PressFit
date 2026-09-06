@@ -18,6 +18,7 @@ export interface MenuItem {
   icon: keyof typeof MaterialIcons.glyphMap;
   label: string;
   onPress: () => void;
+  testID?: string;
 }
 
 interface SideDrawerProps {
@@ -102,7 +103,15 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({ visible, onClose, menuIt
                 }}
                 activeOpacity={0.7}
                 testID={`drawer-item-${index}`}
+                accessibilityLabel={item.testID || item.label}
               >
+                {item.testID && (
+                  <View
+                    testID={item.testID}
+                    pointerEvents="none"
+                    style={StyleSheet.absoluteFillObject}
+                  />
+                )}
                 <MaterialIcons name={item.icon} size={24} color={colors.textSecondary} />
                 <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
                 <MaterialIcons name="chevron-right" size={20} color={colors.textSecondary} />

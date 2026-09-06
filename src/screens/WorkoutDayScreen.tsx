@@ -630,7 +630,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
             </ScrollView>
 
             {/* Action Button (only for today) */}
-            {isToday && exercises.length > 0 && (
+            {isToday && (exercises.length > 0 || dayData) && (
                 <TouchableOpacity
                     style={styles.bottomButton}
                     onPress={handleMainButtonPress}
