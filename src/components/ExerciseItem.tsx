@@ -20,6 +20,8 @@ export interface ExerciseItemProps {
   onThumbnailPress: (videoId: string | null) => void;
   colors: ThemeColors;
   navigation: any;
+  onEdit?: (item: Exercise) => void;
+  onDelete?: (item: Exercise) => void;
 }
 
 const getVideoId = (url: string | undefined): string | null => {
@@ -34,7 +36,7 @@ const getThumbnailUrl = (videoId: string | null): string | null => {
 };
 
 export const ExerciseItem: React.FC<ExerciseItemProps> = React.memo(
-  ({ item, isSelected, selectionMode, onSelect, onThumbnailPress, colors, navigation }) => {
+  ({ item, isSelected, selectionMode, onSelect, onThumbnailPress, colors, navigation, onEdit, onDelete }) => {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -95,10 +97,44 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = React.memo(
               <Text style={[styles.exerciseName, { color: colors.text }]} numberOfLines={2}>
                 {item.titulo}
               </Text>
-              <Text style={[styles.exerciseText, { color: colors.primary }]}>{item.musculos_primarios}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginTop: 2 }}>
+                <Text style={[styles.exerciseText, { color: colors.primary }]}>{item.musculos_primarios}</Text>
+                {item.is_custom && (
+                  <View
+                    testID="custom-exercise-badge"
+                    style={[styles.badge, { backgroundColor: `${colors.primary}25`, marginLeft: 6, paddingVertical: 2, paddingHorizontal: 6 }]}
+                  >
+                    <Text style={[styles.badgeText, { color: colors.primary, fontSize: 10, fontWeight: '700' }]}>
+                      Personalizado
+                    </Text>
+                  </View>
+                )}
+              </View>
             </View>
 
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              {item.is_custom && onEdit && (
+                <TouchableOpacity
+                  onPress={() => onEdit(item)}
+                  style={{ padding: 6 }}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  testID="edit-custom-exercise-button"
+                >
+                  <MaterialIcons name="edit" size={20} color={colors.primary} />
+                </TouchableOpacity>
+              )}
+
+              {item.is_custom && onDelete && (
+                <TouchableOpacity
+                  onPress={() => onDelete(item)}
+                  style={{ padding: 6 }}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  testID="delete-custom-exercise-button"
+                >
+                  <MaterialIcons name="delete-outline" size={20} color={colors.error || '#ef4444'} />
+                </TouchableOpacity>
+              )}
+
               <TouchableOpacity onPress={() => setIsExpanded(!isExpanded)} style={{ padding: 8 }} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                 <MaterialIcons name={isExpanded ? 'expand-less' : 'expand-more'} size={26} color={colors.textSecondary} />
               </TouchableOpacity>
@@ -169,6 +205,9 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = React.memo(
   (prevProps, nextProps) =>
     prevProps.isSelected === nextProps.isSelected &&
     prevProps.item.id === nextProps.item.id &&
+    prevProps.item.titulo === nextProps.item.titulo &&
+    prevProps.item.descripcion === nextProps.item.descripcion &&
+    prevProps.item.is_custom === nextProps.item.is_custom &&
     prevProps.selectionMode === nextProps.selectionMode
 );
 

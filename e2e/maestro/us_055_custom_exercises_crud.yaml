@@ -1,0 +1,307 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_055_custom_exercises_crud.yaml — US-055: Ciclo completo CRUD de Ejercicios Personalizados
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+# 1. Abrir menú hamburguesa y navegar al Catálogo de Ejercicios
+- tapOn:
+    id: "hamburger-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "side-drawer"
+    timeout: 5000
+
+- tapOn:
+    id: "drawer-item-1"
+
+- extendedWaitUntil:
+    visible:
+      id: "exercise-catalog-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "exercise-catalog-screen"
+
+# 2. Verificar que los ejercicios oficiales NO muestran opciones de edición/borrado ni badge personalizado
+- tapOn:
+    id: "exercise-catalog-search-input"
+
+- inputText: "Press de Banca"
+
+- hideKeyboard
+
+- extendedWaitUntil:
+    visible:
+      text: ".*Press de Banca.*"
+    timeout: 5000
+
+- assertVisible:
+    text: ".*Press de Banca.*"
+
+- assertNotVisible:
+    id: "edit-custom-exercise-button"
+
+- assertNotVisible:
+    id: "delete-custom-exercise-button"
+
+- assertNotVisible:
+    id: "custom-exercise-badge"
+
+# 3. Limpiar búsqueda y abrir modal para Crear Ejercicio Personalizado
+- tapOn:
+    id: "exercise-catalog-clear-search-button"
+    optional: true
+
+- tapOn:
+    id: "exercise-catalog-search-input"
+
+- eraseText: 30
+
+- hideKeyboard
+
+- tapOn:
+    id: "open-create-custom-exercise-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "create-custom-exercise-modal"
+    timeout: 5000
+
+- assertVisible:
+    id: "create-custom-exercise-modal"
+
+# 4. Completar el formulario de creación
+- tapOn:
+    id: "custom-exercise-name-input"
+
+- inputText: "Remo Mancuerna E2E"
+
+- tapOn:
+    id: "custom-exercise-muscle-chip-espalda"
+
+- tapOn:
+    id: "custom-exercise-equipment-chip-mancuernas"
+
+- tapOn:
+    id: "custom-exercise-difficulty-chip-intermedio"
+
+- tapOn:
+    id: "custom-exercise-description-input"
+
+- inputText: "Ejercicio para dorsal ancho unilateral."
+
+- hideKeyboard
+
+# 5. Guardar ejercicio personalizado
+- tapOn:
+    id: "custom-exercise-submit-button"
+
+- extendedWaitUntil:
+    notVisible:
+      id: "create-custom-exercise-modal"
+    timeout: 10000
+
+# 6. Buscar el nuevo ejercicio personalizado en el catálogo y verificar badges y botones
+- tapOn:
+    id: "exercise-catalog-search-input"
+
+- inputText: "Remo Mancuerna E2E"
+
+- hideKeyboard
+
+- extendedWaitUntil:
+    visible:
+      text: ".*Remo Mancuerna E2E.*"
+    timeout: 5000
+
+- assertVisible:
+    text: ".*Remo Mancuerna E2E.*"
+
+- assertVisible:
+    id: "custom-exercise-badge"
+
+- assertVisible:
+    id: "edit-custom-exercise-button"
+
+- assertVisible:
+    id: "delete-custom-exercise-button"
+
+# 7. Editar el ejercicio personalizado
+- tapOn:
+    id: "edit-custom-exercise-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "edit-custom-exercise-modal"
+    timeout: 5000
+
+- tapOn:
+    id: "custom-exercise-name-input"
+
+- eraseText: 25
+
+- inputText: "Remo Mancuerna Editado E2E"
+
+- hideKeyboard
+
+- tapOn:
+    id: "custom-exercise-submit-button"
+
+- extendedWaitUntil:
+    notVisible:
+      id: "edit-custom-exercise-modal"
+    timeout: 10000
+
+# 8. Verificar que el cambio se refleja en la búsqueda
+- tapOn:
+    id: "exercise-catalog-clear-search-button"
+    optional: true
+
+- tapOn:
+    id: "exercise-catalog-search-input"
+
+- eraseText: 50
+
+- inputText: "Editado"
+
+- hideKeyboard
+
+- extendedWaitUntil:
+    visible:
+      text: ".*Remo Mancuerna Editado E2E.*"
+    timeout: 5000
+
+- assertVisible:
+    text: ".*Remo Mancuerna Editado E2E.*"
+
+# 9. Eliminar el ejercicio personalizado
+- tapOn:
+    id: "delete-custom-exercise-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "delete-custom-exercise-modal"
+    timeout: 5000
+
+- tapOn:
+    id: "delete-custom-exercise-confirm-button"
+
+- extendedWaitUntil:
+    notVisible:
+      id: "delete-custom-exercise-modal"
+    timeout: 5000
+
+# 10. Verificar que el ejercicio eliminado ya no aparece
+- tapOn:
+    id: "exercise-catalog-clear-search-button"
+    optional: true
+
+- tapOn:
+    id: "exercise-catalog-search-input"
+
+- eraseText: 50
+
+- inputText: "Remo Mancuerna"
+
+- hideKeyboard
+
+- extendedWaitUntil:
+    notVisible:
+      text: ".*Remo Mancuerna Editado E2E.*"
+    timeout: 10000
+
+- assertNotVisible:
+    text: ".*Remo Mancuerna Editado E2E.*"
+
+# 11. Salir y cerrar sesión limpiamente
+- tapOn:
+    id: "exercise-catalog-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element:
+      text: "Perfil"
+    direction: DOWN
+    optional: true
+
+- tapOn:
+    text: "Perfil"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"

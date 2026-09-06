@@ -77,6 +77,8 @@
     "test:e2e:PF-244": "node e2e/run-maestro.js e2e/maestro/us_053_offline_workout_and_sync.yaml",
     "test:e2e:PF-277": "npm run test:e2e:us053",
     "test:e2e:us054": "node e2e/run-maestro.js e2e/maestro/us_054_preset_routines_import.yaml",
+    "test:e2e:us055": "node e2e/run-maestro.js e2e/maestro/us_055_custom_exercises_crud.yaml",
+    "test:e2e:PF-289": "npm run test:e2e:us055",
     "test:e2e:all": "node e2e/run-maestro.js e2e/maestro/"
   },
   "dependencies": {

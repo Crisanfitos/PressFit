@@ -37,6 +37,7 @@ export const ExerciseService = {
                     titulo: ex.nombre || ex.titulo,
                     grupo_muscular: ex.grupo_muscular || 'General',
                     musculos_primarios: ex.musculos_primarios || ex.grupo_muscular || 'General',
+                    is_custom: !!(ex.is_custom || ex.es_personalizado),
                 })),
                 error: null,
             };
@@ -64,6 +65,7 @@ export const ExerciseService = {
                     titulo: newEx.nombre || newEx.titulo,
                     grupo_muscular: newEx.grupo_muscular || 'General',
                     musculos_primarios: newEx.musculos_primarios || newEx.grupo_muscular || 'General',
+                    is_custom: true,
                 },
                 error: null,
             };
@@ -92,6 +94,71 @@ export const ExerciseService = {
         } catch (error) {
             console.error('Error creating custom exercise:', error);
             return { data: null, error };
+        }
+    },
+
+    async updateCustomExercise(
+        id: string,
+        exerciseData: Partial<CustomExerciseInput>
+    ): Promise<ServiceResponse<Exercise>> {
+        if (isE2EMockEnabled()) {
+            const updated = mockStore.updateCustomExercise(id, exerciseData);
+            return {
+                data: updated
+                    ? {
+                        ...updated,
+                        titulo: updated.nombre || updated.titulo,
+                        grupo_muscular: updated.grupo_muscular || 'General',
+                        musculos_primarios: updated.musculos_primarios || updated.grupo_muscular || 'General',
+                        is_custom: true,
+                    }
+                    : null,
+                error: updated ? null : new Error('Exercise not found'),
+            };
+        }
+        try {
+            const updatePayload: any = {};
+            if (exerciseData.titulo) updatePayload.titulo = exerciseData.titulo;
+            if (exerciseData.descripcion !== undefined) updatePayload.description = exerciseData.descripcion;
+            if (exerciseData.grupo_muscular) updatePayload.categoria = exerciseData.grupo_muscular;
+            if (exerciseData.musculos_primarios || exerciseData.grupo_muscular) {
+                updatePayload.musculos_primarios = [exerciseData.musculos_primarios || exerciseData.grupo_muscular];
+            }
+            if (exerciseData.musculos_secundarios) updatePayload.musculos_secundarios = exerciseData.musculos_secundarios;
+            if (exerciseData.dificultad) updatePayload.dificultad = exerciseData.dificultad;
+            if (exerciseData.url_video !== undefined) updatePayload.url_video = exerciseData.url_video;
+
+            const { data, error } = await supabase
+                .from('ejercicios')
+                .update(updatePayload)
+                .eq('id', id)
+                .select()
+                .single();
+
+            if (error) throw error;
+            return { data, error: null };
+        } catch (error) {
+            console.error('Error updating custom exercise:', error);
+            return { data: null, error };
+        }
+    },
+
+    async deleteCustomExercise(id: string): Promise<ServiceResponse<boolean>> {
+        if (isE2EMockEnabled()) {
+            const deleted = mockStore.deleteCustomExercise(id);
+            return { data: deleted, error: null };
+        }
+        try {
+            const { error } = await supabase
+                .from('ejercicios')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+            return { data: true, error: null };
+        } catch (error) {
+            console.error('Error deleting custom exercise:', error);
+            return { data: false, error };
         }
     },
 

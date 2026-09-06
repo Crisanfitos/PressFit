@@ -277,4 +277,65 @@ describe('ExerciseService Unit Tests (PF-245)', () => {
       expect(res.error).toBeDefined();
     });
   });
+
+  describe('updateCustomExercise (PF-289)', () => {
+    it('should update custom exercise in Supabase', async () => {
+      const updatedEx = { id: 'custom-1', titulo: 'Sentadilla Editada' };
+      mockChain.single.mockResolvedValueOnce({ data: updatedEx, error: null });
+
+      const res = await ExerciseService.updateCustomExercise('custom-1', {
+        titulo: 'Sentadilla Editada',
+      });
+
+      expect(res.error).toBeNull();
+      expect(res.data).toEqual(updatedEx);
+    });
+
+    it('should handle error when update fails', async () => {
+      mockChain.single.mockResolvedValueOnce({ data: null, error: new Error('Update error') });
+
+      const res = await ExerciseService.updateCustomExercise('custom-1', {
+        titulo: 'Fail',
+      });
+
+      expect(res.data).toBeNull();
+      expect(res.error).toBeDefined();
+    });
+
+    it('should update mock custom exercise when E2E mock is enabled', async () => {
+      jest.spyOn(mockAdapter, 'isE2EMockEnabled').mockReturnValueOnce(true);
+      const res = await ExerciseService.updateCustomExercise('ex-001', {
+        titulo: 'Mock Edited',
+      });
+
+      expect(res.error).toBeNull();
+      expect(res.data?.titulo).toBe('Mock Edited');
+    });
+  });
+
+  describe('deleteCustomExercise (PF-289)', () => {
+    it('should delete custom exercise from Supabase', async () => {
+      mockChain.eq.mockReturnValueOnce(Promise.resolve({ error: null }));
+
+      const res = await ExerciseService.deleteCustomExercise('custom-1');
+      expect(res.error).toBeNull();
+      expect(res.data).toBe(true);
+    });
+
+    it('should handle error when deletion fails', async () => {
+      mockChain.eq.mockReturnValueOnce(Promise.resolve({ error: new Error('Delete error') }));
+
+      const res = await ExerciseService.deleteCustomExercise('custom-1');
+      expect(res.data).toBe(false);
+      expect(res.error).toBeDefined();
+    });
+
+    it('should delete mock custom exercise when E2E mock is enabled', async () => {
+      jest.spyOn(mockAdapter, 'isE2EMockEnabled').mockReturnValueOnce(true);
+      const res = await ExerciseService.deleteCustomExercise('ex-001');
+      expect(res.error).toBeNull();
+      expect(res.data).toBe(true);
+    });
+  });
 });
+

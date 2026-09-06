@@ -19,6 +19,7 @@ interface CreateCustomExerciseModalProps {
   visible: boolean;
   onClose: () => void;
   onSuccess?: (newExercise: any) => void;
+  initialExercise?: any | null;
 }
 
 const MUSCLE_GROUPS = ['Pecho', 'Espalda', 'Piernas', 'Hombros', 'Brazos', 'Abdomen', 'Fullbody'];
@@ -29,9 +30,12 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
   visible,
   onClose,
   onSuccess,
+  initialExercise,
 }) => {
   const { theme } = useTheme();
   const { colors } = theme;
+
+  const isEditing = !!initialExercise;
 
   const [titulo, setTitulo] = useState('');
   const [grupoMuscular, setGrupoMuscular] = useState('Pecho');
@@ -41,6 +45,24 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
   const [instrucciones, setInstrucciones] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (visible && initialExercise) {
+      setTitulo(initialExercise.titulo || initialExercise.nombre || '');
+      setGrupoMuscular(initialExercise.grupo_muscular || initialExercise.categoria || 'Pecho');
+      setEquipamiento(initialExercise.equipamiento || 'Barra');
+      setDificultad(initialExercise.dificultad || 'Intermedio');
+      setDescripcion(initialExercise.descripcion || initialExercise.description || '');
+      if (Array.isArray(initialExercise.instrucciones)) {
+        setInstrucciones(initialExercise.instrucciones.join('\n'));
+      } else {
+        setInstrucciones(initialExercise.instrucciones || '');
+      }
+      setErrorMsg(null);
+    } else if (visible && !initialExercise) {
+      resetForm();
+    }
+  }, [visible, initialExercise]);
 
   const resetForm = () => {
     setTitulo('');
@@ -77,7 +99,14 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
         instrucciones: instrucciones.trim() ? instrucciones.trim().split('\n').filter(Boolean) : [],
       };
 
-      const { data, error } = await ExerciseService.createCustomExercise(payload);
+      let result;
+      if (isEditing && initialExercise?.id) {
+        result = await ExerciseService.updateCustomExercise(initialExercise.id, payload);
+      } else {
+        result = await ExerciseService.createCustomExercise(payload);
+      }
+
+      const { data, error } = result;
 
       if (error) {
         throw error;
@@ -89,8 +118,8 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
       }
       onClose();
     } catch (err: any) {
-      console.error('Error al crear ejercicio personalizado:', err);
-      setErrorMsg(err.message || 'No se pudo crear el ejercicio. Inténtalo de nuevo.');
+      console.error(isEditing ? 'Error al actualizar ejercicio personalizado:' : 'Error al crear ejercicio personalizado:', err);
+      setErrorMsg(err.message || (isEditing ? 'No se pudo actualizar el ejercicio. Inténtalo de nuevo.' : 'No se pudo crear el ejercicio. Inténtalo de nuevo.'));
     } finally {
       setLoading(false);
     }
@@ -102,7 +131,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
       transparent
       animationType="slide"
       onRequestClose={handleClose}
-      testID="create-custom-exercise-modal"
+      testID={isEditing ? 'edit-custom-exercise-modal' : 'create-custom-exercise-modal'}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -112,7 +141,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
           {/* Header */}
           <View style={[styles.header, { borderBottomColor: colors.border }]}>
             <Text style={[styles.headerTitle, { color: colors.text }]}>
-              Nuevo Ejercicio Personalizado
+              {isEditing ? 'Editar Ejercicio Personalizado' : 'Nuevo Ejercicio Personalizado'}
             </Text>
             <TouchableOpacity
               onPress={handleClose}
@@ -332,7 +361,9 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
               {loading ? (
                 <ActivityIndicator color="#FFF" size="small" />
               ) : (
-                <Text style={[styles.buttonText, { color: '#FFF' }]}>Guardar Ejercicio</Text>
+                <Text style={[styles.buttonText, { color: '#FFF' }]}>
+                  {isEditing ? 'Guardar Cambios' : 'Guardar Ejercicio'}
+                </Text>
               )}
             </TouchableOpacity>
           </View>
@@ -452,3 +483,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+export const EditCustomExerciseModal = CreateCustomExerciseModal;
