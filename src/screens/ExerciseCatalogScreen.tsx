@@ -19,6 +19,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useExerciseController, FilterKey, Exercise } from '../controllers/useExerciseController';
 import { ExerciseItem } from '../components/ExerciseItem';
 import { CreateCustomExerciseModal } from '../components/CreateCustomExerciseModal';
+import { ExerciseService } from '../services/ExerciseService';
 
 type ExerciseCatalogScreenProps = {
   navigation: any;
@@ -46,6 +47,8 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [videoModalVisible, setVideoModalVisible] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
+  const [deleteDialogExercise, setDeleteDialogExercise] = useState<Exercise | null>(null);
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(true);
 
@@ -79,6 +82,31 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
     Keyboard.dismiss();
   };
 
+  const handleEditExercise = useCallback((exercise: Exercise) => {
+    setEditingExercise(exercise);
+    setCreateModalVisible(true);
+  }, []);
+
+  const handleDeleteExercise = useCallback((exercise: Exercise) => {
+    setDeleteDialogExercise(exercise);
+  }, []);
+
+  const confirmDelete = useCallback(async () => {
+    if (deleteDialogExercise) {
+      try {
+        const { error } = await ExerciseService.deleteCustomExercise(deleteDialogExercise.id);
+        if (error) {
+          console.error('Error deleting custom exercise:', error);
+        }
+        await refetchExercises();
+      } catch (err) {
+        console.error('Unexpected error in confirmDelete:', err);
+      } finally {
+        setDeleteDialogExercise(null);
+      }
+    }
+  }, [deleteDialogExercise, refetchExercises]);
+
   const FILTER_ROWS: { key: FilterKey; label: string; options: string[] }[] = useMemo(() => [
     { key: 'primaryMuscle', label: t('exerciseCatalog.primaryMuscle', 'Músculo Principal'), options: filterOptions.primaryMuscles },
     { key: 'secondaryMuscle', label: t('exerciseCatalog.secondaryMuscle', 'Músculo Secundario'), options: filterOptions.secondaryMuscles },
@@ -108,9 +136,11 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
         onThumbnailPress={openVideo}
         colors={colors}
         navigation={navigation}
+        onEdit={handleEditExercise}
+        onDelete={handleDeleteExercise}
       />
     ),
-    [colors, navigation]
+    [colors, navigation, handleEditExercise, handleDeleteExercise]
   );
 
   const screenStyles = useMemo(
@@ -172,7 +202,10 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
         </TouchableOpacity>
         <Text style={screenStyles.headerText}>{t('exerciseCatalog.title', 'Catálogo de Ejercicios')}</Text>
         <TouchableOpacity
-          onPress={() => setCreateModalVisible(true)}
+          onPress={() => {
+            setEditingExercise(null);
+            setCreateModalVisible(true);
+          }}
           style={{ padding: 4 }}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           testID="open-create-custom-exercise-button"
@@ -196,7 +229,11 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
           testID="exercise-catalog-search-input"
         />
         {(searchQuery.length > 0 || isSearchFocused) && (
-          <TouchableOpacity onPress={handleClearSearch} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
+          <TouchableOpacity
+            onPress={handleClearSearch}
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            testID="exercise-catalog-clear-search-button"
+          >
             <MaterialIcons name="close" size={20} color={colors.textSecondary} />
           </TouchableOpacity>
         )}
@@ -345,9 +382,55 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
 
       <CreateCustomExerciseModal
         visible={createModalVisible}
-        onClose={() => setCreateModalVisible(false)}
-        onSuccess={() => refetchExercises()}
+        initialExercise={editingExercise}
+        onClose={() => {
+          setCreateModalVisible(false);
+          setEditingExercise(null);
+        }}
+        onSuccess={() => {
+          setEditingExercise(null);
+          refetchExercises();
+        }}
       />
+
+      {/* Modal de confirmación de borrado */}
+      <Modal
+        visible={!!deleteDialogExercise}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setDeleteDialogExercise(null)}
+        testID="delete-custom-exercise-modal"
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 24, width: '100%', maxWidth: 360, elevation: 5 }}>
+            <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: `${colors.error || '#ef4444'}20`, justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginBottom: 16 }}>
+              <MaterialIcons name="delete-outline" size={28} color={colors.error || '#ef4444'} />
+            </View>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text, textAlign: 'center', marginBottom: 8 }}>
+              Eliminar Ejercicio
+            </Text>
+            <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginBottom: 24 }}>
+              ¿Estás seguro de que deseas eliminar "{deleteDialogExercise?.titulo}"? Esta acción no se puede deshacer.
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1, borderColor: colors.border, alignItems: 'center' }}
+                onPress={() => setDeleteDialogExercise(null)}
+                testID="delete-custom-exercise-cancel-button"
+              >
+                <Text style={{ color: colors.textSecondary, fontWeight: '600' }}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: colors.error || '#ef4444', alignItems: 'center' }}
+                onPress={confirmDelete}
+                testID="delete-custom-exercise-confirm-button"
+              >
+                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Eliminar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };

@@ -65,9 +65,43 @@ class E2EMockStore {
             instrucciones: input.instrucciones || [],
             url_video: input.url_video || '',
             es_personalizado: true,
+            is_custom: true,
         };
         this.catalogExercises.unshift(newEx);
         return newEx;
+    }
+
+    updateCustomExercise(id: string, input: any) {
+        const ex = this.catalogExercises.find((e: any) => e.id === id);
+        if (ex) {
+            if (input.titulo) {
+                ex.nombre = input.titulo;
+                ex.titulo = input.titulo;
+            }
+            if (input.descripcion !== undefined) ex.descripcion = input.descripcion;
+            if (input.grupo_muscular) {
+                ex.grupo_muscular = input.grupo_muscular;
+                ex.musculos_primarios = input.musculos_primarios || input.grupo_muscular;
+            }
+            if (input.musculos_secundarios) ex.musculos_secundarios = input.musculos_secundarios;
+            if (input.equipamiento) ex.equipamiento = input.equipamiento;
+            if (input.dificultad) ex.dificultad = input.dificultad;
+            if (input.instrucciones) ex.instrucciones = input.instrucciones;
+            if (input.url_video !== undefined) ex.url_video = input.url_video;
+            ex.is_custom = true;
+            ex.es_personalizado = true;
+            return ex;
+        }
+        return null;
+    }
+
+    deleteCustomExercise(id: string) {
+        const idx = this.catalogExercises.findIndex((e: any) => e.id === id);
+        if (idx !== -1) {
+            this.catalogExercises.splice(idx, 1);
+            return true;
+        }
+        return false;
     }
 
     getActiveRoutine() {

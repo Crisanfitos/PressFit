@@ -7,6 +7,7 @@ import { ThemeProvider } from '../../src/context/ThemeContext';
 jest.mock('../../src/services/ExerciseService', () => ({
   ExerciseService: {
     createCustomExercise: jest.fn(),
+    updateCustomExercise: jest.fn(),
   },
 }));
 
@@ -94,5 +95,51 @@ describe('CreateCustomExerciseModal', () => {
     });
 
     expect(defaultProps.onClose).toHaveBeenCalled();
+  });
+
+  it('prefills fields and calls updateCustomExercise in edit mode (PF-289)', async () => {
+    (ExerciseService.updateCustomExercise as jest.Mock).mockResolvedValueOnce({
+      data: { id: 'custom-ex-999', titulo: 'Dominadas Modificadas' },
+      error: null,
+    });
+
+    const editProps = {
+      ...defaultProps,
+      initialExercise: {
+        id: 'custom-ex-999',
+        titulo: 'Dominadas Original',
+        grupo_muscular: 'Espalda',
+        equipamiento: 'Barra',
+        dificultad: 'Avanzado',
+        descripcion: 'Con peso',
+      },
+    };
+
+    const { getByTestId, getByText } = await renderModal(editProps);
+
+    expect(getByTestId('edit-custom-exercise-modal')).toBeTruthy();
+    expect(getByText('Editar Ejercicio Personalizado')).toBeTruthy();
+    expect(getByTestId('custom-exercise-name-input').props.value).toBe('Dominadas Original');
+
+    const input = getByTestId('custom-exercise-name-input');
+    await act(async () => {
+      fireEvent.changeText(input, 'Dominadas Modificadas');
+    });
+
+    const submitBtn = getByTestId('custom-exercise-submit-button');
+    await act(async () => {
+      fireEvent.press(submitBtn);
+    });
+
+    await waitFor(() => {
+      expect(ExerciseService.updateCustomExercise).toHaveBeenCalledWith(
+        'custom-ex-999',
+        expect.objectContaining({
+          titulo: 'Dominadas Modificadas',
+        })
+      );
+    });
+
+    expect(defaultProps.onSuccess).toHaveBeenCalled();
   });
 });

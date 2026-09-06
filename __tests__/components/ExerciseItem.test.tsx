@@ -126,4 +126,66 @@ describe('ExerciseItem Component (RNTL)', () => {
 
         expect(getByTestId('icon-check-circle')).toBeTruthy();
     });
+
+    it('renders custom badge and edit/delete buttons only when item is custom (PF-289)', async () => {
+        const customItem = {
+            ...mockItem,
+            id: 'custom-ex-1',
+            is_custom: true,
+        };
+        const onEditMock = jest.fn();
+        const onDeleteMock = jest.fn();
+
+        const { getByTestId, getByText } = await render(
+            <ExerciseItem
+                item={customItem}
+                isSelected={false}
+                selectionMode={false}
+                onSelect={jest.fn()}
+                onThumbnailPress={jest.fn()}
+                colors={mockColors}
+                navigation={mockNavigation}
+                onEdit={onEditMock}
+                onDelete={onDeleteMock}
+            />
+        );
+
+        expect(getByTestId('custom-exercise-badge')).toBeTruthy();
+        expect(getByText('Personalizado')).toBeTruthy();
+
+        const editBtn = getByTestId('edit-custom-exercise-button');
+        fireEvent.press(editBtn);
+        expect(onEditMock).toHaveBeenCalledWith(customItem);
+
+        const deleteBtn = getByTestId('delete-custom-exercise-button');
+        fireEvent.press(deleteBtn);
+        expect(onDeleteMock).toHaveBeenCalledWith(customItem);
+    });
+
+    it('does not render custom badge or edit/delete buttons for official exercises (PF-289)', async () => {
+        const officialItem = {
+            ...mockItem,
+            id: 'official-ex-1',
+            is_custom: false,
+        };
+
+        const { queryByTestId } = await render(
+            <ExerciseItem
+                item={officialItem}
+                isSelected={false}
+                selectionMode={false}
+                onSelect={jest.fn()}
+                onThumbnailPress={jest.fn()}
+                colors={mockColors}
+                navigation={mockNavigation}
+                onEdit={jest.fn()}
+                onDelete={jest.fn()}
+            />
+        );
+
+        expect(queryByTestId('custom-exercise-badge')).toBeNull();
+        expect(queryByTestId('edit-custom-exercise-button')).toBeNull();
+        expect(queryByTestId('delete-custom-exercise-button')).toBeNull();
+    });
 });
+
