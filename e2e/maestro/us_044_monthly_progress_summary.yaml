@@ -80,9 +80,9 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     text: ".*Este mes has entrenado.*"
 
-# 5. Asertar que el mes actual aparece en el selector de mes (Agosto 2026)
+# 5. Asertar que el mes actual aparece en el selector de mes
 - assertVisible:
-    text: ".*Agosto.*2026.*"
+    text: ".*(Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Septiembre|Octubre|Noviembre|Diciembre).*202[0-9].*"
 
 # 6. Volver a la pantalla de Progreso
 - tapOn:

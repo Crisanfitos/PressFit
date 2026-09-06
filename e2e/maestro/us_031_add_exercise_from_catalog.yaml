@@ -58,7 +58,7 @@ appId: com.crisanfitos.PressFit_Expo
     timeout: 10000
 
 - tapOn:
-    id: "edit-routine-detail-button"
+    id: "(edit-routine-detail-button|edit-routine-button-0)"
 
 - extendedWaitUntil:
     visible:

@@ -95,6 +95,12 @@ appId: com.crisanfitos.PressFit_Expo
     timeout: 10000
 
 # 3. Seleccionar un ejercicio para abrir ExerciseProgressDetailScreen
+- scrollUntilVisible:
+    element:
+      text: ".*Press de Banca.*"
+    direction: DOWN
+    timeout: 10000
+
 - tapOn:
     text: ".*Press de Banca.*"
 

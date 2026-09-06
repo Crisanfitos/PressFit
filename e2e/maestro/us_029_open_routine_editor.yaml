@@ -59,7 +59,7 @@ appId: com.crisanfitos.PressFit_Expo
 
 # 2. Entrar a la edición de detalle de la plantilla
 - tapOn:
-    id: "edit-routine-detail-button"
+    id: "(edit-routine-detail-button|edit-routine-button-0)"
 
 - extendedWaitUntil:
     visible:

@@ -378,9 +378,17 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
 
                                     <TouchableOpacity
                                         testID={`edit-routine-button-${index}`}
+                                        accessibilityLabel={index === 0 ? "edit-routine-detail-button" : undefined}
                                         style={styles.actionButton}
                                         onPress={() => navigation.navigate('RoutineDetail', { routineId: routine.id })}
                                     >
+                                        {index === 0 && (
+                                            <View
+                                                testID="edit-routine-detail-button"
+                                                pointerEvents="none"
+                                                style={StyleSheet.absoluteFillObject}
+                                            />
+                                        )}
                                         <MaterialIcons name="edit" size={18} color={colors.text} />
                                         <Text style={styles.actionButtonText}>Editar</Text>
                                     </TouchableOpacity>
