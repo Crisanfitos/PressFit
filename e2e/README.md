@@ -4,13 +4,19 @@ Esta guía explica cómo ejecutar las pruebas End-to-End (E2E) utilizando **Maes
 
 ---
 
-## 🚀 Requisitos Previos
+## 🔐 Configuración de Credenciales E2E
 
-1. **Emulador Android iniciado** en tu sistema (`emulator-5554`).
-2. **Servidor Expo activo en localhost**:
+Para ejecutar flujos que requieren autenticación:
+1. Copia el archivo de ejemplo `e2e/.env.e2e.example` a `e2e/.env.e2e`:
    ```bash
-   npm run start:localhost
+   cp e2e/.env.e2e.example e2e/.env.e2e
    ```
+2. Configura tus credenciales de prueba en `e2e/.env.e2e`:
+   ```env
+   E2E_TEST_EMAIL=tu-email-de-prueba@pressfit.com
+   E2E_TEST_PASSWORD=tu-password-de-prueba
+   ```
+3. El archivo `e2e/.env.e2e` está protegido en `.gitignore` y el ejecutor `e2e/run-maestro.js` inyecta automáticamente estas variables a Maestro.
 
 ---
 
