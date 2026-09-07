@@ -370,4 +370,62 @@ describe('OfflineStorageService (PF-275)', () => {
             expect(res.error).toBe(mockErr);
         });
     });
+
+    describe('_updateTimestamp fallback resilience (PF-301)', () => {
+        it('should silently handle exception when AsyncStorage.getItem fails in _updateTimestamp', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+                if (key === STORAGE_KEYS.TIMESTAMPS) {
+                    return Promise.reject(new Error('AsyncStorage read failure'));
+                }
+                return Promise.resolve(null);
+            });
+
+            await expect(
+                OfflineStorageService._updateTimestamp('test_key', Date.now())
+            ).resolves.not.toThrow();
+        });
+
+        it('should silently handle exception when AsyncStorage.setItem fails in _updateTimestamp', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+                if (key === STORAGE_KEYS.TIMESTAMPS) {
+                    return Promise.resolve(JSON.stringify({ existing: 123 }));
+                }
+                return Promise.resolve(null);
+            });
+            (AsyncStorage.setItem as jest.Mock).mockImplementation((key: string) => {
+                if (key === STORAGE_KEYS.TIMESTAMPS) {
+                    return Promise.reject(new Error('AsyncStorage write failure'));
+                }
+                return Promise.resolve(undefined);
+            });
+
+            await expect(
+                OfflineStorageService._updateTimestamp('test_key', Date.now())
+            ).resolves.not.toThrow();
+        });
+
+        it('should succeed in saveRoutines even when _updateTimestamp throws an internal error', async () => {
+            const routines = [{ id: 'rot-1', nombre: 'Push Day' }];
+            (AsyncStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+                if (key === STORAGE_KEYS.TIMESTAMPS) {
+                    return Promise.reject(new Error('Timestamp read error'));
+                }
+                return Promise.resolve(null);
+            });
+            (AsyncStorage.setItem as jest.Mock).mockImplementation((key: string) => {
+                if (key === STORAGE_KEYS.TIMESTAMPS) {
+                    return Promise.reject(new Error('Timestamp write error'));
+                }
+                return Promise.resolve(undefined);
+            });
+
+            const res = await OfflineStorageService.saveRoutines(routines);
+            expect(res.data).toBe(true);
+            expect(res.error).toBeNull();
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+                STORAGE_KEYS.ROUTINES,
+                expect.stringContaining('Push Day')
+            );
+        });
+    });
 });
