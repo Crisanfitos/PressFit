@@ -1,6 +1,28 @@
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { createClient } from '@supabase/supabase-js';
+
+export const SecureStoreAdapter = {
+    getItem: (key: string): Promise<string | null> => {
+        if (typeof Platform !== 'undefined' && Platform?.OS === 'web') {
+            return AsyncStorage.getItem(key);
+        }
+        return SecureStore.getItemAsync(key);
+    },
+    setItem: (key: string, value: string): Promise<void> => {
+        if (typeof Platform !== 'undefined' && Platform?.OS === 'web') {
+            return AsyncStorage.setItem(key, value);
+        }
+        return SecureStore.setItemAsync(key, value);
+    },
+    removeItem: (key: string): Promise<void> => {
+        if (typeof Platform !== 'undefined' && Platform?.OS === 'web') {
+            return AsyncStorage.removeItem(key);
+        }
+        return SecureStore.deleteItemAsync(key);
+    },
+};
 
 const supabaseUrl =
     process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -19,8 +41,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-        storage: AsyncStorage,
-        autoRefreshToken: true,
+        storage: SecureStoreAdapter,
+        autoRefreshToken: process.env.NODE_ENV !== 'test',
         persistSession: true,
         detectSessionInUrl: false,
     },
