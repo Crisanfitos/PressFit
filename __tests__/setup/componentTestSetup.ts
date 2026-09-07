@@ -10,6 +10,11 @@ jest.mock('@react-native-async-storage/async-storage', () =>
     require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
+// Mock Expo Crypto globally
+jest.mock('expo-crypto', () => ({
+    randomUUID: jest.fn(() => require('crypto').randomUUID()),
+}));
+
 // Mock @expo/vector-icons to avoid expo-font/expo-asset native dependency in unit/component tests
 jest.mock('@expo/vector-icons', () => {
     const mockReact = require('react');

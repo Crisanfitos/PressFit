@@ -21,8 +21,10 @@ jest.mock('expo-secure-store', () => ({
         delete secureStoreMockData[key];
     }),
 }));
-
-
+// Mock Expo Crypto globally
+jest.mock('expo-crypto', () => ({
+    randomUUID: jest.fn(() => require('crypto').randomUUID()),
+}));
 
 // Mock @expo/vector-icons
 jest.mock('@expo/vector-icons', () => {

@@ -69,6 +69,23 @@ describe('SyncService', () => {
                 expect.stringContaining('WORKOUT_START')
             );
         });
+
+        it('should generate secure UUID IDs without using Math.random', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
+            (AsyncStorage.setItem as jest.Mock).mockResolvedValue(undefined);
+
+            const mathRandomSpy = jest.spyOn(Math, 'random');
+
+            const res1 = await SyncService.enqueueOperation('SET_UPSERT', { setIndex: 1 });
+            const res2 = await SyncService.enqueueOperation('SET_UPSERT', { setIndex: 2 });
+
+            expect(res1.data?.id).toMatch(/^sync_\d+_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+            expect(res2.data?.id).toMatch(/^sync_\d+_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+            expect(res1.data?.id).not.toBe(res2.data?.id);
+            expect(mathRandomSpy).not.toHaveBeenCalled();
+
+            mathRandomSpy.mockRestore();
+        });
     });
 
     describe('dequeueOperation', () => {

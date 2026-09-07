@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Crypto from 'expo-crypto';
 import { NetworkService, NetworkState } from './NetworkService';
 import { ServiceResponse } from '../types/models';
 
@@ -163,7 +164,7 @@ export const SyncService = {
             const currentQueue = queueRes.data || [];
 
             const newOp: PendingSyncOperation = {
-                id: `sync_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+                id: `sync_${Date.now()}_${Crypto.randomUUID()}`,
                 type,
                 payload,
                 timestamp: Date.now(),
