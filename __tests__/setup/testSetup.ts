@@ -10,6 +10,18 @@ jest.mock('@react-native-async-storage/async-storage', () =>
     require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
+// Mock Expo SecureStore globally
+const secureStoreMockData: Record<string, string> = {};
+jest.mock('expo-secure-store', () => ({
+    getItemAsync: jest.fn(async (key: string) => secureStoreMockData[key] ?? null),
+    setItemAsync: jest.fn(async (key: string, value: string) => {
+        secureStoreMockData[key] = value;
+    }),
+    deleteItemAsync: jest.fn(async (key: string) => {
+        delete secureStoreMockData[key];
+    }),
+}));
+
 
 
 // Mock @expo/vector-icons
