@@ -480,23 +480,28 @@ export const RoutineService = {
 
             if (routineError || !newRoutine) throw routineError;
 
-            // 3. Copy each rutina_diaria (template days)
+            // 3. Copy each rutina_diaria (template days) in batch (PF-297)
             if (template.rutinas_diarias && template.rutinas_diarias.length > 0) {
-                for (const day of template.rutinas_diarias) {
-                    // Create the daily routine
-                    const { data: newDay, error: dayError } = await supabase
-                        .from('rutinas_diarias')
-                        .insert({
-                            rutina_semanal_id: newRoutine.id,
-                            nombre_dia: day.nombre_dia,
-                            descripcion: day.descripcion,
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString(),
-                        })
-                        .select()
-                        .single();
+                const daysToInsert = template.rutinas_diarias.map((day: RoutineDay) => ({
+                    rutina_semanal_id: newRoutine.id,
+                    nombre_dia: day.nombre_dia,
+                    descripcion: day.descripcion,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                }));
 
-                    if (dayError || !newDay) continue;
+                const { data: insertedDays, error: daysError } = await supabase
+                    .from('rutinas_diarias')
+                    .insert(daysToInsert)
+                    .select();
+
+                if (daysError || !insertedDays) throw daysError;
+
+                for (let i = 0; i < template.rutinas_diarias.length; i++) {
+                    const day = template.rutinas_diarias[i];
+                    const newDay = insertedDays.find((d: any) => d.nombre_dia === day.nombre_dia) || insertedDays[i];
+
+                    if (!newDay) continue;
 
                     // 4. Copy ejercicios_programados for this day
                     if (day.ejercicios_programados && day.ejercicios_programados.length > 0) {
@@ -550,6 +555,16 @@ export const RoutineService = {
             console.error('Error creating routine from template:', error);
             return { data: null, error };
         }
+    },
+
+    // Alias for createRoutineFromTemplate for consistency
+    createWeeklyRoutineFromTemplate(
+        userId: string,
+        templateId: string,
+        newName: string,
+        objetivo?: string
+    ): Promise<ServiceResponse<WeeklyRoutine>> {
+        return this.createRoutineFromTemplate(userId, templateId, newName, objetivo);
     },
 
     async updateRoutineDayDescription(dayId: string, descripcion: string): Promise<ServiceResponse<RoutineDay>> {

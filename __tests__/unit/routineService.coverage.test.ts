@@ -494,8 +494,11 @@ describe('RoutineService Coverage Suite', () => {
             });
             // 2. insert new routine
             mockChain.single.mockResolvedValueOnce({ data: { id: 'new-r' }, error: null });
-            // 3. insert day
-            mockChain.single.mockResolvedValueOnce({ data: { id: 'new-day' }, error: null });
+            // 3. batch insert days (PF-297, select resolves via then)
+            mockChain.then.mockImplementationOnce((resolve: any) => resolve({
+                data: [{ id: 'new-day', nombre_dia: 'Lunes' }],
+                error: null,
+            }));
             // 4. insert exercise
             mockChain.single.mockResolvedValueOnce({ data: { id: 'new-ep' }, error: null });
             // 5. insert series (then call)
@@ -527,12 +530,45 @@ describe('RoutineService Coverage Suite', () => {
                 error: null,
             });
             mockChain.single.mockResolvedValueOnce({ data: { id: 'new-r-2' }, error: null }); // new routine
-            mockChain.single.mockResolvedValueOnce({ data: { id: 'new-day-2' }, error: null }); // new day
+            // batch insert days (PF-297)
+            mockChain.then.mockImplementationOnce((resolve: any) => resolve({
+                data: [{ id: 'new-day-2', nombre_dia: 'Martes' }],
+                error: null,
+            }));
             mockChain.single.mockResolvedValueOnce({ data: { id: 'new-ep-2' }, error: null }); // new exercise
             mockChain.then.mockImplementationOnce((resolve: any) => resolve({ data: [], error: null })); // default series
 
             const res = await RoutineService.createRoutineFromTemplate('u-1', 't-1', 'Copia2');
             expect(res.error).toBeNull();
+        });
+
+        it('should perform batch insertion of multiple routine days in a single call (PF-297)', async () => {
+            mockChain.single.mockResolvedValueOnce({
+                data: {
+                    id: 't-multi',
+                    nombre: 'Multi Day Template',
+                    objetivo: 'Hipertrofia',
+                    rutinas_diarias: [
+                        { nombre_dia: 'Lunes', descripcion: 'Pecho', ejercicios_programados: [] },
+                        { nombre_dia: 'Miércoles', descripcion: 'Espalda', ejercicios_programados: [] },
+                        { nombre_dia: 'Viernes', descripcion: 'Pierna', ejercicios_programados: [] },
+                    ],
+                },
+                error: null,
+            });
+            mockChain.single.mockResolvedValueOnce({ data: { id: 'new-r-multi' }, error: null });
+            mockChain.then.mockImplementationOnce((resolve: any) => resolve({
+                data: [
+                    { id: 'd-1', nombre_dia: 'Lunes' },
+                    { id: 'd-2', nombre_dia: 'Miércoles' },
+                    { id: 'd-3', nombre_dia: 'Viernes' },
+                ],
+                error: null,
+            }));
+
+            const res = await RoutineService.createWeeklyRoutineFromTemplate('u-1', 't-multi', 'Multi Copia');
+            expect(res.error).toBeNull();
+            expect(res.data?.id).toBe('new-r-multi');
         });
     });
 
