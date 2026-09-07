@@ -22,6 +22,8 @@ export interface ExerciseFilterSectionProps {
     colors: ThemeColors;
 }
 
+import { useTranslation } from 'react-i18next';
+
 export const ExerciseFilterSection: React.FC<ExerciseFilterSectionProps> = ({
     showFilters,
     setShowFilters,
@@ -33,11 +35,14 @@ export const ExerciseFilterSection: React.FC<ExerciseFilterSectionProps> = ({
     clearAllFilters,
     colors,
 }) => {
+    const { t } = useTranslation();
+
     return (
         <View>
             <TouchableOpacity
                 style={styles.toggleRow}
                 onPress={() => setShowFilters((prev) => !prev)}
+                testID="filter-toggle-button"
             >
                 <MaterialIcons
                     name={showFilters ? 'filter-list-off' : 'filter-list'}
@@ -45,7 +50,9 @@ export const ExerciseFilterSection: React.FC<ExerciseFilterSectionProps> = ({
                     color={colors.textSecondary}
                 />
                 <Text style={[styles.toggleText, { color: colors.textSecondary }]}>
-                    {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
+                    {showFilters
+                        ? t('exerciseCatalog.hideFilters', 'Ocultar filtros')
+                        : t('exerciseCatalog.showFilters', 'Mostrar filtros')}
                 </Text>
                 {hasActiveFilters && (
                     <View style={[styles.activeDot, { backgroundColor: colors.primary }]} />
@@ -94,7 +101,7 @@ export const ExerciseFilterSection: React.FC<ExerciseFilterSectionProps> = ({
                                             !activeValue && { color: colors.primary, fontWeight: '600' },
                                         ]}
                                     >
-                                        Todos
+                                        {t('common.all', 'Todos')}
                                     </Text>
                                 </TouchableOpacity>
                                 {options.map((option) => {
@@ -111,6 +118,7 @@ export const ExerciseFilterSection: React.FC<ExerciseFilterSectionProps> = ({
                                                 },
                                             ]}
                                             onPress={() => setFilter(key, isSelected ? null : option)}
+                                            testID={`filter-chip-${option.toLowerCase().replace(/\s+/g, '-')}`}
                                         >
                                             <Text
                                                 style={[
@@ -132,7 +140,7 @@ export const ExerciseFilterSection: React.FC<ExerciseFilterSectionProps> = ({
             {showFilters && hasActiveFilters && (
                 <TouchableOpacity style={styles.clearButton} onPress={clearAllFilters}>
                     <Text style={[styles.clearButtonText, { color: colors.primary }]}>
-                        Limpiar Filtros
+                        {t('exerciseCatalog.clearFilters', 'Limpiar Filtros')}
                     </Text>
                 </TouchableOpacity>
             )}

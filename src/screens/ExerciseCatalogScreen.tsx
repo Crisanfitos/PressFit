@@ -9,7 +9,6 @@ import {
   Keyboard,
   ActivityIndicator,
   Animated,
-  ScrollView,
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,6 +18,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useExerciseController, FilterKey, Exercise } from '../controllers/useExerciseController';
 import { ExerciseItem } from '../components/ExerciseItem';
 import { CreateCustomExerciseModal } from '../components/CreateCustomExerciseModal';
+import { ExerciseFilterSection } from '../components/exercises/ExerciseFilterSection';
 import { ExerciseService } from '../services/ExerciseService';
 
 type ExerciseCatalogScreenProps = {
@@ -168,18 +168,6 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
           gap: 12,
         },
         searchInput: { flex: 1, color: colors.text, fontSize: 16 },
-        categoriesScroll: { paddingHorizontal: 16, gap: 8, alignItems: 'center' },
-        categoryChip: {
-          paddingHorizontal: 16,
-          paddingVertical: 8,
-          borderRadius: 20,
-          backgroundColor: colors.surface,
-          borderWidth: 1,
-          borderColor: colors.border,
-        },
-        categoryChipSelected: { backgroundColor: `${colors.primary}20`, borderColor: colors.primary },
-        categoryText: { color: colors.textSecondary, fontSize: 14, fontWeight: '500' },
-        categoryTextSelected: { color: colors.primary, fontWeight: '600' },
         listContent: { paddingHorizontal: 16, paddingBottom: 24, paddingTop: 8 },
         emptyStateContainer: { alignItems: 'center', justifyContent: 'center', paddingTop: 60, opacity: 0.7 },
         emptyStateText: { color: colors.textSecondary, fontSize: 16, marginTop: 16, textAlign: 'center' },
@@ -240,71 +228,17 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
       </View>
 
       {!isSearchFocused && searchQuery.length === 0 && (
-        <View>
-          <TouchableOpacity
-            style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 8 }}
-            onPress={() => setShowFilters((prev) => !prev)}
-            testID="filter-toggle-button"
-          >
-            <MaterialIcons name={showFilters ? 'filter-list-off' : 'filter-list'} size={20} color={colors.textSecondary} />
-            <Text style={{ color: colors.textSecondary, fontSize: 13, marginLeft: 6, fontWeight: '500' }}>
-              {showFilters ? t('exerciseCatalog.hideFilters', 'Ocultar filtros') : t('exerciseCatalog.showFilters', 'Mostrar filtros')}
-            </Text>
-            {hasActiveFilters && (
-              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary, marginLeft: 6 }} />
-            )}
-          </TouchableOpacity>
-
-          {showFilters && FILTER_ROWS.map(({ key, label, options }) => {
-            if (options.length === 0) return null;
-            const activeValue = filters[key];
-            return (
-              <View key={key} style={{ marginBottom: 6 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 4 }}>
-                  <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: '600', flex: 1 }}>{label}</Text>
-                  {activeValue && (
-                    <TouchableOpacity onPress={() => clearFilter(key)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                      <MaterialIcons name="close" size={16} color={colors.textSecondary} />
-                    </TouchableOpacity>
-                  )}
-                </View>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={screenStyles.categoriesScroll}>
-                  <TouchableOpacity
-                    style={[screenStyles.categoryChip, !activeValue && screenStyles.categoryChipSelected]}
-                    onPress={() => clearFilter(key)}
-                  >
-                    <Text style={[screenStyles.categoryText, !activeValue && screenStyles.categoryTextSelected]}>
-                      {t('common.all', 'Todos')}
-                    </Text>
-                  </TouchableOpacity>
-                  {options.map((option) => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[screenStyles.categoryChip, activeValue === option && screenStyles.categoryChipSelected]}
-                      onPress={() => setFilter(key, activeValue === option ? null : option)}
-                      testID={`filter-chip-${option.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      <Text style={[screenStyles.categoryText, activeValue === option && screenStyles.categoryTextSelected]}>
-                        {option}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            );
-          })}
-
-          {showFilters && hasActiveFilters && (
-            <TouchableOpacity
-              style={{ alignSelf: 'center', paddingVertical: 6, paddingHorizontal: 16, marginTop: 4, marginBottom: 4 }}
-              onPress={clearAllFilters}
-            >
-              <Text style={{ color: colors.primary, fontSize: 13, fontWeight: '600' }}>
-                {t('exerciseCatalog.clearFilters', 'Limpiar Filtros')}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        <ExerciseFilterSection
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+          hasActiveFilters={hasActiveFilters}
+          filterRows={FILTER_ROWS}
+          filters={filters}
+          setFilter={setFilter}
+          clearFilter={clearFilter}
+          clearAllFilters={clearAllFilters}
+          colors={colors}
+        />
       )}
 
       {loading ? (
