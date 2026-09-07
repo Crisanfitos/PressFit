@@ -503,36 +503,44 @@ export const RoutineService = {
 
                     if (!newDay) continue;
 
-                    // 4. Copy ejercicios_programados for this day
+                    // 4. Copy ejercicios_programados for this day in batch (PF-298)
                     if (day.ejercicios_programados && day.ejercicios_programados.length > 0) {
-                        for (const exercise of day.ejercicios_programados) {
-                            const { data: newExercise, error: exError } = await supabase
-                                .from('ejercicios_programados')
-                                .insert({
-                                    rutina_diaria_id: newDay.id,
-                                    ejercicio_id: exercise.ejercicio_id,
-                                    orden_ejecucion: exercise.orden_ejecucion,
-                                    tipo_peso: exercise.tipo_peso || 'total',
-                                    created_at: new Date().toISOString(),
-                                    updated_at: new Date().toISOString(),
-                                })
-                                .select()
-                                .single();
+                        const exercisesToInsert = day.ejercicios_programados.map((exercise: ScheduledExercise) => ({
+                            rutina_diaria_id: newDay.id,
+                            ejercicio_id: exercise.ejercicio_id,
+                            orden_ejecucion: exercise.orden_ejecucion,
+                            tipo_peso: exercise.tipo_peso || 'total',
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString(),
+                        }));
 
-                            if (exError || !newExercise) continue;
+                        const { data: insertedExercises, error: exError } = await supabase
+                            .from('ejercicios_programados')
+                            .insert(exercisesToInsert)
+                            .select();
 
-                            // 5. Copy series for this exercise
+                        if (exError || !insertedExercises) continue;
+
+                        // 5. Copy series for this day's exercises in batch
+                        const allSeriesToInsert: any[] = [];
+
+                        for (let j = 0; j < day.ejercicios_programados.length; j++) {
+                            const exercise = day.ejercicios_programados[j];
+                            const newExercise = insertedExercises.find(
+                                (e: any) => e.ejercicio_id === exercise.ejercicio_id && e.orden_ejecucion === exercise.orden_ejecucion
+                            ) || insertedExercises[j];
+
+                            if (!newExercise) continue;
+
                             if (exercise.series && exercise.series.length > 0) {
-                                const seriesToInsert = exercise.series.map((serie: Serie) => ({
+                                const series = exercise.series.map((serie: Serie) => ({
                                     ejercicio_programado_id: newExercise.id,
                                     numero_serie: serie.numero_serie,
                                     repeticiones: serie.repeticiones,
                                     peso_utilizado: serie.peso_utilizado || null,
-                                    // descanso_segundos removed as it's not in DB schema
                                     created_at: new Date().toISOString(),
                                 }));
-
-                                await supabase.from('series').insert(seriesToInsert);
+                                allSeriesToInsert.push(...series);
                             } else {
                                 // Create 3 empty series by default if template has no series
                                 const defaultSeries = [1, 2, 3].map(num => ({
@@ -542,9 +550,12 @@ export const RoutineService = {
                                     peso_utilizado: null,
                                     created_at: new Date().toISOString(),
                                 }));
-
-                                await supabase.from('series').insert(defaultSeries);
+                                allSeriesToInsert.push(...defaultSeries);
                             }
+                        }
+
+                        if (allSeriesToInsert.length > 0) {
+                            await supabase.from('series').insert(allSeriesToInsert);
                         }
                     }
                 }
