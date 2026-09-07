@@ -16,9 +16,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useExerciseController, FilterKey, Exercise } from '../controllers/useExerciseController';
-import { ExerciseItem } from '../components/ExerciseItem';
 import { CreateCustomExerciseModal } from '../components/CreateCustomExerciseModal';
-import { ExerciseFilterSection } from '../components/exercises/ExerciseFilterSection';
+import { ExerciseFilterSection, ExerciseListItem } from '../components/exercises';
 import { ExerciseService } from '../services/ExerciseService';
 
 type ExerciseCatalogScreenProps = {
@@ -128,7 +127,7 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
 
   const renderItem = useCallback(
     ({ item }: { item: Exercise }) => (
-      <ExerciseItem
+      <ExerciseListItem
         item={item}
         isSelected={false}
         selectionMode={false}
