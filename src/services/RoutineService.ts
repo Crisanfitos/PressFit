@@ -16,6 +16,150 @@ import {
 import { PresetRoutineService } from './PresetRoutineService';
 
 
+export const DAYS_OF_WEEK = [
+    'Lunes',
+    'Martes',
+    'Miércoles',
+    'Jueves',
+    'Viernes',
+    'Sábado',
+    'Domingo',
+] as const;
+
+/**
+ * Maps preset template days to a 7-day weekly schedule (Lunes - Domingo).
+ * Supports 3-day (Lun/Mie/Vie), 4-day (Lun/Mar/Jue/Vie), 5-day (Lun-Vie), and 6-day (Lun-Sab) splits.
+ */
+export const mapPresetDaysToWeeklySchedule = <T = any>(presetDays: T[] = []): (T | null)[] => {
+    const count = presetDays.length;
+    if (count === 6) {
+        return [presetDays[0], presetDays[1], presetDays[2], presetDays[3], presetDays[4], presetDays[5], null];
+    }
+    if (count === 5) {
+        return [presetDays[0], presetDays[1], presetDays[2], presetDays[3], presetDays[4], null, null];
+    }
+    if (count === 4) {
+        return [presetDays[0], presetDays[1], null, presetDays[2], presetDays[3], null, null];
+    }
+    if (count === 3) {
+        return [presetDays[0], null, presetDays[1], null, presetDays[2], null, null];
+    }
+    return Array.from({ length: 7 }, (_, i) => (i < count ? presetDays[i] : null));
+};
+
+/**
+ * Finds an exercise ID in catalog by normalized name or creates a custom exercise in catalog.
+ */
+export const resolveOrCreateExercise = async (
+    catalogExercises: { id: string; titulo?: string | null }[] | null,
+    name: string,
+    muscleGroup: string,
+    userId: string
+): Promise<string> => {
+    const normalized = name.trim().toLowerCase();
+    const matched = (catalogExercises || []).find(
+        (ex) => ex.titulo && ex.titulo.trim().toLowerCase() === normalized
+    );
+
+    if (matched) return matched.id;
+
+    const { data: newEx, error: newExError } = await supabase
+        .from('ejercicios')
+        .insert({
+            titulo: name,
+            categoria: muscleGroup,
+            musculos_primarios: [muscleGroup],
+            dificultad: 'intermediate',
+            is_custom: true,
+            created_by: userId,
+        })
+        .select('id')
+        .single();
+
+    if (newExError || !newEx) throw newExError || new Error(`Failed to create exercise ${name}`);
+    return newEx.id;
+};
+
+/**
+ * Creates 7 daily routine entries with scheduled exercises and series for a weekly routine.
+ */
+export const createPresetDailyRoutines = async (
+    weeklyRoutineId: string,
+    schedule: (any | null)[],
+    catalogExercises: { id: string; titulo?: string | null }[] | null,
+    userId: string
+): Promise<void> => {
+    for (let i = 0; i < DAYS_OF_WEEK.length; i++) {
+        const dayName = DAYS_OF_WEEK[i];
+        const presetDay = schedule[i];
+
+        const description = presetDay
+            ? (presetDay.descripcion ? `${presetDay.nombre_dia} - ${presetDay.descripcion}` : presetDay.nombre_dia)
+            : 'Descanso / Recuperación';
+
+        const { data: newDay, error: dayError } = await supabase
+            .from('rutinas_diarias')
+            .insert({
+                rutina_semanal_id: weeklyRoutineId,
+                nombre_dia: dayName,
+                descripcion: description,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            })
+            .select()
+            .single();
+
+        if (dayError || !newDay) {
+            if (dayError) throw dayError;
+            continue;
+        }
+
+        if (presetDay && presetDay.ejercicios && presetDay.ejercicios.length > 0) {
+            for (const ex of presetDay.ejercicios) {
+                const exerciseId = await resolveOrCreateExercise(
+                    catalogExercises,
+                    ex.nombre_ejercicio,
+                    ex.grupo_muscular_principal,
+                    userId
+                );
+
+                const { data: newScheduledEx, error: schError } = await supabase
+                    .from('ejercicios_programados')
+                    .insert({
+                        rutina_diaria_id: newDay.id,
+                        ejercicio_id: exerciseId,
+                        orden_ejecucion: ex.orden_ejecucion,
+                        tipo_peso: ex.tipo_peso || 'total',
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                    })
+                    .select()
+                    .single();
+
+                if (schError || !newScheduledEx) {
+                    if (schError) throw schError;
+                    continue;
+                }
+
+                if (ex.series && ex.series.length > 0) {
+                    const seriesInserts = ex.series.map((s: any) => ({
+                        ejercicio_programado_id: newScheduledEx.id,
+                        numero_serie: s.numero_serie,
+                        repeticiones: s.repeticiones_objetivo || 0,
+                        peso_utilizado: s.peso_sugerido || 0,
+                        rpe: s.rpe_objetivo ? Math.round(s.rpe_objetivo) : null,
+                        descanso_segundos: s.descanso_segundos || null,
+                        created_at: new Date().toISOString(),
+                    }));
+
+                    const { error: seriesErr } = await supabase.from('series').insert(seriesInserts);
+                    if (seriesErr) throw seriesErr;
+                }
+            }
+        }
+    }
+};
+
 export const RoutineService = {
     async getWeeklyRoutineWithDays(routineId: string): Promise<ServiceResponse<WeeklyRoutine>> {
         if (isE2EMockEnabled()) {
@@ -417,6 +561,13 @@ export const RoutineService = {
      * @param userId The ID of the user importing the routine
      * @param presetRoutineId The ID of the preset routine (e.g. 'preset-ppl-6d')
      * @param setActive Whether to automatically set this routine as active (defaults to true)
+
+
+    /**
+     * Imports/clones a pre-defined seed routine into the user's active weekly routine in Supabase.
+     * @param userId The ID of the user importing the routine
+     * @param presetRoutineId The ID of the preset routine (e.g. 'preset-ppl-6d')
+     * @param setActive Whether to automatically set this routine as active (defaults to true)
      */
     async importPresetRoutine(
         userId: string,
@@ -440,36 +591,6 @@ export const RoutineService = {
 
             if (catalogError) throw catalogError;
 
-            // Helper to find or create an exercise ID by name
-            const getExerciseIdByName = async (name: string, muscleGroup: string): Promise<string> => {
-                const normalized = name.trim().toLowerCase();
-                const matched = (catalogExercises || []).find(
-                    (ex) => ex.titulo && ex.titulo.trim().toLowerCase() === normalized
-                );
-
-                if (matched) return matched.id;
-
-                // Fallback: create a missing exercise entry in catalog
-                const { data: newEx, error: newExError } = await supabase
-                    .from('ejercicios')
-                    .insert({
-                        titulo: name,
-                        categoria: muscleGroup,
-                        musculos_primarios: [muscleGroup],
-                        dificultad: 'intermediate',
-                        is_custom: true,
-                        created_by: userId,
-                    })
-                    .select('id')
-                    .single();
-
-
-
-
-                if (newExError || !newEx) throw newExError || new Error(`Failed to create exercise ${name}`);
-                return newEx.id;
-            };
-
             // 3. Create the new weekly routine
             const { data: newRoutine, error: routineError } = await supabase
                 .from('rutinas_semanales')
@@ -486,105 +607,11 @@ export const RoutineService = {
                 .select()
                 .single();
 
-
             if (routineError || !newRoutine) throw routineError || new Error('Failed to create weekly routine');
 
-            // 4. Create daily routines and scheduled exercises for all 7 days of the week (Lunes - Domingo)
-            const daysOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-            const presetDays = preset.rutinas_diarias || [];
-
-            const getTemplateDayForIndex = (index: number) => {
-                const count = presetDays.length;
-                if (count === 6) {
-                    return index < 6 ? presetDays[index] : null;
-                }
-                if (count === 5) {
-                    return index < 5 ? presetDays[index] : null;
-                }
-                if (count === 4) {
-                    if (index === 0) return presetDays[0];
-                    if (index === 1) return presetDays[1];
-                    if (index === 3) return presetDays[2];
-                    if (index === 4) return presetDays[3];
-                    return null;
-                }
-                if (count === 3) {
-                    if (index === 0) return presetDays[0];
-                    if (index === 2) return presetDays[1];
-                    if (index === 4) return presetDays[2];
-                    return null;
-                }
-                return index < count ? presetDays[index] : null;
-            };
-
-            for (let i = 0; i < daysOfWeek.length; i++) {
-                const dayName = daysOfWeek[i];
-                const presetDay = getTemplateDayForIndex(i);
-
-                const description = presetDay
-                    ? (presetDay.descripcion ? `${presetDay.nombre_dia} - ${presetDay.descripcion}` : presetDay.nombre_dia)
-                    : 'Descanso / Recuperación';
-
-                const { data: newDay, error: dayError } = await supabase
-                    .from('rutinas_diarias')
-                    .insert({
-                        rutina_semanal_id: newRoutine.id,
-                        nombre_dia: dayName,
-                        descripcion: description,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString(),
-                    })
-                    .select()
-                    .single();
-
-                if (dayError || !newDay) {
-                    if (dayError) throw dayError;
-                    continue;
-                }
-
-                if (presetDay && presetDay.ejercicios && presetDay.ejercicios.length > 0) {
-                    for (const ex of presetDay.ejercicios) {
-                        const exerciseId = await getExerciseIdByName(
-                            ex.nombre_ejercicio,
-                            ex.grupo_muscular_principal
-                        );
-
-                        const { data: newScheduledEx, error: schError } = await supabase
-                            .from('ejercicios_programados')
-                            .insert({
-                                rutina_diaria_id: newDay.id,
-                                ejercicio_id: exerciseId,
-                                orden_ejecucion: ex.orden_ejecucion,
-                                tipo_peso: ex.tipo_peso || 'total',
-                                created_at: new Date().toISOString(),
-                                updated_at: new Date().toISOString(),
-                            })
-                            .select()
-                            .single();
-
-                        if (schError || !newScheduledEx) {
-                            if (schError) throw schError;
-                            continue;
-                        }
-
-                        if (ex.series && ex.series.length > 0) {
-                            const seriesInserts = ex.series.map((s) => ({
-                                ejercicio_programado_id: newScheduledEx.id,
-                                numero_serie: s.numero_serie,
-                                repeticiones: s.repeticiones_objetivo || 0,
-                                peso_utilizado: s.peso_sugerido || 0,
-                                rpe: s.rpe_objetivo ? Math.round(s.rpe_objetivo) : null,
-                                descanso_segundos: s.descanso_segundos || null,
-                                created_at: new Date().toISOString(),
-                            }));
-
-                            const { error: seriesErr } = await supabase.from('series').insert(seriesInserts);
-                            if (seriesErr) throw seriesErr;
-                        }
-                    }
-                }
-            }
-
+            // 4. Map preset days into 7-day weekly schedule and persist daily routines
+            const schedule = mapPresetDaysToWeeklySchedule(preset.rutinas_diarias || []);
+            await createPresetDailyRoutines(newRoutine.id, schedule, catalogExercises, userId);
 
             // 5. Activate routine if requested
             if (setActive) {
@@ -598,6 +625,17 @@ export const RoutineService = {
             console.error('Error importing preset routine:', error);
             return { data: null, error };
         }
+    },
+
+    /**
+     * Alias for importPresetRoutine (PF-303)
+     */
+    async createWeeklyRoutineFromPreset(
+        userId: string,
+        presetRoutineId: string,
+        setActive: boolean = true
+    ): Promise<ServiceResponse<WeeklyRoutine>> {
+        return this.importPresetRoutine(userId, presetRoutineId, setActive);
     },
 };
 
