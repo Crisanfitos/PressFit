@@ -7,10 +7,13 @@ import { ThemeColors } from '../../types/theme';
 export interface ExerciseListItemProps {
     item: any;
     isSelected: boolean;
+    selectionMode?: boolean;
     onSelect: () => void;
     onThumbnailPress: (videoId: string | null) => void;
     colors: ThemeColors;
     navigation: any;
+    onEdit?: (item: any) => void;
+    onDelete?: (item: any) => void;
 }
 
 export const getVideoId = (url: string | undefined): string | null => {
@@ -25,7 +28,17 @@ export const getThumbnailUrl = (videoId: string | null): string | null => {
 };
 
 export const ExerciseListItem: React.FC<ExerciseListItemProps> = React.memo(
-    ({ item, isSelected, onSelect, onThumbnailPress, colors, navigation }) => {
+    ({
+        item,
+        isSelected,
+        selectionMode = true,
+        onSelect,
+        onThumbnailPress,
+        colors,
+        navigation,
+        onEdit,
+        onDelete,
+    }) => {
         const fadeAnim = useRef(new Animated.Value(0)).current;
         const [isExpanded, setIsExpanded] = useState(false);
 
@@ -37,13 +50,13 @@ export const ExerciseListItem: React.FC<ExerciseListItemProps> = React.memo(
             }).start();
         }, [fadeAnim]);
 
-        const videoId = getVideoId(item.url_video);
+        const videoId = getVideoId(item?.url_video);
         const thumbnailUrl = getThumbnailUrl(videoId);
 
         return (
             <Animated.View style={{ opacity: fadeAnim }}>
                 <TouchableOpacity
-                    testID={`exercise-item-${item.id}`}
+                    testID={item?.id ? `exercise-item-${item.id}` : undefined}
                     style={[
                         styles.exerciseCard,
                         {
@@ -87,12 +100,54 @@ export const ExerciseListItem: React.FC<ExerciseListItemProps> = React.memo(
                             <Text style={[styles.exerciseName, { color: colors.text }]} numberOfLines={2}>
                                 {item.titulo}
                             </Text>
-                            <Text style={[styles.exerciseText, { color: colors.primary }]}>
-                                {item.musculos_primarios}
-                            </Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginTop: 2 }}>
+                                <Text style={[styles.exerciseText, { color: colors.primary }]}>
+                                    {item.musculos_primarios}
+                                </Text>
+                                {item.is_custom && (
+                                    <View
+                                        testID="custom-exercise-badge"
+                                        style={[
+                                            styles.badge,
+                                            {
+                                                backgroundColor: `${colors.primary}25`,
+                                                marginLeft: 6,
+                                                paddingVertical: 2,
+                                                paddingHorizontal: 6,
+                                            },
+                                        ]}
+                                    >
+                                        <Text style={[styles.badgeText, { color: colors.primary, fontSize: 10, fontWeight: '700' }]}>
+                                            Personalizado
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
                         </View>
 
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            {item.is_custom && onEdit && (
+                                <TouchableOpacity
+                                    onPress={() => onEdit(item)}
+                                    style={{ padding: 6 }}
+                                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                    testID="edit-custom-exercise-button"
+                                >
+                                    <MaterialIcons name="edit" size={20} color={colors.primary} />
+                                </TouchableOpacity>
+                            )}
+
+                            {item.is_custom && onDelete && (
+                                <TouchableOpacity
+                                    onPress={() => onDelete(item)}
+                                    style={{ padding: 6 }}
+                                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                    testID="delete-custom-exercise-button"
+                                >
+                                    <MaterialIcons name="delete-outline" size={20} color={colors.error || '#ef4444'} />
+                                </TouchableOpacity>
+                            )}
+
                             <TouchableOpacity
                                 onPress={() => setIsExpanded(!isExpanded)}
                                 style={{ padding: 8 }}
@@ -113,13 +168,15 @@ export const ExerciseListItem: React.FC<ExerciseListItemProps> = React.memo(
                                 <MaterialIcons name="info-outline" size={22} color={colors.textSecondary} />
                             </TouchableOpacity>
 
-                            <View style={styles.selectionIndicator}>
-                                <MaterialIcons
-                                    name={isSelected ? 'check-circle' : 'add-circle-outline'}
-                                    size={24}
-                                    color={isSelected ? colors.primary : colors.textSecondary}
-                                />
-                            </View>
+                            {selectionMode && (
+                                <View style={styles.selectionIndicator}>
+                                    <MaterialIcons
+                                        name={isSelected ? 'check-circle' : 'add-circle-outline'}
+                                        size={24}
+                                        color={isSelected ? colors.primary : colors.textSecondary}
+                                    />
+                                </View>
+                            )}
                         </View>
                     </View>
 
@@ -169,8 +226,16 @@ export const ExerciseListItem: React.FC<ExerciseListItemProps> = React.memo(
         );
     },
     (prevProps, nextProps) =>
-        prevProps.isSelected === nextProps.isSelected && prevProps.item.id === nextProps.item.id
+        prevProps.isSelected === nextProps.isSelected &&
+        prevProps.item?.id === nextProps.item?.id &&
+        prevProps.item?.titulo === nextProps.item?.titulo &&
+        prevProps.item?.descripcion === nextProps.item?.descripcion &&
+        prevProps.item?.is_custom === nextProps.item?.is_custom &&
+        prevProps.selectionMode === nextProps.selectionMode
 );
+
+export const ExerciseItem = ExerciseListItem;
+export type ExerciseItemProps = ExerciseListItemProps;
 
 const styles = StyleSheet.create({
     exerciseCard: {
