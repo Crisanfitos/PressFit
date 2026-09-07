@@ -499,8 +499,11 @@ describe('RoutineService Coverage Suite', () => {
                 data: [{ id: 'new-day', nombre_dia: 'Lunes' }],
                 error: null,
             }));
-            // 4. insert exercise
-            mockChain.single.mockResolvedValueOnce({ data: { id: 'new-ep' }, error: null });
+            // 4. batch insert exercise (PF-298, select resolves via then)
+            mockChain.then.mockImplementationOnce((resolve: any) => resolve({
+                data: [{ id: 'new-ep', ejercicio_id: 'ej-1', orden_ejecucion: 1 }],
+                error: null,
+            }));
             // 5. insert series (then call)
             mockChain.then.mockImplementationOnce((resolve: any) => resolve({ data: [], error: null }));
 
@@ -535,7 +538,11 @@ describe('RoutineService Coverage Suite', () => {
                 data: [{ id: 'new-day-2', nombre_dia: 'Martes' }],
                 error: null,
             }));
-            mockChain.single.mockResolvedValueOnce({ data: { id: 'new-ep-2' }, error: null }); // new exercise
+            // batch insert exercises (PF-298)
+            mockChain.then.mockImplementationOnce((resolve: any) => resolve({
+                data: [{ id: 'new-ep-2', ejercicio_id: 'ej-2', orden_ejecucion: 1 }],
+                error: null,
+            }));
             mockChain.then.mockImplementationOnce((resolve: any) => resolve({ data: [], error: null })); // default series
 
             const res = await RoutineService.createRoutineFromTemplate('u-1', 't-1', 'Copia2');
@@ -569,6 +576,60 @@ describe('RoutineService Coverage Suite', () => {
             const res = await RoutineService.createWeeklyRoutineFromTemplate('u-1', 't-multi', 'Multi Copia');
             expect(res.error).toBeNull();
             expect(res.data?.id).toBe('new-r-multi');
+        });
+
+        it('should batch insert multiple exercises and their series for a routine day (PF-298)', async () => {
+            mockChain.single.mockResolvedValueOnce({
+                data: {
+                    id: 't-ex-multi',
+                    nombre: 'Template Multi Ex',
+                    objetivo: 'Fuerza',
+                    rutinas_diarias: [{
+                        nombre_dia: 'Lunes',
+                        descripcion: 'Push Day',
+                        ejercicios_programados: [
+                            {
+                                ejercicio_id: 'ej-1',
+                                orden_ejecucion: 1,
+                                tipo_peso: 'total',
+                                series: [
+                                    { numero_serie: 1, repeticiones: 8, peso_utilizado: 100 },
+                                    { numero_serie: 2, repeticiones: 8, peso_utilizado: 100 },
+                                ],
+                            },
+                            {
+                                ejercicio_id: 'ej-2',
+                                orden_ejecucion: 2,
+                                tipo_peso: 'mancuernas',
+                                series: [
+                                    { numero_serie: 1, repeticiones: 12, peso_utilizado: 24 },
+                                ],
+                            },
+                        ],
+                    }],
+                },
+                error: null,
+            });
+            mockChain.single.mockResolvedValueOnce({ data: { id: 'r-batch-ex' }, error: null });
+            // batch days
+            mockChain.then.mockImplementationOnce((resolve: any) => resolve({
+                data: [{ id: 'd-lunes', nombre_dia: 'Lunes' }],
+                error: null,
+            }));
+            // batch exercises
+            mockChain.then.mockImplementationOnce((resolve: any) => resolve({
+                data: [
+                    { id: 'ep-1', ejercicio_id: 'ej-1', orden_ejecucion: 1 },
+                    { id: 'ep-2', ejercicio_id: 'ej-2', orden_ejecucion: 2 },
+                ],
+                error: null,
+            }));
+            // batch series
+            mockChain.then.mockImplementationOnce((resolve: any) => resolve({ data: [], error: null }));
+
+            const res = await RoutineService.createWeeklyRoutineFromTemplate('u-1', 't-ex-multi', 'Batch Ex Routine');
+            expect(res.error).toBeNull();
+            expect(res.data?.id).toBe('r-batch-ex');
         });
     });
 
