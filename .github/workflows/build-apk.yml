@@ -1,0 +1,109 @@
+name: PressFit APK Build (EAS)
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'EAS build profile'
+        required: false
+        default: 'preview'
+        type: choice
+        options:
+          - preview
+          - production
+      platform:
+        description: 'Target platform'
+        required: false
+        default: 'android'
+        type: choice
+        options:
+          - android
+  push:
+    tags:
+      - 'v*.*.*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-apk:
+    name: Build APK via EAS
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Determine build profile
+        id: profile
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "eas_profile=${{ github.event.inputs.profile }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "eas_profile=preview" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build APK on EAS
+        id: eas_build
+        run: |
+          echo "### 🏗️ Starting EAS Build" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Profile:** ${{ steps.profile.outputs.eas_profile }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Trigger:** ${{ github.event_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Ref:** ${{ github.ref }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          BUILD_OUTPUT=$(npx eas build \
+            --platform android \
+            --profile ${{ steps.profile.outputs.eas_profile }} \
+            --non-interactive \
+            --json 2>&1) || true
+
+          echo "$BUILD_OUTPUT"
+
+          # Extract build URL from JSON output
+          BUILD_URL=$(echo "$BUILD_OUTPUT" | grep -o '"buildUrl":"[^"]*"' | head -1 | sed 's/"buildUrl":"//;s/"//')
+          BUILD_ID=$(echo "$BUILD_OUTPUT" | grep -o '"id":"[^"]*"' | head -1 | sed 's/"id":"//;s/"//')
+
+          if [ -n "$BUILD_URL" ]; then
+            echo "build_url=$BUILD_URL" >> "$GITHUB_OUTPUT"
+            echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
+            echo "### ✅ EAS Build Submitted Successfully" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+            echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+            echo "| **Build ID** | \`$BUILD_ID\` |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| **Build URL** | [View on Expo]($BUILD_URL) |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| **Profile** | ${{ steps.profile.outputs.eas_profile }} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| **Platform** | android |" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "> 📲 Once the build completes, download the APK from the [Expo build page]($BUILD_URL)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### ⚠️ Build Submitted" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Build was submitted but the URL could not be extracted automatically." >> "$GITHUB_STEP_SUMMARY"
+            echo "Check your [Expo Dashboard](https://expo.dev) for the build status." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo '<details><summary>Raw output</summary>' >> "$GITHUB_STEP_SUMMARY"
+            echo '' >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "$BUILD_OUTPUT" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo '</details>' >> "$GITHUB_STEP_SUMMARY"
+          fi
