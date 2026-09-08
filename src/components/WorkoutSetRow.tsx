@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import SetInput from './SetInput';
 import { HapticService } from '../services/HapticService';
 import { TipoPeso } from '../types/setTypes';
+import { validateRpe } from '../utils/rpeValidation';
 
 export interface SetData {
     id: string;
@@ -87,6 +88,19 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
             : (!isNaN(parsedGhost) && parsedGhost > 0 ? parsedGhost : 0);
         const nextVal = Math.max(0, current + delta);
         onSetChange(set.id, 'reps', String(nextVal));
+    };
+
+    const handleRpeChange = (val: string) => {
+        const result = validateRpe(val);
+        if (result.clamped) {
+            HapticService.warning();
+        }
+        if (result.value === null) {
+            onSetChange(set.id, 'rpe', '');
+        } else {
+            const valStr = result.value % 1 === 0 ? String(result.value) : result.value.toFixed(1);
+            onSetChange(set.id, 'rpe', valStr);
+        }
     };
 
     const isActiveTimer = lastCompletedSetId === set.id && restTimerVisible;
@@ -209,10 +223,10 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                         testID={`set-rpe-input-${setIndex}`}
                         value={set.rpe && set.rpe > 0 ? set.rpe : ''}
                         placeholder={ghostRpe ?? '-'}
-                        onChange={(val) => onSetChange(set.id, 'rpe', val)}
+                        onChange={handleRpeChange}
                         isEditable={isInputEditable}
                         colors={colors}
-                        maxLength={2}
+                        maxLength={4}
                     />
                 </View>
 

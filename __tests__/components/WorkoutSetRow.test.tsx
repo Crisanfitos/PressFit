@@ -7,6 +7,7 @@ jest.mock('../../src/services/HapticService', () => ({
     HapticService: {
         selection: jest.fn(),
         setCompleted: jest.fn(),
+        warning: jest.fn(),
     },
 }));
 
@@ -364,5 +365,120 @@ describe('WorkoutSetRow Component (RNTL)', () => {
         const minusRepsBtn = getByTestId('quick-adjust-reps-minus-0');
         fireEvent.press(minusRepsBtn);
         expect(mockOnSetChange).toHaveBeenCalledWith('set-str-2', 'reps', '9');
+    });
+
+    describe('RPE Input Validation (PF-309)', () => {
+        it('allows valid RPE input (e.g. 8.5) and calls onSetChange on blur', async () => {
+            const { getByTestId, findByDisplayValue } = await render(
+                <WorkoutSetRow
+                    set={defaultSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                />
+            );
+
+            const rpeInput = getByTestId('set-rpe-input-0');
+            fireEvent.changeText(rpeInput, '8.5');
+            expect(await findByDisplayValue('8.5')).toBeTruthy();
+            fireEvent(rpeInput, 'blur');
+
+            expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'rpe', '8.5');
+            expect(HapticService.warning).not.toHaveBeenCalled();
+        });
+
+        it('handles optional empty RPE and calls onSetChange with empty string', async () => {
+            const { getByTestId, findByDisplayValue } = await render(
+                <WorkoutSetRow
+                    set={defaultSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                />
+            );
+
+            const rpeInput = getByTestId('set-rpe-input-0');
+            fireEvent.changeText(rpeInput, '');
+            expect(await findByDisplayValue('')).toBeTruthy();
+            fireEvent(rpeInput, 'blur');
+
+            expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'rpe', '');
+        });
+
+        it('clamps RPE below 1 (e.g. 0) to 1 and triggers warning haptic', async () => {
+            const { getByTestId, findByDisplayValue } = await render(
+                <WorkoutSetRow
+                    set={defaultSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                />
+            );
+
+            const rpeInput = getByTestId('set-rpe-input-0');
+            fireEvent.changeText(rpeInput, '0');
+            expect(await findByDisplayValue('0')).toBeTruthy();
+            fireEvent(rpeInput, 'blur');
+
+            expect(HapticService.warning).toHaveBeenCalled();
+            expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'rpe', '1');
+        });
+
+        it('clamps RPE above 10 (e.g. 15) to 10 and triggers warning haptic', async () => {
+            const { getByTestId, findByDisplayValue } = await render(
+                <WorkoutSetRow
+                    set={defaultSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                />
+            );
+
+            const rpeInput = getByTestId('set-rpe-input-0');
+            fireEvent.changeText(rpeInput, '15');
+            expect(await findByDisplayValue('15')).toBeTruthy();
+            fireEvent(rpeInput, 'blur');
+
+            expect(HapticService.warning).toHaveBeenCalled();
+            expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'rpe', '10');
+        });
+
+        it('sanitizes non-numeric text to empty and calls onSetChange with empty string', async () => {
+            const { getByTestId, findByDisplayValue } = await render(
+                <WorkoutSetRow
+                    set={defaultSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                />
+            );
+
+            const rpeInput = getByTestId('set-rpe-input-0');
+            fireEvent.changeText(rpeInput, 'abc');
+            expect(await findByDisplayValue('abc')).toBeTruthy();
+            fireEvent(rpeInput, 'blur');
+
+            expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'rpe', '');
+        });
     });
 });

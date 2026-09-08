@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import { WorkoutService } from '../services/WorkoutService';
 import { RoutineService } from '../services/RoutineService';
 import { TipoPeso } from '../types/setTypes';
+import { validateRpe } from '../utils/rpeValidation';
 
 export type WorkoutMode = 'ACTIVE' | 'VIEW' | 'MISSED' | 'PREVIEW' | 'PENDING';
 
@@ -362,15 +363,23 @@ export const useWorkoutController = (
         if (field === 'reps') dbField = 'repeticiones';
         // 'rpe' maps directly to 'rpe' in DB — no renaming needed
 
+        let processedValue = value;
+        let dbValue: any = value === '' || value === undefined ? null : value;
+
+        if (field === 'rpe') {
+            const validation = validateRpe(value);
+            processedValue = validation.value;
+            dbValue = validation.value;
+        }
+
         setExercises((prev) =>
             prev.map((ex) => ({
                 ...ex,
-                sets: ex.sets.map((s) => (s.id === setId ? { ...s, [dbField]: value } : s)),
+                sets: ex.sets.map((s) => (s.id === setId ? { ...s, [dbField]: processedValue ?? undefined } : s)),
             }))
         );
 
         try {
-            const dbValue = value === '' || value === undefined ? null : value;
             await WorkoutService.updateSet(setId, { [field]: dbValue });
         } catch (error) {
             console.error('Failed to update set', error);
