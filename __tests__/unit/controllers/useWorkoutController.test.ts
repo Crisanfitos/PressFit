@@ -960,4 +960,120 @@ describe('useWorkoutController (PF-257)', () => {
             expect(WorkoutService.getWorkoutDetails).toHaveBeenCalledTimes(1);
         });
     });
+
+    describe('updateSet (PF-309)', () => {
+        it('updates weight and reps optimistically and calls WorkoutService.updateSet', async () => {
+            (WorkoutService.updateSet as jest.Mock).mockResolvedValue({ error: null });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            await act(async () => {
+                await hook.result.current.updateSet('s-1', 'weight', '85');
+            });
+
+            expect(hook.result.current.exercises[0].sets[0].peso_utilizado).toBe('85');
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', { weight: '85' });
+        });
+
+        it('updates valid RPE (1-10) and calls WorkoutService.updateSet with parsed number', async () => {
+            (WorkoutService.updateSet as jest.Mock).mockResolvedValue({ error: null });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            await act(async () => {
+                await hook.result.current.updateSet('s-1', 'rpe', '8.5');
+            });
+
+            expect(hook.result.current.exercises[0].sets[0].rpe).toBe(8.5);
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', { rpe: 8.5 });
+        });
+
+        it('handles optional empty RPE and calls WorkoutService.updateSet with null', async () => {
+            (WorkoutService.updateSet as jest.Mock).mockResolvedValue({ error: null });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            await act(async () => {
+                await hook.result.current.updateSet('s-1', 'rpe', '');
+            });
+
+            expect(hook.result.current.exercises[0].sets[0].rpe).toBeUndefined();
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', { rpe: null });
+        });
+
+        it('clamps RPE below 1 to 1', async () => {
+            (WorkoutService.updateSet as jest.Mock).mockResolvedValue({ error: null });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            await act(async () => {
+                await hook.result.current.updateSet('s-1', 'rpe', '0');
+            });
+
+            expect(hook.result.current.exercises[0].sets[0].rpe).toBe(1);
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', { rpe: 1 });
+        });
+
+        it('clamps RPE above 10 to 10', async () => {
+            (WorkoutService.updateSet as jest.Mock).mockResolvedValue({ error: null });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            await act(async () => {
+                await hook.result.current.updateSet('s-1', 'rpe', '15');
+            });
+
+            expect(hook.result.current.exercises[0].sets[0].rpe).toBe(10);
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', { rpe: 10 });
+        });
+
+        it('sanitizes non-numeric RPE to null', async () => {
+            (WorkoutService.updateSet as jest.Mock).mockResolvedValue({ error: null });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            await act(async () => {
+                await hook.result.current.updateSet('s-1', 'rpe', 'invalid');
+            });
+
+            expect(hook.result.current.exercises[0].sets[0].rpe).toBeUndefined();
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', { rpe: null });
+        });
+
+        it('does nothing when mode is not editable', async () => {
+            (WorkoutService.getWorkoutDetails as jest.Mock).mockResolvedValue({
+                data: { ...getMockWorkoutWithExercises(), completada: true },
+                error: null,
+            });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3, false)
+            );
+            await waitFor(() => expect(hook.result.current.mode).toBe('VIEW'));
+
+            await act(async () => {
+                await hook.result.current.updateSet('s-1', 'rpe', '8');
+            });
+
+            expect(WorkoutService.updateSet).not.toHaveBeenCalled();
+        });
+    });
 });
