@@ -37,6 +37,8 @@ import FloatingTimerPill from '../components/FloatingTimerPill';
 import { View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getActiveWorkoutParams } from '../services/TimerNotificationService';
+import { useWorkoutRecovery } from '../hooks/useWorkoutRecovery';
+import ResumeWorkoutModal from '../components/workout/ResumeWorkoutModal';
 
 const MainNavigator: React.FC = () => {
     const insets = useSafeAreaInsets();
@@ -46,6 +48,7 @@ const MainNavigator: React.FC = () => {
     const navigation = useNavigation<any>();
 
     const [isWorkoutFocused, setIsWorkoutFocused] = React.useState(false);
+    const { pendingSession, handleResume, handleDiscard } = useWorkoutRecovery(navigation);
 
     React.useEffect(() => {
         const checkFocus = () => {
@@ -143,6 +146,13 @@ const MainNavigator: React.FC = () => {
                 />
             </Tab.Navigator>
             <FloatingTimerPill visible={isWorkoutFocused ? false : undefined} onPress={handlePillPress} />
+            <ResumeWorkoutModal
+                visible={!isWorkoutFocused && Boolean(pendingSession)}
+                session={pendingSession}
+                onResume={handleResume}
+                onDiscard={handleDiscard}
+                colors={colors}
+            />
         </View>
     );
 };

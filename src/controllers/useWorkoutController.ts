@@ -4,6 +4,7 @@ import { WorkoutService } from '../services/WorkoutService';
 import { RoutineService } from '../services/RoutineService';
 import { TipoPeso } from '../types/setTypes';
 import { validateRpe } from '../utils/rpeValidation';
+import { clearActiveWorkoutParams, saveActiveWorkoutParams } from '../services/TimerNotificationService';
 
 export type WorkoutMode = 'ACTIVE' | 'VIEW' | 'MISSED' | 'PREVIEW' | 'PENDING';
 
@@ -199,6 +200,7 @@ export const useWorkoutController = (
 
                     if (diffSeconds > 10800) {
                         await WorkoutService.completeWorkout(currentWorkoutId, Math.floor(diffSeconds / 60));
+                        await clearActiveWorkoutParams();
                         setWorkout({ ...workoutData, completada: true, hora_fin: new Date().toISOString() });
                         setMode('VIEW');
                     } else {
@@ -260,6 +262,13 @@ export const useWorkoutController = (
             const { data: fullWorkout } = await WorkoutService.getWorkoutDetails(newWorkout.id);
             setWorkout(fullWorkout);
             setMode('ACTIVE');
+            await saveActiveWorkoutParams({
+                routineDayId,
+                workoutId: newWorkout.id,
+                dayName: fullWorkout?.nombre_dia,
+                dayOfWeek,
+                mode: 'ACTIVE',
+            });
 
             // Pass ghost source to loadExercises so previousWorkout and exercises
             // are set in the same execution context (atomic React batch)
@@ -509,6 +518,7 @@ export const useWorkoutController = (
         const durationMinutes = Math.floor(timer / 60);
         try {
             await WorkoutService.completeWorkout(workout.id, durationMinutes);
+            await clearActiveWorkoutParams();
             return true;
         } catch (error) {
             console.error('Failed to finish workout', error);
