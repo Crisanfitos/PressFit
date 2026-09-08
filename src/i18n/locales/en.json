@@ -136,8 +136,21 @@
     "totalTime": "Total Time",
     "workouts": "workouts",
     "searchExercise": "Search exercise...",
-    "noExercisesTracked": "No exercises with recorded sets yet",
-    "monthlySummaryText": "This month you worked out for a total of {{text}}"
+    "monthlySummaryText": "This month you worked out for a total of {{text}}",
+    "hypertrophy": "Hypertrophy Volume",
+    "hypertrophySubtitle": "Weekly effective sets vs MEV / MAV / MRV",
+    "hypertrophyDashboard": "Hypertrophy Dashboard",
+    "hypertrophyWeek": "Week",
+    "hypertrophyTotalSets": "Total Effective Sets",
+    "hypertrophyOptimalMuscles": "Optimal Groups (MAV)",
+    "hypertrophyHighFatigue": "Fatigue Alert / MRV",
+    "hypertrophyEmptyTitle": "No sets recorded this week",
+    "hypertrophyEmptySubtitle": "Log workouts to compare your volume against scientific hypertrophy thresholds.",
+    "hypertrophyLegendTitle": "Scientific Volume Thresholds (Israetel / RP)",
+    "hypertrophyMVDesc": "MV (Maintenance Volume): Minimum volume needed to retain muscle mass.",
+    "hypertrophyMEVDesc": "MEV (Minimum Effective Volume): Minimum volume needed to ignite muscle growth.",
+    "hypertrophyMAVDesc": "MAV (Maximum Adaptive Volume): Sweet spot where greatest gains occur.",
+    "hypertrophyMRVDesc": "MRV (Maximum Recoverable Volume): Upper ceiling of recovery. Exceeding it yields excessive fatigue."
   },
   "physicalProgress": {
     "title": "Physical Progress",

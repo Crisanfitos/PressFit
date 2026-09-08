@@ -30,6 +30,7 @@ export const linkingConfig: LinkingOptions<any> = {
                     ExerciseTracking: 'progress/exercise-tracking',
                     ExerciseProgressDetail: 'progress/exercise/:exerciseId',
                     PhysicalProgress: 'progress/physical',
+                    HypertrophyVolume: 'progress/hypertrophy',
                 },
             },
             Perfil: {

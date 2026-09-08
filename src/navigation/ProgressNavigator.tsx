@@ -6,6 +6,7 @@ import WeeklyProgressScreen from '../screens/WeeklyProgressScreen';
 import DailyProgressScreen from '../screens/DailyProgressScreen';
 import ExerciseTrackingScreen from '../screens/ExerciseTrackingScreen';
 import PhysicalProgressScreen from '../screens/PhysicalProgressScreen';
+import HypertrophyVolumeScreen from '../screens/HypertrophyVolumeScreen';
 
 export type ProgressStackParamList = {
     ProgressMain: undefined;
@@ -15,6 +16,7 @@ export type ProgressStackParamList = {
     ExerciseTracking: { exerciseId?: string };
     ExerciseProgressDetail: { exerciseId: string };
     PhysicalProgress: undefined;
+    HypertrophyVolume: undefined;
 };
 
 const Stack = createNativeStackNavigator<ProgressStackParamList>();
@@ -34,6 +36,7 @@ const ProgressNavigator: React.FC = () => {
             <Stack.Screen name="ExerciseTracking" component={ExerciseTrackingScreen} />
             <Stack.Screen name="ExerciseProgressDetail" component={require('../screens/ExerciseProgressDetailScreen').default} />
             <Stack.Screen name="PhysicalProgress" component={PhysicalProgressScreen} />
+            <Stack.Screen name="HypertrophyVolume" component={HypertrophyVolumeScreen} />
         </Stack.Navigator>
     );
 };

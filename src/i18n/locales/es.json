@@ -136,8 +136,21 @@
     "totalTime": "Tiempo Total",
     "workouts": "entrenamientos",
     "searchExercise": "Buscar ejercicio...",
-    "noExercisesTracked": "No hay ejercicios registrados todavía",
-    "monthlySummaryText": "Este mes has entrenado un total de {{text}}"
+    "monthlySummaryText": "Este mes has entrenado un total de {{text}}",
+    "hypertrophy": "Volumen de Hipertrofia",
+    "hypertrophySubtitle": "Series efectivas semanales vs MEV / MAV / MRV",
+    "hypertrophyDashboard": "Dashboard de Hipertrofia",
+    "hypertrophyWeek": "Semana",
+    "hypertrophyTotalSets": "Series Efectivas Totales",
+    "hypertrophyOptimalMuscles": "Grupos Óptimos (MAV)",
+    "hypertrophyHighFatigue": "Alerta de Fatiga / MRV",
+    "hypertrophyEmptyTitle": "Sin registros esta semana",
+    "hypertrophyEmptySubtitle": "Completa entrenamientos para comparar tu volumen frente a los umbrales científicos de hipertrofia.",
+    "hypertrophyLegendTitle": "Umbrales Científicos de Volumen (Israetel / RP)",
+    "hypertrophyMVDesc": "MV (Mantenimiento): Volumen mínimo para mantener la masa muscular actual.",
+    "hypertrophyMEVDesc": "MEV (Mínimo Efectivo): Volumen mínimo para estimular hipertrofia.",
+    "hypertrophyMAVDesc": "MAV (Máximo Adaptativo): Rango óptimo donde se logran las mayores ganancias musculares.",
+    "hypertrophyMRVDesc": "MRV (Máximo Recuperable): Límite superior de recuperación. Superarlo genera fatiga excesiva."
   },
   "physicalProgress": {
     "title": "Cambio Físico",

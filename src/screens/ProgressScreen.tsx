@@ -26,6 +26,7 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
         { icon: 'date-range', title: t('progress.weekly'), subtitle: t('progress.weeklySubtitle'), screen: 'WeeklyProgress', testID: 'progress-item-weekly' },
         { icon: 'today', title: t('progress.daily'), subtitle: t('progress.dailySubtitle'), screen: 'DailyProgress', testID: 'progress-item-daily' },
         { icon: 'fitness-center', title: t('progress.exercise'), subtitle: t('progress.exerciseSubtitle'), screen: 'ExerciseTracking', testID: 'progress-item-exercise' },
+        { icon: 'bar-chart', title: t('progress.hypertrophy', 'Volumen de Hipertrofia'), subtitle: t('progress.hypertrophySubtitle', 'Series efectivas semanales vs MEV / MAV / MRV'), screen: 'HypertrophyVolume', testID: 'progress-item-hypertrophy' },
     ];
 
     const styles = useMemo(
