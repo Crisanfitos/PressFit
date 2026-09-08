@@ -1,0 +1,115 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_057_onboarding_flow.yaml — US-057: Flujo de Onboarding interactivo de nuevos usuarios (PF-291)
+
+- launchApp:
+    clearState: true
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 1. Espera a que la pantalla de bienvenida esté visible
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "welcome-screen"
+
+- assertVisible:
+    id: "onboarding-button"
+
+# 2. Navegar a la pantalla de Onboarding
+- tapOn:
+    id: "onboarding-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "onboarding-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "onboarding-screen"
+
+# 3. Paso 1: Objetivo fitness
+- assertVisible:
+    id: "onboarding-step1-title"
+
+- assertVisible:
+    id: "skip-button"
+
+- assertVisible:
+    id: "goal-card-strength"
+
+# Seleccionar objetivo Fuerza
+- tapOn:
+    id: "goal-card-strength"
+
+# Pulsar Siguiente para avanzar al Paso 2
+- tapOn:
+    id: "next-button"
+
+# 4. Paso 2: Días de entrenamiento semanal
+- extendedWaitUntil:
+    visible:
+      id: "onboarding-step2-title"
+    timeout: 5000
+
+- assertVisible:
+    id: "onboarding-step2-title"
+
+- assertVisible:
+    id: "days-chip-4"
+
+# Seleccionar 4 días
+- tapOn:
+    id: "days-chip-4"
+
+- assertVisible:
+    id: "days-info-card"
+
+# Pulsar Siguiente para avanzar al Paso 3
+- tapOn:
+    id: "next-button"
+
+# 5. Paso 3: Nivel de experiencia
+- extendedWaitUntil:
+    visible:
+      id: "onboarding-step3-title"
+    timeout: 5000
+
+- assertVisible:
+    id: "onboarding-step3-title"
+
+- assertVisible:
+    id: "level-card-intermediate"
+
+# Seleccionar nivel Intermedio
+- tapOn:
+    id: "level-card-intermediate"
+
+- assertVisible:
+    id: "finish-button"
+
+# 6. Finalizar el flujo de Onboarding
+- tapOn:
+    id: "finish-button"
+
+# 7. Verificar redirección exitosa a la pantalla de registro (SignUp)
+- extendedWaitUntil:
+    visible:
+      id: "signup-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "signup-screen"
