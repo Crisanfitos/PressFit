@@ -266,9 +266,9 @@ export const AnalyticsService = {
                         id,
                         ejercicio:ejercicios!inner(
                             id,
-                            nombre,
-                            grupo_muscular_principal,
-                            grupos_musculares_secundarios
+                            titulo,
+                            musculos_primarios,
+                            musculos_secundarios
                         ),
                         rutinas_diarias!inner(
                             id,
@@ -292,13 +292,27 @@ export const AnalyticsService = {
                 const ejercicio = row.ejercicios_programados?.ejercicio;
                 if (!epId || !ejercicio) continue;
 
+                // Extract primary and secondary muscles safely supporting DB schema (titulo, musculos_primarios, musculos_secundarios)
+                // as well as mock / legacy schema (nombre, grupo_muscular_principal, grupos_musculares_secundarios)
+                const primaryMuscle = Array.isArray(ejercicio.musculos_primarios)
+                    ? ejercicio.musculos_primarios[0]
+                    : (ejercicio.musculos_primarios || ejercicio.grupo_muscular_principal || 'Otros');
+
+                const secondaryMuscles = Array.isArray(ejercicio.musculos_secundarios)
+                    ? ejercicio.musculos_secundarios
+                    : (Array.isArray(ejercicio.grupos_musculares_secundarios)
+                        ? ejercicio.grupos_musculares_secundarios
+                        : (ejercicio.musculos_secundarios ? [ejercicio.musculos_secundarios] : []));
+
+                const nombre = ejercicio.titulo || ejercicio.nombre || '';
+
                 if (!exerciseMap.has(epId)) {
                     exerciseMap.set(epId, {
                         ejercicio: {
                             id: ejercicio.id,
-                            nombre: ejercicio.nombre,
-                            grupo_muscular_principal: ejercicio.grupo_muscular_principal,
-                            grupos_musculares_secundarios: ejercicio.grupos_musculares_secundarios,
+                            nombre,
+                            grupo_muscular_principal: primaryMuscle,
+                            grupos_musculares_secundarios: secondaryMuscles,
                         },
                         series: [],
                     });

@@ -258,6 +258,64 @@ describe('AnalyticsService (PF-154, PF-155, PF-157)', () => {
             expect(result.data!.porGrupoMuscular['Pecho']).toBe(2);
         });
 
+        it('correctly parses DB schema columns titulo, musculos_primarios and musculos_secundarios', async () => {
+            const rawSets = [
+                {
+                    id: 's-10',
+                    numero_serie: 1,
+                    peso_utilizado: 50,
+                    repeticiones: 12,
+                    ejercicios_programados: {
+                        id: 'ep-10',
+                        ejercicio: {
+                            id: 'ex-10',
+                            titulo: 'Dominadas',
+                            musculos_primarios: ['Espalda'],
+                            musculos_secundarios: ['Bíceps'],
+                        },
+                        rutinas_diarias: {
+                            id: 'rd-10',
+                            fecha_dia: '2026-08-26',
+                            rutinas_semanales: { usuario_id: 'u-1' }
+                        }
+                    }
+                },
+                {
+                    id: 's-11',
+                    numero_serie: 2,
+                    peso_utilizado: 50,
+                    repeticiones: 10,
+                    ejercicios_programados: {
+                        id: 'ep-10',
+                        ejercicio: {
+                            id: 'ex-10',
+                            titulo: 'Dominadas',
+                            musculos_primarios: ['Espalda'],
+                            musculos_secundarios: ['Bíceps'],
+                        },
+                        rutinas_diarias: {
+                            id: 'rd-10',
+                            fecha_dia: '2026-08-26',
+                            rutinas_semanales: { usuario_id: 'u-1' }
+                        }
+                    }
+                },
+            ];
+
+            mockChain.then = jest.fn((resolve: any) =>
+                Promise.resolve({ data: rawSets, error: null }).then(resolve)
+            );
+
+            const result = await AnalyticsService.getEffectiveSetsByMuscleGroup('u-1', {
+                secondaryWeight: 0.5,
+            });
+
+            expect(result.error).toBeNull();
+            expect(result.data).toBeDefined();
+            expect(result.data!.porGrupoMuscular['Espalda']).toBe(2);
+            expect(result.data!.porGrupoMuscular['Bíceps']).toBe(1);
+        });
+
         it('handles DB error gracefully', async () => {
             const dbError = new Error('Query error');
             mockChain.then = jest.fn((resolve: any) =>
