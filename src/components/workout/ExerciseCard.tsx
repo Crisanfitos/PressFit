@@ -35,6 +35,7 @@ export interface ExerciseCardProps {
     onDeleteSet: (setId: string, exerciseId: string) => void;
     onStartRestTimer: (setId: string) => void;
     onAddSet: (exerciseId: string) => void;
+    onSwapExercise?: (exercise: any) => void;
     getGhostValue: (exerciseId: string, setNumber: number, field: 'weight' | 'reps' | 'rpe') => string | null;
 }
 
@@ -59,6 +60,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     onDeleteSet,
     onStartRestTimer,
     onAddSet,
+    onSwapExercise,
     getGhostValue,
 }) => {
     const setsList = exercise.sets || exercise.series || [];
@@ -98,6 +100,16 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                         </View>
                     </View>
                     <View style={styles.exerciseActions}>
+                        {onSwapExercise && (
+                            <TouchableOpacity
+                                testID={`swap-exercise-button-${index}`}
+                                style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                                onPress={() => onSwapExercise(exercise)}
+                                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            >
+                                <MaterialIcons name="swap-horiz" size={20} color={colors.primary} />
+                            </TouchableOpacity>
+                        )}
                         <TouchableOpacity
                             style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
                             onPress={() => onNavigateDetail(exercise.id)}

@@ -83,6 +83,8 @@
     "test:e2e:PF-291": "node e2e/run-maestro.js e2e/maestro/us_057_onboarding_flow.yaml",
     "test:e2e:us058": "node e2e/run-maestro.js e2e/maestro/us_058_advanced_metrics_fatigue_rpe.yaml",
     "test:e2e:PF-292": "node e2e/run-maestro.js e2e/maestro/us_058_advanced_metrics_fatigue_rpe.yaml",
+    "test:e2e:us059": "node e2e/run-maestro.js e2e/maestro/us_059_swap_exercise_flow.yaml",
+    "test:e2e:PF-310": "node e2e/run-maestro.js e2e/maestro/us_059_swap_exercise_flow.yaml",
     "test:e2e:all": "node e2e/run-maestro.js e2e/maestro/"
   },
   "dependencies": {

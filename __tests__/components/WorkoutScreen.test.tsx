@@ -206,4 +206,19 @@ describe('WorkoutScreen Component (RNTL)', () => {
     const weightInputSet1 = getByTestId('set-weight-input-1');
     expect(weightInputSet1.props.placeholder).toBe('85');
   });
+
+  it('navigates to SwapExercise screen when swap exercise button is pressed in active workout', async () => {
+    const { getByTestId } = await render(
+      <WorkoutScreen navigation={mockNavigation} route={activeRoute} />
+    );
+
+    const swapBtn = getByTestId('swap-exercise-button-0');
+    expect(swapBtn).toBeTruthy();
+
+    fireEvent.press(swapBtn);
+    expect(mockNavigation.navigate).toHaveBeenCalledWith('SwapExercise', expect.objectContaining({
+      workoutId: 'w-101',
+      oldExercise: expect.objectContaining({ id: 'ex-item-1' }),
+    }));
+  });
 });

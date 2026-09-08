@@ -444,6 +444,56 @@ export const useWorkoutController = (
         }
     };
 
+    const swapExercise = async (
+        oldRoutineExerciseId: string,
+        newExercise: { id: string; titulo: string; grupo_muscular?: string; imagen_url?: string; tipo_peso?: TipoPeso },
+        newSetsCount: number = 3
+    ) => {
+        if (!workout) return false;
+
+        try {
+            // Optimistic update in state: replace exercise in place
+            setExercises((prev) =>
+                prev.map((ex) => {
+                    if (ex.routine_exercise_id === oldRoutineExerciseId || ex.id === oldRoutineExerciseId) {
+                        return {
+                            ...ex,
+                            id: newExercise.id,
+                            titulo: newExercise.titulo,
+                            grupo_muscular: newExercise.grupo_muscular || ex.grupo_muscular,
+                            imagen_url: newExercise.imagen_url || ex.imagen_url,
+                            tipo_peso: newExercise.tipo_peso || ex.tipo_peso || 'total',
+                            target_sets: newSetsCount,
+                            sets: Array.from({ length: newSetsCount }, (_, i) => ({
+                                id: `temp-${Date.now()}-${i}`,
+                                ejercicio_programado_id: oldRoutineExerciseId,
+                                numero_serie: i + 1,
+                                peso_utilizado: 0,
+                                repeticiones: 0,
+                            })),
+                        };
+                    }
+                    return ex;
+                })
+            );
+
+            const res = await WorkoutService.swapExerciseInWorkout(
+                workout.id,
+                oldRoutineExerciseId,
+                newExercise.id,
+                newSetsCount
+            );
+
+            // Reload to ensure all IDs and series are synchronized from database
+            await loadExercises(routineDayId, workout.id);
+            return !res.error;
+        } catch (error) {
+            console.error('Failed to swap exercise in controller:', error);
+            if (workout) await loadExercises(routineDayId, workout.id);
+            return false;
+        }
+    };
+
     const finishWorkout = async () => {
         if (!workout || mode !== 'ACTIVE') return false;
         stopTimer();
@@ -471,6 +521,7 @@ export const useWorkoutController = (
         deleteSet,
         removeExercise,
         addExercise,
+        swapExercise,
         finishWorkout,
         updateWeightType,
         loadSeriesForExercise,

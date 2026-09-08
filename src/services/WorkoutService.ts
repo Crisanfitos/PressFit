@@ -666,4 +666,104 @@ export const WorkoutService = {
             return { data: null, error };
         }
     },
+
+    /**
+     * Swaps an existing programmed exercise in an active workout with a new exercise,
+     * maintaining the exact ordinal execution order (orden_ejecucion), and replacing
+     * the series with newSetsCount clean initial sets.
+     */
+    async swapExerciseInWorkout(
+        workoutId: string,
+        programmedExerciseId: string,
+        newExerciseId: string,
+        newSetsCount: number = 3
+    ): Promise<ServiceResponse<ScheduledExercise>> {
+        if (isE2EMockEnabled()) {
+            return {
+                data: {
+                    id: programmedExerciseId,
+                    rutina_diaria_id: workoutId,
+                    ejercicio_id: newExerciseId,
+                    orden_ejecucion: 1,
+                    created_at: new Date().toISOString(),
+                } as any,
+                error: null,
+            };
+        }
+
+        try {
+            // 1. Update the programmed exercise to point to the new exercise (maintains original orden_ejecucion)
+            const { data: updatedProgrammed, error: updateError } = await supabase
+                .from('ejercicios_programados')
+                .update({ ejercicio_id: newExerciseId })
+                .eq('id', programmedExerciseId)
+                .select(`*, ejercicio:ejercicios (*)`)
+                .single();
+
+            if (updateError) throw updateError;
+
+            // 2. Delete old series for this programmed exercise
+            const { error: deleteSeriesError } = await supabase
+                .from('series')
+                .delete()
+                .eq('ejercicio_programado_id', programmedExerciseId);
+
+            if (deleteSeriesError) {
+                console.warn('Could not delete old series during exercise swap:', deleteSeriesError);
+            }
+
+            // 3. Insert new clean initial sets
+            if (newSetsCount > 0) {
+                const newSeries = Array.from({ length: newSetsCount }, (_, i) => ({
+                    ejercicio_programado_id: programmedExerciseId,
+                    numero_serie: i + 1,
+                    peso_utilizado: 0,
+                    repeticiones: 0,
+                }));
+                const { error: insertSeriesError } = await supabase
+                    .from('series')
+                    .insert(newSeries);
+
+                if (insertSeriesError) {
+                    console.warn('Could not insert new series during exercise swap:', insertSeriesError);
+                }
+            }
+
+            // 4. Update local cache if available
+            try {
+                const cachedRes = await OfflineStorageService.getCachedWorkouts();
+                const workouts = cachedRes.data || [];
+                const updatedList = workouts.map((w) => {
+                    if (w.id === workoutId && w.ejercicios_programados) {
+                        w.ejercicios_programados = w.ejercicios_programados.map((ep) => {
+                            if (ep.id === programmedExerciseId) {
+                                return {
+                                    ...ep,
+                                    ejercicio_id: newExerciseId,
+                                    ejercicio: updatedProgrammed?.ejercicio || ep.ejercicio,
+                                    series: Array.from({ length: newSetsCount }, (_, i) => ({
+                                        id: `temp-${Date.now()}-${i}`,
+                                        ejercicio_programado_id: programmedExerciseId,
+                                        numero_serie: i + 1,
+                                        peso_utilizado: 0,
+                                        repeticiones: 0,
+                                    })),
+                                };
+                            }
+                            return ep;
+                        });
+                    }
+                    return w;
+                });
+                await OfflineStorageService.saveWorkouts(updatedList);
+            } catch (cacheErr) {
+                console.warn('Could not update cache on swapExerciseInWorkout:', cacheErr);
+            }
+
+            return { data: updatedProgrammed, error: null };
+        } catch (error) {
+            console.error('Error swapping exercise in workout:', error);
+            return { data: null, error };
+        }
+    },
 };
