@@ -11,7 +11,7 @@ interface SetInputProps {
     testID?: string;
 }
 
-const SetInput: React.FC<SetInputProps> = ({
+const SetInput: React.FC<SetInputProps> = React.memo(({
     value,
     placeholder = '-',
     onChange,
@@ -60,7 +60,7 @@ const SetInput: React.FC<SetInputProps> = ({
         // Removed selectTextOnFocus so the text is not auto-selected
         />
     );
-};
+});
 
 const styles = StyleSheet.create({
     input: {

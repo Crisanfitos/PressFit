@@ -323,4 +323,64 @@ const styles = StyleSheet.create({
     },
 });
 
-export default WorkoutSetRow;
+export const areWorkoutSetRowPropsEqual = (
+    prevProps: WorkoutSetRowProps,
+    nextProps: WorkoutSetRowProps
+): boolean => {
+    const prevSet = prevProps.set;
+    const nextSet = nextProps.set;
+    if (
+        prevSet.id !== nextSet.id ||
+        prevSet.numero_serie !== nextSet.numero_serie ||
+        prevSet.peso_utilizado !== nextSet.peso_utilizado ||
+        prevSet.repeticiones !== nextSet.repeticiones ||
+        prevSet.rpe !== nextSet.rpe ||
+        prevSet.descanso_segundos !== nextSet.descanso_segundos
+    ) {
+        return false;
+    }
+
+    if (
+        prevProps.setIndex !== nextProps.setIndex ||
+        prevProps.exerciseId !== nextProps.exerciseId ||
+        prevProps.tipoPeso !== nextProps.tipoPeso ||
+        prevProps.ghostWeight !== nextProps.ghostWeight ||
+        prevProps.ghostReps !== nextProps.ghostReps ||
+        prevProps.ghostRpe !== nextProps.ghostRpe ||
+        prevProps.isInputEditable !== nextProps.isInputEditable ||
+        prevProps.isStructureEditable !== nextProps.isStructureEditable ||
+        prevProps.navMode !== nextProps.navMode
+    ) {
+        return false;
+    }
+
+    const prevIsCompleted = prevProps.lastCompletedSetId === prevSet.id;
+    const nextIsCompleted = nextProps.lastCompletedSetId === nextSet.id;
+    if (prevIsCompleted !== nextIsCompleted) {
+        return false;
+    }
+
+    if (nextIsCompleted && prevProps.restTimerVisible !== nextProps.restTimerVisible) {
+        return false;
+    }
+
+    const prevHasSavedTimer = !!prevProps.savedTimerSetIds?.has(prevSet.id);
+    const nextHasSavedTimer = !!nextProps.savedTimerSetIds?.has(nextSet.id);
+    if (prevHasSavedTimer !== nextHasSavedTimer) {
+        return false;
+    }
+
+    if (
+        prevProps.colors.background !== nextProps.colors.background ||
+        prevProps.colors.surface !== nextProps.colors.surface ||
+        prevProps.colors.text !== nextProps.colors.text ||
+        prevProps.colors.primary !== nextProps.colors.primary ||
+        prevProps.colors.border !== nextProps.colors.border
+    ) {
+        return false;
+    }
+
+    return true;
+};
+
+export default React.memo(WorkoutSetRow, areWorkoutSetRowPropsEqual);

@@ -39,7 +39,7 @@ export interface ExerciseCardProps {
     getGhostValue: (exerciseId: string, setNumber: number, field: 'weight' | 'reps' | 'rpe') => string | null;
 }
 
-export const ExerciseCard: React.FC<ExerciseCardProps> = ({
+const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     exercise,
     index,
     isCollapsed,
@@ -310,4 +310,116 @@ const styles = StyleSheet.create({
     },
 });
 
+export const areExerciseCardPropsEqual = (
+    prevProps: ExerciseCardProps,
+    nextProps: ExerciseCardProps
+): boolean => {
+    // 1. Primitive and UI state comparisons
+    if (
+        prevProps.index !== nextProps.index ||
+        prevProps.isCollapsed !== nextProps.isCollapsed ||
+        prevProps.isInputEditable !== nextProps.isInputEditable ||
+        prevProps.isStructureEditable !== nextProps.isStructureEditable ||
+        prevProps.mode !== nextProps.mode ||
+        prevProps.navMode !== nextProps.navMode
+    ) {
+        return false;
+    }
+
+    // 2. Exercise basic attributes
+    const prevEx = prevProps.exercise;
+    const nextEx = nextProps.exercise;
+    if (
+        prevEx.id !== nextEx.id ||
+        prevEx.titulo !== nextEx.titulo ||
+        prevEx.tipo_peso !== nextEx.tipo_peso ||
+        prevEx.routine_exercise_id !== nextEx.routine_exercise_id
+    ) {
+        return false;
+    }
+
+    // 3. Theme colors comparison
+    if (
+        prevProps.colors.surface !== nextProps.colors.surface ||
+        prevProps.colors.border !== nextProps.colors.border ||
+        prevProps.colors.primary !== nextProps.colors.primary ||
+        prevProps.colors.text !== nextProps.colors.text ||
+        prevProps.colors.textSecondary !== nextProps.colors.textSecondary
+    ) {
+        return false;
+    }
+
+    // 4. Previous workout metadata (stale warning, etc.)
+    if (
+        prevProps.previousWorkout?.isStale !== nextProps.previousWorkout?.isStale ||
+        prevProps.previousWorkout?.days_diff !== nextProps.previousWorkout?.days_diff
+    ) {
+        return false;
+    }
+
+    // 5. Sets list comparison
+    const prevSets = prevEx.sets || prevEx.series || [];
+    const nextSets = nextEx.sets || nextEx.series || [];
+
+    if (prevSets.length !== nextSets.length) {
+        return false;
+    }
+
+    for (let i = 0; i < nextSets.length; i++) {
+        const p = prevSets[i];
+        const n = nextSets[i];
+        if (
+            p.id !== n.id ||
+            p.numero_serie !== n.numero_serie ||
+            p.peso_utilizado !== n.peso_utilizado ||
+            p.repeticiones !== n.repeticiones ||
+            p.rpe !== n.rpe ||
+            p.descanso_segundos !== n.descanso_segundos
+        ) {
+            return false;
+        }
+    }
+
+    // 6. Rest timer & lastCompletedSetId localization
+    // Only invalidate if this exercise contains the set that was marked completed
+    const prevHadCompleted = prevProps.lastCompletedSetId
+        ? prevSets.some((s: any) => s.id === prevProps.lastCompletedSetId)
+        : false;
+    const nextHasCompleted = nextProps.lastCompletedSetId
+        ? nextSets.some((s: any) => s.id === nextProps.lastCompletedSetId)
+        : false;
+
+    if (prevHadCompleted !== nextHasCompleted) {
+        return false;
+    }
+
+    if (nextHasCompleted) {
+        if (
+            prevProps.lastCompletedSetId !== nextProps.lastCompletedSetId ||
+            prevProps.restTimerVisible !== nextProps.restTimerVisible
+        ) {
+            return false;
+        }
+    }
+
+    // 7. savedTimerSetIds localization
+    for (const set of nextSets) {
+        if (set.id) {
+            const wasSaved = prevProps.savedTimerSetIds?.has(set.id);
+            const isSaved = nextProps.savedTimerSetIds?.has(set.id);
+            if (wasSaved !== isSaved) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+};
+
+export const ExerciseCard: React.FC<ExerciseCardProps> = React.memo(
+    ExerciseCardComponent,
+    areExerciseCardPropsEqual
+);
+
 export default ExerciseCard;
+

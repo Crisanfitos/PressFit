@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, cleanup } from '@testing-library/react-native';
-import WorkoutSetRow from '../../src/components/WorkoutSetRow';
+import WorkoutSetRow, { areWorkoutSetRowPropsEqual } from '../../src/components/WorkoutSetRow';
 import { HapticService } from '../../src/services/HapticService';
 
 jest.mock('../../src/services/HapticService', () => ({
@@ -481,4 +481,68 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'rpe', '');
         });
     });
+
+    describe('areWorkoutSetRowPropsEqual Comparator (Atomic Memoization)', () => {
+        const baseProps: any = {
+            set: defaultSet,
+            setIndex: 0,
+            exerciseId: 'ex-1',
+            tipoPeso: 'total',
+            isInputEditable: true,
+            isStructureEditable: true,
+            colors: mockColors,
+            ghostWeight: null,
+            ghostReps: null,
+            ghostRpe: null,
+            navMode: 'DEFAULT',
+            lastCompletedSetId: null,
+            restTimerVisible: false,
+            savedTimerSetIds: new Set<string>(),
+            onSetChange: mockOnSetChange,
+            onDeleteSet: mockOnDeleteSet,
+            onStartRestTimer: mockOnStartRestTimer,
+        };
+
+        it('returns true when relevant props are identical', () => {
+            const nextProps = { ...baseProps, onSetChange: jest.fn() }; // function reference changed
+            expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(true);
+        });
+
+        it('returns false when set scalar values change', () => {
+            const nextProps = { ...baseProps, set: { ...defaultSet, peso_utilizado: 85 } };
+            expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
+        });
+
+        it('returns false when editable status changes', () => {
+            const nextProps = { ...baseProps, isInputEditable: false };
+            expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
+        });
+
+        it('isolates rest timer completion: returns true if completed set belongs to another row', () => {
+            const nextProps = {
+                ...baseProps,
+                lastCompletedSetId: 'set-999', // another set
+                restTimerVisible: true,
+            };
+            expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(true);
+        });
+
+        it('invalidates memoization when this row becomes the completed set', () => {
+            const nextProps = {
+                ...baseProps,
+                lastCompletedSetId: 'set-1', // this set
+                restTimerVisible: true,
+            };
+            expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
+        });
+
+        it('invalidates memoization when this row changes savedTimerSetIds membership', () => {
+            const nextProps = {
+                ...baseProps,
+                savedTimerSetIds: new Set<string>(['set-1']),
+            };
+            expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
+        });
+    });
 });
+
