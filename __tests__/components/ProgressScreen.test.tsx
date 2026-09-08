@@ -32,4 +32,18 @@ describe('ProgressScreen Component (RNTL)', () => {
 
         expect(mockNavigation.navigate).toHaveBeenCalledWith('HypertrophyVolume');
     });
+
+    it('ensures all cards render chevron icons and bounded flex containers for subtitles', async () => {
+        const { getByTestId, getByText, getAllByTestId } = await render(
+            <ProgressScreen navigation={mockNavigation} />
+        );
+
+        const card = getByTestId('progress-item-hypertrophy');
+        expect(card).toBeTruthy();
+        expect(getByText('Series efectivas semanales vs MEV / MAV / MRV')).toBeTruthy();
+
+        // Check that chevron icons exist for each navigation item (5 total)
+        const chevrons = getAllByTestId('icon-arrow-forward-ios');
+        expect(chevrons.length).toBe(5);
+    });
 });

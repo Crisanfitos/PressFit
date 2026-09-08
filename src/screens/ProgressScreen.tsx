@@ -54,7 +54,17 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
                     padding: 16,
                     marginBottom: 16,
                 },
-                itemContent: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+                itemContent: {
+                    flex: 1,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 16,
+                    marginRight: 12,
+                },
+                textContent: {
+                    flex: 1,
+                    justifyContent: 'center',
+                },
                 iconContainer: {
                     height: 48,
                     width: 48,
@@ -87,7 +97,7 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
                             <View style={styles.iconContainer}>
                                 <MaterialIcons name={item.icon} size={28} color={colors.primary} />
                             </View>
-                            <View>
+                            <View style={styles.textContent}>
                                 <Text style={styles.itemTitle}>{item.title}</Text>
                                 <Text style={styles.itemSubtitle}>{item.subtitle}</Text>
                             </View>
