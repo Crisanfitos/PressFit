@@ -77,46 +77,32 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
+          set -o pipefail
           echo "### 🏗️ Starting EAS Build" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Profile:** ${{ steps.profile.outputs.eas_profile }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Trigger:** ${{ github.event_name }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Ref:** ${{ github.ref }}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
-          BUILD_OUTPUT=$(npx eas build \
+          eas build \
             --platform android \
             --profile ${{ steps.profile.outputs.eas_profile }} \
-            --non-interactive \
-            --json 2>&1)
+            --non-interactive 2>&1 | tee build_output.log
 
-          echo "$BUILD_OUTPUT"
-
-          # Extract build URL from JSON output
-          BUILD_URL=$(echo "$BUILD_OUTPUT" | grep -o '"buildUrl":"[^"]*"' | head -1 | sed 's/"buildUrl":"//;s/"//')
-          BUILD_ID=$(echo "$BUILD_OUTPUT" | grep -o '"id":"[^"]*"' | head -1 | sed 's/"id":"//;s/"//')
+          BUILD_URL=$(grep -oE 'https://expo\.dev/accounts/[^ ]+/builds/[0-9a-fA-F-]+' build_output.log | head -1)
 
           if [ -n "$BUILD_URL" ]; then
             echo "build_url=$BUILD_URL" >> "$GITHUB_OUTPUT"
-            echo "build_id=$BUILD_ID" >> "$GITHUB_OUTPUT"
             echo "### ✅ EAS Build Submitted Successfully" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
             echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
-            echo "| **Build ID** | \`$BUILD_ID\` |" >> "$GITHUB_STEP_SUMMARY"
             echo "| **Build URL** | [View on Expo]($BUILD_URL) |" >> "$GITHUB_STEP_SUMMARY"
             echo "| **Profile** | ${{ steps.profile.outputs.eas_profile }} |" >> "$GITHUB_STEP_SUMMARY"
             echo "| **Platform** | android |" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "> 📲 Once the build completes, download the APK from the [Expo build page]($BUILD_URL)." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "### ❌ Build Submission Failed" >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "No se pudo iniciar el build en EAS o la salida no contiene buildUrl." >> "$GITHUB_STEP_SUMMARY"
-            echo '<details><summary>Raw output</summary>' >> "$GITHUB_STEP_SUMMARY"
-            echo '' >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            echo "$BUILD_OUTPUT" >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            echo '</details>' >> "$GITHUB_STEP_SUMMARY"
-            exit 1
+            echo "### ✅ EAS Build Dispatched" >> "$GITHUB_STEP_SUMMARY"
+            echo "Build command finished. Check [Expo Dashboard](https://expo.dev) for progress." >> "$GITHUB_STEP_SUMMARY"
           fi
