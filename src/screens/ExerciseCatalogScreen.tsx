@@ -2,7 +2,6 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import {
   View,
   Text,
-  FlatList,
   TouchableOpacity,
   TextInput,
   StyleSheet,
@@ -11,6 +10,7 @@ import {
   Animated,
   Modal,
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -52,7 +52,7 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
   const [showFilters, setShowFilters] = useState(true);
 
   const SCROLL_TOP_THRESHOLD = 6;
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<FlashList<Exercise>>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const scrollTopOpacity = useRef(new Animated.Value(0)).current;
 
@@ -243,17 +243,15 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
       {loading ? (
         <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />
       ) : (
-        <FlatList
+        <FlashList
           ref={flatListRef}
           data={exercises}
           renderItem={renderItem}
+          estimatedItemSize={90}
           keyExtractor={(item) => item.id}
           contentContainerStyle={screenStyles.listContent}
           showsVerticalScrollIndicator={false}
-          initialNumToRender={8}
-          windowSize={5}
           testID="exercise-catalog-list"
-          removeClippedSubviews
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
           ListEmptyComponent={
