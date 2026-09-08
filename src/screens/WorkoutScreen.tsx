@@ -70,6 +70,15 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         navigation.navigate('ExerciseLibrary', { routineDayId: workout?.id || routineDayId });
     };
 
+    const handleSwapExercise = (exercise: any) => {
+        state.needsRefreshRef.current = true;
+        navigation.navigate('SwapExercise', {
+            workoutId: workout?.id || initialWorkoutId,
+            routineDayId: routineDayId || workout?.rutina_diaria_id,
+            oldExercise: exercise,
+        });
+    };
+
     const handleFinishWorkout = () => {
         Alert.alert(t('workout.finishWorkout', 'Finalizar Entrenamiento'), t('workout.finishWorkoutConfirm', '¿Deseas finalizar este entrenamiento?'), [
             { text: t('common.cancel', 'Cancelar'), style: 'cancel' },
@@ -144,6 +153,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                 onDeleteSet={(sId, eId) => confirmDeleteSet(async () => { state.setSaving(true); await deleteSet(sId, eId); state.setSaving(false); })}
                                 onStartRestTimer={state.handleStartRestTimer}
                                 onAddSet={async (id) => { state.setSaving(true); await addSet(id); state.setSaving(false); }}
+                                onSwapExercise={(mode === 'ACTIVE' || isStructureEditable) ? handleSwapExercise : undefined}
                                 getGhostValue={(eId, sNum, fld) => getGhostValue(previousWorkout, eId, sNum, fld)}
                             />
                         ))

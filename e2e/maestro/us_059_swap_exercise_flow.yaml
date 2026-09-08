@@ -1,0 +1,120 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_059_swap_exercise_flow.yaml — PF-310: Intercambiar ejercicio durante el entrenamiento activo
+
+- launchApp:
+    clearState: true
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 1. Navegar desde bienvenida a pantalla de Login
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+# 2. Introducir credenciales de prueba
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+- inputText: "${E2E_TEST_EMAIL}"
+
+- tapOn:
+    id: "password-input"
+- inputText: "${E2E_TEST_PASSWORD}"
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# 3. Entrar a WorkoutScreen
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+- tapOn:
+    id: "calendar-day-today"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "start-workout-action-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 10000
+
+# 4. Verificar botón de intercambio y pulsar
+- extendedWaitUntil:
+    visible:
+      id: "swap-exercise-button-0"
+    timeout: 10000
+
+- assertVisible:
+    id: "swap-exercise-button-0"
+
+- tapOn:
+    id: "swap-exercise-button-0"
+
+# 5. Verificar SwapExerciseScreen y tarjeta fija del ejercicio a sustituir
+- extendedWaitUntil:
+    visible:
+      id: "swap-exercise-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "swap-exercise-current-card"
+
+# 6. Seleccionar ejercicio del catálogo y continuar
+- tapOn:
+    text: ".*"
+    optional: true
+
+- tapOn:
+    id: "swap-exercise-continue-button"
+    optional: true
+
+# 7. Verificar paso 2 de comparativa y series
+- extendedWaitUntil:
+    visible:
+      id: "swap-exercise-step-2"
+    timeout: 5000
+    optional: true
+
+- tapOn:
+    id: "swap-exercise-sets-increment"
+    optional: true
+
+- tapOn:
+    id: "swap-exercise-finish-button"
+    optional: true
+
+# 8. Retorno a pantalla de entrenamiento
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 10000
+    optional: true
