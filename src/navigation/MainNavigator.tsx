@@ -34,6 +34,7 @@ export type MainTabParamList = {
 const Tab = createMaterialTopTabNavigator<MainTabParamList>();
 
 import FloatingTimerPill from '../components/FloatingTimerPill';
+import RestTimerFloatingBar from '../components/timer/RestTimerFloatingBar';
 import { View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getActiveWorkoutParams } from '../services/TimerNotificationService';
@@ -145,7 +146,11 @@ const MainNavigator: React.FC = () => {
                     }}
                 />
             </Tab.Navigator>
-            <FloatingTimerPill visible={isWorkoutFocused ? false : undefined} onPress={handlePillPress} />
+            <RestTimerFloatingBar
+                visible={isWorkoutFocused ? false : undefined}
+                bottomOffset={65 + insets.bottom}
+                onPress={handlePillPress}
+            />
             <ResumeWorkoutModal
                 visible={!isWorkoutFocused && Boolean(pendingSession)}
                 session={pendingSession}

@@ -512,3 +512,57 @@ export async function clearActiveWorkoutParams(): Promise<void> {
         await AsyncStorage.removeItem(WORKOUT_PARAMS_KEY);
     } catch (_) { }
 }
+
+// ─── Floating Bar & Target Duration Helpers (PF-312) ───
+export const TIMER_TARGET_DURATION_KEY = '@pressfit_timer_target_duration';
+
+export async function setTimerTargetDuration(durationSeconds: number): Promise<void> {
+    try {
+        await AsyncStorage.setItem(TIMER_TARGET_DURATION_KEY, String(durationSeconds));
+    } catch (_) { }
+}
+
+export async function getTimerTargetDuration(): Promise<number> {
+    try {
+        const val = await AsyncStorage.getItem(TIMER_TARGET_DURATION_KEY);
+        if (val) return Math.max(1, parseInt(val, 10) || 90);
+    } catch (_) { }
+    return 90;
+}
+
+export async function addSecondsToRestTimer(secondsToAdd = 30): Promise<{ elapsed: number; target: number }> {
+    try {
+        const currentTarget = await getTimerTargetDuration();
+        const newTarget = currentTarget + secondsToAdd;
+        await setTimerTargetDuration(newTarget);
+
+        const elapsed = await getElapsedSecondsFromStorage();
+        const paused = await AsyncStorage.getItem(TIMER_PAUSED_ELAPSED_KEY);
+        if (paused === null) {
+            const saved = await AsyncStorage.getItem(TIMER_STORAGE_KEY);
+            if (saved) {
+                const startTs = parseInt(saved, 10);
+                await scheduleTimerNotification(elapsed, { paused: false, startTimeMs: startTs });
+            }
+        }
+        logTimerNotification('info', `Added ${secondsToAdd}s to rest timer. New target: ${newTarget}s`);
+        return { elapsed, target: newTarget };
+    } catch (error) {
+        logTimerNotification('warn', 'Failed to add seconds to rest timer:', error);
+        return { elapsed: 0, target: 90 };
+    }
+}
+
+export async function discardActiveRestTimer(): Promise<void> {
+    try {
+        await setPendingTimerAction('DISCARD');
+        await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+        await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
+        await AsyncStorage.removeItem(TIMER_TARGET_DURATION_KEY);
+        await cancelTimerNotification();
+        logTimerNotification('info', 'Active rest timer discarded via discardActiveRestTimer');
+    } catch (error) {
+        logTimerNotification('warn', 'Failed to discard active rest timer:', error);
+    }
+}
+
