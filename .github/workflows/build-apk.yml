@@ -45,6 +45,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify EXPO_TOKEN Secret
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::error title=Missing Secret::El secreto EXPO_TOKEN no está configurado en GitHub Secrets."
+            echo "### ❌ Error: EXPO_TOKEN no configurado" >> "$GITHUB_STEP_SUMMARY"
+            echo "Para compilar en EAS se requiere configurar el secreto \`EXPO_TOKEN\` en **Settings > Secrets and variables > Actions** del repositorio." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "✅ EXPO_TOKEN está configurado."
+
       - name: Setup EAS CLI
         uses: expo/expo-github-action@v8
         with:
@@ -62,6 +74,8 @@ jobs:
 
       - name: Build APK on EAS
         id: eas_build
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           echo "### 🏗️ Starting EAS Build" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Profile:** ${{ steps.profile.outputs.eas_profile }}" >> "$GITHUB_STEP_SUMMARY"
@@ -73,7 +87,7 @@ jobs:
             --platform android \
             --profile ${{ steps.profile.outputs.eas_profile }} \
             --non-interactive \
-            --json 2>&1) || true
+            --json 2>&1)
 
           echo "$BUILD_OUTPUT"
 
@@ -95,15 +109,14 @@ jobs:
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "> 📲 Once the build completes, download the APK from the [Expo build page]($BUILD_URL)." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "### ⚠️ Build Submitted" >> "$GITHUB_STEP_SUMMARY"
+            echo "### ❌ Build Submission Failed" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "Build was submitted but the URL could not be extracted automatically." >> "$GITHUB_STEP_SUMMARY"
-            echo "Check your [Expo Dashboard](https://expo.dev) for the build status." >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "No se pudo iniciar el build en EAS o la salida no contiene buildUrl." >> "$GITHUB_STEP_SUMMARY"
             echo '<details><summary>Raw output</summary>' >> "$GITHUB_STEP_SUMMARY"
             echo '' >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
             echo "$BUILD_OUTPUT" >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
             echo '</details>' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
           fi
