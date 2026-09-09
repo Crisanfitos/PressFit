@@ -154,6 +154,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                 onStartRestTimer={state.handleStartRestTimer}
                                 onAddSet={async (id) => { state.setSaving(true); await addSet(id); state.setSaving(false); }}
                                 onSwapExercise={(mode === 'ACTIVE' || isStructureEditable) ? handleSwapExercise : undefined}
+                                onOpenPlateCalculator={state.handleOpenPlateCalculator}
                                 getGhostValue={(eId, sNum, fld) => getGhostValue(previousWorkout, eId, sNum, fld)}
                             />
                         ))
@@ -180,6 +181,10 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                 restTimerVisible={state.restTimerVisible}
                 onRestTimerDismiss={state.handleRestTimerDismiss}
                 onRestTimerStop={state.handleRestTimerStop}
+                plateCalculatorVisible={state.plateCalculatorVisible}
+                plateCalculatorWeight={state.plateCalculatorWeight}
+                onClosePlateCalculator={state.handleClosePlateCalculator}
+                onApplyPlateCalculatorWeight={state.handleApplyPlateCalculatorWeight}
             />
         </SafeAreaView>
     );

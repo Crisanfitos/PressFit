@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, cleanup } from '@testing-library/react-native';
+import { render, fireEvent, cleanup } from '@testing-library/react-native';
 import ExerciseCard, { areExerciseCardPropsEqual, ExerciseCardProps } from '../../src/components/workout/ExerciseCard';
 
 describe('ExerciseCard & areExerciseCardPropsEqual (RNTL)', () => {
@@ -118,5 +118,29 @@ describe('ExerciseCard & areExerciseCardPropsEqual (RNTL)', () => {
             };
             expect(areExerciseCardPropsEqual(baseProps, nextProps)).toBe(false);
         });
+
+        it('invalidates memoization when onOpenPlateCalculator changes', () => {
+            const nextProps = {
+                ...baseProps,
+                onOpenPlateCalculator: jest.fn(),
+            };
+            expect(areExerciseCardPropsEqual(baseProps, nextProps)).toBe(false);
+        });
+    });
+
+    it('renders plate calculator action button and triggers callback with first set weight', async () => {
+        const mockOpenPlate = jest.fn();
+        const { getByTestId } = await render(
+            <ExerciseCard
+                {...baseProps}
+                onOpenPlateCalculator={mockOpenPlate}
+            />
+        );
+
+        const plateBtn = getByTestId('plate-calculator-exercise-button-0');
+        expect(plateBtn).toBeTruthy();
+        fireEvent.press(plateBtn);
+
+        expect(mockOpenPlate).toHaveBeenCalledWith(80, 'set-1');
     });
 });

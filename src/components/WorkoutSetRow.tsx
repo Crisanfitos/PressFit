@@ -41,6 +41,7 @@ export interface WorkoutSetRowProps {
     lastCompletedSetId?: string | null;
     restTimerVisible?: boolean;
     savedTimerSetIds?: Set<string>;
+    onOpenPlateCalculator?: (weight: number, setId: string) => void;
     onSetChange: (setId: string, field: string, value: string) => void;
     onDeleteSet?: (setId: string, exerciseId: string) => void;
     onStartRestTimer?: (setId: string) => void;
@@ -61,6 +62,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     lastCompletedSetId,
     restTimerVisible,
     savedTimerSetIds,
+    onOpenPlateCalculator,
     onSetChange,
     onDeleteSet,
     onStartRestTimer,
@@ -170,7 +172,39 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                                     >
                                         <Text style={[styles.quickAdjustText, { color: colors.primary }]}>+2.5</Text>
                                     </TouchableOpacity>
+                                    {onOpenPlateCalculator && (
+                                        <TouchableOpacity
+                                            testID={`plate-calculator-button-${setIndex}`}
+                                            style={[
+                                                styles.quickAdjustBtn,
+                                                { backgroundColor: colors.surfaceHighlight, borderColor: colors.border },
+                                            ]}
+                                            onPress={() => {
+                                                const currentWeight = parseFloat(String(set.peso_utilizado)) || (ghostWeight ? parseFloat(String(ghostWeight)) : 0);
+                                                onOpenPlateCalculator(currentWeight, set.id);
+                                            }}
+                                            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                                        >
+                                            <MaterialIcons name="fitness-center" size={11} color={colors.primary} />
+                                        </TouchableOpacity>
+                                    )}
                                 </View>
+                            )}
+                            {!isInputEditable && onOpenPlateCalculator && (
+                                <TouchableOpacity
+                                    testID={`plate-calculator-button-${setIndex}`}
+                                    style={[
+                                        styles.quickAdjustBtn,
+                                        { backgroundColor: colors.surfaceHighlight, borderColor: colors.border, marginTop: 4, width: '100%' },
+                                    ]}
+                                    onPress={() => {
+                                        const currentWeight = parseFloat(String(set.peso_utilizado)) || (ghostWeight ? parseFloat(String(ghostWeight)) : 0);
+                                        onOpenPlateCalculator(currentWeight, set.id);
+                                    }}
+                                    hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                                >
+                                    <MaterialIcons name="fitness-center" size={12} color={colors.primary} />
+                                </TouchableOpacity>
                             )}
                         </View>
                     )}
@@ -349,7 +383,8 @@ export const areWorkoutSetRowPropsEqual = (
         prevProps.ghostRpe !== nextProps.ghostRpe ||
         prevProps.isInputEditable !== nextProps.isInputEditable ||
         prevProps.isStructureEditable !== nextProps.isStructureEditable ||
-        prevProps.navMode !== nextProps.navMode
+        prevProps.navMode !== nextProps.navMode ||
+        prevProps.onOpenPlateCalculator !== nextProps.onOpenPlateCalculator
     ) {
         return false;
     }

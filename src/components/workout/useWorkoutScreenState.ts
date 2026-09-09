@@ -29,6 +29,9 @@ export const useWorkoutScreenState = ({
     const [restTimerVisible, setRestTimerVisible] = useState(false);
     const [lastCompletedSetId, setLastCompletedSetId] = useState<string | null>(null);
     const [savedTimerSetIds, setSavedTimerSetIds] = useState<Set<string>>(new Set());
+    const [plateCalculatorVisible, setPlateCalculatorVisible] = useState(false);
+    const [plateCalculatorWeight, setPlateCalculatorWeight] = useState(20);
+    const [activePlateSetId, setActivePlateSetId] = useState<string | null>(null);
 
     const hasInitializedCollapse = useRef(false);
     const needsRefreshRef = useRef(false);
@@ -103,6 +106,25 @@ export const useWorkoutScreenState = ({
         setCollapsedExercises((prev) => ({ ...prev, [id]: !prev[id] }));
     };
 
+    const handleOpenPlateCalculator = (weight: number, setId?: string) => {
+        setPlateCalculatorWeight(weight > 0 ? weight : 20);
+        setActivePlateSetId(setId || null);
+        setPlateCalculatorVisible(true);
+    };
+
+    const handleApplyPlateCalculatorWeight = async (weight: number) => {
+        if (activePlateSetId) {
+            await updateSet(activePlateSetId, 'weight', String(weight));
+        }
+        setPlateCalculatorVisible(false);
+        setActivePlateSetId(null);
+    };
+
+    const handleClosePlateCalculator = () => {
+        setPlateCalculatorVisible(false);
+        setActivePlateSetId(null);
+    };
+
     return {
         collapsedExercises,
         saving,
@@ -118,6 +140,11 @@ export const useWorkoutScreenState = ({
         lastCompletedSetId,
         setLastCompletedSetId,
         savedTimerSetIds,
+        plateCalculatorVisible,
+        plateCalculatorWeight,
+        handleOpenPlateCalculator,
+        handleApplyPlateCalculatorWeight,
+        handleClosePlateCalculator,
         needsRefreshRef,
         handleConfirmAddSets,
         handleStartRestTimer,

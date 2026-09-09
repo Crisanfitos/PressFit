@@ -36,6 +36,7 @@ export interface ExerciseCardProps {
     onStartRestTimer: (setId: string) => void;
     onAddSet: (exerciseId: string) => void;
     onSwapExercise?: (exercise: any) => void;
+    onOpenPlateCalculator?: (weight: number, setId?: string) => void;
     getGhostValue: (exerciseId: string, setNumber: number, field: 'weight' | 'reps' | 'rpe') => string | null;
 }
 
@@ -61,6 +62,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     onStartRestTimer,
     onAddSet,
     onSwapExercise,
+    onOpenPlateCalculator,
     getGhostValue,
 }) => {
     const setsList = exercise.sets || exercise.series || [];
@@ -108,6 +110,20 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                             >
                                 <MaterialIcons name="swap-horiz" size={20} color={colors.primary} />
+                            </TouchableOpacity>
+                        )}
+                        {exercise.tipo_peso !== 'corporal' && onOpenPlateCalculator && (
+                            <TouchableOpacity
+                                testID={`plate-calculator-exercise-button-${index}`}
+                                style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                                onPress={() => {
+                                    const firstSet = setsList[0];
+                                    const initialW = firstSet?.peso_utilizado || 0;
+                                    onOpenPlateCalculator(initialW, firstSet?.id);
+                                }}
+                                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            >
+                                <MaterialIcons name="fitness-center" size={20} color={colors.primary} />
                             </TouchableOpacity>
                         )}
                         <TouchableOpacity
@@ -177,6 +193,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                                 onSetChange={onSetChange}
                                 onDeleteSet={onDeleteSet}
                                 onStartRestTimer={onStartRestTimer}
+                                onOpenPlateCalculator={onOpenPlateCalculator}
                             />
                         ))
                     )}
@@ -411,6 +428,10 @@ export const areExerciseCardPropsEqual = (
                 return false;
             }
         }
+    }
+
+    if (prevProps.onOpenPlateCalculator !== nextProps.onOpenPlateCalculator) {
+        return false;
     }
 
     return true;

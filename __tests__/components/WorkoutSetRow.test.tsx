@@ -543,6 +543,37 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             };
             expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
         });
+
+        it('invalidates memoization when onOpenPlateCalculator changes', () => {
+            const nextProps = {
+                ...baseProps,
+                onOpenPlateCalculator: jest.fn(),
+            };
+            expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
+        });
+    });
+
+    it('triggers onOpenPlateCalculator when plate calculator button is pressed', async () => {
+        const mockOpenPlate = jest.fn();
+        const { getByTestId } = await render(
+            <WorkoutSetRow
+                set={defaultSet}
+                setIndex={0}
+                exerciseId="ex-1"
+                tipoPeso="total"
+                isInputEditable={true}
+                isStructureEditable={false}
+                colors={mockColors}
+                onSetChange={mockOnSetChange}
+                onOpenPlateCalculator={mockOpenPlate}
+            />
+        );
+
+        const plateBtn = getByTestId('plate-calculator-button-0');
+        expect(plateBtn).toBeTruthy();
+        fireEvent.press(plateBtn);
+
+        expect(mockOpenPlate).toHaveBeenCalledWith(80, 'set-1');
     });
 });
 

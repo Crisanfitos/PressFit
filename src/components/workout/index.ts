@@ -6,3 +6,5 @@ export * from './WorkoutModals';
 export * from './StaleWarningBanner';
 export * from './workoutHelpers';
 export * from './useWorkoutScreenState';
+export * from './PlateVisualizer';
+export * from './PlateCalculatorModal';

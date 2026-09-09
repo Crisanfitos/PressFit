@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ThemeColors } from '../../types/theme';
 import RestTimer from '../RestTimer';
+import PlateCalculatorModal from './PlateCalculatorModal';
 
 export interface WorkoutModalsProps {
     modalVisible: boolean;
@@ -15,6 +16,10 @@ export interface WorkoutModalsProps {
     restTimerVisible: boolean;
     onRestTimerDismiss: () => void;
     onRestTimerStop: (seconds: number) => void;
+    plateCalculatorVisible?: boolean;
+    plateCalculatorWeight?: number;
+    onClosePlateCalculator?: () => void;
+    onApplyPlateCalculatorWeight?: (weight: number) => void;
 }
 
 export const WorkoutModals: React.FC<WorkoutModalsProps> = ({
@@ -28,6 +33,10 @@ export const WorkoutModals: React.FC<WorkoutModalsProps> = ({
     restTimerVisible,
     onRestTimerDismiss,
     onRestTimerStop,
+    plateCalculatorVisible,
+    plateCalculatorWeight,
+    onClosePlateCalculator,
+    onApplyPlateCalculatorWeight,
 }) => {
     return (
         <>
@@ -79,6 +88,17 @@ export const WorkoutModals: React.FC<WorkoutModalsProps> = ({
                 onTimerStop={onRestTimerStop}
                 colors={colors}
             />
+
+            {/* Plate Calculator Modal */}
+            {onClosePlateCalculator && (
+                <PlateCalculatorModal
+                    visible={!!plateCalculatorVisible}
+                    onClose={onClosePlateCalculator}
+                    initialWeight={plateCalculatorWeight}
+                    colors={colors}
+                    onApplyWeight={onApplyPlateCalculatorWeight}
+                />
+            )}
         </>
     );
 };
