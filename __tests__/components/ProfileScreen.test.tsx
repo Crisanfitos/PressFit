@@ -114,4 +114,15 @@ describe('ProfileScreen Component (RNTL)', () => {
             expect(getByTestId('timer-notification-toggle-switch').props.value).toBe(false);
         });
     });
+
+    it('navigates to PlateSettings screen when Discos y Barras row is pressed (PF-320)', async () => {
+        const { getByTestId } = await renderProfileScreen();
+
+        const plateSettingsBtn = getByTestId('plate-settings-navigation-button');
+        expect(plateSettingsBtn).toBeTruthy();
+
+        fireEvent.press(plateSettingsBtn);
+        expect(mockNavigation.navigate).toHaveBeenCalledWith('PlateSettings');
+    });
 });
+

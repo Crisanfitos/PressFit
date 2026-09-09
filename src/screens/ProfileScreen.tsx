@@ -312,6 +312,18 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                     thumbColor={timerNotifEnabled ? colors.primary : colors.textSecondary}
                                 />
                             </View>
+                            <TouchableOpacity
+                                testID="plate-settings-navigation-button"
+                                style={[styles.settingRow, { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border }]}
+                                onPress={() => navigation.navigate('PlateSettings')}
+                            >
+                                <MaterialIcons name="fitness-center" size={24} color={colors.textSecondary} />
+                                <View style={styles.settingTextContainer}>
+                                    <Text style={styles.settingLabel}>{t('profile.plateSettings', 'Discos y Barras')}</Text>
+                                    <Text style={styles.settingDescription}>{t('profile.plateSettingsDesc', 'Configura tu barra e inventario de discos')}</Text>
+                                </View>
+                                <MaterialIcons name="chevron-right" size={24} color={colors.textSecondary} />
+                            </TouchableOpacity>
                         </View>
                     </View>
 
