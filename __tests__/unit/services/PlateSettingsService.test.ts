@@ -105,4 +105,25 @@ describe('PlateSettingsService Unit Tests', () => {
     expect(loaded).toBeDefined();
     expect(loaded.defaultBarWeight).toBe(DEFAULT_BAR_WEIGHT_KG);
   });
+
+  it('isolates settings between different user IDs', async () => {
+    const userA = 'user-alpha';
+    const userB = 'user-beta';
+
+    // User A modifies bar weight and disables 25kg plates
+    await PlateSettingsService.updateBarWeight(15, 'kg', userA);
+    await PlateSettingsService.updatePlateItem('kg', 25, { enabled: false }, userA);
+
+    // User B fetches settings
+    const settingsB = await PlateSettingsService.getSettings(userB);
+    expect(settingsB.defaultBarWeight).toBe(DEFAULT_BAR_WEIGHT_KG);
+    const plate25B = settingsB.platesKg.find(p => p.weight === 25);
+    expect(plate25B?.availablePairs).toBeUndefined(); // Enabled by default
+
+    // User A fetches settings and confirms customization remains isolated
+    const settingsA = await PlateSettingsService.getSettings(userA);
+    expect(settingsA.defaultBarWeight).toBe(15);
+    const plate25A = settingsA.platesKg.find(p => p.weight === 25);
+    expect(plate25A?.availablePairs).toBe(0); // Disabled for user A
+  });
 });

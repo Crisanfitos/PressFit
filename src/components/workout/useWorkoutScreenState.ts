@@ -32,6 +32,7 @@ export const useWorkoutScreenState = ({
     const [plateCalculatorVisible, setPlateCalculatorVisible] = useState(false);
     const [plateCalculatorWeight, setPlateCalculatorWeight] = useState(20);
     const [activePlateSetId, setActivePlateSetId] = useState<string | null>(null);
+    const [activePlateExerciseId, setActivePlateExerciseId] = useState<string | null>(null);
 
     const hasInitializedCollapse = useRef(false);
     const needsRefreshRef = useRef(false);
@@ -106,23 +107,40 @@ export const useWorkoutScreenState = ({
         setCollapsedExercises((prev) => ({ ...prev, [id]: !prev[id] }));
     };
 
-    const handleOpenPlateCalculator = (weight: number, setId?: string) => {
+    const handleOpenPlateCalculator = (weight: number, setId?: string, exerciseId?: string) => {
         setPlateCalculatorWeight(weight > 0 ? weight : 20);
         setActivePlateSetId(setId || null);
+
+        let targetExId = exerciseId || null;
+        if (!targetExId && setId) {
+            const found = exercises.find((ex) => ex.series?.some((s: any) => s.id === setId));
+            if (found) targetExId = found.id;
+        }
+        setActivePlateExerciseId(targetExId);
         setPlateCalculatorVisible(true);
     };
 
     const handleApplyPlateCalculatorWeight = async (weight: number) => {
-        if (activePlateSetId) {
+        const targetEx = exercises.find((ex) => ex.id === activePlateExerciseId)
+            || (activePlateSetId ? exercises.find((ex) => ex.series?.some((s: any) => s.id === activePlateSetId)) : null);
+
+        if (targetEx?.series && targetEx.series.length > 0) {
+            await Promise.all(
+                targetEx.series.map((s: any) => updateSet(s.id, 'weight', String(weight)))
+            );
+        } else if (activePlateSetId) {
             await updateSet(activePlateSetId, 'weight', String(weight));
         }
+
         setPlateCalculatorVisible(false);
         setActivePlateSetId(null);
+        setActivePlateExerciseId(null);
     };
 
     const handleClosePlateCalculator = () => {
         setPlateCalculatorVisible(false);
         setActivePlateSetId(null);
+        setActivePlateExerciseId(null);
     };
 
     return {

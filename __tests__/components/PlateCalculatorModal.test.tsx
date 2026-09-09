@@ -1,6 +1,8 @@
 import React from 'react';
 import { render, fireEvent, cleanup, waitFor } from '@testing-library/react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import PlateCalculatorModal from '../../src/components/workout/PlateCalculatorModal';
+import { PlateSettingsService } from '../../src/services/PlateSettingsService';
 
 jest.mock('../../src/services/HapticService', () => ({
   HapticService: {
@@ -9,6 +11,40 @@ jest.mock('../../src/services/HapticService', () => ({
     warning: jest.fn(),
   },
 }));
+
+jest.mock('../../src/services/PlateSettingsService', () => {
+  const defaultPlatesKg = [
+    { weight: 25, availablePairs: undefined },
+    { weight: 20, availablePairs: undefined },
+    { weight: 15, availablePairs: undefined },
+    { weight: 10, availablePairs: undefined },
+    { weight: 5, availablePairs: undefined },
+    { weight: 2.5, availablePairs: undefined },
+    { weight: 1.25, availablePairs: undefined },
+  ];
+  const defaultPlatesLb = [
+    { weight: 45, availablePairs: undefined },
+    { weight: 35, availablePairs: undefined },
+    { weight: 25, availablePairs: undefined },
+    { weight: 10, availablePairs: undefined },
+    { weight: 5, availablePairs: undefined },
+    { weight: 2.5, availablePairs: undefined },
+  ];
+
+  return {
+    PlateSettingsService: {
+      getSettings: jest.fn().mockImplementation((userId?: string) => Promise.resolve({
+        unit: 'kg',
+        defaultBarWeight: 20,
+        customBarWeightKg: 20,
+        customBarWeightLb: 45,
+        platesKg: defaultPlatesKg,
+        platesLb: defaultPlatesLb,
+      })),
+      _clearMemoryCache: jest.fn(),
+    },
+  };
+});
 
 describe('PlateCalculatorModal Component (RNTL)', () => {
   const mockColors: any = {
@@ -24,8 +60,10 @@ describe('PlateCalculatorModal Component (RNTL)', () => {
   const mockOnClose = jest.fn();
   const mockOnApplyWeight = jest.fn();
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
+    PlateSettingsService._clearMemoryCache();
+    await AsyncStorage.clear();
   });
 
   afterEach(() => {
@@ -33,7 +71,7 @@ describe('PlateCalculatorModal Component (RNTL)', () => {
   });
 
   it('renders modal content correctly when visible is true', async () => {
-    const { getByTestId, getByText } = await render(
+    const { getByTestId, getByText, toJSON } = await render(
       <PlateCalculatorModal
         visible={true}
         onClose={mockOnClose}
@@ -128,7 +166,7 @@ describe('PlateCalculatorModal Component (RNTL)', () => {
     expect(mockOnClose).toHaveBeenCalled();
   });
 
-  it('calls onClose when close icon or cancel button is pressed', async () => {
+  it('calls onClose when close icon button is pressed', async () => {
     const { getByTestId } = await render(
       <PlateCalculatorModal
         visible={true}
@@ -141,13 +179,25 @@ describe('PlateCalculatorModal Component (RNTL)', () => {
 
     fireEvent.press(getByTestId('close-plate-calculator-btn'));
     expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onClose when cancel footer button is pressed', async () => {
+    const { getByTestId } = await render(
+      <PlateCalculatorModal
+        visible={true}
+        onClose={mockOnClose}
+        initialWeight={80}
+        unit="kg"
+        colors={mockColors}
+      />
+    );
 
     fireEvent.press(getByTestId('cancel-plate-calc-btn'));
-    expect(mockOnClose).toHaveBeenCalledTimes(2);
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
   it('supports lb unit properly with default 45lb bar and lb bar presets', async () => {
-    const { findByTestId, findByText } = await render(
+    const { getByTestId, getByText } = await render(
       <PlateCalculatorModal
         visible={true}
         onClose={mockOnClose}
@@ -157,9 +207,52 @@ describe('PlateCalculatorModal Component (RNTL)', () => {
       />
     );
 
-    expect(await findByTestId('bar-preset-45')).toBeTruthy();
-    expect(await findByTestId('bar-preset-35')).toBeTruthy();
-    expect(await findByTestId('bar-preset-25')).toBeTruthy();
-    expect(await findByText('Por lado: 1x45lb')).toBeTruthy();
+    expect(getByTestId('bar-preset-45')).toBeTruthy();
+    expect(getByTestId('bar-preset-35')).toBeTruthy();
+    expect(getByTestId('bar-preset-25')).toBeTruthy();
+    expect(getByText('Por lado: 1x45lb')).toBeTruthy();
+  });
+
+  it('respects gym restrictions by excluding disabled plates (availablePairs: 0)', async () => {
+    // 70kg target with 20kg bar requires 25kg per side.
+    // By default it would use 1x25kg.
+    // If 25kg plates are disabled in the user's gym, it should use 1x20kg, 1x5kg instead.
+    const customPlates = [
+      { weight: 25, availablePairs: 0 },
+      { weight: 20, availablePairs: undefined },
+      { weight: 15, availablePairs: undefined },
+      { weight: 10, availablePairs: undefined },
+      { weight: 5, availablePairs: undefined },
+      { weight: 2.5, availablePairs: undefined },
+      { weight: 1.25, availablePairs: undefined },
+    ];
+
+    const { getByTestId, queryByText } = await render(
+      <PlateCalculatorModal
+        visible={true}
+        onClose={mockOnClose}
+        initialWeight={70}
+        unit="kg"
+        colors={mockColors}
+        customPlates={customPlates}
+      />
+    );
+
+    expect(getByTestId('plate-summary-text').props.children).toBe('Por lado: 1x20kg, 1x5kg');
+    expect(queryByText('Por lado: 1x25kg')).toBeNull();
+  });
+
+  it('renders native Modal without throwing when visible is false', async () => {
+    const { queryByTestId } = await render(
+      <PlateCalculatorModal
+        visible={false}
+        onClose={mockOnClose}
+        initialWeight={60}
+        unit="kg"
+        colors={mockColors}
+      />
+    );
+
+    expect(queryByTestId('plate-calculator-modal')).toBeNull();
   });
 });

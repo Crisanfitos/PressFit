@@ -20,6 +20,7 @@ export interface WorkoutModalsProps {
     plateCalculatorWeight?: number;
     onClosePlateCalculator?: () => void;
     onApplyPlateCalculatorWeight?: (weight: number) => void;
+    userId?: string;
 }
 
 export const WorkoutModals: React.FC<WorkoutModalsProps> = ({
@@ -37,6 +38,7 @@ export const WorkoutModals: React.FC<WorkoutModalsProps> = ({
     plateCalculatorWeight,
     onClosePlateCalculator,
     onApplyPlateCalculatorWeight,
+    userId,
 }) => {
     return (
         <>
@@ -97,6 +99,7 @@ export const WorkoutModals: React.FC<WorkoutModalsProps> = ({
                     initialWeight={plateCalculatorWeight}
                     colors={colors}
                     onApplyWeight={onApplyPlateCalculatorWeight}
+                    userId={userId}
                 />
             )}
         </>

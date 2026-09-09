@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useContext } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
+import { AuthContext } from '../context/AuthContext';
 import {
   PlateSettingsService,
   UserPlateSettings,
@@ -48,6 +49,8 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { colors } = theme;
+  const auth = useContext(AuthContext);
+  const userId = auth?.user?.id;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -59,12 +62,12 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
   // Cargar configuración inicial
   useEffect(() => {
     loadSettings();
-  }, []);
+  }, [userId]);
 
   const loadSettings = async () => {
     try {
       setLoading(true);
-      const data = await PlateSettingsService.getSettings();
+      const data = await PlateSettingsService.getSettings(userId);
       setSettings(data);
       checkIfCustom(data.defaultBarWeight, data.unit);
     } catch (error) {
@@ -93,7 +96,7 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
     if (!settings || settings.unit === unit) return;
     HapticService.selection();
 
-    const updated = await PlateSettingsService.updateUnit(unit);
+    const updated = await PlateSettingsService.updateUnit(unit, userId);
     setSettings(updated);
     checkIfCustom(updated.defaultBarWeight, unit);
   };
@@ -106,7 +109,7 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
     setIsCustomBar(false);
     setCustomBarText(value.toString());
 
-    const updated = await PlateSettingsService.updateBarWeight(value, currentUnit);
+    const updated = await PlateSettingsService.updateBarWeight(value, currentUnit, userId);
     setSettings(updated);
   };
 
@@ -121,7 +124,7 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
         ...(currentUnit === 'kg' ? { customBarWeightKg: num } : { customBarWeightLb: num }),
       };
       setSettings(updated);
-      PlateSettingsService.saveSettings(updated);
+      PlateSettingsService.saveSettings(updated, userId);
     }
   };
 
@@ -134,7 +137,7 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
     const newPairs = enabled ? undefined : 0;
     const updated = await PlateSettingsService.updatePlateItem(currentUnit, weight, {
       availablePairs: newPairs,
-    });
+    }, userId);
     setSettings(updated);
   };
 
@@ -162,7 +165,7 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
 
     const updated = await PlateSettingsService.updatePlateItem(currentUnit, plate.weight, {
       availablePairs: nextPairs,
-    });
+    }, userId);
     setSettings(updated);
   };
 
@@ -173,7 +176,7 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
 
     const updated = await PlateSettingsService.updatePlateItem(currentUnit, weight, {
       availablePairs: undefined,
-    });
+    }, userId);
     setSettings(updated);
   };
 
@@ -189,7 +192,7 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
           style: 'destructive',
           onPress: async () => {
             HapticService.medium();
-            const defaults = await PlateSettingsService.resetToDefaults();
+            const defaults = await PlateSettingsService.resetToDefaults(userId);
             setSettings(defaults);
             checkIfCustom(defaults.defaultBarWeight, defaults.unit);
           },
@@ -203,7 +206,7 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
     if (!settings) return;
     setSaving(true);
     try {
-      await PlateSettingsService.saveSettings(settings);
+      await PlateSettingsService.saveSettings(settings, userId);
       HapticService.light();
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 2000);

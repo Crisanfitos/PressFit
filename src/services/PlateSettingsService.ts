@@ -10,6 +10,10 @@ import {
 
 export const PLATE_SETTINGS_STORAGE_KEY = '@pressfit_plate_settings';
 
+export const getPlateSettingsStorageKey = (userId?: string): string => {
+  return userId ? `@pressfit_plate_settings_${userId}` : PLATE_SETTINGS_STORAGE_KEY;
+};
+
 export interface UserPlateSettings {
   defaultBarWeight: number;
   unit: WeightUnit;
@@ -28,7 +32,9 @@ export const getDefaultPlateSettings = (): UserPlateSettings => ({
   customBarWeightLb: DEFAULT_BAR_WEIGHT_LB,
 });
 
-let memoryCache: UserPlateSettings | null = null;
+let memoryCache: Record<string, UserPlateSettings> = {};
+
+const getCacheKey = (userId?: string): string => userId || '__default__';
 
 export const PlateSettingsService = {
   /**
@@ -41,17 +47,23 @@ export const PlateSettingsService = {
   /**
    * Carga los ajustes de inventario y barra del usuario desde el almacenamiento local.
    * Si no existen o están corruptos, devuelve y almacena los ajustes predeterminados.
+   * Aislado por userId para evitar compartir configuraciones entre diferentes cuentas.
    */
-  async getSettings(): Promise<UserPlateSettings> {
-    if (memoryCache) {
-      return { ...memoryCache };
+  async getSettings(userId?: string): Promise<UserPlateSettings> {
+    const cacheKey = getCacheKey(userId);
+    if (memoryCache[cacheKey]) {
+      return { ...memoryCache[cacheKey] };
     }
 
     try {
-      const raw = await AsyncStorage.getItem(PLATE_SETTINGS_STORAGE_KEY);
+      const storageKey = getPlateSettingsStorageKey(userId);
+      let raw = await AsyncStorage.getItem(storageKey);
+
+      // Si no existe para este usuario específico pero existe la clave global antigua,
+      // no la cargamos si se trata de un usuario distinto o aislamos siempre por defecto.
       if (!raw) {
         const defaults = getDefaultPlateSettings();
-        memoryCache = defaults;
+        memoryCache[cacheKey] = defaults;
         return { ...defaults };
       }
 
@@ -73,23 +85,25 @@ export const PlateSettingsService = {
         customBarWeightLb: parsed.customBarWeightLb ?? defaults.customBarWeightLb,
       };
 
-      memoryCache = merged;
+      memoryCache[cacheKey] = merged;
       return { ...merged };
     } catch (error) {
       console.warn('[PlateSettingsService] Error loading plate settings, using defaults:', error);
       const defaults = getDefaultPlateSettings();
-      memoryCache = defaults;
+      memoryCache[cacheKey] = defaults;
       return { ...defaults };
     }
   },
 
   /**
-   * Persiste la configuración completa de discos y barra en el almacenamiento local.
+   * Persiste la configuración completa de discos y barra en el almacenamiento local para el usuario dado.
    */
-  async saveSettings(settings: UserPlateSettings): Promise<void> {
+  async saveSettings(settings: UserPlateSettings, userId?: string): Promise<void> {
+    const cacheKey = getCacheKey(userId);
+    const storageKey = getPlateSettingsStorageKey(userId);
     try {
-      memoryCache = { ...settings };
-      await AsyncStorage.setItem(PLATE_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+      memoryCache[cacheKey] = { ...settings };
+      await AsyncStorage.setItem(storageKey, JSON.stringify(settings));
     } catch (error) {
       console.error('[PlateSettingsService] Error saving plate settings:', error);
       throw error;
@@ -97,19 +111,19 @@ export const PlateSettingsService = {
   },
 
   /**
-   * Restablece los ajustes a las denominaciones estándar y barra oficial.
+   * Restablece los ajustes a las denominaciones estándar y barra oficial para el usuario.
    */
-  async resetToDefaults(): Promise<UserPlateSettings> {
+  async resetToDefaults(userId?: string): Promise<UserPlateSettings> {
     const defaults = getDefaultPlateSettings();
-    await this.saveSettings(defaults);
+    await this.saveSettings(defaults, userId);
     return { ...defaults };
   },
 
   /**
    * Actualiza el peso de barra predeterminado según la unidad indicada o activa.
    */
-  async updateBarWeight(barWeight: number, unit?: WeightUnit): Promise<UserPlateSettings> {
-    const current = await this.getSettings();
+  async updateBarWeight(barWeight: number, unit?: WeightUnit, userId?: string): Promise<UserPlateSettings> {
+    const current = await this.getSettings(userId);
     const activeUnit = unit ?? current.unit;
 
     const updated: UserPlateSettings = {
@@ -120,15 +134,15 @@ export const PlateSettingsService = {
         : { customBarWeightLb: barWeight }),
     };
 
-    await this.saveSettings(updated);
+    await this.saveSettings(updated, userId);
     return updated;
   },
 
   /**
    * Alterna la unidad de trabajo (kg o lb) sincronizando la barra por defecto adecuada.
    */
-  async updateUnit(unit: WeightUnit): Promise<UserPlateSettings> {
-    const current = await this.getSettings();
+  async updateUnit(unit: WeightUnit, userId?: string): Promise<UserPlateSettings> {
+    const current = await this.getSettings(userId);
     if (current.unit === unit) {
       return current;
     }
@@ -143,7 +157,7 @@ export const PlateSettingsService = {
       defaultBarWeight: newBarWeight,
     };
 
-    await this.saveSettings(updated);
+    await this.saveSettings(updated, userId);
     return updated;
   },
 
@@ -154,9 +168,10 @@ export const PlateSettingsService = {
   async updatePlateItem(
     unit: WeightUnit,
     weight: number,
-    options: { enabled?: boolean; availablePairs?: number }
+    options: { enabled?: boolean; availablePairs?: number },
+    userId?: string
   ): Promise<UserPlateSettings> {
-    const current = await this.getSettings();
+    const current = await this.getSettings(userId);
     const isKg = unit === 'kg';
     const targetList = isKg ? [...current.platesKg] : [...current.platesLb];
 
@@ -186,14 +201,18 @@ export const PlateSettingsService = {
       ...(isKg ? { platesKg: targetList } : { platesLb: targetList }),
     };
 
-    await this.saveSettings(updated);
+    await this.saveSettings(updated, userId);
     return updated;
   },
 
   /**
-   * Limpia la memoria caché (útil para aislamiento de pruebas unitarias).
+   * Limpia la memoria caché (útil para aislamiento de pruebas unitarias o cambio de sesión).
    */
-  _clearMemoryCache(): void {
-    memoryCache = null;
+  _clearMemoryCache(userId?: string): void {
+    if (userId) {
+      delete memoryCache[getCacheKey(userId)];
+    } else {
+      memoryCache = {};
+    }
   },
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import {
   calculatePlates,
   PlateCalculationResult,
+  PlateInventoryItem,
   WeightUnit,
   DEFAULT_BAR_WEIGHT_KG,
   DEFAULT_BAR_WEIGHT_LB,
@@ -21,6 +22,8 @@ import {
 import { ThemeColors } from '../../types/theme';
 import PlateVisualizer from './PlateVisualizer';
 import { HapticService } from '../../services/HapticService';
+import { AuthContext } from '../../context/AuthContext';
+import { PlateSettingsService, UserPlateSettings } from '../../services/PlateSettingsService';
 
 export interface PlateCalculatorModalProps {
   visible: boolean;
@@ -30,6 +33,9 @@ export interface PlateCalculatorModalProps {
   colors: ThemeColors;
   onApplyWeight?: (weight: number) => void;
   testID?: string;
+  userId?: string;
+  customPlates?: PlateInventoryItem[];
+  defaultBarWeight?: number;
 }
 
 const BAR_PRESETS_KG = [20, 15, 10];
@@ -43,37 +49,82 @@ export const PlateCalculatorModal: React.FC<PlateCalculatorModalProps> = ({
   colors,
   onApplyWeight,
   testID = 'plate-calculator-modal',
+  userId,
+  customPlates,
+  defaultBarWeight: customDefaultBar,
 }) => {
-  if (!visible) return null;
+  const auth = useContext(AuthContext);
+  const effectiveUserId = userId || auth?.user?.id;
+  const [userSettings, setUserSettings] = useState<UserPlateSettings | null>(null);
 
-  const defaultBar = unit === 'kg' ? DEFAULT_BAR_WEIGHT_KG : DEFAULT_BAR_WEIGHT_LB;
-  const barPresets = unit === 'kg' ? BAR_PRESETS_KG : BAR_PRESETS_LB;
+  useEffect(() => {
+    let isMounted = true;
+    if (visible && !customPlates) {
+      PlateSettingsService.getSettings(effectiveUserId).then((data) => {
+        if (isMounted) {
+          setUserSettings(data);
+        }
+      }).catch((err) => {
+        console.warn('[PlateCalculatorModal] Failed to load plate settings:', err);
+      });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [visible, effectiveUserId, customPlates]);
+
+  const fallbackBar = unit === 'kg' ? DEFAULT_BAR_WEIGHT_KG : DEFAULT_BAR_WEIGHT_LB;
+  const resolvedDefaultBar = customDefaultBar
+    ?? (userSettings
+      ? (unit === 'kg'
+        ? (userSettings.customBarWeightKg ?? (userSettings.unit === 'kg' ? userSettings.defaultBarWeight : DEFAULT_BAR_WEIGHT_KG))
+        : (userSettings.customBarWeightLb ?? (userSettings.unit === 'lb' ? userSettings.defaultBarWeight : DEFAULT_BAR_WEIGHT_LB)))
+      : fallbackBar);
+
+  const basePresets = unit === 'kg' ? BAR_PRESETS_KG : BAR_PRESETS_LB;
+  const barPresets = useMemo(() => {
+    if (resolvedDefaultBar && !basePresets.includes(resolvedDefaultBar)) {
+      return [resolvedDefaultBar, ...basePresets].sort((a, b) => b - a);
+    }
+    return basePresets;
+  }, [resolvedDefaultBar, basePresets]);
 
   const [targetWeightInput, setTargetWeightInput] = useState<string>(
-    initialWeight > 0 ? String(initialWeight) : String(defaultBar)
+    initialWeight > 0 ? String(initialWeight) : String(resolvedDefaultBar)
   );
-  const [barWeight, setBarWeight] = useState<number>(defaultBar);
+  const [barWeight, setBarWeight] = useState<number>(resolvedDefaultBar);
 
   useEffect(() => {
     if (visible) {
-      const weightToSet = initialWeight > 0 ? initialWeight : defaultBar;
+      const weightToSet = initialWeight > 0 ? initialWeight : resolvedDefaultBar;
       setTargetWeightInput(String(weightToSet));
-      setBarWeight(defaultBar);
+      setBarWeight(resolvedDefaultBar);
     }
-  }, [visible, initialWeight, defaultBar]);
+  }, [visible, initialWeight, resolvedDefaultBar]);
 
   const parsedTargetWeight = useMemo(() => {
     const parsed = parseFloat(targetWeightInput.replace(',', '.'));
     return isNaN(parsed) || parsed < 0 ? 0 : parsed;
   }, [targetWeightInput]);
 
+  const activePlates = useMemo(() => {
+    if (customPlates && customPlates.length > 0) {
+      return customPlates;
+    }
+    if (userSettings) {
+      return unit === 'kg' ? userSettings.platesKg : userSettings.platesLb;
+    }
+    return undefined;
+  }, [customPlates, userSettings, unit]);
+
   const result: PlateCalculationResult = useMemo(() => {
     return calculatePlates({
       targetWeight: parsedTargetWeight,
       barWeight,
       unit,
+      availablePlates: activePlates,
     });
-  }, [parsedTargetWeight, barWeight, unit]);
+  }, [parsedTargetWeight, barWeight, unit, activePlates]);
 
   const handleAdjustWeight = (delta: number) => {
     HapticService.selection();
