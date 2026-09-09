@@ -141,6 +141,6 @@ describe('ExerciseCard & areExerciseCardPropsEqual (RNTL)', () => {
         expect(plateBtn).toBeTruthy();
         fireEvent.press(plateBtn);
 
-        expect(mockOpenPlate).toHaveBeenCalledWith(80, 'set-1');
+        expect(mockOpenPlate).toHaveBeenCalledWith(80, 'set-1', 'ex-1');
     });
 });

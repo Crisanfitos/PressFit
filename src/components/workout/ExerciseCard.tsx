@@ -36,7 +36,7 @@ export interface ExerciseCardProps {
     onStartRestTimer: (setId: string) => void;
     onAddSet: (exerciseId: string) => void;
     onSwapExercise?: (exercise: any) => void;
-    onOpenPlateCalculator?: (weight: number, setId?: string) => void;
+    onOpenPlateCalculator?: (weight: number, setId?: string, exerciseId?: string) => void;
     getGhostValue: (exerciseId: string, setNumber: number, field: 'weight' | 'reps' | 'rpe') => string | null;
 }
 
@@ -119,7 +119,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                                 onPress={() => {
                                     const firstSet = setsList[0];
                                     const initialW = firstSet?.peso_utilizado || 0;
-                                    onOpenPlateCalculator(initialW, firstSet?.id);
+                                    onOpenPlateCalculator(initialW, firstSet?.id, exercise.id);
                                 }}
                                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                             >

@@ -41,7 +41,7 @@ export interface WorkoutSetRowProps {
     lastCompletedSetId?: string | null;
     restTimerVisible?: boolean;
     savedTimerSetIds?: Set<string>;
-    onOpenPlateCalculator?: (weight: number, setId: string) => void;
+    onOpenPlateCalculator?: (weight: number, setId: string, exerciseId?: string) => void;
     onSetChange: (setId: string, field: string, value: string) => void;
     onDeleteSet?: (setId: string, exerciseId: string) => void;
     onStartRestTimer?: (setId: string) => void;
@@ -181,7 +181,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                                             ]}
                                             onPress={() => {
                                                 const currentWeight = parseFloat(String(set.peso_utilizado)) || (ghostWeight ? parseFloat(String(ghostWeight)) : 0);
-                                                onOpenPlateCalculator(currentWeight, set.id);
+                                                onOpenPlateCalculator(currentWeight, set.id, exerciseId);
                                             }}
                                             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                                         >
@@ -199,7 +199,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                                     ]}
                                     onPress={() => {
                                         const currentWeight = parseFloat(String(set.peso_utilizado)) || (ghostWeight ? parseFloat(String(ghostWeight)) : 0);
-                                        onOpenPlateCalculator(currentWeight, set.id);
+                                        onOpenPlateCalculator(currentWeight, set.id, exerciseId);
                                     }}
                                     hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                                 >

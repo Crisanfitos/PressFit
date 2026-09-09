@@ -113,21 +113,23 @@ export const useWorkoutScreenState = ({
 
         let targetExId = exerciseId || null;
         if (!targetExId && setId) {
-            const found = exercises.find((ex) => ex.series?.some((s: any) => s.id === setId));
-            if (found) targetExId = found.id;
+            const found = exercises.find((ex) => (ex.sets || ex.series)?.some((s: any) => s.id === setId));
+            if (found) targetExId = found.id || found.routine_exercise_id;
         }
         setActivePlateExerciseId(targetExId);
         setPlateCalculatorVisible(true);
     };
 
     const handleApplyPlateCalculatorWeight = async (weight: number) => {
-        const targetEx = exercises.find((ex) => ex.id === activePlateExerciseId)
-            || (activePlateSetId ? exercises.find((ex) => ex.series?.some((s: any) => s.id === activePlateSetId)) : null);
+        const targetEx = exercises.find((ex) => (activePlateExerciseId && (ex.id === activePlateExerciseId || ex.routine_exercise_id === activePlateExerciseId)))
+            || (activePlateSetId ? exercises.find((ex) => (ex.sets || ex.series)?.some((s: any) => s.id === activePlateSetId)) : null);
 
-        if (targetEx?.series && targetEx.series.length > 0) {
-            await Promise.all(
-                targetEx.series.map((s: any) => updateSet(s.id, 'weight', String(weight)))
-            );
+        const targetSets = targetEx?.sets || targetEx?.series || [];
+
+        if (targetSets.length > 0) {
+            for (const s of targetSets) {
+                await updateSet(s.id, 'weight', String(weight));
+            }
         } else if (activePlateSetId) {
             await updateSet(activePlateSetId, 'weight', String(weight));
         }
@@ -160,6 +162,8 @@ export const useWorkoutScreenState = ({
         savedTimerSetIds,
         plateCalculatorVisible,
         plateCalculatorWeight,
+        activePlateSetId,
+        activePlateExerciseId,
         handleOpenPlateCalculator,
         handleApplyPlateCalculatorWeight,
         handleClosePlateCalculator,
