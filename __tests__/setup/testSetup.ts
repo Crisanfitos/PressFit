@@ -67,6 +67,12 @@ jest.mock('expo-haptics', () => ({
     selectionAsync: jest.fn().mockResolvedValue(undefined),
 }));
 
+// Mock react-native-view-shot
+jest.mock('react-native-view-shot', () => ({
+    captureRef: jest.fn().mockResolvedValue('file:///mock/path/workout_card.png'),
+    releaseCapture: jest.fn(),
+}));
+
 import i18n from '../../src/i18n';
 
 // Reset i18n language to Spanish before each test to guarantee deterministic UI text across environments
