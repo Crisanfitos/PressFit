@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -9,6 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { useWorkoutController } from '../controllers/useWorkoutController';
 import { saveActiveWorkoutParams } from '../services/TimerNotificationService';
+import { ShareModal, SocialCardData } from '../components/social';
 import {
     WorkoutHeader,
     ExerciseCard,
@@ -43,6 +44,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         workout,
         exercises,
         loading: controllerLoading,
+        timer,
         mode,
         previousWorkout,
         addSet,
@@ -54,6 +56,14 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         updateWeightType,
         reloadExercises,
     } = useWorkoutController(initialWorkoutId || null, routineDayId, user?.id || '', dayOfWeek || 0, navMode === 'edit');
+
+    const [shareModalVisible, setShareModalVisible] = useState(false);
+    const [shareCardData, setShareCardData] = useState<SocialCardData | null>(null);
+
+    const handleCloseShareModal = () => {
+        setShareModalVisible(false);
+        navigation.goBack();
+    };
 
     const state = useWorkoutScreenState({
         controllerLoading,
@@ -86,12 +96,31 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                 text: t('common.finish', 'Finalizar'),
                 onPress: async () => {
                     state.setSaving(true);
+                    const currentTimer = timer || 0;
+                    const durationMins = Math.max(1, Math.round(currentTimer / 60));
+                    const totalVolume = exercises.reduce((acc: number, ex: any) => {
+                        const setList = ex.series || ex.sets || [];
+                        return acc + setList.reduce((sAcc: number, s: any) => sAcc + ((s.peso || s.peso_utilizado || 0) * (s.repeticiones || 0)), 0);
+                    }, 0);
+                    const totalSetsCount = exercises.reduce((acc: number, ex: any) => acc + (ex.series || ex.sets || []).length, 0);
+
                     const success = await finishWorkout();
                     state.setSaving(false);
                     if (success) {
-                        Alert.alert(t('workout.workoutCompletedTitle', '¡Completado!'), t('workout.workoutSavedSuccess', 'Entrenamiento guardado correctamente'), [
-                            { text: 'OK', onPress: () => navigation.goBack() },
-                        ]);
+                        const cardData: SocialCardData = {
+                            workoutName: dayName || workout?.nombre || workout?.descripcion || t('workout.completedWorkout', 'Entrenamiento Completado'),
+                            date: new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }),
+                            duration: durationMins,
+                            durationMinutes: durationMins,
+                            exerciseCount: exercises.length,
+                            totalSets: totalSetsCount,
+                            completedSets: totalSetsCount,
+                            totalVolume,
+                            totalVolumeKg: totalVolume,
+                            userName: user?.user_metadata?.full_name || user?.email?.split('@')[0] || undefined,
+                        };
+                        setShareCardData(cardData);
+                        setShareModalVisible(true);
                     } else {
                         Alert.alert(t('common.error', 'Error'), 'No se pudo finalizar el entrenamiento');
                     }
@@ -185,6 +214,12 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                 plateCalculatorWeight={state.plateCalculatorWeight}
                 onClosePlateCalculator={state.handleClosePlateCalculator}
                 onApplyPlateCalculatorWeight={state.handleApplyPlateCalculatorWeight}
+            />
+            <ShareModal
+                visible={shareModalVisible}
+                onClose={handleCloseShareModal}
+                data={shareCardData}
+                colors={colors}
             />
         </SafeAreaView>
     );

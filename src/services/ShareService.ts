@@ -38,25 +38,29 @@ export class ShareService {
         const parts: string[] = [];
         parts.push('¡Entrenamiento completado con PressFit! 🏋️‍♂️');
 
-        if (data.durationMinutes !== null && data.durationMinutes !== undefined && data.durationMinutes > 0) {
-            parts.push(`⏱️ Duración: ${formatDuration(data.durationMinutes)}`);
+        const duration = data.durationMinutes ?? data.duration;
+        if (duration !== null && duration !== undefined && duration > 0) {
+            parts.push(`⏱️ Duración: ${formatDuration(duration)}`);
         }
 
-        if (data.totalVolumeKg !== undefined && data.totalVolumeKg > 0) {
-            parts.push(`⚡ Volumen total: ${formatVolume(data.totalVolumeKg)}`);
+        const volume = data.totalVolumeKg ?? data.totalVolume;
+        if (volume !== undefined && volume > 0) {
+            parts.push(`⚡ Volumen total: ${formatVolume(volume)}`);
         }
 
-        if (data.completedSets !== undefined && data.completedSets > 0) {
-            parts.push(`📊 Series completadas: ${data.completedSets}`);
+        const sets = data.completedSets ?? data.totalSets;
+        if (sets !== undefined && sets > 0) {
+            parts.push(`📊 Series completadas: ${sets}`);
         }
 
         if (data.totalReps !== undefined && data.totalReps > 0) {
             parts.push(`🔁 Repeticiones: ${data.totalReps}`);
         }
 
-        if (data.prs && data.prs.length > 0) {
+        const prList = data.prs ?? data.personalRecords;
+        if (prList && prList.length > 0) {
             parts.push('\n🏆 ¡Nuevos Récords Personales (PR)!');
-            data.prs.forEach((pr) => {
+            prList.forEach((pr) => {
                 const repStr = pr.reps ? ` x ${pr.reps} reps` : '';
                 parts.push(`  • ${pr.exerciseName}: ${pr.weight} kg${repStr}`);
             });

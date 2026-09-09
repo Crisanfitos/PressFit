@@ -96,6 +96,31 @@ describe('WorkoutScreen Component (RNTL)', () => {
     });
   });
 
+  it('opens ShareModal with workout stats when workout is finished successfully (PF-164)', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    const { getByTestId, queryByTestId } = await render(
+      <WorkoutScreen navigation={mockNavigation} route={activeRoute} />
+    );
+
+    expect(queryByTestId('share-modal')).toBeNull();
+
+    const finishBtn = getByTestId('finish-workout-button');
+    fireEvent.press(finishBtn);
+
+    const alertButtons = alertSpy.mock.calls[alertSpy.mock.calls.length - 1][2];
+    const confirmAlertBtn = alertButtons?.find((b: any) => b.text === 'Finalizar');
+    confirmAlertBtn?.onPress();
+
+    await waitFor(() => {
+      expect(mockFinishWorkout).toHaveBeenCalled();
+      expect(getByTestId('share-modal')).toBeTruthy();
+      expect(getByTestId('share-modal-canvas')).toBeTruthy();
+    });
+
+    fireEvent.press(getByTestId('share-modal-done-btn'));
+    expect(mockNavigation.goBack).toHaveBeenCalled();
+  });
+
   it('renders empty exercise message when exercises array is empty', async () => {
     mockUseWorkoutController.mockReturnValue({
       workout: { id: 'w-101' },

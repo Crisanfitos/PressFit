@@ -10,3 +10,7 @@ export type {
   PersonalRecordHighlight,
   CardAspectRatio,
 } from './SocialCardCanvas';
+
+export { default as ShareModal } from './ShareModal';
+export type { ShareModalProps } from './ShareModal';
+

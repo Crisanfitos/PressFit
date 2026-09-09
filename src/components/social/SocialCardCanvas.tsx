@@ -44,6 +44,11 @@ export interface SocialCardData {
   totalVolume: number;
   personalRecords?: PersonalRecordHighlight[];
   userName?: string;
+  durationMinutes?: number | null;
+  totalVolumeKg?: number;
+  completedSets?: number;
+  totalReps?: number;
+  prs?: PersonalRecordHighlight[];
 }
 
 export interface SocialCardCanvasProps {
