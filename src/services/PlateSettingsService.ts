@@ -167,10 +167,10 @@ export const PlateSettingsService = {
 
       if (options.enabled === false) {
         updatedPairs = 0;
-      } else if (options.enabled === true && existing.availablePairs === 0) {
-        updatedPairs = undefined;
       } else if ('availablePairs' in options) {
         updatedPairs = options.availablePairs;
+      } else if (options.enabled === true && existing.availablePairs === 0) {
+        updatedPairs = undefined;
       } else {
         updatedPairs = existing.availablePairs;
       }
