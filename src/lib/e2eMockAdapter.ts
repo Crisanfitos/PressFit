@@ -132,6 +132,7 @@ class E2EMockStore {
                         peso_utilizado: 60,
                         repeticiones: 10,
                         rpe: 8,
+                        tipo_serie: 'normal',
                     })),
                 })),
             })),
@@ -243,7 +244,7 @@ class E2EMockStore {
         return null;
     }
 
-    addSet(exerciseId: string) {
+    addSet(exerciseId: string, setType: string = 'normal') {
         if (!this.currentWorkout) {
             this.currentWorkout = this.getMockRoutineDay();
         }
@@ -264,6 +265,7 @@ class E2EMockStore {
                 rpe: null,
                 descanso_segundos: null,
                 completada: false,
+                tipo_serie: setType || 'normal',
             };
             targetEx.series.push(newSet);
             return newSet;
