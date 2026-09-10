@@ -7,7 +7,7 @@
  * @module types/models
  */
 
-import { TipoPeso } from './setTypes';
+import { TipoPeso, SetType } from './setTypes';
 
 // ============================================================================
 // Service Response
@@ -50,6 +50,7 @@ export interface Serie {
     repeticiones: number;
     rpe?: number;
     descanso_segundos?: number;
+    tipo_serie?: SetType;
     created_at?: string;
 }
 
@@ -195,6 +196,7 @@ export interface SetUpdatePayload {
     repeticiones?: number;
     rpe?: number;
     descanso_segundos?: number;
+    tipo_serie?: SetType;
 }
 
 /**
@@ -233,6 +235,7 @@ export interface SeriesInsert {
     repeticiones: number;
     rpe?: number;
     descanso_segundos?: number;
+    tipo_serie?: SetType;
 }
 
 // ============================================================================
@@ -245,6 +248,7 @@ export interface PresetSeries {
     repeticiones_objetivo: number;
     rpe_objetivo?: number;
     descanso_segundos?: number;
+    tipo_serie?: SetType;
 }
 
 export interface PresetScheduledExercise {

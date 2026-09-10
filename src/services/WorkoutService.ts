@@ -1,6 +1,6 @@
 import { NetworkService } from './NetworkService';
 import { supabase } from '../lib/supabase';
-import { TipoPeso } from '../types/setTypes';
+import { TipoPeso, SetType } from '../types/setTypes';
 import { formatLocalDateKey, parseDateKeyAsLocalDate } from '../utils/dateUtils';
 import { isE2EMockEnabled, mockStore } from '../lib/e2eMockAdapter';
 import { OfflineStorageService } from './OfflineStorageService';
@@ -151,7 +151,7 @@ export const WorkoutService = {
                             id,
                             ejercicios_programados (
                                 ejercicio_id,
-                                series (numero_serie, peso_utilizado, repeticiones, rpe)
+                                series (numero_serie, peso_utilizado, repeticiones, rpe, tipo_serie)
                             )
                         `)
                         .eq('rutina_semanal_id', templateDay.rutina_semanal_id)
@@ -181,6 +181,7 @@ export const WorkoutService = {
                                         peso_utilizado: serie.peso_utilizado,
                                         repeticiones: 0,
                                         descanso_segundos: 0,
+                                        tipo_serie: serie.tipo_serie || 'normal',
                                     });
                                 }
                             }
@@ -305,7 +306,8 @@ export const WorkoutService = {
         exerciseId: string,
         setNumber: number,
         weight: number,
-        reps: number
+        reps: number,
+        setType: SetType = 'normal'
     ): Promise<ServiceResponse<Serie>> {
         try {
             let { data: scheduledExercise, error: findError } = await supabase
@@ -349,12 +351,13 @@ export const WorkoutService = {
                     numero_serie: setNumber,
                     peso_utilizado: weight || 0,
                     repeticiones: reps || 0,
+                    tipo_serie: setType || 'normal',
                 })
                 .select()
                 .single();
 
             if (isE2EMockEnabled()) {
-                const mockAdded = mockStore.addSet(exerciseId);
+                const mockAdded = mockStore.addSet(exerciseId, setType);
                 return { data: (mockAdded || data) as any, error: null };
             }
 
@@ -368,13 +371,14 @@ export const WorkoutService = {
 
     async updateSet(
         setId: string,
-        updates: { weight?: number; reps?: number; rpe?: number; descanso_segundos?: number }
+        updates: { weight?: number; reps?: number; rpe?: number; descanso_segundos?: number; tipo_serie?: SetType }
     ): Promise<ServiceResponse<Serie>> {
         const dbUpdates: SetUpdatePayload = {};
         if (updates.weight !== undefined) dbUpdates.peso_utilizado = updates.weight;
         if (updates.reps !== undefined) dbUpdates.repeticiones = updates.reps;
         if (updates.rpe !== undefined) dbUpdates.rpe = updates.rpe;
         if (updates.descanso_segundos !== undefined) dbUpdates.descanso_segundos = updates.descanso_segundos;
+        if (updates.tipo_serie !== undefined) dbUpdates.tipo_serie = updates.tipo_serie;
 
         if (isE2EMockEnabled()) {
             const mockUpdated = mockStore.updateSet(setId, dbUpdates);
@@ -430,6 +434,7 @@ export const WorkoutService = {
             repeticiones: dbUpdates.repeticiones || 0,
             rpe: dbUpdates.rpe,
             descanso_segundos: dbUpdates.descanso_segundos,
+            tipo_serie: dbUpdates.tipo_serie || 'normal',
         };
 
         const cachedRes = await OfflineStorageService.getCachedWorkouts();

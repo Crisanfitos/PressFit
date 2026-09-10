@@ -95,6 +95,7 @@ export const createMockSerie = (overrides: Record<string, any> = {}) => ({
     peso_utilizado: 60,
     repeticiones: 10,
     rpe: 7,
+    tipo_serie: 'normal',
     ...overrides,
 });
 
