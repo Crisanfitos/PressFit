@@ -11,6 +11,7 @@ import {
     cancelTimerNotification,
     getElapsedSecondsFromStorage,
     checkActiveRestTimer,
+    finishActiveRestTimer,
     setRestTimerUIVisible,
     isRestTimerUIVisibleState,
     setTimerNotificationLogLevel,
@@ -74,6 +75,12 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
     setItem: jest.fn(),
     getItem: jest.fn(),
     removeItem: jest.fn(),
+}));
+
+jest.mock('../../../src/services/WorkoutService', () => ({
+    WorkoutService: {
+        updateSet: jest.fn().mockResolvedValue({ data: null, error: null }),
+    },
 }));
 
 describe('TimerNotificationService', () => {
@@ -403,6 +410,18 @@ describe('TimerNotificationService', () => {
 
             expect(res).toEqual({ active: false, elapsedSeconds: 0 });
         });
+
+        it('should return { active: false, elapsedSeconds: 0 } when pending action is OK', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) => {
+                if (key === TIMER_PENDING_ACTION_KEY) return 'OK';
+                if (key === TIMER_STORAGE_KEY) return String(Date.now() - 10000);
+                return null;
+            });
+
+            const res = await checkActiveRestTimer();
+
+            expect(res).toEqual({ active: false, elapsedSeconds: 0 });
+        });
     });
 
     describe('Pending Actions Persistence (PF-284)', () => {
@@ -428,7 +447,7 @@ describe('TimerNotificationService', () => {
     });
 
     describe('handleNotificationAction (PF-284)', () => {
-        it('handles ACTION_OK: saves OK action, freezes elapsed, removes timer start and cancels notification', async () => {
+        it('handles ACTION_OK: finishes active timer, removes storage keys and cancels notification', async () => {
             (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) => {
                 if (key === TIMER_STORAGE_KEY) return String(Date.now() - 50000);
                 return null;
@@ -438,8 +457,8 @@ describe('TimerNotificationService', () => {
 
             expect(result).toBe('OK');
             expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_PENDING_ACTION_KEY, 'OK');
-            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_PAUSED_ELAPSED_KEY, expect.any(String));
             expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_STORAGE_KEY);
+            expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_PAUSED_ELAPSED_KEY);
             expect(Notifications.dismissNotificationAsync).toHaveBeenCalledWith(TIMER_NOTIFICATION_IDENTIFIER);
         });
 
@@ -783,6 +802,41 @@ describe('TimerNotificationService', () => {
             (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce('RESUME');
             const action = await getPendingTimerAction();
             expect(action).toBe('RESUME');
+        });
+    });
+
+    describe('finishActiveRestTimer & discardActiveRestTimer (PF-337)', () => {
+        it('finishActiveRestTimer updates set descanso_segundos if activeSetId exists, purges storage keys, and cancels notification', async () => {
+            const { WorkoutService } = require('../../../src/services/WorkoutService');
+            const fakeStart = Date.now() - 42000;
+            (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) => {
+                if (key === TIMER_STORAGE_KEY) return String(fakeStart);
+                if (key === '@pressfit_active_workout_params') return JSON.stringify({ activeSetId: 'set-xyz', workoutId: 'w-1' });
+                return null;
+            });
+
+            const elapsed = await finishActiveRestTimer();
+
+            expect(elapsed).toBeGreaterThanOrEqual(41);
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('set-xyz', { descanso_segundos: elapsed });
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_PENDING_ACTION_KEY, 'OK');
+            expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_STORAGE_KEY);
+            expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_PAUSED_ELAPSED_KEY);
+            expect(Notifications.dismissNotificationAsync).toHaveBeenCalledWith(TIMER_NOTIFICATION_IDENTIFIER);
+        });
+
+        it('finishActiveRestTimer gracefully handles case without activeSetId', async () => {
+            (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) => {
+                if (key === TIMER_PAUSED_ELAPSED_KEY) return '25';
+                return null;
+            });
+
+            const elapsed = await finishActiveRestTimer();
+
+            expect(elapsed).toBe(25);
+            expect(AsyncStorage.setItem).toHaveBeenCalledWith(TIMER_PENDING_ACTION_KEY, 'OK');
+            expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_STORAGE_KEY);
+            expect(AsyncStorage.removeItem).toHaveBeenCalledWith(TIMER_PAUSED_ELAPSED_KEY);
         });
     });
 });

@@ -66,7 +66,11 @@ export const useWorkoutScreenState = ({
             const { active } = await checkActiveRestTimer();
             const savedParams = await getActiveWorkoutParams();
             if (savedParams?.activeSetId) setLastCompletedSetId(savedParams.activeSetId);
-            if (active) setRestTimerVisible(true);
+            if (active) {
+                setRestTimerVisible(true);
+            } else {
+                setRestTimerVisible(false);
+            }
         });
     }, [navigation, reloadExercises]);
 
