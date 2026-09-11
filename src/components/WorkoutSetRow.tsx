@@ -158,29 +158,6 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
         }
     };
 
-    const handleQuickAdjustWeight = (delta: number) => {
-        HapticService.selection();
-        const parsedWeight = parseFloat(String(set.peso_utilizado));
-        const parsedGhost = ghostWeight ? parseFloat(String(ghostWeight)) : 0;
-        const current = !isNaN(parsedWeight) && parsedWeight > 0
-            ? parsedWeight
-            : (!isNaN(parsedGhost) && parsedGhost > 0 ? parsedGhost : 0);
-        const nextVal = Math.max(0, Math.round((current + delta) * 10) / 10);
-        const valStr = nextVal % 1 === 0 ? String(nextVal) : nextVal.toFixed(1);
-        onSetChange(set.id, 'weight', valStr);
-    };
-
-    const handleQuickAdjustReps = (delta: number) => {
-        HapticService.selection();
-        const parsedReps = parseInt(String(set.repeticiones), 10);
-        const parsedGhost = ghostReps ? parseInt(String(ghostReps), 10) : 0;
-        const current = !isNaN(parsedReps) && parsedReps > 0
-            ? parsedReps
-            : (!isNaN(parsedGhost) && parsedGhost > 0 ? parsedGhost : 0);
-        const nextVal = Math.max(0, current + delta);
-        onSetChange(set.id, 'reps', String(nextVal));
-    };
-
     const handleRpeChange = (val: string) => {
         const result = validateRpe(val);
         if (result.clamped) {
@@ -253,132 +230,44 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                         {isSpecialType ? typeVisual.shortLabel : set.numero_serie}
                     </Text>
                 </TouchableOpacity>
-
-                {/* Weight Column */}
+                {/* Weight Column */}
                 <View style={[styles.inputGroup, { maxWidth: 80 }]}>
                     {isBodyweight ? (
                         <View
+                            testID={`bodyweight-placeholder-${setIndex}`}
                             style={[
                                 styles.bodyweightPlaceholder,
                                 { backgroundColor: colors.surfaceHighlight, borderColor: colors.border },
                             ]}
                         >
-                            <Text style={{ color: colors.textSecondary, fontSize: 14, fontWeight: '600' }}>
+                            <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: '600' }}>
                                 BW
                             </Text>
                         </View>
                     ) : (
-                        <View style={styles.inputWithControls}>
-                            <SetInput
-                                testID={`set-weight-input-${setIndex}`}
-                                value={set.peso_utilizado > 0 ? set.peso_utilizado : ''}
-                                placeholder={ghostWeight ?? '-'}
-                                onChange={(val) => onSetChange(set.id, 'weight', val)}
-                                isEditable={effectiveInputEditable}
-                                colors={colors}
-                                maxLength={5}
-                            />
-                            {effectiveInputEditable && (
-                                <View style={styles.quickAdjustRow}>
-                                    <TouchableOpacity
-                                        testID={`quick-adjust-weight-minus-${setIndex}`}
-                                        style={[
-                                            styles.quickAdjustBtn,
-                                            { backgroundColor: colors.surfaceHighlight, borderColor: colors.border },
-                                        ]}
-                                        onPress={() => handleQuickAdjustWeight(-2.5)}
-                                        hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                                    >
-                                        <Text style={[styles.quickAdjustText, { color: colors.primary }]}>-2.5</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        testID={`quick-adjust-weight-plus-${setIndex}`}
-                                        style={[
-                                            styles.quickAdjustBtn,
-                                            { backgroundColor: colors.surfaceHighlight, borderColor: colors.border },
-                                        ]}
-                                        onPress={() => handleQuickAdjustWeight(2.5)}
-                                        hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                                    >
-                                        <Text style={[styles.quickAdjustText, { color: colors.primary }]}>+2.5</Text>
-                                    </TouchableOpacity>
-                                    {onOpenPlateCalculator && (
-                                        <TouchableOpacity
-                                            testID={`plate-calculator-button-${setIndex}`}
-                                            style={[
-                                                styles.quickAdjustBtn,
-                                                { backgroundColor: colors.surfaceHighlight, borderColor: colors.border },
-                                            ]}
-                                            onPress={() => {
-                                                const currentWeight = parseFloat(String(set.peso_utilizado)) || (ghostWeight ? parseFloat(String(ghostWeight)) : 0);
-                                                onOpenPlateCalculator(currentWeight, set.id, exerciseId);
-                                            }}
-                                            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                                        >
-                                            <MaterialIcons name="fitness-center" size={11} color={colors.primary} />
-                                        </TouchableOpacity>
-                                    )}
-                                </View>
-                            )}
-                            {!isInputEditable && !isCompleted && onOpenPlateCalculator && (
-                                <TouchableOpacity
-                                    testID={`plate-calculator-button-${setIndex}`}
-                                    style={[
-                                        styles.quickAdjustBtn,
-                                        { backgroundColor: colors.surfaceHighlight, borderColor: colors.border, marginTop: 4, width: '100%' },
-                                    ]}
-                                    onPress={() => {
-                                        const currentWeight = parseFloat(String(set.peso_utilizado)) || (ghostWeight ? parseFloat(String(ghostWeight)) : 0);
-                                        onOpenPlateCalculator(currentWeight, set.id, exerciseId);
-                                    }}
-                                    hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                                >
-                                    <MaterialIcons name="fitness-center" size={12} color={colors.primary} />
-                                </TouchableOpacity>
-                            )}
-                        </View>
+                        <SetInput
+                            testID={`set-weight-input-${setIndex}`}
+                            value={set.peso_utilizado > 0 ? set.peso_utilizado : ''}
+                            placeholder={ghostWeight ?? '-'}
+                            onChange={(val) => onSetChange(set.id, 'weight', val)}
+                            isEditable={effectiveInputEditable}
+                            colors={colors}
+                            maxLength={5}
+                        />
                     )}
                 </View>
 
                 {/* Reps Column */}
                 <View style={[styles.inputGroup, { maxWidth: 80 }]}>
-                    <View style={styles.inputWithControls}>
-                        <SetInput
-                            testID={`set-reps-input-${setIndex}`}
-                            value={set.repeticiones > 0 ? set.repeticiones : ''}
-                            placeholder={ghostReps ?? '-'}
-                            onChange={(val) => onSetChange(set.id, 'reps', val)}
-                            isEditable={effectiveInputEditable}
-                            colors={colors}
-                            maxLength={3}
-                        />
-                        {effectiveInputEditable && (
-                            <View style={styles.quickAdjustRow}>
-                                <TouchableOpacity
-                                    testID={`quick-adjust-reps-minus-${setIndex}`}
-                                    style={[
-                                        styles.quickAdjustBtn,
-                                        { backgroundColor: colors.surfaceHighlight, borderColor: colors.border },
-                                    ]}
-                                    onPress={() => handleQuickAdjustReps(-1)}
-                                    hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                                >
-                                    <Text style={[styles.quickAdjustText, { color: colors.primary }]}>-1</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    testID={`quick-adjust-reps-plus-${setIndex}`}
-                                    style={[
-                                        styles.quickAdjustBtn,
-                                        { backgroundColor: colors.surfaceHighlight, borderColor: colors.border },
-                                    ]}
-                                    onPress={() => handleQuickAdjustReps(1)}
-                                    hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                                >
-                                    <Text style={[styles.quickAdjustText, { color: colors.primary }]}>+1</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
-                    </View>
+                    <SetInput
+                        testID={`set-reps-input-${setIndex}`}
+                        value={set.repeticiones > 0 ? set.repeticiones : ''}
+                        placeholder={ghostReps ?? '-'}
+                        onChange={(val) => onSetChange(set.id, 'reps', val)}
+                        isEditable={effectiveInputEditable}
+                        colors={colors}
+                        maxLength={3}
+                    />
                 </View>
 
                 {/* RPE Column */}
@@ -457,7 +346,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: 12,
+        marginBottom: 8,
         paddingHorizontal: 4,
         paddingVertical: 2,
     },
@@ -473,7 +362,7 @@ const styles = StyleSheet.create({
     },
     setTypeBadgeButton: {
         width: 32,
-        height: 32,
+        height: 42,
         borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
@@ -496,36 +385,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    inputWithControls: {
-        width: '100%',
-        alignItems: 'center',
-    },
     bodyweightPlaceholder: {
         width: '100%',
+        height: 42,
         borderWidth: 1,
         borderRadius: 8,
-        paddingVertical: 12,
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    quickAdjustRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        marginTop: 4,
-        gap: 4,
-    },
-    quickAdjustBtn: {
-        flex: 1,
-        borderWidth: 1,
-        borderRadius: 4,
-        paddingVertical: 2,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    quickAdjustText: {
-        fontSize: 10,
-        fontWeight: '700',
     },
     deleteSetButton: {
         padding: 4,
@@ -534,12 +400,14 @@ const styles = StyleSheet.create({
     completeCheckbox: {
         padding: 4,
         marginLeft: 4,
+        height: 42,
         justifyContent: 'center',
         alignItems: 'center',
     },
     editSetButton: {
         padding: 4,
         marginLeft: 2,
+        height: 42,
         justifyContent: 'center',
         alignItems: 'center',
     },

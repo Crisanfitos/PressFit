@@ -85,8 +85,8 @@ describe('WorkoutSetRow Component (RNTL)', () => {
         expect(queryByTestId('set-weight-input-0')).toBeNull();
     });
 
-    it('quick adjusts weight plus 2.5kg with haptic feedback', async () => {
-        const { getByTestId } = await render(
+    it('renders clean single-line inputs without sub-buttons underneath (PF-335)', async () => {
+        const { queryByTestId, getByTestId } = await render(
             <WorkoutSetRow
                 set={defaultSet}
                 setIndex={0}
@@ -99,15 +99,43 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             />
         );
 
-        const plusBtn = getByTestId('quick-adjust-weight-plus-0');
-        fireEvent.press(plusBtn);
+        // Inputs exist
+        expect(getByTestId('set-weight-input-0')).toBeTruthy();
+        expect(getByTestId('set-reps-input-0')).toBeTruthy();
+        expect(getByTestId('set-rpe-input-0')).toBeTruthy();
 
-        expect(HapticService.selection).toHaveBeenCalledTimes(1);
+        // Sub-buttons underneath are completely removed for clean single-line design
+        expect(queryByTestId('quick-adjust-weight-plus-0')).toBeNull();
+        expect(queryByTestId('quick-adjust-weight-minus-0')).toBeNull();
+        expect(queryByTestId('quick-adjust-reps-plus-0')).toBeNull();
+        expect(queryByTestId('quick-adjust-reps-minus-0')).toBeNull();
+        expect(queryByTestId('plate-calculator-button-0')).toBeNull();
+    });
+
+    it('updates weight via SetInput change and blur', async () => {
+        const { getByTestId, findByDisplayValue } = await render(
+            <WorkoutSetRow
+                set={defaultSet}
+                setIndex={0}
+                exerciseId="ex-1"
+                tipoPeso="total"
+                isInputEditable={true}
+                isStructureEditable={false}
+                colors={mockColors}
+                onSetChange={mockOnSetChange}
+            />
+        );
+
+        const weightInput = getByTestId('set-weight-input-0');
+        fireEvent.changeText(weightInput, '82.5');
+        expect(await findByDisplayValue('82.5')).toBeTruthy();
+        fireEvent(weightInput, 'blur');
+
         expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'weight', '82.5');
     });
 
-    it('quick adjusts weight minus 2.5kg with haptic feedback', async () => {
-        const { getByTestId } = await render(
+    it('updates reps via SetInput change and blur', async () => {
+        const { getByTestId, findByDisplayValue } = await render(
             <WorkoutSetRow
                 set={defaultSet}
                 setIndex={0}
@@ -120,105 +148,12 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             />
         );
 
-        const minusBtn = getByTestId('quick-adjust-weight-minus-0');
-        fireEvent.press(minusBtn);
+        const repsInput = getByTestId('set-reps-input-0');
+        fireEvent.changeText(repsInput, '11');
+        expect(await findByDisplayValue('11')).toBeTruthy();
+        fireEvent(repsInput, 'blur');
 
-        expect(HapticService.selection).toHaveBeenCalledTimes(1);
-        expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'weight', '77.5');
-    });
-
-    it('uses ghost weight as base when current weight is empty/0 for quick adjustments', async () => {
-        const emptySet = {
-            id: 'set-2',
-            numero_serie: 2,
-            peso_utilizado: 0,
-            repeticiones: 0,
-        };
-
-        const { getByTestId } = await render(
-            <WorkoutSetRow
-                set={emptySet}
-                setIndex={1}
-                exerciseId="ex-1"
-                tipoPeso="total"
-                ghostWeight="60"
-                isInputEditable={true}
-                isStructureEditable={false}
-                colors={mockColors}
-                onSetChange={mockOnSetChange}
-            />
-        );
-
-        const plusBtn = getByTestId('quick-adjust-weight-plus-1');
-        fireEvent.press(plusBtn);
-
-        expect(HapticService.selection).toHaveBeenCalled();
-        expect(mockOnSetChange).toHaveBeenCalledWith('set-2', 'weight', '62.5');
-    });
-
-    it('clamps weight so it never goes below 0', async () => {
-        const zeroSet = {
-            id: 'set-3',
-            numero_serie: 1,
-            peso_utilizado: 1,
-            repeticiones: 0,
-        };
-
-        const { getByTestId } = await render(
-            <WorkoutSetRow
-                set={zeroSet}
-                setIndex={0}
-                exerciseId="ex-1"
-                tipoPeso="total"
-                isInputEditable={true}
-                isStructureEditable={false}
-                colors={mockColors}
-                onSetChange={mockOnSetChange}
-            />
-        );
-
-        const minusBtn = getByTestId('quick-adjust-weight-minus-0');
-        fireEvent.press(minusBtn);
-
-        expect(mockOnSetChange).toHaveBeenCalledWith('set-3', 'weight', '0');
-    });
-
-    it('quick adjusts reps plus 1 with haptic feedback', async () => {
-        const { getByTestId } = await render(
-            <WorkoutSetRow
-                set={defaultSet}
-                setIndex={0}
-                exerciseId="ex-1"
-                tipoPeso="total"
-                isInputEditable={true}
-                isStructureEditable={false}
-                colors={mockColors}
-                onSetChange={mockOnSetChange}
-            />
-        );
-
-        const plusRepsBtn = getByTestId('quick-adjust-reps-plus-0');
-        fireEvent.press(plusRepsBtn);
         expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'reps', '11');
-    });
-
-    it('quick adjusts reps minus 1 with haptic feedback', async () => {
-        const { getByTestId } = await render(
-            <WorkoutSetRow
-                set={defaultSet}
-                setIndex={0}
-                exerciseId="ex-1"
-                tipoPeso="total"
-                isInputEditable={true}
-                isStructureEditable={false}
-                colors={mockColors}
-                onSetChange={mockOnSetChange}
-            />
-        );
-
-        const minusRepsBtn = getByTestId('quick-adjust-reps-minus-0');
-        fireEvent.press(minusRepsBtn);
-        expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'reps', '9');
     });
 
     it('calls onDeleteSet via contextual action modal on long press in editable structure mode', async () => {
@@ -270,7 +205,7 @@ describe('WorkoutSetRow Component (RNTL)', () => {
         expect(mockOnStartRestTimer).toHaveBeenCalledWith('set-1');
     });
 
-    it('handles string inputs for peso_utilizado plus (PF-BUG-070)', async () => {
+    it('handles string inputs for peso_utilizado cleanly (PF-BUG-070)', async () => {
         const stringSet = {
             id: 'set-str-1',
             numero_serie: 1,
@@ -279,7 +214,7 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             rpe: 8,
         };
 
-        const { getByTestId } = await render(
+        const { getByTestId, findByDisplayValue } = await render(
             <WorkoutSetRow
                 set={stringSet}
                 setIndex={0}
@@ -292,39 +227,15 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             />
         );
 
-        const plusBtn = getByTestId('quick-adjust-weight-plus-0');
-        expect(() => fireEvent.press(plusBtn)).not.toThrow();
-        expect(mockOnSetChange).toHaveBeenCalledWith('set-str-1', 'weight', '82.5');
+        const weightInput = getByTestId('set-weight-input-0');
+        expect(weightInput.props.value).toBe('80');
+        fireEvent.changeText(weightInput, '85');
+        expect(await findByDisplayValue('85')).toBeTruthy();
+        fireEvent(weightInput, 'blur');
+        expect(mockOnSetChange).toHaveBeenCalledWith('set-str-1', 'weight', '85');
     });
 
-    it('handles string inputs for peso_utilizado minus (PF-BUG-070)', async () => {
-        const stringSet = {
-            id: 'set-str-1',
-            numero_serie: 1,
-            peso_utilizado: '80' as any,
-            repeticiones: 10,
-            rpe: 8,
-        };
-
-        const { getByTestId } = await render(
-            <WorkoutSetRow
-                set={stringSet}
-                setIndex={0}
-                exerciseId="ex-1"
-                tipoPeso="total"
-                isInputEditable={true}
-                isStructureEditable={false}
-                colors={mockColors}
-                onSetChange={mockOnSetChange}
-            />
-        );
-
-        const minusBtn = getByTestId('quick-adjust-weight-minus-0');
-        expect(() => fireEvent.press(minusBtn)).not.toThrow();
-        expect(mockOnSetChange).toHaveBeenCalledWith('set-str-1', 'weight', '77.5');
-    });
-
-    it('handles string inputs for repeticiones plus (PF-BUG-070)', async () => {
+    it('handles string inputs for repeticiones cleanly (PF-BUG-070)', async () => {
         const stringSet = {
             id: 'set-str-2',
             numero_serie: 1,
@@ -332,7 +243,7 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             repeticiones: '10' as any,
         };
 
-        const { getByTestId } = await render(
+        const { getByTestId, findByDisplayValue } = await render(
             <WorkoutSetRow
                 set={stringSet}
                 setIndex={0}
@@ -345,35 +256,12 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             />
         );
 
-        const plusRepsBtn = getByTestId('quick-adjust-reps-plus-0');
-        fireEvent.press(plusRepsBtn);
-        expect(mockOnSetChange).toHaveBeenCalledWith('set-str-2', 'reps', '11');
-    });
-
-    it('handles string inputs for repeticiones minus (PF-BUG-070)', async () => {
-        const stringSet = {
-            id: 'set-str-2',
-            numero_serie: 1,
-            peso_utilizado: 50,
-            repeticiones: '10' as any,
-        };
-
-        const { getByTestId } = await render(
-            <WorkoutSetRow
-                set={stringSet}
-                setIndex={0}
-                exerciseId="ex-1"
-                tipoPeso="total"
-                isInputEditable={true}
-                isStructureEditable={false}
-                colors={mockColors}
-                onSetChange={mockOnSetChange}
-            />
-        );
-
-        const minusRepsBtn = getByTestId('quick-adjust-reps-minus-0');
-        fireEvent.press(minusRepsBtn);
-        expect(mockOnSetChange).toHaveBeenCalledWith('set-str-2', 'reps', '9');
+        const repsInput = getByTestId('set-reps-input-0');
+        expect(repsInput.props.value).toBe('10');
+        fireEvent.changeText(repsInput, '12');
+        expect(await findByDisplayValue('12')).toBeTruthy();
+        fireEvent(repsInput, 'blur');
+        expect(mockOnSetChange).toHaveBeenCalledWith('set-str-2', 'reps', '12');
     });
 
     describe('RPE Input Validation (PF-309)', () => {
@@ -562,9 +450,9 @@ describe('WorkoutSetRow Component (RNTL)', () => {
         });
     });
 
-    it('triggers onOpenPlateCalculator when plate calculator button is pressed', async () => {
+    it('opens plate calculator via contextual action modal on long press', async () => {
         const mockOpenPlate = jest.fn();
-        const { getByTestId } = await render(
+        const { getByTestId, findByTestId } = await render(
             <WorkoutSetRow
                 set={defaultSet}
                 setIndex={0}
@@ -578,7 +466,8 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             />
         );
 
-        const plateBtn = getByTestId('plate-calculator-button-0');
+        fireEvent(getByTestId('set-row-0'), 'longPress');
+        const plateBtn = await findByTestId('action-plate-calculator');
         expect(plateBtn).toBeTruthy();
         fireEvent.press(plateBtn);
 
