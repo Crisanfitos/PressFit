@@ -190,6 +190,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                                 isStructureEditable={isStructureEditable}
                                 canDelete={canDeleteSets}
                                 colors={colors}
+                                mode={mode}
                                 navMode={navMode}
                                 lastCompletedSetId={lastCompletedSetId}
                                 restTimerVisible={restTimerVisible}

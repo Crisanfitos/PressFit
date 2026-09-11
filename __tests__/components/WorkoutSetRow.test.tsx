@@ -759,6 +759,102 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
         });
     });
+
+    describe('Set Number Button Chip Styling (PF-333)', () => {
+        it('renders rounded chip with surfaceHighlight background and border when editable', async () => {
+            const { getByTestId } = await render(
+                <WorkoutSetRow
+                    set={{ ...defaultSet, tipo_serie: 'normal' }}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                />
+            );
+
+            const btn = getByTestId('set-type-button-0');
+            expect(btn.props.style).toEqual(
+                expect.objectContaining({
+                    backgroundColor: mockColors.surfaceHighlight,
+                    borderColor: mockColors.border,
+                })
+            );
+            expect(btn.props.accessibilityState?.disabled).toBeFalsy();
+        });
+
+        it('enables interaction and applies chip style when mode is PREVIEW', async () => {
+            const { getByTestId, findByTestId } = await render(
+                <WorkoutSetRow
+                    set={{ ...defaultSet, tipo_serie: 'normal' }}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={false}
+                    isStructureEditable={false}
+                    mode="PREVIEW"
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                />
+            );
+
+            const btn = getByTestId('set-type-button-0');
+            expect(btn.props.style).toEqual(
+                expect.objectContaining({
+                    backgroundColor: mockColors.surfaceHighlight,
+                    borderColor: mockColors.border,
+                })
+            );
+            expect(btn.props.accessibilityState?.disabled).toBeFalsy();
+
+            fireEvent.press(btn);
+            expect(await findByTestId('set-type-picker-modal')).toBeTruthy();
+        });
+
+        it('renders transparent style and disables interaction when non-editable and not PREVIEW', async () => {
+            const { getByTestId, queryByTestId } = await render(
+                <WorkoutSetRow
+                    set={{ ...defaultSet, tipo_serie: 'normal' }}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={false}
+                    isStructureEditable={false}
+                    mode="VIEW"
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                />
+            );
+
+            const btn = getByTestId('set-type-button-0');
+            expect(btn.props.accessibilityState?.disabled).toBe(true);
+
+            fireEvent.press(btn);
+            expect(queryByTestId('set-type-picker-modal')).toBeNull();
+        });
+
+        it('invalidates memoization when mode changes', () => {
+            const baseProps: any = {
+                set: defaultSet,
+                setIndex: 0,
+                exerciseId: 'ex-1',
+                tipoPeso: 'total',
+                isInputEditable: false,
+                isStructureEditable: false,
+                mode: 'PREVIEW',
+                colors: mockColors,
+            };
+
+            const nextProps = {
+                ...baseProps,
+                mode: 'ACTIVE',
+            };
+
+            expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
+        });
+    });
 });
 
 

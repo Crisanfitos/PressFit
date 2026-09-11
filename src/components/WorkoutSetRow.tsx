@@ -40,6 +40,7 @@ export interface WorkoutSetRowProps {
         inputBackground?: string;
         [key: string]: any;
     };
+    mode?: string;
     navMode?: string;
     lastCompletedSetId?: string | null;
     restTimerVisible?: boolean;
@@ -63,6 +64,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     isStructureEditable,
     canDelete,
     colors,
+    mode,
     navMode,
     lastCompletedSetId,
     restTimerVisible,
@@ -79,9 +81,10 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     const currentSetType: SetType = set.tipo_serie || 'normal';
     const typeVisual = SET_TYPE_COLORS[currentSetType] || SET_TYPE_COLORS.normal;
     const isSpecialType = currentSetType !== 'normal';
+    const canEditSetType = isInputEditable || isStructureEditable || mode === 'PREVIEW';
 
     const handleOpenSetTypePicker = () => {
-        if (!isInputEditable && !isStructureEditable) return;
+        if (!canEditSetType) return;
         HapticService.selection();
         setIsTypePickerVisible(true);
     };
@@ -149,13 +152,23 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                     testID={`set-type-button-${setIndex}`}
                     style={[
                         styles.setTypeBadgeButton,
-                        isSpecialType && {
-                            backgroundColor: typeVisual.badgeBg,
-                            borderColor: typeVisual.border,
-                        },
+                        isSpecialType
+                            ? {
+                                backgroundColor: typeVisual.badgeBg,
+                                borderColor: typeVisual.border,
+                            }
+                            : canEditSetType
+                                ? {
+                                    backgroundColor: colors.surfaceHighlight,
+                                    borderColor: colors.border,
+                                }
+                                : {
+                                    backgroundColor: 'transparent',
+                                    borderColor: 'transparent',
+                                },
                     ]}
                     onPress={handleOpenSetTypePicker}
-                    disabled={!isInputEditable && !isStructureEditable}
+                    disabled={!canEditSetType}
                     activeOpacity={0.7}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
@@ -164,7 +177,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                             styles.setNumber,
                             isSpecialType
                                 ? [styles.specialBadgeText, { color: typeVisual.badgeText }]
-                                : { color: colors.textSecondary },
+                                : { color: canEditSetType ? colors.text : colors.textSecondary },
                         ]}
                     >
                         {isSpecialType ? typeVisual.shortLabel : set.numero_serie}
@@ -455,6 +468,7 @@ export const areWorkoutSetRowPropsEqual = (
         prevProps.isInputEditable !== nextProps.isInputEditable ||
         prevProps.isStructureEditable !== nextProps.isStructureEditable ||
         prevProps.canDelete !== nextProps.canDelete ||
+        prevProps.mode !== nextProps.mode ||
         prevProps.navMode !== nextProps.navMode ||
         prevProps.onOpenPlateCalculator !== nextProps.onOpenPlateCalculator ||
         prevProps.onSelectSetType !== nextProps.onSelectSetType
