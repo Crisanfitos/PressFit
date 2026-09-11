@@ -197,6 +197,7 @@ export interface SetUpdatePayload {
     rpe?: number;
     descanso_segundos?: number;
     tipo_serie?: SetType;
+    numero_serie?: number;
 }
 
 /**

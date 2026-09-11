@@ -26,6 +26,7 @@ export interface WorkoutSetRowProps {
     ghostRpe?: string | null;
     isInputEditable: boolean;
     isStructureEditable: boolean;
+    canDelete?: boolean;
     colors: {
         background: string;
         surface: string;
@@ -57,6 +58,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     ghostRpe,
     isInputEditable,
     isStructureEditable,
+    canDelete,
     colors,
     navMode,
     lastCompletedSetId,
@@ -265,7 +267,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                 </View>
 
                 {/* Delete Set Button */}
-                {isStructureEditable && onDeleteSet && (
+                {((canDelete !== undefined ? canDelete : isStructureEditable) && Boolean(onDeleteSet)) && (
                     <TouchableOpacity
                         testID={`delete-set-button-${setIndex}`}
                         style={styles.deleteSetButton}
@@ -383,6 +385,7 @@ export const areWorkoutSetRowPropsEqual = (
         prevProps.ghostRpe !== nextProps.ghostRpe ||
         prevProps.isInputEditable !== nextProps.isInputEditable ||
         prevProps.isStructureEditable !== nextProps.isStructureEditable ||
+        prevProps.canDelete !== nextProps.canDelete ||
         prevProps.navMode !== nextProps.navMode ||
         prevProps.onOpenPlateCalculator !== nextProps.onOpenPlateCalculator
     ) {

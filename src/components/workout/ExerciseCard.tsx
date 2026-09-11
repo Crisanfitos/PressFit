@@ -6,6 +6,7 @@ import { WeightTypeBadge } from '../WeightTypeBadge';
 import { PersonalNoteButton } from '../PersonalNoteButton';
 import WorkoutSetRow from '../WorkoutSetRow';
 import { TipoPeso, TIPO_PESO_SHORT_LABELS } from '../../types/setTypes';
+import { MAX_TOTAL_SETS_PER_EXERCISE } from '../../utils/setLimits';
 
 export interface ExerciseCardProps {
     exercise: {
@@ -66,6 +67,8 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     getGhostValue,
 }) => {
     const setsList = exercise.sets || exercise.series || [];
+    const isAtTotalLimit = setsList.length >= MAX_TOTAL_SETS_PER_EXERCISE;
+    const canDeleteSets = isStructureEditable || mode === 'ACTIVE';
 
     return (
         <View style={[styles.exerciseCard, { backgroundColor: colors.surface, borderColor: colors.border }]} testID={`exercise-card-${index}`}>
@@ -163,7 +166,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                         <View style={[styles.inputGroup, { maxWidth: 60 }]}>
                             <Text style={[styles.referenceText, { color: colors.primary }]}>RPE</Text>
                         </View>
-                        {isStructureEditable && <View style={{ width: 28 }} />}
+                        {canDeleteSets && <View style={{ width: 28 }} />}
                     </View>
 
                     {setsList.length === 0 ? (
@@ -185,6 +188,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                                 ghostRpe={getGhostValue(exercise.id, set.numero_serie, 'rpe')}
                                 isInputEditable={isInputEditable}
                                 isStructureEditable={isStructureEditable}
+                                canDelete={canDeleteSets}
                                 colors={colors}
                                 navMode={navMode}
                                 lastCompletedSetId={lastCompletedSetId}
@@ -198,20 +202,39 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                         ))
                     )}
 
-                    {(isStructureEditable || (isInputEditable && mode !== 'ACTIVE')) && (
+                    {(isStructureEditable || isInputEditable || mode === 'ACTIVE') && (
                         <TouchableOpacity
                             testID={`add-set-button-${index}`}
+                            disabled={isAtTotalLimit}
                             style={[
                                 styles.addSetButton,
                                 {
-                                    backgroundColor: `${colors.primary}20`,
-                                    borderColor: colors.primary,
+                                    backgroundColor: isAtTotalLimit ? `${colors.border}30` : `${colors.primary}20`,
+                                    borderColor: isAtTotalLimit ? colors.border : colors.primary,
+                                    opacity: isAtTotalLimit ? 0.6 : 1,
                                 },
                             ]}
-                            onPress={() => onAddSet(exercise.id)}
+                            onPress={() => {
+                                if (!isAtTotalLimit) {
+                                    onAddSet(exercise.id);
+                                }
+                            }}
                         >
-                            <MaterialIcons name="add" size={16} color={colors.primary} />
-                            <Text style={[styles.addSetText, { color: colors.primary }]}>Añadir Series</Text>
+                            <MaterialIcons
+                                name={isAtTotalLimit ? 'block' : 'add'}
+                                size={16}
+                                color={isAtTotalLimit ? colors.textSecondary : colors.primary}
+                            />
+                            <Text
+                                style={[
+                                    styles.addSetText,
+                                    { color: isAtTotalLimit ? colors.textSecondary : colors.primary },
+                                ]}
+                            >
+                                {isAtTotalLimit
+                                    ? `Límite alcanzado (máx. ${MAX_TOTAL_SETS_PER_EXERCISE} series)`
+                                    : 'Añadir Series'}
+                            </Text>
                         </TouchableOpacity>
                     )}
                 </View>

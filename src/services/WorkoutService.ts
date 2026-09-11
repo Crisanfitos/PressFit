@@ -371,7 +371,7 @@ export const WorkoutService = {
 
     async updateSet(
         setId: string,
-        updates: { weight?: number; reps?: number; rpe?: number; descanso_segundos?: number; tipo_serie?: SetType }
+        updates: { weight?: number; reps?: number; rpe?: number; descanso_segundos?: number; tipo_serie?: SetType; numero_serie?: number }
     ): Promise<ServiceResponse<Serie>> {
         const dbUpdates: SetUpdatePayload = {};
         if (updates.weight !== undefined) dbUpdates.peso_utilizado = updates.weight;
@@ -379,6 +379,7 @@ export const WorkoutService = {
         if (updates.rpe !== undefined) dbUpdates.rpe = updates.rpe;
         if (updates.descanso_segundos !== undefined) dbUpdates.descanso_segundos = updates.descanso_segundos;
         if (updates.tipo_serie !== undefined) dbUpdates.tipo_serie = updates.tipo_serie;
+        if (updates.numero_serie !== undefined) dbUpdates.numero_serie = updates.numero_serie;
 
         if (isE2EMockEnabled()) {
             const mockUpdated = mockStore.updateSet(setId, dbUpdates);

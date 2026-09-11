@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Alert } from 'react-native';
 import { WorkoutService } from '../services/WorkoutService';
 import { RoutineService } from '../services/RoutineService';
-import { TipoPeso } from '../types/setTypes';
+import { TipoPeso, SetType } from '../types/setTypes';
 import { validateRpe } from '../utils/rpeValidation';
+import { MAX_TOTAL_SETS_PER_EXERCISE, MAX_WARMUP_SETS_PER_EXERCISE, checkSetLimits } from '../utils/setLimits';
 import { clearActiveWorkoutParams, saveActiveWorkoutParams } from '../services/TimerNotificationService';
 
 export type WorkoutMode = 'ACTIVE' | 'VIEW' | 'MISSED' | 'PREVIEW' | 'PENDING';
@@ -16,6 +17,7 @@ interface Set {
     peso_utilizado: number;
     rpe?: number;
     descanso_segundos?: number;
+    tipo_serie?: SetType;
     pending?: boolean;
 }
 
@@ -322,13 +324,22 @@ export const useWorkoutController = (
         }
     }, []);
 
-    const addSets = async (exerciseId: string, count: number) => {
+    const addSets = async (exerciseId: string, count: number = 1, setType: SetType = 'normal') => {
         // Allow editing in ACTIVE, PREVIEW mode, or when editing a template/routine
         const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
         if (!workout || !canEdit) return;
 
         const exerciseIndex = exercises.findIndex((e) => e.id === exerciseId);
         if (exerciseIndex === -1) return;
+
+        const exercise = exercises[exerciseIndex];
+        const currentSets = exercise.sets || [];
+
+        const limitValidation = checkSetLimits(currentSets, count, setType);
+        if (!limitValidation.allowed) {
+            Alert.alert('Límite de series', limitValidation.reason || 'No se pueden añadir más series.');
+            return;
+        }
 
         try {
             const targetWorkoutId = workout.id;
@@ -342,13 +353,24 @@ export const useWorkoutController = (
 
             // Create sets in backend on the current workout
             for (let i = 0; i < count; i++) {
-                await WorkoutService.addSet(
-                    targetWorkoutId,
-                    exerciseId,
-                    currentCount + 1 + i,
-                    baseWeight,
-                    baseRep
-                );
+                if (setType && setType !== 'normal') {
+                    await WorkoutService.addSet(
+                        targetWorkoutId,
+                        exerciseId,
+                        currentCount + 1 + i,
+                        baseWeight,
+                        baseRep,
+                        setType
+                    );
+                } else {
+                    await WorkoutService.addSet(
+                        targetWorkoutId,
+                        exerciseId,
+                        currentCount + 1 + i,
+                        baseWeight,
+                        baseRep
+                    );
+                }
             }
 
             // Backend ok → reload series for this exercise
@@ -359,8 +381,8 @@ export const useWorkoutController = (
         }
     };
 
-    const addSet = async (exerciseId: string) => {
-        await addSets(exerciseId, 1);
+    const addSet = async (exerciseId: string, setType: SetType = 'normal') => {
+        await addSets(exerciseId, 1, setType);
     };
 
     const updateSet = async (setId: string, field: string, value: any) => {
@@ -398,10 +420,21 @@ export const useWorkoutController = (
     const deleteSet = async (setId: string, exerciseId: string) => {
         const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
         if (!canEdit) return;
+
+        const targetExercise = exercises.find(
+            (e) => e.id === exerciseId || e.routine_exercise_id === exerciseId
+        );
+        const originalSets = targetExercise?.sets || [];
+        const filtered = originalSets.filter((s) => s.id !== setId);
+        const renumberedSets = filtered.map((s, index) => ({
+            ...s,
+            numero_serie: index + 1,
+        }));
+
         setExercises((prev) =>
             prev.map((ex) => {
                 if (ex.id === exerciseId || ex.routine_exercise_id === exerciseId) {
-                    return { ...ex, sets: (ex.sets || []).filter((s) => s.id !== setId) };
+                    return { ...ex, sets: renumberedSets };
                 }
                 return ex;
             })
@@ -409,6 +442,12 @@ export const useWorkoutController = (
 
         try {
             await WorkoutService.deleteSet(setId);
+            for (const s of renumberedSets) {
+                const prev = originalSets.find((os) => os.id === s.id);
+                if (prev && prev.numero_serie !== s.numero_serie && s.id && !s.id.startsWith('temp-')) {
+                    await WorkoutService.updateSet(s.id, { numero_serie: s.numero_serie });
+                }
+            }
         } catch (error) {
             console.error('Failed to delete set', error);
             if (workout) loadExercises(routineDayId, workout.id);

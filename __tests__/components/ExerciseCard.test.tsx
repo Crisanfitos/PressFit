@@ -143,4 +143,54 @@ describe('ExerciseCard & areExerciseCardPropsEqual (RNTL)', () => {
 
         expect(mockOpenPlate).toHaveBeenCalledWith(80, 'set-1', 'ex-1');
     });
+
+    describe('In-Situ Set Management and Limits (PF-314)', () => {
+        it('renders add-set button in ACTIVE mode even when isStructureEditable is false', async () => {
+            const mockAddSet = jest.fn();
+            const { getByTestId, getByText } = await render(
+                <ExerciseCard
+                    {...baseProps}
+                    mode="ACTIVE"
+                    isStructureEditable={false}
+                    onAddSet={mockAddSet}
+                />
+            );
+
+            const addBtn = getByTestId('add-set-button-0');
+            expect(addBtn).toBeTruthy();
+            expect(getByText('Añadir Series')).toBeTruthy();
+
+            fireEvent.press(addBtn);
+            expect(mockAddSet).toHaveBeenCalledWith('ex-1');
+        });
+
+        it('disables add-set button and shows explanatory text when 10 sets limit is reached', async () => {
+            const tenSets = Array.from({ length: 10 }, (_, i) => ({
+                id: `set-${i + 1}`,
+                numero_serie: i + 1,
+                peso_utilizado: 50,
+                repeticiones: 10,
+            }));
+
+            const mockAddSet = jest.fn();
+            const { getByTestId, getByText } = await render(
+                <ExerciseCard
+                    {...baseProps}
+                    mode="ACTIVE"
+                    exercise={{
+                        ...mockExercise,
+                        sets: tenSets,
+                    }}
+                    onAddSet={mockAddSet}
+                />
+            );
+
+            const addBtn = getByTestId('add-set-button-0');
+            expect(addBtn).toBeTruthy();
+            expect(getByText('Límite alcanzado (máx. 10 series)')).toBeTruthy();
+
+            fireEvent.press(addBtn);
+            expect(mockAddSet).not.toHaveBeenCalled();
+        });
+    });
 });
