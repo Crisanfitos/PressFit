@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../i18n';
+import { WorkoutService } from './WorkoutService';
 
 export const TIMER_STORAGE_KEY = '@pressfit_rest_timer_start';
 export const TIMER_PENDING_ACTION_KEY = '@pressfit_timer_action';
@@ -365,7 +366,7 @@ export async function getElapsedSecondsFromStorage(): Promise<number> {
 export async function checkActiveRestTimer(): Promise<{ active: boolean; elapsedSeconds: number; paused?: boolean }> {
     try {
         const pendingAction = await getPendingTimerAction();
-        if (pendingAction === 'DISCARD') {
+        if (pendingAction === 'DISCARD' || pendingAction === 'OK') {
             return { active: false, elapsedSeconds: 0 };
         }
         const paused = await AsyncStorage.getItem(TIMER_PAUSED_ELAPSED_KEY);
@@ -421,11 +422,7 @@ export async function handleNotificationAction(actionId: string): Promise<TimerP
     logTimerNotification('info', `Handling notification action: ${actionId}`);
     try {
         if (actionId === ACTION_OK) {
-            const elapsed = await getElapsedSecondsFromStorage();
-            await setPendingTimerAction('OK');
-            await AsyncStorage.setItem(TIMER_PAUSED_ELAPSED_KEY, String(elapsed));
-            await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
-            await cancelTimerNotification();
+            await finishActiveRestTimer();
             return 'OK';
         } else if (actionId === ACTION_PAUSE) {
             const elapsed = await getElapsedSecondsFromStorage();
@@ -563,6 +560,34 @@ export async function discardActiveRestTimer(): Promise<void> {
         logTimerNotification('info', 'Active rest timer discarded via discardActiveRestTimer');
     } catch (error) {
         logTimerNotification('warn', 'Failed to discard active rest timer:', error);
+    }
+}
+
+export async function finishActiveRestTimer(): Promise<number> {
+    try {
+        const elapsed = await getElapsedSecondsFromStorage();
+        const savedParams = await getActiveWorkoutParams();
+        const targetSetId = savedParams?.activeSetId;
+
+        if (targetSetId && elapsed > 0) {
+            try {
+                await WorkoutService.updateSet(targetSetId, { descanso_segundos: elapsed });
+            } catch (err) {
+                logTimerNotification('warn', 'Failed to update set descanso_segundos on finish:', err);
+            }
+            await saveActiveWorkoutParams({ activeSetId: null });
+        }
+
+        await setPendingTimerAction('OK');
+        await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+        await AsyncStorage.removeItem(TIMER_PAUSED_ELAPSED_KEY);
+        await AsyncStorage.removeItem(TIMER_TARGET_DURATION_KEY);
+        await cancelTimerNotification();
+        logTimerNotification('info', `Active rest timer finished: elapsed=${elapsed}s, set=${targetSetId}`);
+        return elapsed;
+    } catch (error) {
+        logTimerNotification('warn', 'Failed to finish active rest timer:', error);
+        return 0;
     }
 }
 

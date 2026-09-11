@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import {
     checkActiveRestTimer,
+    finishActiveRestTimer,
     setPendingTimerAction,
     discardActiveRestTimer,
     addSecondsToRestTimer,
@@ -137,7 +138,7 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
 
     const handleFinish = async () => {
         HapticService.selection();
-        await setPendingTimerAction('OK');
+        await finishActiveRestTimer();
         setTimerActive(false);
         if (onFinish) {
             onFinish();

@@ -15,6 +15,7 @@ jest.mock('../../src/services/TimerNotificationService', () => ({
     checkActiveRestTimer: jest.fn(),
     getTimerTargetDuration: jest.fn(),
     setPendingTimerAction: jest.fn(),
+    finishActiveRestTimer: jest.fn(),
     addSecondsToRestTimer: jest.fn(),
     discardActiveRestTimer: jest.fn(),
 }));
@@ -34,6 +35,7 @@ describe('RestTimerFloatingBar Component', () => {
         });
         (TimerNotificationService.getTimerTargetDuration as jest.Mock).mockResolvedValue(90);
         (TimerNotificationService.setPendingTimerAction as jest.Mock).mockResolvedValue(undefined);
+        (TimerNotificationService.finishActiveRestTimer as jest.Mock).mockResolvedValue(45);
         (TimerNotificationService.addSecondsToRestTimer as jest.Mock).mockResolvedValue({
             elapsed: 30,
             target: 120,
@@ -109,7 +111,7 @@ describe('RestTimerFloatingBar Component', () => {
         expect(mockOnPress).toHaveBeenCalledTimes(1);
     });
 
-    it('handles Listo button press: triggers haptics, sets pending action OK, and calls onFinish', async () => {
+    it('handles Listo button press: triggers haptics, finishes timer, and calls onFinish', async () => {
         const { getByTestId } = await render(
             <ThemeProvider>
                 <RestTimerFloatingBar
@@ -125,7 +127,7 @@ describe('RestTimerFloatingBar Component', () => {
         });
 
         expect(HapticService.selection).toHaveBeenCalled();
-        expect(TimerNotificationService.setPendingTimerAction).toHaveBeenCalledWith('OK');
+        expect(TimerNotificationService.finishActiveRestTimer).toHaveBeenCalledTimes(1);
         expect(mockOnFinish).toHaveBeenCalledTimes(1);
     });
 
