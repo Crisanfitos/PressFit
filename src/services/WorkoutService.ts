@@ -30,6 +30,14 @@ function isNetworkError(error: any): boolean {
     return msg.includes('fetch') || msg.includes('network') || msg.includes('offline') || msg.includes('timeout');
 }
 
+export function isSchemaColumnError(error: any): boolean {
+    if (!error) return false;
+    if (error.code === 'PGRST204') return true;
+    if (error.code === '42703') return true;
+    const msg = String(error.message || error.details || error.hint || error).toLowerCase();
+    return msg.includes('tipo_serie') || (msg.includes('column') && msg.includes('schema cache'));
+}
+
 export const WorkoutService = {
     async getWorkoutDetails(workoutId: string): Promise<ServiceResponse<RoutineDay>> {
         if (isE2EMockEnabled()) {
@@ -145,7 +153,7 @@ export const WorkoutService = {
                     const todayStr = formatLocalDateKey(new Date());
 
                     // Find the most recent completed workout for the same day name
-                    const { data: lastWorkouts } = await supabase
+                    let lastWorkoutsRes = await supabase
                         .from('rutinas_diarias')
                         .select(`
                             id,
@@ -161,6 +169,28 @@ export const WorkoutService = {
                         .not('fecha_dia', 'is', null)
                         .order('fecha_dia', { ascending: false })
                         .limit(1);
+
+                    if (lastWorkoutsRes.error && isSchemaColumnError(lastWorkoutsRes.error)) {
+                        console.warn('[WorkoutService] tipo_serie column not found in schema cache, querying previous series without tipo_serie');
+                        lastWorkoutsRes = await supabase
+                            .from('rutinas_diarias')
+                            .select(`
+                                id,
+                                ejercicios_programados (
+                                    ejercicio_id,
+                                    series (numero_serie, peso_utilizado, repeticiones, rpe)
+                                )
+                            `)
+                            .eq('rutina_semanal_id', templateDay.rutina_semanal_id)
+                            .eq('nombre_dia', templateDay.nombre_dia)
+                            .lt('fecha_dia', todayStr)
+                            .eq('completada', true)
+                            .not('fecha_dia', 'is', null)
+                            .order('fecha_dia', { ascending: false })
+                            .limit(1);
+                    }
+
+                    const lastWorkouts = lastWorkoutsRes.data;
 
                     if (lastWorkouts?.[0]?.ejercicios_programados && insertedExercises) {
                         // Map exercise_id -> new ejercicio_programado_id
@@ -188,7 +218,16 @@ export const WorkoutService = {
                         }
 
                         if (seriesToInsert.length > 0) {
-                            await supabase.from('series').insert(seriesToInsert);
+                            const insertCopyRes = await supabase.from('series').insert(seriesToInsert);
+                            if (insertCopyRes.error && isSchemaColumnError(insertCopyRes.error)) {
+                                console.warn('[WorkoutService] tipo_serie column not supported on insert copy, inserting legacy series');
+                                const legacySeries = seriesToInsert.map((s) => {
+                                    const copy = { ...s };
+                                    delete (copy as any).tipo_serie;
+                                    return copy;
+                                });
+                                await supabase.from('series').insert(legacySeries);
+                            }
                         }
                     }
                 } catch (copyError) {
@@ -294,7 +333,11 @@ export const WorkoutService = {
                 .order('numero_serie', { ascending: true });
 
             if (seriesError) throw seriesError;
-            return { data: series || [], error: null };
+            const normalizedSeries = (series || []).map((s) => ({
+                ...s,
+                tipo_serie: (s as any).tipo_serie || 'normal',
+            }));
+            return { data: normalizedSeries, error: null };
         } catch (error) {
             console.error('Error fetching series for exercise:', error);
             return { data: null, error };
@@ -344,7 +387,7 @@ export const WorkoutService = {
                 scheduledExercise = newEx;
             }
 
-            const { data, error } = await supabase
+            let { data, error } = await supabase
                 .from('series')
                 .insert({
                     ejercicio_programado_id: scheduledExercise!.id,
@@ -356,13 +399,33 @@ export const WorkoutService = {
                 .select()
                 .single();
 
+            // Defensive schema cache / migration fallback (PF-332)
+            if (error && isSchemaColumnError(error)) {
+                console.warn('[WorkoutService] tipo_serie column missing in schema cache, falling back to insert without tipo_serie');
+                const fallbackRes = await supabase
+                    .from('series')
+                    .insert({
+                        ejercicio_programado_id: scheduledExercise!.id,
+                        numero_serie: setNumber,
+                        peso_utilizado: weight || 0,
+                        repeticiones: reps || 0,
+                    })
+                    .select()
+                    .single();
+                data = fallbackRes.data;
+                error = fallbackRes.error;
+            }
+
             if (isE2EMockEnabled()) {
                 const mockAdded = mockStore.addSet(exerciseId, setType);
                 return { data: (mockAdded || data) as any, error: null };
             }
 
             if (error) throw error;
-            return { data, error: null };
+            const normalizedData = data
+                ? { ...data, tipo_serie: (data as any).tipo_serie || setType || 'normal' }
+                : data;
+            return { data: normalizedData, error: null };
         } catch (error) {
             console.error('Error adding set:', error);
             return { data: null, error };
@@ -389,12 +452,27 @@ export const WorkoutService = {
         const offline = await checkIsOffline();
         if (!offline) {
             try {
-                const { data, error } = await supabase
+                let { data, error } = await supabase
                     .from('series')
                     .update(dbUpdates)
                     .eq('id', setId)
                     .select()
                     .single();
+
+                // Defensive schema cache / migration fallback (PF-332)
+                if (error && isSchemaColumnError(error) && dbUpdates.tipo_serie !== undefined) {
+                    console.warn('[WorkoutService] tipo_serie column missing in schema cache, falling back to update without tipo_serie');
+                    const fallbackUpdates = { ...dbUpdates };
+                    delete fallbackUpdates.tipo_serie;
+                    const fallbackRes = await supabase
+                        .from('series')
+                        .update(fallbackUpdates)
+                        .eq('id', setId)
+                        .select()
+                        .single();
+                    data = fallbackRes.data;
+                    error = fallbackRes.error;
+                }
 
                 if (error) {
                     if (isNetworkError(error)) throw error;
@@ -402,14 +480,19 @@ export const WorkoutService = {
                 }
 
                 // Update local cache
+                let normalized: any = data;
                 if (data) {
+                    normalized = {
+                        ...data,
+                        tipo_serie: (data as any).tipo_serie || dbUpdates.tipo_serie || 'normal',
+                    };
                     const cachedRes = await OfflineStorageService.getCachedWorkouts();
                     const workouts = cachedRes.data || [];
                     const updatedList = workouts.map((w) => {
                         if (w.ejercicios_programados) {
                             w.ejercicios_programados.forEach((ex) => {
                                 if (ex.series) {
-                                    ex.series = ex.series.map((s) => (s.id === setId ? { ...s, ...data } : s));
+                                    ex.series = ex.series.map((s) => (s.id === setId ? { ...s, ...normalized } : s));
                                 }
                             });
                         }
@@ -418,7 +501,7 @@ export const WorkoutService = {
                     await OfflineStorageService.saveWorkouts(updatedList);
                 }
 
-                return { data, error: null };
+                return { data: normalized, error: null };
             } catch (error) {
                 console.warn('Supabase updateSet network failure, falling back to offline enqueue:', error);
             }

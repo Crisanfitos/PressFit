@@ -316,7 +316,10 @@ export const useWorkoutController = (
                 if (exIdx !== -1) {
                     updated[exIdx] = {
                         ...updated[exIdx],
-                        sets: series as Set[],
+                        sets: (series as Set[]).map((s) => ({
+                            ...s,
+                            tipo_serie: s.tipo_serie || 'normal',
+                        })),
                     };
                 }
                 return updated;
