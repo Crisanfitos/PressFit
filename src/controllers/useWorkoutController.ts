@@ -395,6 +395,7 @@ export const useWorkoutController = (
         let dbField = field;
         if (field === 'weight') dbField = 'peso_utilizado';
         if (field === 'reps') dbField = 'repeticiones';
+        if (field === 'setType' || field === 'tipo_serie') dbField = 'tipo_serie';
         // 'rpe' maps directly to 'rpe' in DB — no renaming needed
 
         let processedValue = value;
@@ -406,6 +407,11 @@ export const useWorkoutController = (
             dbValue = validation.value;
         }
 
+        if (field === 'setType' || field === 'tipo_serie') {
+            processedValue = value as SetType;
+            dbValue = value as SetType;
+        }
+
         setExercises((prev) =>
             prev.map((ex) => ({
                 ...ex,
@@ -414,9 +420,30 @@ export const useWorkoutController = (
         );
 
         try {
-            await WorkoutService.updateSet(setId, { [field]: dbValue });
+            const updatesPayload: any = (field === 'setType' || field === 'tipo_serie')
+                ? { tipo_serie: dbValue }
+                : { [field]: dbValue };
+            await WorkoutService.updateSet(setId, updatesPayload);
         } catch (error) {
             console.error('Failed to update set', error);
+        }
+    };
+
+    const updateSetType = async (setId: string, newType: SetType) => {
+        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
+        if (!canEdit) return;
+
+        setExercises((prev) =>
+            prev.map((ex) => ({
+                ...ex,
+                sets: ex.sets.map((s) => (s.id === setId ? { ...s, tipo_serie: newType } : s)),
+            }))
+        );
+
+        try {
+            await WorkoutService.updateSet(setId, { tipo_serie: newType });
+        } catch (error) {
+            console.error('Failed to update set type', error);
         }
     };
 
@@ -579,6 +606,7 @@ export const useWorkoutController = (
         addSet,
         addSets,
         updateSet,
+        updateSetType,
         deleteSet,
         removeExercise,
         addExercise,

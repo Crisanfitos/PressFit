@@ -1167,4 +1167,57 @@ describe('useWorkoutController (PF-257)', () => {
             expect(WorkoutService.updateSet).not.toHaveBeenCalled();
         });
     });
+
+    describe('Set Type Updates (PF-315)', () => {
+        it('optimistically updates set type and calls WorkoutService.updateSet via updateSetType', async () => {
+            (WorkoutService.updateSet as jest.Mock).mockResolvedValue({ error: null });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            await act(async () => {
+                await hook.result.current.updateSetType('s-1', 'failure');
+            });
+
+            expect(hook.result.current.exercises[0].sets[0].tipo_serie).toBe('failure');
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', { tipo_serie: 'failure' });
+        });
+
+        it('updates set type via updateSet with field tipo_serie', async () => {
+            (WorkoutService.updateSet as jest.Mock).mockResolvedValue({ error: null });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            await act(async () => {
+                await hook.result.current.updateSet('s-1', 'tipo_serie', 'warmup');
+            });
+
+            expect(hook.result.current.exercises[0].sets[0].tipo_serie).toBe('warmup');
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', { tipo_serie: 'warmup' });
+        });
+
+        it('does not update set type when mode is VIEW', async () => {
+            (WorkoutService.getWorkoutDetails as jest.Mock).mockResolvedValue({
+                data: { ...getMockWorkoutWithExercises(), completada: true },
+                error: null,
+            });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3, false)
+            );
+            await waitFor(() => expect(hook.result.current.mode).toBe('VIEW'));
+
+            await act(async () => {
+                await hook.result.current.updateSetType('s-1', 'drop');
+            });
+
+            expect(WorkoutService.updateSet).not.toHaveBeenCalled();
+        });
+    });
 });
+

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import SetInput from './SetInput';
 import { HapticService } from '../services/HapticService';
-import { TipoPeso } from '../types/setTypes';
+import { TipoPeso, SetType, SET_TYPE_COLORS } from '../types/setTypes';
 import { validateRpe } from '../utils/rpeValidation';
+import SetTypePickerModal from './workout/SetTypePickerModal';
 
 export interface SetData {
     id: string;
@@ -14,6 +15,7 @@ export interface SetData {
     repeticiones: number;
     rpe?: number;
     descanso_segundos?: number;
+    tipo_serie?: SetType;
 }
 
 export interface WorkoutSetRowProps {
@@ -43,6 +45,7 @@ export interface WorkoutSetRowProps {
     restTimerVisible?: boolean;
     savedTimerSetIds?: Set<string>;
     onOpenPlateCalculator?: (weight: number, setId: string, exerciseId?: string) => void;
+    onSelectSetType?: (setId: string, type: SetType) => void;
     onSetChange: (setId: string, field: string, value: string) => void;
     onDeleteSet?: (setId: string, exerciseId: string) => void;
     onStartRestTimer?: (setId: string) => void;
@@ -65,11 +68,31 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     restTimerVisible,
     savedTimerSetIds,
     onOpenPlateCalculator,
+    onSelectSetType,
     onSetChange,
     onDeleteSet,
     onStartRestTimer,
 }) => {
     const isBodyweight = tipoPeso === 'corporal';
+    const [isTypePickerVisible, setIsTypePickerVisible] = useState(false);
+
+    const currentSetType: SetType = set.tipo_serie || 'normal';
+    const typeVisual = SET_TYPE_COLORS[currentSetType] || SET_TYPE_COLORS.normal;
+    const isSpecialType = currentSetType !== 'normal';
+
+    const handleOpenSetTypePicker = () => {
+        if (!isInputEditable && !isStructureEditable) return;
+        HapticService.selection();
+        setIsTypePickerVisible(true);
+    };
+
+    const handleSelectSetType = (newType: SetType) => {
+        if (onSelectSetType) {
+            onSelectSetType(set.id, newType);
+        } else {
+            onSetChange(set.id, 'tipo_serie', newType);
+        }
+    };
 
     const handleQuickAdjustWeight = (delta: number) => {
         HapticService.selection();
@@ -122,9 +145,31 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     return (
         <View style={styles.container} testID={`set-row-${setIndex}`}>
             <View style={styles.mainRow}>
-                <Text style={[styles.setNumber, { color: colors.textSecondary }]}>
-                    {set.numero_serie}
-                </Text>
+                <TouchableOpacity
+                    testID={`set-type-button-${setIndex}`}
+                    style={[
+                        styles.setTypeBadgeButton,
+                        isSpecialType && {
+                            backgroundColor: typeVisual.badgeBg,
+                            borderColor: typeVisual.border,
+                        },
+                    ]}
+                    onPress={handleOpenSetTypePicker}
+                    disabled={!isInputEditable && !isStructureEditable}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                    <Text
+                        style={[
+                            styles.setNumber,
+                            isSpecialType
+                                ? [styles.specialBadgeText, { color: typeVisual.badgeText }]
+                                : { color: colors.textSecondary },
+                        ]}
+                    >
+                        {isSpecialType ? typeVisual.shortLabel : set.numero_serie}
+                    </Text>
+                </TouchableOpacity>
 
                 {/* Weight Column */}
                 <View style={[styles.inputGroup, { maxWidth: 80 }]}>
@@ -295,6 +340,15 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                     </TouchableOpacity>
                 )}
             </View>
+
+            {/* Set Type Picker Modal */}
+            <SetTypePickerModal
+                visible={isTypePickerVisible}
+                currentType={currentSetType}
+                onSelect={handleSelectSetType}
+                onClose={() => setIsTypePickerVisible(false)}
+                colors={colors}
+            />
         </View>
     );
 };
@@ -307,10 +361,24 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
+    setTypeBadgeButton: {
+        width: 32,
+        height: 32,
+        borderRadius: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1.5,
+        borderColor: 'transparent',
+        marginHorizontal: 4,
+    },
     setNumber: {
-        width: 40,
-        fontSize: 16,
+        fontSize: 15,
+        fontWeight: '700',
         textAlign: 'center',
+    },
+    specialBadgeText: {
+        fontSize: 14,
+        fontWeight: '800',
     },
     inputGroup: {
         flex: 1,
@@ -371,7 +439,8 @@ export const areWorkoutSetRowPropsEqual = (
         prevSet.peso_utilizado !== nextSet.peso_utilizado ||
         prevSet.repeticiones !== nextSet.repeticiones ||
         prevSet.rpe !== nextSet.rpe ||
-        prevSet.descanso_segundos !== nextSet.descanso_segundos
+        prevSet.descanso_segundos !== nextSet.descanso_segundos ||
+        prevSet.tipo_serie !== nextSet.tipo_serie
     ) {
         return false;
     }
@@ -387,7 +456,8 @@ export const areWorkoutSetRowPropsEqual = (
         prevProps.isStructureEditable !== nextProps.isStructureEditable ||
         prevProps.canDelete !== nextProps.canDelete ||
         prevProps.navMode !== nextProps.navMode ||
-        prevProps.onOpenPlateCalculator !== nextProps.onOpenPlateCalculator
+        prevProps.onOpenPlateCalculator !== nextProps.onOpenPlateCalculator ||
+        prevProps.onSelectSetType !== nextProps.onSelectSetType
     ) {
         return false;
     }

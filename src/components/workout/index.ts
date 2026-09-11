@@ -8,3 +8,5 @@ export * from './workoutHelpers';
 export * from './useWorkoutScreenState';
 export * from './PlateVisualizer';
 export * from './PlateCalculatorModal';
+export * from './SetTypePickerModal';
+

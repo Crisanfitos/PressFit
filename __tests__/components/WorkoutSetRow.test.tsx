@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, cleanup } from '@testing-library/react-native';
+import { render, fireEvent, cleanup, waitFor } from '@testing-library/react-native';
 import WorkoutSetRow, { areWorkoutSetRowPropsEqual } from '../../src/components/WorkoutSetRow';
 import { HapticService } from '../../src/services/HapticService';
 
@@ -615,6 +615,145 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             const nextProps = {
                 ...baseProps,
                 canDelete: true,
+            };
+
+            expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
+        });
+    });
+
+    describe('Interactive Set Type Selection (PF-315)', () => {
+        it('renders set number button with testID and shows number for normal set', async () => {
+            const { getByTestId, getByText } = await render(
+                <WorkoutSetRow
+                    set={{ ...defaultSet, tipo_serie: 'normal' }}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={true}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                />
+            );
+
+            expect(getByTestId('set-type-button-0')).toBeTruthy();
+            expect(getByText('1')).toBeTruthy();
+        });
+
+        it('renders short code badge (W, A, F, D) when set is non-normal', async () => {
+            const { getByTestId, getByText } = await render(
+                <WorkoutSetRow
+                    set={{ ...defaultSet, tipo_serie: 'warmup' }}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={true}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                />
+            );
+
+            expect(getByTestId('set-type-button-0')).toBeTruthy();
+            expect(getByText('W')).toBeTruthy();
+        });
+
+        it('opens SetTypePickerModal when set type button is pressed', async () => {
+            const { getByTestId, queryByTestId, findByTestId } = await render(
+                <WorkoutSetRow
+                    set={defaultSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={true}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                />
+            );
+
+            expect(queryByTestId('set-type-picker-modal')).toBeNull();
+            fireEvent.press(getByTestId('set-type-button-0'));
+            expect(await findByTestId('set-type-picker-modal')).toBeTruthy();
+        });
+
+        it('calls onSetChange with tipo_serie when an option is selected from modal', async () => {
+            const { getByTestId, findByTestId } = await render(
+                <WorkoutSetRow
+                    set={defaultSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={true}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                />
+            );
+
+            fireEvent.press(getByTestId('set-type-button-0'));
+            const failureOption = await findByTestId('set-type-option-failure');
+            fireEvent.press(failureOption);
+
+            expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'tipo_serie', 'failure');
+        });
+
+        it('calls onSelectSetType if provided when option is selected', async () => {
+            const mockSelectSetType = jest.fn();
+            const { getByTestId, findByTestId } = await render(
+                <WorkoutSetRow
+                    set={defaultSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={true}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                    onSelectSetType={mockSelectSetType}
+                />
+            );
+
+            fireEvent.press(getByTestId('set-type-button-0'));
+            const dropOption = await findByTestId('set-type-option-drop');
+            fireEvent.press(dropOption);
+
+            expect(mockSelectSetType).toHaveBeenCalledWith('set-1', 'drop');
+        });
+
+        it('invalidates memoization when tipo_serie changes', () => {
+            const baseProps: any = {
+                set: { ...defaultSet, tipo_serie: 'normal' },
+                setIndex: 0,
+                exerciseId: 'ex-1',
+                tipoPeso: 'total',
+                isInputEditable: true,
+                isStructureEditable: true,
+                colors: mockColors,
+            };
+
+            const nextProps = {
+                ...baseProps,
+                set: { ...defaultSet, tipo_serie: 'warmup' },
+            };
+
+            expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
+        });
+
+        it('invalidates memoization when onSelectSetType callback changes', () => {
+            const baseProps: any = {
+                set: defaultSet,
+                setIndex: 0,
+                exerciseId: 'ex-1',
+                tipoPeso: 'total',
+                isInputEditable: true,
+                isStructureEditable: true,
+                colors: mockColors,
+            };
+
+            const nextProps = {
+                ...baseProps,
+                onSelectSetType: jest.fn(),
             };
 
             expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
