@@ -13,9 +13,9 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import {
     checkActiveRestTimer,
-    getTimerTargetDuration,
-    addSecondsToRestTimer,
+    setPendingTimerAction,
     discardActiveRestTimer,
+    addSecondsToRestTimer,
 } from '../../services/TimerNotificationService';
 import { HapticService } from '../../services/HapticService';
 
@@ -23,6 +23,7 @@ export interface RestTimerFloatingBarProps {
     visible?: boolean;
     targetSeconds?: number;
     onPress?: () => void;
+    onFinish?: () => void;
     onAddSeconds?: (seconds: number) => void;
     onSkip?: () => void;
     testID?: string;
@@ -31,8 +32,9 @@ export interface RestTimerFloatingBarProps {
 
 export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
     visible: propVisible,
-    targetSeconds: propTargetSeconds,
+    targetSeconds: _propTargetSeconds,
     onPress,
+    onFinish,
     onAddSeconds,
     onSkip,
     testID = 'rest-timer-floating-bar',
@@ -43,13 +45,12 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
     const { colors } = theme;
 
     const [seconds, setSeconds] = useState(0);
-    const [targetDuration, setTargetDuration] = useState(propTargetSeconds || 90);
     const [timerActive, setTimerActive] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
 
     const isMountedRef = useRef(true);
     const slideAnim = useRef(new Animated.Value(100)).current;
-    const progressAnim = useRef(new Animated.Value(0)).current;
+    const pulseAnim = useRef(new Animated.Value(0.6)).current;
 
     const isVisible = propVisible !== undefined ? propVisible : timerActive;
 
@@ -60,13 +61,8 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
         setIsPaused(Boolean(paused));
         if (active) {
             setSeconds(elapsedSeconds);
-            if (!propTargetSeconds) {
-                const persistedTarget = await getTimerTargetDuration();
-                if (!isMountedRef.current) return;
-                setTargetDuration(persistedTarget);
-            }
         }
-    }, [propTargetSeconds]);
+    }, []);
 
     useEffect(() => {
         isMountedRef.current = true;
@@ -74,12 +70,6 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
             isMountedRef.current = false;
         };
     }, []);
-
-    useEffect(() => {
-        if (propTargetSeconds) {
-            setTargetDuration(propTargetSeconds);
-        }
-    }, [propTargetSeconds]);
 
     useEffect(() => {
         syncTimerState();
@@ -121,25 +111,42 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
         };
     }, [isVisible, slideAnim]);
 
-    // Animate progress percentage
+    // Pulse animation while running
     useEffect(() => {
-        const currentTarget = Math.max(1, targetDuration);
-        const ratio = Math.min(1, Math.max(0, seconds / currentTarget));
-        const anim = Animated.timing(progressAnim, {
-            toValue: ratio,
-            duration: 350,
-            useNativeDriver: false,
-        });
-        anim.start();
-        return () => {
-            anim.stop();
-        };
-    }, [seconds, targetDuration, progressAnim]);
+        if (isVisible && !isPaused) {
+            const loop = Animated.loop(
+                Animated.sequence([
+                    Animated.timing(pulseAnim, {
+                        toValue: 1,
+                        duration: 1000,
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(pulseAnim, {
+                        toValue: 0.6,
+                        duration: 1000,
+                        useNativeDriver: true,
+                    }),
+                ])
+            );
+            loop.start();
+            return () => loop.stop();
+        } else {
+            pulseAnim.setValue(1);
+        }
+    }, [isVisible, isPaused, pulseAnim]);
+
+    const handleFinish = async () => {
+        HapticService.selection();
+        await setPendingTimerAction('OK');
+        setTimerActive(false);
+        if (onFinish) {
+            onFinish();
+        }
+    };
 
     const handleAdd30s = async () => {
         HapticService.selection();
-        const { target } = await addSecondsToRestTimer(30);
-        setTargetDuration(target);
+        await addSecondsToRestTimer(30);
         if (onAddSeconds) {
             onAddSeconds(30);
         }
@@ -161,14 +168,6 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
     };
 
     if (!isVisible) return null;
-
-    const remaining = Math.max(0, targetDuration - seconds);
-    const isOvertime = seconds > targetDuration;
-
-    const progressWidth = progressAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: ['0%', '100%'],
-    });
 
     const styles = StyleSheet.create({
         container: {
@@ -207,7 +206,7 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
             width: 36,
             height: 36,
             borderRadius: 18,
-            backgroundColor: `${colors.primary}20`,
+            backgroundColor: isPaused ? '#eab30820' : `${colors.primary}20`,
             alignItems: 'center',
             justifyContent: 'center',
             marginRight: 10,
@@ -218,7 +217,7 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
         timeText: {
             fontSize: 16,
             fontWeight: '700',
-            color: isOvertime ? '#ef4444' : colors.text,
+            color: isPaused ? colors.textSecondary : colors.text,
             fontVariant: ['tabular-nums'],
         },
         labelText: {
@@ -231,6 +230,20 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
             flexDirection: 'row',
             alignItems: 'center',
             gap: 6,
+        },
+        finishButton: {
+            backgroundColor: '#22c55e',
+            borderRadius: 10,
+            paddingVertical: 6,
+            paddingHorizontal: 10,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        finishText: {
+            fontSize: 12,
+            fontWeight: '700',
+            color: '#ffffff',
         },
         addSecondsButton: {
             backgroundColor: `${colors.primary}18`,
@@ -262,16 +275,16 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
             fontWeight: '600',
             color: colors.textSecondary,
         },
-        progressTrack: {
-            height: 3,
+        indicatorTrack: {
+            height: 2.5,
             backgroundColor: colors.border,
             borderRadius: 1.5,
             marginTop: 8,
             overflow: 'hidden',
         },
-        progressFill: {
+        indicatorLine: {
             height: '100%',
-            backgroundColor: isOvertime ? '#ef4444' : colors.primary,
+            width: '100%',
             borderRadius: 1.5,
         },
     });
@@ -289,38 +302,54 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
                         onPress={onPress}
                         style={styles.leftSection}
                     >
-                        <View style={styles.iconCircle}>
+                        <Animated.View
+                            style={[
+                                styles.iconCircle,
+                                { opacity: isPaused ? 1 : pulseAnim },
+                            ]}
+                        >
                             <MaterialIcons
                                 name={isPaused ? 'pause' : 'timer'}
                                 size={20}
                                 color={isPaused ? '#eab308' : colors.primary}
                             />
-                        </View>
+                        </Animated.View>
                         <View style={styles.timeColumn}>
                             <Text testID={`${testID}-time`} style={styles.timeText}>
-                                {isOvertime ? `+${formatTime(seconds - targetDuration)}` : formatTime(remaining)}
+                                {formatTime(seconds)}
                             </Text>
                             <Text style={styles.labelText}>
                                 {isPaused
                                     ? t('timer.paused', 'Pausado')
-                                    : isOvertime
-                                    ? t('timer.overtime', 'Tiempo extra')
-                                    : t('timer.remaining', 'Descanso restante')}
+                                    : t('timer.rest', 'Descanso')}
                             </Text>
                         </View>
                     </TouchableOpacity>
 
                     <View style={styles.actionsRow}>
                         <TouchableOpacity
-                            testID={`${testID}-add-30s`}
+                            testID={`${testID}-finish`}
                             activeOpacity={0.7}
-                            onPress={handleAdd30s}
-                            style={styles.addSecondsButton}
+                            onPress={handleFinish}
+                            style={styles.finishButton}
                             hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
                         >
-                            <MaterialIcons name="add" size={14} color={colors.primary} />
-                            <Text style={styles.addSecondsText}>30s</Text>
+                            <MaterialIcons name="check" size={16} color="#fff" style={{ marginRight: 4 }} />
+                            <Text style={styles.finishText}>{t('timer.ready', 'Listo')}</Text>
                         </TouchableOpacity>
+
+                        {onAddSeconds && (
+                            <TouchableOpacity
+                                testID={`${testID}-add-30s`}
+                                activeOpacity={0.7}
+                                onPress={handleAdd30s}
+                                style={styles.addSecondsButton}
+                                hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+                            >
+                                <MaterialIcons name="add" size={14} color={colors.primary} />
+                                <Text style={styles.addSecondsText}>30s</Text>
+                            </TouchableOpacity>
+                        )}
 
                         <TouchableOpacity
                             testID={`${testID}-skip`}
@@ -334,9 +363,14 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
                     </View>
                 </View>
 
-                {/* Progress bar */}
-                <View style={styles.progressTrack}>
-                    <Animated.View style={[styles.progressFill, { width: progressWidth }]} />
+                {/* Status indicator line */}
+                <View style={styles.indicatorTrack}>
+                    <View
+                        style={[
+                            styles.indicatorLine,
+                            { backgroundColor: isPaused ? '#eab308' : colors.primary },
+                        ]}
+                    />
                 </View>
             </View>
         </Animated.View>
