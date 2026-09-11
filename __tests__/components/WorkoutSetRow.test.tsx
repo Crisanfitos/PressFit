@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert } from 'react-native';
-import { render, fireEvent, cleanup, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, cleanup, waitFor, act } from '@testing-library/react-native';
 import WorkoutSetRow, { areWorkoutSetRowPropsEqual } from '../../src/components/WorkoutSetRow';
 import { HapticService } from '../../src/services/HapticService';
 
@@ -221,8 +221,8 @@ describe('WorkoutSetRow Component (RNTL)', () => {
         expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'reps', '9');
     });
 
-    it('calls onDeleteSet when delete button is pressed in editable structure mode', async () => {
-        const { getByTestId } = await render(
+    it('calls onDeleteSet via contextual action modal on long press in editable structure mode', async () => {
+        const { getByTestId, queryByTestId, findByTestId } = await render(
             <WorkoutSetRow
                 set={defaultSet}
                 setIndex={0}
@@ -236,7 +236,14 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             />
         );
 
-        const deleteBtn = getByTestId('delete-set-button-0');
+        // Delete button is not permanent in the row
+        expect(queryByTestId('delete-set-button-0')).toBeNull();
+
+        // Long press on row opens SetActionModal
+        fireEvent(getByTestId('set-row-0'), 'longPress');
+
+        const deleteBtn = await findByTestId('delete-set-button-0');
+        expect(deleteBtn).toBeTruthy();
         fireEvent.press(deleteBtn);
 
         expect(mockOnDeleteSet).toHaveBeenCalledWith('set-1', 'ex-1');
@@ -579,9 +586,9 @@ describe('WorkoutSetRow Component (RNTL)', () => {
     });
 
     describe('In-Situ Set Deletion with canDelete prop (PF-314)', () => {
-        it('renders delete button when canDelete is true even if isStructureEditable is false', async () => {
+        it('renders delete button via long press when canDelete is true even if isStructureEditable is false', async () => {
             const mockDelete = jest.fn();
-            const { getByTestId } = await render(
+            const { getByTestId, queryByTestId, findByTestId } = await render(
                 <WorkoutSetRow
                     set={defaultSet}
                     setIndex={0}
@@ -596,7 +603,10 @@ describe('WorkoutSetRow Component (RNTL)', () => {
                 />
             );
 
-            const deleteBtn = getByTestId('delete-set-button-0');
+            expect(queryByTestId('delete-set-button-0')).toBeNull();
+            fireEvent(getByTestId('set-row-0'), 'longPress');
+
+            const deleteBtn = await findByTestId('delete-set-button-0');
             expect(deleteBtn).toBeTruthy();
             fireEvent.press(deleteBtn);
             expect(mockDelete).toHaveBeenCalledWith('set-1', 'ex-1');
@@ -680,7 +690,7 @@ describe('WorkoutSetRow Component (RNTL)', () => {
         });
 
         it('calls onSetChange with tipo_serie when an option is selected from modal', async () => {
-            const { getByTestId, findByTestId } = await render(
+            const { toJSON, getByTestId, findByTestId } = await render(
                 <WorkoutSetRow
                     set={defaultSet}
                     setIndex={0}

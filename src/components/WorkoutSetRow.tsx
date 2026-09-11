@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Pressable, StyleSheet, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import SetInput from './SetInput';
 import { HapticService } from '../services/HapticService';
 import { TipoPeso, SetType, SET_TYPE_COLORS } from '../types/setTypes';
 import { validateRpe } from '../utils/rpeValidation';
 import SetTypePickerModal from './workout/SetTypePickerModal';
+import { SetActionModal } from './workout/SetActionModal';
 
 export interface SetData {
     id: string;
@@ -52,6 +53,7 @@ export interface WorkoutSetRowProps {
     onToggleCompleteSet?: (setId: string, isCompleted: boolean) => void;
     onSetChange: (setId: string, field: string, value: string) => void;
     onDeleteSet?: (setId: string, exerciseId: string) => void;
+    onDuplicateSet?: (setId: string, exerciseId: string) => void;
     onStartRestTimer?: (setId: string) => void;
 }
 
@@ -77,10 +79,12 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     onToggleCompleteSet,
     onSetChange,
     onDeleteSet,
+    onDuplicateSet,
     onStartRestTimer,
 }) => {
     const isBodyweight = tipoPeso === 'corporal';
     const [isTypePickerVisible, setIsTypePickerVisible] = useState(false);
+    const [isActionModalVisible, setIsActionModalVisible] = useState(false);
 
     const isCompleted = Boolean(set.is_completed ?? set.completada);
     const effectiveInputEditable = isInputEditable && !isCompleted;
@@ -89,6 +93,13 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     const typeVisual = SET_TYPE_COLORS[currentSetType] || SET_TYPE_COLORS.normal;
     const isSpecialType = currentSetType !== 'normal';
     const canEditSetType = (isInputEditable || isStructureEditable || mode === 'PREVIEW') && !isCompleted;
+
+    const handleLongPress = () => {
+        if (HapticService.selection) {
+            HapticService.selection();
+        }
+        setIsActionModalVisible(true);
+    };
 
     const handleUnlockSet = () => {
         if (HapticService.selection) {
@@ -196,12 +207,15 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
             : colors.textSecondary;
 
     return (
-        <View
+        <TouchableOpacity
+            testID={`set-row-${setIndex}`}
+            delayLongPress={400}
+            onLongPress={handleLongPress}
+            activeOpacity={1}
             style={[
                 styles.container,
                 isCompleted && styles.completedContainer,
             ]}
-            testID={`set-row-${setIndex}`}
         >
             <View style={styles.mainRow}>
                 <TouchableOpacity
@@ -380,18 +394,6 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                     />
                 </View>
 
-                {/* Delete Set Button */}
-                {((canDelete !== undefined ? canDelete : isStructureEditable) && Boolean(onDeleteSet) && !isCompleted) && (
-                    <TouchableOpacity
-                        testID={`delete-set-button-${setIndex}`}
-                        style={styles.deleteSetButton}
-                        onPress={() => onDeleteSet(set.id, exerciseId)}
-                        hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-                    >
-                        <MaterialIcons name="close" size={20} color={colors.textSecondary} />
-                    </TouchableOpacity>
-                )}
-
                 {/* Edit Completed Set Button */}
                 {isCompleted && isInputEditable && (
                     <TouchableOpacity
@@ -429,7 +431,27 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                 onClose={() => setIsTypePickerVisible(false)}
                 colors={colors}
             />
-        </View>
+
+            {/* Set Action Modal (Contextual long-press menu) */}
+            <SetActionModal
+                visible={isActionModalVisible}
+                setNumber={set.numero_serie}
+                setIndex={setIndex}
+                setType={currentSetType}
+                isBodyweight={isBodyweight}
+                canDelete={(canDelete !== undefined ? canDelete : isStructureEditable) && Boolean(onDeleteSet) && !isCompleted}
+                deleteTestID={`delete-set-button-${setIndex}`}
+                colors={colors}
+                onClose={() => setIsActionModalVisible(false)}
+                onOpenTypePicker={canEditSetType ? () => setIsTypePickerVisible(true) : undefined}
+                onDuplicateSet={onDuplicateSet ? () => onDuplicateSet(set.id, exerciseId) : undefined}
+                onOpenPlateCalculator={onOpenPlateCalculator ? () => {
+                    const currentWeight = parseFloat(String(set.peso_utilizado)) || (ghostWeight ? parseFloat(String(ghostWeight)) : 0);
+                    onOpenPlateCalculator(currentWeight, set.id, exerciseId);
+                } : undefined}
+                onDeleteSet={onDeleteSet ? () => onDeleteSet(set.id, exerciseId) : undefined}
+            />
+        </TouchableOpacity>
     );
 };
 
@@ -560,7 +582,8 @@ export const areWorkoutSetRowPropsEqual = (
         prevProps.navMode !== nextProps.navMode ||
         prevProps.onOpenPlateCalculator !== nextProps.onOpenPlateCalculator ||
         prevProps.onSelectSetType !== nextProps.onSelectSetType ||
-        prevProps.onToggleCompleteSet !== nextProps.onToggleCompleteSet
+        prevProps.onToggleCompleteSet !== nextProps.onToggleCompleteSet ||
+        prevProps.onDuplicateSet !== nextProps.onDuplicateSet
     ) {
         return false;
     }

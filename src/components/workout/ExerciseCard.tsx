@@ -168,7 +168,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                         <View style={[styles.inputGroup, { maxWidth: 60 }]}>
                             <Text style={[styles.referenceText, { color: colors.primary }]}>RPE</Text>
                         </View>
-                        {canDeleteSets && <View style={{ width: 28 }} />}
+                        <View style={{ width: 28 }} />
                     </View>
 
                     {setsList.length === 0 ? (

@@ -462,8 +462,28 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
             justifyContent: 'center',
             marginLeft: 6,
         },
+        runningControlsRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginLeft: 8,
+        },
+        finishButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            borderRadius: 10,
+            backgroundColor: '#22c55e',
+            marginRight: 6,
+        },
+        finishButtonText: {
+            fontSize: 14,
+            fontWeight: '700',
+            color: '#ffffff',
+        },
         stopButton: {
-            paddingHorizontal: 16,
+            paddingHorizontal: 12,
             paddingVertical: 8,
             borderRadius: 10,
             backgroundColor: colors.primary,
@@ -475,7 +495,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
         },
         dismissButton: {
             padding: 8,
-            marginLeft: 8,
+            marginLeft: 4,
         },
     });
 
@@ -521,14 +541,23 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                     </TouchableOpacity>
                 </>
             ) : (
-                <>
+                <View style={styles.runningControlsRow}>
+                    <TouchableOpacity
+                        testID="rest-timer-finish-button"
+                        style={styles.finishButton}
+                        onPress={handleConfirm}
+                        hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+                    >
+                        <MaterialIcons name="check" size={16} color="#fff" style={{ marginRight: 4 }} />
+                        <Text style={styles.finishButtonText}>{t('timer.ready', 'Listo')}</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity testID="rest-timer-pause-button" style={styles.stopButton} onPress={handleStop}>
                         <Text style={styles.stopButtonText}>{t('timer.stop', 'Parar')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity testID="rest-timer-discard-button" style={styles.dismissButton} onPress={handleDiscard}>
                         <MaterialIcons name="close" size={20} color={colors.textSecondary} />
                     </TouchableOpacity>
-                </>
+                </View>
             )}
         </Animated.View>
     );
