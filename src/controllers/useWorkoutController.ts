@@ -18,6 +18,8 @@ interface Set {
     rpe?: number;
     descanso_segundos?: number;
     tipo_serie?: SetType;
+    is_completed?: boolean;
+    completada?: boolean;
     pending?: boolean;
 }
 
@@ -396,6 +398,7 @@ export const useWorkoutController = (
         if (field === 'weight') dbField = 'peso_utilizado';
         if (field === 'reps') dbField = 'repeticiones';
         if (field === 'setType' || field === 'tipo_serie') dbField = 'tipo_serie';
+        if (field === 'is_completed' || field === 'completada') dbField = 'is_completed';
         // 'rpe' maps directly to 'rpe' in DB — no renaming needed
 
         let processedValue = value;
@@ -412,20 +415,50 @@ export const useWorkoutController = (
             dbValue = value as SetType;
         }
 
+        if (field === 'is_completed' || field === 'completada') {
+            const boolVal = Boolean(value === true || value === 'true');
+            processedValue = boolVal;
+            dbValue = boolVal;
+        }
+
         setExercises((prev) =>
             prev.map((ex) => ({
                 ...ex,
-                sets: ex.sets.map((s) => (s.id === setId ? { ...s, [dbField]: processedValue ?? undefined } : s)),
+                sets: ex.sets.map((s) => (s.id === setId ? {
+                    ...s,
+                    [dbField]: processedValue ?? undefined,
+                    ...(dbField === 'is_completed' ? { is_completed: processedValue, completada: processedValue } : {})
+                } : s)),
             }))
         );
 
         try {
             const updatesPayload: any = (field === 'setType' || field === 'tipo_serie')
                 ? { tipo_serie: dbValue }
-                : { [field]: dbValue };
+                : (field === 'is_completed' || field === 'completada')
+                    ? { is_completed: dbValue, completada: dbValue }
+                    : { [field]: dbValue };
             await WorkoutService.updateSet(setId, updatesPayload);
         } catch (error) {
             console.error('Failed to update set', error);
+        }
+    };
+
+    const toggleCompleteSet = async (setId: string, isCompleted: boolean) => {
+        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
+        if (!canEdit) return;
+
+        setExercises((prev) =>
+            prev.map((ex) => ({
+                ...ex,
+                sets: ex.sets.map((s) => (s.id === setId ? { ...s, is_completed: isCompleted, completada: isCompleted } : s)),
+            }))
+        );
+
+        try {
+            await WorkoutService.updateSet(setId, { is_completed: isCompleted, completada: isCompleted });
+        } catch (error) {
+            console.error('Failed to toggle set completion', error);
         }
     };
 
@@ -607,6 +640,7 @@ export const useWorkoutController = (
         addSets,
         updateSet,
         updateSetType,
+        toggleCompleteSet,
         deleteSet,
         removeExercise,
         addExercise,

@@ -54,6 +54,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         removeExercise,
         finishWorkout,
         updateWeightType,
+        toggleCompleteSet,
         reloadExercises,
     } = useWorkoutController(initialWorkoutId || null, routineDayId, user?.id || '', dayOfWeek || 0, navMode === 'edit');
 
@@ -184,6 +185,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                 onAddSet={async (id) => { state.setSaving(true); await addSet(id); state.setSaving(false); }}
                                 onSwapExercise={(mode === 'ACTIVE' || isStructureEditable) ? handleSwapExercise : undefined}
                                 onOpenPlateCalculator={state.handleOpenPlateCalculator}
+                                onToggleCompleteSet={toggleCompleteSet}
                                 getGhostValue={(eId, sNum, fld) => getGhostValue(previousWorkout, eId, sNum, fld)}
                             />
                         ))

@@ -1219,5 +1219,55 @@ describe('useWorkoutController (PF-257)', () => {
             expect(WorkoutService.updateSet).not.toHaveBeenCalled();
         });
     });
+
+    describe('PF-317: Set Completion Toggle and Persistence', () => {
+        it('toggles set completed state to true via toggleCompleteSet', async () => {
+            (WorkoutService.updateSet as jest.Mock).mockResolvedValue({ error: null });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            await act(async () => {
+                await hook.result.current.toggleCompleteSet('s-1', true);
+            });
+
+            expect(hook.result.current.exercises[0].sets[0].is_completed).toBe(true);
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', { is_completed: true, completada: true });
+        });
+
+        it('toggles set completed state to false via toggleCompleteSet (unlock)', async () => {
+            (WorkoutService.updateSet as jest.Mock).mockResolvedValue({ error: null });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            await act(async () => {
+                await hook.result.current.toggleCompleteSet('s-1', false);
+            });
+
+            expect(hook.result.current.exercises[0].sets[0].is_completed).toBe(false);
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', { is_completed: false, completada: false });
+        });
+
+        it('updates set completion state via updateSet with field is_completed', async () => {
+            (WorkoutService.updateSet as jest.Mock).mockResolvedValue({ error: null });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            await act(async () => {
+                await hook.result.current.updateSet('s-1', 'is_completed', true);
+            });
+
+            expect(hook.result.current.exercises[0].sets[0].is_completed).toBe(true);
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', { is_completed: true, completada: true });
+        });
+    });
 });
 

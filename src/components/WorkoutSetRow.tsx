@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import SetInput from './SetInput';
 import { HapticService } from '../services/HapticService';
@@ -16,6 +16,8 @@ export interface SetData {
     rpe?: number;
     descanso_segundos?: number;
     tipo_serie?: SetType;
+    is_completed?: boolean;
+    completada?: boolean;
 }
 
 export interface WorkoutSetRowProps {
@@ -47,6 +49,7 @@ export interface WorkoutSetRowProps {
     savedTimerSetIds?: Set<string>;
     onOpenPlateCalculator?: (weight: number, setId: string, exerciseId?: string) => void;
     onSelectSetType?: (setId: string, type: SetType) => void;
+    onToggleCompleteSet?: (setId: string, isCompleted: boolean) => void;
     onSetChange: (setId: string, field: string, value: string) => void;
     onDeleteSet?: (setId: string, exerciseId: string) => void;
     onStartRestTimer?: (setId: string) => void;
@@ -71,6 +74,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     savedTimerSetIds,
     onOpenPlateCalculator,
     onSelectSetType,
+    onToggleCompleteSet,
     onSetChange,
     onDeleteSet,
     onStartRestTimer,
@@ -78,10 +82,56 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     const isBodyweight = tipoPeso === 'corporal';
     const [isTypePickerVisible, setIsTypePickerVisible] = useState(false);
 
+    const isCompleted = Boolean(set.is_completed ?? set.completada);
+    const effectiveInputEditable = isInputEditable && !isCompleted;
+
     const currentSetType: SetType = set.tipo_serie || 'normal';
     const typeVisual = SET_TYPE_COLORS[currentSetType] || SET_TYPE_COLORS.normal;
     const isSpecialType = currentSetType !== 'normal';
-    const canEditSetType = isInputEditable || isStructureEditable || mode === 'PREVIEW';
+    const canEditSetType = (isInputEditable || isStructureEditable || mode === 'PREVIEW') && !isCompleted;
+
+    const handleUnlockSet = () => {
+        if (HapticService.selection) {
+            HapticService.selection();
+        }
+        if (onToggleCompleteSet) {
+            onToggleCompleteSet(set.id, false);
+        }
+        onSetChange(set.id, 'is_completed', 'false');
+    };
+
+    const promptUnlockConfirmation = () => {
+        Alert.alert(
+            'Editar Serie',
+            '¿Deseas desbloquear esta serie para modificar sus valores?',
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                    text: 'Desbloquear',
+                    onPress: handleUnlockSet,
+                },
+            ]
+        );
+    };
+
+    const handleToggleComplete = () => {
+        if (isCompleted) {
+            promptUnlockConfirmation();
+        } else {
+            if (HapticService.success) {
+                HapticService.success();
+            } else if (HapticService.setCompleted) {
+                HapticService.setCompleted();
+            }
+            if (onToggleCompleteSet) {
+                onToggleCompleteSet(set.id, true);
+            }
+            onSetChange(set.id, 'is_completed', 'true');
+            if (onStartRestTimer) {
+                onStartRestTimer(set.id);
+            }
+        }
+    };
 
     const handleOpenSetTypePicker = () => {
         if (!canEditSetType) return;
@@ -146,7 +196,13 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
             : colors.textSecondary;
 
     return (
-        <View style={styles.container} testID={`set-row-${setIndex}`}>
+        <View
+            style={[
+                styles.container,
+                isCompleted && styles.completedContainer,
+            ]}
+            testID={`set-row-${setIndex}`}
+        >
             <View style={styles.mainRow}>
                 <TouchableOpacity
                     testID={`set-type-button-${setIndex}`}
@@ -204,11 +260,11 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                                 value={set.peso_utilizado > 0 ? set.peso_utilizado : ''}
                                 placeholder={ghostWeight ?? '-'}
                                 onChange={(val) => onSetChange(set.id, 'weight', val)}
-                                isEditable={isInputEditable}
+                                isEditable={effectiveInputEditable}
                                 colors={colors}
                                 maxLength={5}
                             />
-                            {isInputEditable && (
+                            {effectiveInputEditable && (
                                 <View style={styles.quickAdjustRow}>
                                     <TouchableOpacity
                                         testID={`quick-adjust-weight-minus-${setIndex}`}
@@ -250,7 +306,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                                     )}
                                 </View>
                             )}
-                            {!isInputEditable && onOpenPlateCalculator && (
+                            {!isInputEditable && !isCompleted && onOpenPlateCalculator && (
                                 <TouchableOpacity
                                     testID={`plate-calculator-button-${setIndex}`}
                                     style={[
@@ -278,11 +334,11 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                             value={set.repeticiones > 0 ? set.repeticiones : ''}
                             placeholder={ghostReps ?? '-'}
                             onChange={(val) => onSetChange(set.id, 'reps', val)}
-                            isEditable={isInputEditable}
+                            isEditable={effectiveInputEditable}
                             colors={colors}
                             maxLength={3}
                         />
-                        {isInputEditable && (
+                        {effectiveInputEditable && (
                             <View style={styles.quickAdjustRow}>
                                 <TouchableOpacity
                                     testID={`quick-adjust-reps-minus-${setIndex}`}
@@ -318,14 +374,14 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                         value={set.rpe && set.rpe > 0 ? set.rpe : ''}
                         placeholder={ghostRpe ?? '-'}
                         onChange={handleRpeChange}
-                        isEditable={isInputEditable}
+                        isEditable={effectiveInputEditable}
                         colors={colors}
                         maxLength={4}
                     />
                 </View>
 
                 {/* Delete Set Button */}
-                {((canDelete !== undefined ? canDelete : isStructureEditable) && Boolean(onDeleteSet)) && (
+                {((canDelete !== undefined ? canDelete : isStructureEditable) && Boolean(onDeleteSet) && !isCompleted) && (
                     <TouchableOpacity
                         testID={`delete-set-button-${setIndex}`}
                         style={styles.deleteSetButton}
@@ -336,19 +392,30 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                     </TouchableOpacity>
                 )}
 
-                {/* Rest Timer Button */}
-                {navMode !== 'edit' && onStartRestTimer && (
+                {/* Edit Completed Set Button */}
+                {isCompleted && isInputEditable && (
+                    <TouchableOpacity
+                        testID={`edit-set-button-${setIndex}`}
+                        style={styles.editSetButton}
+                        onPress={promptUnlockConfirmation}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                        <MaterialIcons name="edit" size={18} color={colors.primary} />
+                    </TouchableOpacity>
+                )}
+
+                {/* Completion Checkbox */}
+                {navMode !== 'edit' && (
                     <TouchableOpacity
                         testID={`set-complete-checkbox-${setIndex}`}
-                        style={styles.timerButton}
-                        onPress={() => onStartRestTimer(set.id)}
-                        disabled={disableInteraction}
+                        style={styles.completeCheckbox}
+                        onPress={handleToggleComplete}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
                         <MaterialIcons
-                            name={disableInteraction ? 'timer-off' : 'timer'}
-                            size={18}
-                            color={timerColor}
+                            name={isCompleted ? 'check-box' : 'check-box-outline-blank'}
+                            size={24}
+                            color={isCompleted ? '#22c55e' : colors.textSecondary}
                         />
                     </TouchableOpacity>
                 )}
@@ -369,6 +436,14 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
 const styles = StyleSheet.create({
     container: {
         marginBottom: 12,
+        paddingHorizontal: 4,
+        paddingVertical: 2,
+    },
+    completedContainer: {
+        backgroundColor: 'rgba(34, 197, 94, 0.08)',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(34, 197, 94, 0.25)',
     },
     mainRow: {
         flexDirection: 'row',
@@ -434,6 +509,18 @@ const styles = StyleSheet.create({
         padding: 4,
         marginLeft: 6,
     },
+    completeCheckbox: {
+        padding: 4,
+        marginLeft: 4,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    editSetButton: {
+        padding: 4,
+        marginLeft: 2,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     timerButton: {
         padding: 4,
         marginLeft: 4,
@@ -453,7 +540,8 @@ export const areWorkoutSetRowPropsEqual = (
         prevSet.repeticiones !== nextSet.repeticiones ||
         prevSet.rpe !== nextSet.rpe ||
         prevSet.descanso_segundos !== nextSet.descanso_segundos ||
-        prevSet.tipo_serie !== nextSet.tipo_serie
+        prevSet.tipo_serie !== nextSet.tipo_serie ||
+        (prevSet.is_completed ?? prevSet.completada) !== (nextSet.is_completed ?? nextSet.completada)
     ) {
         return false;
     }
@@ -471,7 +559,8 @@ export const areWorkoutSetRowPropsEqual = (
         prevProps.mode !== nextProps.mode ||
         prevProps.navMode !== nextProps.navMode ||
         prevProps.onOpenPlateCalculator !== nextProps.onOpenPlateCalculator ||
-        prevProps.onSelectSetType !== nextProps.onSelectSetType
+        prevProps.onSelectSetType !== nextProps.onSelectSetType ||
+        prevProps.onToggleCompleteSet !== nextProps.onToggleCompleteSet
     ) {
         return false;
     }

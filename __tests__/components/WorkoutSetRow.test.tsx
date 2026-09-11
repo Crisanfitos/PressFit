@@ -1,4 +1,5 @@
 import React from 'react';
+import { Alert } from 'react-native';
 import { render, fireEvent, cleanup, waitFor } from '@testing-library/react-native';
 import WorkoutSetRow, { areWorkoutSetRowPropsEqual } from '../../src/components/WorkoutSetRow';
 import { HapticService } from '../../src/services/HapticService';
@@ -7,6 +8,7 @@ jest.mock('../../src/services/HapticService', () => ({
     HapticService: {
         selection: jest.fn(),
         setCompleted: jest.fn(),
+        success: jest.fn(),
         warning: jest.fn(),
     },
 }));
@@ -850,6 +852,222 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             const nextProps = {
                 ...baseProps,
                 mode: 'ACTIVE',
+            };
+
+            expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
+        });
+    });
+
+    describe('PF-317: Set Completion, Visual Feedback, Input Locking, and Typed Editing', () => {
+        const mockOnToggleCompleteSet = jest.fn();
+
+        beforeEach(() => {
+            jest.clearAllMocks();
+        });
+
+        it('renders unchecked completion checkbox when set is not completed', async () => {
+            const { getByTestId } = await render(
+                <WorkoutSetRow
+                    set={defaultSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                    onToggleCompleteSet={mockOnToggleCompleteSet}
+                    onStartRestTimer={mockOnStartRestTimer}
+                />
+            );
+
+            const checkbox = getByTestId('set-complete-checkbox-0');
+            expect(checkbox).toBeTruthy();
+        });
+
+        it('marks set completed on checkbox press, invokes HapticService.success, triggers rest timer, and calls handlers', async () => {
+            const { getByTestId } = await render(
+                <WorkoutSetRow
+                    set={defaultSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                    onToggleCompleteSet={mockOnToggleCompleteSet}
+                    onStartRestTimer={mockOnStartRestTimer}
+                />
+            );
+
+            const checkbox = getByTestId('set-complete-checkbox-0');
+            fireEvent.press(checkbox);
+
+            expect(HapticService.success).toHaveBeenCalledTimes(1);
+            expect(mockOnToggleCompleteSet).toHaveBeenCalledWith('set-1', true);
+            expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'is_completed', 'true');
+            expect(mockOnStartRestTimer).toHaveBeenCalledWith('set-1');
+        });
+
+        it('locks inputs and hides quick adjustment buttons when set is completed', async () => {
+            const completedSet = {
+                ...defaultSet,
+                is_completed: true,
+            };
+
+            const { getByTestId, queryByTestId } = await render(
+                <WorkoutSetRow
+                    set={completedSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={true}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                    onToggleCompleteSet={mockOnToggleCompleteSet}
+                    onDeleteSet={mockOnDeleteSet}
+                />
+            );
+
+            // Inputs should not be editable
+            const weightInput = getByTestId('set-weight-input-0');
+            const repsInput = getByTestId('set-reps-input-0');
+            const rpeInput = getByTestId('set-rpe-input-0');
+
+            expect(weightInput.props.editable).toBe(false);
+            expect(repsInput.props.editable).toBe(false);
+            expect(rpeInput.props.editable).toBe(false);
+
+            // Quick adjusts and delete button should not be displayed
+            expect(queryByTestId('quick-adjust-weight-plus-0')).toBeNull();
+            expect(queryByTestId('quick-adjust-reps-plus-0')).toBeNull();
+            expect(queryByTestId('delete-set-button-0')).toBeNull();
+
+            // Set type button should be disabled
+            const setTypeBtn = getByTestId('set-type-button-0');
+            expect(setTypeBtn.props.accessibilityState?.disabled).toBe(true);
+
+            // Explicit edit button should be visible
+            expect(getByTestId('edit-set-button-0')).toBeTruthy();
+        });
+
+        it('prompts Alert confirmation when tapping edit button on completed set and unlocks on confirm', async () => {
+            const alertSpy = jest.spyOn(Alert, 'alert');
+            const completedSet = {
+                ...defaultSet,
+                is_completed: true,
+            };
+
+            const { getByTestId } = await render(
+                <WorkoutSetRow
+                    set={completedSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                    onToggleCompleteSet={mockOnToggleCompleteSet}
+                />
+            );
+
+            const editBtn = getByTestId('edit-set-button-0');
+            fireEvent.press(editBtn);
+
+            expect(alertSpy).toHaveBeenCalledTimes(1);
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Editar Serie',
+                '¿Deseas desbloquear esta serie para modificar sus valores?',
+                expect.any(Array)
+            );
+
+            // Simulate pressing "Desbloquear"
+            const alertButtons = alertSpy.mock.calls[0][2];
+            const unlockButton = alertButtons?.find((b) => b.text === 'Desbloquear');
+            expect(unlockButton).toBeDefined();
+
+            unlockButton?.onPress?.();
+
+            expect(HapticService.selection).toHaveBeenCalled();
+            expect(mockOnToggleCompleteSet).toHaveBeenCalledWith('set-1', false);
+            expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'is_completed', 'false');
+
+            alertSpy.mockRestore();
+        });
+
+        it('prompts Alert confirmation when tapping completed checkbox and unlocks on confirm', async () => {
+            const alertSpy = jest.spyOn(Alert, 'alert');
+            const completedSet = {
+                ...defaultSet,
+                completada: true,
+            };
+
+            const { getByTestId } = await render(
+                <WorkoutSetRow
+                    set={completedSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                    onToggleCompleteSet={mockOnToggleCompleteSet}
+                />
+            );
+
+            const checkbox = getByTestId('set-complete-checkbox-0');
+            fireEvent.press(checkbox);
+
+            expect(alertSpy).toHaveBeenCalledTimes(1);
+
+            const alertButtons = alertSpy.mock.calls[0][2];
+            const unlockButton = alertButtons?.find((b) => b.text === 'Desbloquear');
+            unlockButton?.onPress?.();
+
+            expect(mockOnToggleCompleteSet).toHaveBeenCalledWith('set-1', false);
+            expect(mockOnSetChange).toHaveBeenCalledWith('set-1', 'is_completed', 'false');
+
+            alertSpy.mockRestore();
+        });
+
+        it('invalidates memoization in areWorkoutSetRowPropsEqual when is_completed changes', () => {
+            const baseProps: any = {
+                set: { ...defaultSet, is_completed: false },
+                setIndex: 0,
+                exerciseId: 'ex-1',
+                tipoPeso: 'total',
+                isInputEditable: true,
+                isStructureEditable: false,
+                colors: mockColors,
+            };
+
+            const nextProps = {
+                ...baseProps,
+                set: { ...defaultSet, is_completed: true },
+            };
+
+            expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
+        });
+
+        it('invalidates memoization when onToggleCompleteSet callback changes', () => {
+            const baseProps: any = {
+                set: defaultSet,
+                setIndex: 0,
+                exerciseId: 'ex-1',
+                tipoPeso: 'total',
+                isInputEditable: true,
+                isStructureEditable: false,
+                colors: mockColors,
+                onToggleCompleteSet: () => {},
+            };
+
+            const nextProps = {
+                ...baseProps,
+                onToggleCompleteSet: () => {},
             };
 
             expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);

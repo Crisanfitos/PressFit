@@ -35,7 +35,7 @@ export function isSchemaColumnError(error: any): boolean {
     if (error.code === 'PGRST204') return true;
     if (error.code === '42703') return true;
     const msg = String(error.message || error.details || error.hint || error).toLowerCase();
-    return msg.includes('tipo_serie') || (msg.includes('column') && msg.includes('schema cache'));
+    return msg.includes('tipo_serie') || msg.includes('is_completed') || msg.includes('completada') || (msg.includes('column') && msg.includes('schema cache'));
 }
 
 export const WorkoutService = {
@@ -434,7 +434,7 @@ export const WorkoutService = {
 
     async updateSet(
         setId: string,
-        updates: { weight?: number; reps?: number; rpe?: number; descanso_segundos?: number; tipo_serie?: SetType; numero_serie?: number }
+        updates: { weight?: number; reps?: number; rpe?: number; descanso_segundos?: number; tipo_serie?: SetType; numero_serie?: number; is_completed?: boolean; completada?: boolean }
     ): Promise<ServiceResponse<Serie>> {
         const dbUpdates: SetUpdatePayload = {};
         if (updates.weight !== undefined) dbUpdates.peso_utilizado = updates.weight;
@@ -443,6 +443,8 @@ export const WorkoutService = {
         if (updates.descanso_segundos !== undefined) dbUpdates.descanso_segundos = updates.descanso_segundos;
         if (updates.tipo_serie !== undefined) dbUpdates.tipo_serie = updates.tipo_serie;
         if (updates.numero_serie !== undefined) dbUpdates.numero_serie = updates.numero_serie;
+        if (updates.is_completed !== undefined) dbUpdates.is_completed = updates.is_completed;
+        if (updates.completada !== undefined) dbUpdates.completada = updates.completada;
 
         if (isE2EMockEnabled()) {
             const mockUpdated = mockStore.updateSet(setId, dbUpdates);
@@ -460,10 +462,12 @@ export const WorkoutService = {
                     .single();
 
                 // Defensive schema cache / migration fallback (PF-332)
-                if (error && isSchemaColumnError(error) && dbUpdates.tipo_serie !== undefined) {
-                    console.warn('[WorkoutService] tipo_serie column missing in schema cache, falling back to update without tipo_serie');
+                if (error && isSchemaColumnError(error)) {
+                    console.warn('[WorkoutService] schema column missing in cache, falling back to update without optional columns');
                     const fallbackUpdates = { ...dbUpdates };
                     delete fallbackUpdates.tipo_serie;
+                    delete fallbackUpdates.is_completed;
+                    delete fallbackUpdates.completada;
                     const fallbackRes = await supabase
                         .from('series')
                         .update(fallbackUpdates)
@@ -485,6 +489,8 @@ export const WorkoutService = {
                     normalized = {
                         ...data,
                         tipo_serie: (data as any).tipo_serie || dbUpdates.tipo_serie || 'normal',
+                        is_completed: (data as any).is_completed ?? dbUpdates.is_completed,
+                        completada: (data as any).completada ?? dbUpdates.completada,
                     };
                     const cachedRes = await OfflineStorageService.getCachedWorkouts();
                     const workouts = cachedRes.data || [];
@@ -492,7 +498,7 @@ export const WorkoutService = {
                         if (w.ejercicios_programados) {
                             w.ejercicios_programados.forEach((ex) => {
                                 if (ex.series) {
-                                    ex.series = ex.series.map((s) => (s.id === setId ? { ...s, ...normalized } : s));
+                                    ex.series = ex.series.map((s) => (s.id === setId ? { ...s, ...normalized, ...dbUpdates } : s));
                                 }
                             });
                         }

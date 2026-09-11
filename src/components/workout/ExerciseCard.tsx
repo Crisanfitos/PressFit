@@ -38,6 +38,7 @@ export interface ExerciseCardProps {
     onAddSet: (exerciseId: string) => void;
     onSwapExercise?: (exercise: any) => void;
     onOpenPlateCalculator?: (weight: number, setId?: string, exerciseId?: string) => void;
+    onToggleCompleteSet?: (setId: string, isCompleted: boolean) => void;
     getGhostValue: (exerciseId: string, setNumber: number, field: 'weight' | 'reps' | 'rpe') => string | null;
 }
 
@@ -64,6 +65,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     onAddSet,
     onSwapExercise,
     onOpenPlateCalculator,
+    onToggleCompleteSet,
     getGhostValue,
 }) => {
     const setsList = exercise.sets || exercise.series || [];
@@ -199,6 +201,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                                 onDeleteSet={onDeleteSet}
                                 onStartRestTimer={onStartRestTimer}
                                 onOpenPlateCalculator={onOpenPlateCalculator}
+                                onToggleCompleteSet={onToggleCompleteSet}
                             />
                         ))
                     )}

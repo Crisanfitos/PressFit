@@ -51,6 +51,8 @@ export interface Serie {
     rpe?: number;
     descanso_segundos?: number;
     tipo_serie?: SetType;
+    is_completed?: boolean;
+    completada?: boolean;
     created_at?: string;
 }
 
@@ -198,6 +200,8 @@ export interface SetUpdatePayload {
     descanso_segundos?: number;
     tipo_serie?: SetType;
     numero_serie?: number;
+    is_completed?: boolean;
+    completada?: boolean;
 }
 
 /**
