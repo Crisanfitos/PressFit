@@ -14,12 +14,14 @@ jest.mock('../../src/services/HapticService', () => ({
 jest.mock('../../src/services/TimerNotificationService', () => ({
     checkActiveRestTimer: jest.fn(),
     getTimerTargetDuration: jest.fn(),
+    setPendingTimerAction: jest.fn(),
     addSecondsToRestTimer: jest.fn(),
     discardActiveRestTimer: jest.fn(),
 }));
 
 describe('RestTimerFloatingBar Component', () => {
     const mockOnPress = jest.fn();
+    const mockOnFinish = jest.fn();
     const mockOnAddSeconds = jest.fn();
     const mockOnSkip = jest.fn();
 
@@ -31,6 +33,7 @@ describe('RestTimerFloatingBar Component', () => {
             paused: false,
         });
         (TimerNotificationService.getTimerTargetDuration as jest.Mock).mockResolvedValue(90);
+        (TimerNotificationService.setPendingTimerAction as jest.Mock).mockResolvedValue(undefined);
         (TimerNotificationService.addSecondsToRestTimer as jest.Mock).mockResolvedValue({
             elapsed: 30,
             target: 120,
@@ -51,7 +54,7 @@ describe('RestTimerFloatingBar Component', () => {
         expect(queryByTestId('rest-timer-floating-bar')).toBeNull();
     });
 
-    it('renders bar with formatted remaining time and label when visible is true', async () => {
+    it('renders bar with count-up formatted elapsed time and label Descanso when visible is true', async () => {
         (TimerNotificationService.checkActiveRestTimer as jest.Mock).mockResolvedValue({
             active: true,
             elapsedSeconds: 30,
@@ -62,17 +65,36 @@ describe('RestTimerFloatingBar Component', () => {
             <ThemeProvider>
                 <RestTimerFloatingBar
                     visible={true}
-                    targetSeconds={90}
                     onPress={mockOnPress}
                 />
             </ThemeProvider>
         );
 
-        // 90s target - 30s elapsed = 60s remaining => "1:00"
         expect(getByTestId('rest-timer-floating-bar')).toBeTruthy();
         expect(getByTestId('rest-timer-floating-bar-time')).toBeTruthy();
-        expect(await findByText('1:00')).toBeTruthy();
-        expect(await findByText('Descanso restante')).toBeTruthy();
+        expect(await findByText('0:30')).toBeTruthy();
+        expect(await findByText('Descanso')).toBeTruthy();
+    });
+
+    it('renders count-up time correctly when minutes elapsed > 0', async () => {
+        (TimerNotificationService.checkActiveRestTimer as jest.Mock).mockResolvedValue({
+            active: true,
+            elapsedSeconds: 75,
+            paused: false,
+        });
+
+        const { findByText } = await render(
+            <ThemeProvider>
+                <RestTimerFloatingBar
+                    visible={true}
+                    onPress={mockOnPress}
+                />
+            </ThemeProvider>
+        );
+
+        // 75 seconds = 1:15
+        expect(await findByText('1:15')).toBeTruthy();
+        expect(await findByText('Descanso')).toBeTruthy();
     });
 
     it('calls onPress when the bar touchable is tapped', async () => {
@@ -87,25 +109,24 @@ describe('RestTimerFloatingBar Component', () => {
         expect(mockOnPress).toHaveBeenCalledTimes(1);
     });
 
-    it('handles +30s button press: triggers haptics and adds 30 seconds', async () => {
+    it('handles Listo button press: triggers haptics, sets pending action OK, and calls onFinish', async () => {
         const { getByTestId } = await render(
             <ThemeProvider>
                 <RestTimerFloatingBar
                     visible={true}
-                    targetSeconds={90}
-                    onAddSeconds={mockOnAddSeconds}
+                    onFinish={mockOnFinish}
                 />
             </ThemeProvider>
         );
 
-        const addBtn = getByTestId('rest-timer-floating-bar-add-30s');
+        const finishBtn = getByTestId('rest-timer-floating-bar-finish');
         await act(async () => {
-            fireEvent.press(addBtn);
+            fireEvent.press(finishBtn);
         });
 
         expect(HapticService.selection).toHaveBeenCalled();
-        expect(TimerNotificationService.addSecondsToRestTimer).toHaveBeenCalledWith(30);
-        expect(mockOnAddSeconds).toHaveBeenCalledWith(30);
+        expect(TimerNotificationService.setPendingTimerAction).toHaveBeenCalledWith('OK');
+        expect(mockOnFinish).toHaveBeenCalledTimes(1);
     });
 
     it('handles Saltar button press: triggers haptics, discards timer, and calls onSkip', async () => {
@@ -128,25 +149,24 @@ describe('RestTimerFloatingBar Component', () => {
         expect(mockOnSkip).toHaveBeenCalledTimes(1);
     });
 
-    it('displays overtime indicator and format when elapsed exceeds target', async () => {
-        (TimerNotificationService.checkActiveRestTimer as jest.Mock).mockResolvedValue({
-            active: true,
-            elapsedSeconds: 105,
-            paused: false,
-        });
-
-        const { findByText } = await render(
+    it('handles optional onAddSeconds button press when prop is passed', async () => {
+        const { getByTestId } = await render(
             <ThemeProvider>
                 <RestTimerFloatingBar
                     visible={true}
-                    targetSeconds={90}
+                    onAddSeconds={mockOnAddSeconds}
                 />
             </ThemeProvider>
         );
 
-        // 105s - 90s = 15s overtime => "+0:15"
-        expect(await findByText('+0:15')).toBeTruthy();
-        expect(await findByText('Tiempo extra')).toBeTruthy();
+        const addBtn = getByTestId('rest-timer-floating-bar-add-30s');
+        await act(async () => {
+            fireEvent.press(addBtn);
+        });
+
+        expect(HapticService.selection).toHaveBeenCalled();
+        expect(TimerNotificationService.addSecondsToRestTimer).toHaveBeenCalledWith(30);
+        expect(mockOnAddSeconds).toHaveBeenCalledWith(30);
     });
 
     it('displays paused label when timer is paused', async () => {
@@ -160,11 +180,11 @@ describe('RestTimerFloatingBar Component', () => {
             <ThemeProvider>
                 <RestTimerFloatingBar
                     visible={true}
-                    targetSeconds={90}
                 />
             </ThemeProvider>
         );
 
+        expect(await findByText('0:45')).toBeTruthy();
         expect(await findByText('Pausado')).toBeTruthy();
     });
 });
