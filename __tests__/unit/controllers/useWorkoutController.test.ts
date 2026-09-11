@@ -556,6 +556,61 @@ describe('useWorkoutController (PF-257)', () => {
 
             expect(mockAlert).toHaveBeenCalledWith('Error Add Sets', expect.any(String));
         });
+
+        it('blocks addSets and shows Alert when reaching maximum 10 sets per exercise limit (PF-314)', async () => {
+            const tenSets = Array.from({ length: 10 }, (_, i) => ({
+                id: `s-${i + 1}`,
+                numero_serie: i + 1,
+                repeticiones: 10,
+                peso_utilizado: 50,
+            }));
+            const mockWorkout = getMockWorkoutWithExercises();
+            mockWorkout.ejercicios_programados[0].series = tenSets;
+            (WorkoutService.getWorkoutDetails as jest.Mock).mockResolvedValue({
+                data: mockWorkout,
+                error: null,
+            });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            await act(async () => {
+                await hook.result.current.addSet('ex-1');
+            });
+
+            expect(mockAlert).toHaveBeenCalledWith('Límite de series', expect.stringContaining('Límite total alcanzado'));
+            expect(WorkoutService.addSet).not.toHaveBeenCalled();
+        });
+
+        it('blocks addSets when reaching maximum 4 warmup sets limit (PF-314)', async () => {
+            const fourWarmupSets = Array.from({ length: 4 }, (_, i) => ({
+                id: `s-${i + 1}`,
+                numero_serie: i + 1,
+                repeticiones: 10,
+                peso_utilizado: 50,
+                tipo_serie: 'warmup',
+            }));
+            const mockWorkout = getMockWorkoutWithExercises();
+            mockWorkout.ejercicios_programados[0].series = fourWarmupSets;
+            (WorkoutService.getWorkoutDetails as jest.Mock).mockResolvedValue({
+                data: mockWorkout,
+                error: null,
+            });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            await act(async () => {
+                await hook.result.current.addSets('ex-1', 1, 'warmup');
+            });
+
+            expect(mockAlert).toHaveBeenCalledWith('Límite de series', expect.stringContaining('Límite de calentamiento alcanzado'));
+            expect(WorkoutService.addSet).not.toHaveBeenCalled();
+        });
     });
 
     describe('updateSet', () => {
@@ -690,6 +745,42 @@ describe('useWorkoutController (PF-257)', () => {
             });
 
             expect(WorkoutService.deleteSet).not.toHaveBeenCalled();
+        });
+
+        it('renumbers remaining sets sequentially and syncs with WorkoutService.updateSet (PF-314)', async () => {
+            const threeSets = [
+                { id: 's-1', numero_serie: 1, repeticiones: 10, peso_utilizado: 50 },
+                { id: 's-2', numero_serie: 2, repeticiones: 10, peso_utilizado: 50 },
+                { id: 's-3', numero_serie: 3, repeticiones: 10, peso_utilizado: 50 },
+            ];
+            const mockWorkout = getMockWorkoutWithExercises();
+            mockWorkout.ejercicios_programados[0].series = threeSets;
+            (WorkoutService.getWorkoutDetails as jest.Mock).mockResolvedValue({
+                data: mockWorkout,
+                error: null,
+            });
+            (WorkoutService.deleteSet as jest.Mock).mockResolvedValue({ error: null });
+            (WorkoutService.updateSet as jest.Mock).mockResolvedValue({ error: null });
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-1', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            // Delete set 2
+            await act(async () => {
+                await hook.result.current.deleteSet('s-2', 'ex-1');
+            });
+
+            const sets = hook.result.current.exercises[0].sets;
+            expect(sets).toHaveLength(2);
+            expect(sets[0].id).toBe('s-1');
+            expect(sets[0].numero_serie).toBe(1);
+            expect(sets[1].id).toBe('s-3');
+            expect(sets[1].numero_serie).toBe(2);
+
+            expect(WorkoutService.deleteSet).toHaveBeenCalledWith('s-2');
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-3', { numero_serie: 2 });
         });
     });
 

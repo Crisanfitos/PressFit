@@ -575,5 +575,51 @@ describe('WorkoutSetRow Component (RNTL)', () => {
 
         expect(mockOpenPlate).toHaveBeenCalledWith(80, 'set-1', 'ex-1');
     });
+
+    describe('In-Situ Set Deletion with canDelete prop (PF-314)', () => {
+        it('renders delete button when canDelete is true even if isStructureEditable is false', async () => {
+            const mockDelete = jest.fn();
+            const { getByTestId } = await render(
+                <WorkoutSetRow
+                    set={defaultSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    canDelete={true}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                    onDeleteSet={mockDelete}
+                />
+            );
+
+            const deleteBtn = getByTestId('delete-set-button-0');
+            expect(deleteBtn).toBeTruthy();
+            fireEvent.press(deleteBtn);
+            expect(mockDelete).toHaveBeenCalledWith('set-1', 'ex-1');
+        });
+
+        it('invalidates memoization when canDelete changes', () => {
+            const baseProps: any = {
+                set: defaultSet,
+                setIndex: 0,
+                exerciseId: 'ex-1',
+                tipoPeso: 'total',
+                isInputEditable: true,
+                isStructureEditable: false,
+                canDelete: false,
+                colors: mockColors,
+            };
+
+            const nextProps = {
+                ...baseProps,
+                canDelete: true,
+            };
+
+            expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
+        });
+    });
 });
+
 
