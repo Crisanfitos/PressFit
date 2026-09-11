@@ -1268,6 +1268,37 @@ describe('useWorkoutController (PF-257)', () => {
             expect(hook.result.current.exercises[0].sets[0].is_completed).toBe(true);
             expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', { is_completed: true, completada: true });
         });
+
+        it('restores is_completed: true and completada: true on exercises when loading existing workout (PF-338)', async () => {
+            (WorkoutService.getWorkoutDetails as jest.Mock).mockImplementation(() =>
+                Promise.resolve({
+                    data: {
+                        id: 'w-existing-completed',
+                        ejercicios_programados: [
+                            {
+                                id: 'ep-1',
+                                ejercicio: { id: 'ex-1', titulo: 'Sentadilla' },
+                                series: [
+                                    { id: 's-10', numero_serie: 1, peso_utilizado: 100, repeticiones: 5, is_completed: true },
+                                    { id: 's-20', numero_serie: 2, peso_utilizado: 100, repeticiones: 5, is_completed: false },
+                                ],
+                            },
+                        ],
+                    },
+                    error: null,
+                })
+            );
+
+            const hook = await renderHook(() =>
+                useWorkoutController('w-existing-completed', 'rd-1', 'u-1', 3)
+            );
+            await waitFor(() => expect(hook.result.current.loading).toBe(false));
+
+            expect(hook.result.current.exercises[0].sets[0].is_completed).toBe(true);
+            expect(hook.result.current.exercises[0].sets[0].completada).toBe(true);
+            expect(hook.result.current.exercises[0].sets[1].is_completed).toBe(false);
+            expect(hook.result.current.exercises[0].sets[1].completada).toBe(false);
+        });
     });
 });
 

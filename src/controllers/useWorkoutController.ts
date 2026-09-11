@@ -81,7 +81,11 @@ export const useWorkoutController = (
                         id: ex.ejercicio.id,
                         routine_exercise_id: ex.id,
                         target_sets: 3,
-                        sets: ex.series || [],
+                        sets: (ex.series || []).map((s: any) => ({
+                            ...s,
+                            is_completed: Boolean(s.is_completed || s.completada),
+                            completada: Boolean(s.is_completed || s.completada),
+                        })),
                         is_routine: true,
                         tipo_peso: (ex.tipo_peso as TipoPeso) || 'total',
                     }));

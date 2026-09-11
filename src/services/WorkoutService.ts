@@ -65,26 +65,59 @@ export const WorkoutService = {
                     return { data: null, error };
                 }
 
+                // Retrieve currently cached workouts to reconcile optimistic / offline values
+                const cachedRes = await OfflineStorageService.getCachedWorkouts();
+                const currentCached = cachedRes.data || [];
+                const existingCachedWorkout = currentCached.find((w) => w.id === workoutId);
+                const cachedSeriesMap = new Map<string, Serie>();
+                if (existingCachedWorkout?.ejercicios_programados) {
+                    existingCachedWorkout.ejercicios_programados.forEach((ex: any) => {
+                        if (ex.series) {
+                            ex.series.forEach((s: any) => {
+                                if (s.id) cachedSeriesMap.set(s.id, s);
+                            });
+                        }
+                    });
+                }
+
                 // Sort exercises by order
                 if (data?.ejercicios_programados) {
                     data.ejercicios_programados.sort(
                         (a: ScheduledExercise, b: ScheduledExercise) => (a.orden_ejecucion || 0) - (b.orden_ejecucion || 0)
                     );
 
-                    // Sort sets by number
+                    // Sort sets by number and reconcile completion state
                     data.ejercicios_programados.forEach((ex: ScheduledExercise) => {
                         if (ex.series) {
                             ex.series.sort(
                                 (a: Serie, b: Serie) => (a.numero_serie || 0) - (b.numero_serie || 0)
                             );
+
+                            ex.series = ex.series.map((s: Serie) => {
+                                const cachedSet = cachedSeriesMap.get(s.id);
+                                const isCompleted = Boolean(
+                                    s.is_completed || s.completada || cachedSet?.is_completed || cachedSet?.completada
+                                );
+                                return {
+                                    ...s,
+                                    is_completed: isCompleted,
+                                    completada: isCompleted,
+                                    tipo_serie: s.tipo_serie || cachedSet?.tipo_serie || 'normal',
+                                    peso_utilizado: s.peso_utilizado !== undefined && s.peso_utilizado !== null
+                                        ? s.peso_utilizado
+                                        : (cachedSet?.peso_utilizado ?? 0),
+                                    repeticiones: s.repeticiones !== undefined && s.repeticiones !== null
+                                        ? s.repeticiones
+                                        : (cachedSet?.repeticiones ?? 0),
+                                    rpe: s.rpe !== undefined && s.rpe !== null ? s.rpe : cachedSet?.rpe,
+                                };
+                            });
                         }
                     });
                 }
 
                 // Cache workout locally
                 if (data) {
-                    const cachedRes = await OfflineStorageService.getCachedWorkouts();
-                    const currentCached = cachedRes.data || [];
                     const filtered = currentCached.filter((w) => w.id !== data.id);
                     await OfflineStorageService.saveWorkouts([...filtered, data]);
                 }
@@ -99,6 +132,20 @@ export const WorkoutService = {
         const cachedRes = await OfflineStorageService.getCachedWorkouts();
         const cachedWorkout = cachedRes.data?.find((w) => w.id === workoutId);
         if (cachedWorkout) {
+            if (cachedWorkout.ejercicios_programados) {
+                cachedWorkout.ejercicios_programados.forEach((ex: any) => {
+                    if (ex.series) {
+                        ex.series = ex.series.map((s: any) => {
+                            const isCompleted = Boolean(s.is_completed || s.completada);
+                            return {
+                                ...s,
+                                is_completed: isCompleted,
+                                completada: isCompleted,
+                            };
+                        });
+                    }
+                });
+            }
             return { data: cachedWorkout, error: null };
         }
 
@@ -446,6 +493,14 @@ export const WorkoutService = {
         if (updates.is_completed !== undefined) dbUpdates.is_completed = updates.is_completed;
         if (updates.completada !== undefined) dbUpdates.completada = updates.completada;
 
+        const effectiveCompleted = updates.is_completed !== undefined
+            ? updates.is_completed
+            : updates.completada;
+        if (effectiveCompleted !== undefined) {
+            dbUpdates.is_completed = effectiveCompleted;
+            dbUpdates.completada = effectiveCompleted;
+        }
+
         if (isE2EMockEnabled()) {
             const mockUpdated = mockStore.updateSet(setId, dbUpdates);
             return { data: mockUpdated as any, error: null };
@@ -454,9 +509,13 @@ export const WorkoutService = {
         const offline = await checkIsOffline();
         if (!offline) {
             try {
+                // PostgREST column is is_completed (completada is an internal/client alias)
+                const supabasePayload: any = { ...dbUpdates };
+                delete supabasePayload.completada;
+
                 let { data, error } = await supabase
                     .from('series')
-                    .update(dbUpdates)
+                    .update(supabasePayload)
                     .eq('id', setId)
                     .select()
                     .single();
@@ -464,10 +523,18 @@ export const WorkoutService = {
                 // Defensive schema cache / migration fallback (PF-332)
                 if (error && isSchemaColumnError(error)) {
                     console.warn('[WorkoutService] schema column missing in cache, falling back to update without optional columns');
-                    const fallbackUpdates = { ...dbUpdates };
-                    delete fallbackUpdates.tipo_serie;
-                    delete fallbackUpdates.is_completed;
-                    delete fallbackUpdates.completada;
+                    const errorMsg = String(error.message || error.details || error.hint || '').toLowerCase();
+                    const fallbackUpdates = { ...supabasePayload };
+
+                    if (errorMsg.includes('tipo_serie')) {
+                        delete fallbackUpdates.tipo_serie;
+                    } else if (errorMsg.includes('is_completed')) {
+                        delete fallbackUpdates.is_completed;
+                    } else {
+                        delete fallbackUpdates.tipo_serie;
+                        delete fallbackUpdates.is_completed;
+                    }
+
                     const fallbackRes = await supabase
                         .from('series')
                         .update(fallbackUpdates)
@@ -489,8 +556,8 @@ export const WorkoutService = {
                     normalized = {
                         ...data,
                         tipo_serie: (data as any).tipo_serie || dbUpdates.tipo_serie || 'normal',
-                        is_completed: (data as any).is_completed ?? dbUpdates.is_completed,
-                        completada: (data as any).completada ?? dbUpdates.completada,
+                        is_completed: (data as any).is_completed ?? dbUpdates.is_completed ?? false,
+                        completada: (data as any).completada ?? (data as any).is_completed ?? dbUpdates.completada ?? dbUpdates.is_completed ?? false,
                     };
                     const cachedRes = await OfflineStorageService.getCachedWorkouts();
                     const workouts = cachedRes.data || [];
@@ -519,12 +586,14 @@ export const WorkoutService = {
         const mockSet: Serie = {
             id: setId,
             ejercicio_programado_id: 'offline-ex-id',
-            numero_serie: 1,
+            numero_serie: dbUpdates.numero_serie || 1,
             peso_utilizado: dbUpdates.peso_utilizado || 0,
             repeticiones: dbUpdates.repeticiones || 0,
             rpe: dbUpdates.rpe,
             descanso_segundos: dbUpdates.descanso_segundos,
             tipo_serie: dbUpdates.tipo_serie || 'normal',
+            is_completed: dbUpdates.is_completed ?? dbUpdates.completada ?? false,
+            completada: dbUpdates.completada ?? dbUpdates.is_completed ?? false,
         };
 
         const cachedRes = await OfflineStorageService.getCachedWorkouts();
@@ -533,7 +602,12 @@ export const WorkoutService = {
             if (w.ejercicios_programados) {
                 w.ejercicios_programados.forEach((ex) => {
                     if (ex.series) {
-                        ex.series = ex.series.map((s) => (s.id === setId ? { ...s, ...dbUpdates } : s));
+                        ex.series = ex.series.map((s) => (s.id === setId ? {
+                            ...s,
+                            ...dbUpdates,
+                            is_completed: dbUpdates.is_completed ?? s.is_completed ?? false,
+                            completada: dbUpdates.completada ?? dbUpdates.is_completed ?? s.completada ?? false,
+                        } : s));
                     }
                 });
             }

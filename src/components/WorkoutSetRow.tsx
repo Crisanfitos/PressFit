@@ -86,7 +86,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     const [isTypePickerVisible, setIsTypePickerVisible] = useState(false);
     const [isActionModalVisible, setIsActionModalVisible] = useState(false);
 
-    const isCompleted = Boolean(set.is_completed ?? set.completada);
+    const isCompleted = Boolean(set.is_completed || set.completada);
     const effectiveInputEditable = isInputEditable && !isCompleted;
 
     const currentSetType: SetType = set.tipo_serie || 'normal';
@@ -431,7 +431,7 @@ export const areWorkoutSetRowPropsEqual = (
         prevSet.rpe !== nextSet.rpe ||
         prevSet.descanso_segundos !== nextSet.descanso_segundos ||
         prevSet.tipo_serie !== nextSet.tipo_serie ||
-        (prevSet.is_completed ?? prevSet.completada) !== (nextSet.is_completed ?? nextSet.completada)
+        Boolean(prevSet.is_completed || prevSet.completada) !== Boolean(nextSet.is_completed || nextSet.completada)
     ) {
         return false;
     }

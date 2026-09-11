@@ -60,7 +60,7 @@ export const WorkoutRecoveryService = {
                     if (ep.series && Array.isArray(ep.series)) {
                         totalSetsCount += ep.series.length;
                         for (const s of ep.series) {
-                            if ((s.repeticiones && s.repeticiones > 0) || (s.peso_utilizado && s.peso_utilizado > 0)) {
+                            if (Boolean(s.is_completed ?? s.completada) || (s.repeticiones && s.repeticiones > 0) || (s.peso_utilizado && s.peso_utilizado > 0)) {
                                 completedSetsCount++;
                             }
                         }
