@@ -64,12 +64,13 @@ const SetInput: React.FC<SetInputProps> = React.memo(({
 
 const styles = StyleSheet.create({
     input: {
-        flex: 1,
+        width: '100%',
+        height: 42,
         borderWidth: 1,
         borderRadius: 8,
-        paddingVertical: 12,
         paddingHorizontal: 4,
         fontSize: 16,
+        fontWeight: '600',
         textAlign: 'center',
     },
 });
