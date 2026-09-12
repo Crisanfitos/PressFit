@@ -9,6 +9,8 @@
  * @module utils/analyticsUtils
  */
 
+import { SetType } from '../types/setTypes';
+
 export type OneRMFormula = 'auto' | 'brzycki' | 'epley';
 
 export interface OneRMBestSetResult<T = unknown> {
@@ -29,6 +31,15 @@ export interface EffectiveSetsSummary {
     distribucion: MuscleVolumeDistribution[];
 }
 
+export interface WorkoutTonnageSummary {
+    effectiveTonnage: number;
+    totalTonnage: number;
+    warmupTonnage: number;
+    totalSetsCount: number;
+    effectiveSetsCount: number;
+    warmupSetsCount: number;
+}
+
 export interface ExerciseWithSeriesForVolume {
     ejercicio: {
         id?: string;
@@ -42,7 +53,7 @@ export interface ExerciseWithSeriesForVolume {
         peso_utilizado?: number | null;
         repeticiones?: number | null;
         rpe?: number | null;
-        tipo_serie?: string | null;
+        tipo_serie?: SetType | string | null;
         is_warmup?: boolean | null;
         [key: string]: any;
     }>;
@@ -81,7 +92,7 @@ export function isEffectiveSet(set: {
     peso_utilizado?: number | null;
     repeticiones?: number | null;
     rpe?: number | null;
-    tipo_serie?: string | null;
+    tipo_serie?: SetType | string | null;
     is_warmup?: boolean | null;
 }): boolean {
     if (!set || typeof set !== 'object') {
@@ -97,6 +108,12 @@ export function isEffectiveSet(set: {
         return false;
     }
 
+    // If explicit type is provided, only valid working set types qualify
+    const VALID_EFFECTIVE_TYPES = ['normal', 'feeder', 'failure', 'drop'];
+    if (tipo && !VALID_EFFECTIVE_TYPES.includes(tipo)) {
+        return false;
+    }
+
     const reps = Number(set.repeticiones);
     if (isNaN(reps) || reps <= 0) {
         return false;
@@ -107,8 +124,8 @@ export function isEffectiveSet(set: {
         return false;
     }
 
-    // Sub-threshold intensity (explicitly low RPE warmups < 5 when RPE is recorded)
-    if (typeof set.rpe === 'number' && !isNaN(set.rpe) && set.rpe > 0 && set.rpe < 5) {
+    // Sub-threshold intensity (explicitly low RPE warmups < 5 when RPE is recorded without an explicit non-warmup type or when type is normal)
+    if ((!tipo || tipo === 'normal') && typeof set.rpe === 'number' && !isNaN(set.rpe) && set.rpe > 0 && set.rpe < 5) {
         return false;
     }
 
@@ -452,5 +469,97 @@ export function calculateWeeklyFatigue(
         statusLabel,
         statusColor,
         recommendation,
+    };
+}
+
+/**
+ * Calculates tonnage for an individual set (weight * reps).
+ *
+ * @param set - Set object with weight and reps.
+ * @returns Tonnage in kg rounded to 2 decimal places, or 0 if inputs are invalid.
+ */
+export function calculateSetTonnage(set: {
+    peso_utilizado?: number | null;
+    repeticiones?: number | null;
+}): number {
+    if (!set || typeof set !== 'object') {
+        return 0;
+    }
+    const weight = Number(set.peso_utilizado);
+    const reps = Number(set.repeticiones);
+    if (isNaN(weight) || isNaN(reps) || weight < 0 || reps <= 0) {
+        return 0;
+    }
+    return Math.round(weight * reps * 100) / 100;
+}
+
+/**
+ * Calculates workout tonnage breakdown, discriminating effective tonnage from warmup tonnage.
+ *
+ * Provides both effective tonnage (only working sets) and total tonnage (including warmups),
+ * alongside set counts, allowing screens and summaries to present or toggle between both metrics cleanly.
+ *
+ * @param series - Array of performed sets in the workout.
+ * @returns Object with effectiveTonnage, totalTonnage, warmupTonnage, and set counts.
+ */
+export function calculateWorkoutTonnage(
+    series: Array<{
+        peso_utilizado?: number | null;
+        repeticiones?: number | null;
+        rpe?: number | null;
+        tipo_serie?: SetType | string | null;
+        is_warmup?: boolean | null;
+        [key: string]: any;
+    }>
+): WorkoutTonnageSummary {
+    if (!Array.isArray(series) || series.length === 0) {
+        return {
+            effectiveTonnage: 0,
+            totalTonnage: 0,
+            warmupTonnage: 0,
+            totalSetsCount: 0,
+            effectiveSetsCount: 0,
+            warmupSetsCount: 0,
+        };
+    }
+
+    let effectiveTonnage = 0;
+    let warmupTonnage = 0;
+    let totalTonnage = 0;
+    let totalSetsCount = 0;
+    let effectiveSetsCount = 0;
+    let warmupSetsCount = 0;
+
+    for (const set of series) {
+        if (!set || typeof set !== 'object') continue;
+
+        const reps = Number(set.repeticiones);
+        const weight = Number(set.peso_utilizado);
+
+        // Discard invalid reps or negative weights
+        if (isNaN(reps) || reps <= 0 || isNaN(weight) || weight < 0) {
+            continue;
+        }
+
+        const setTonnage = Math.round(weight * reps * 100) / 100;
+        totalTonnage += setTonnage;
+        totalSetsCount++;
+
+        if (isEffectiveSet(set)) {
+            effectiveTonnage += setTonnage;
+            effectiveSetsCount++;
+        } else {
+            warmupTonnage += setTonnage;
+            warmupSetsCount++;
+        }
+    }
+
+    return {
+        effectiveTonnage: Math.round(effectiveTonnage * 100) / 100,
+        totalTonnage: Math.round(totalTonnage * 100) / 100,
+        warmupTonnage: Math.round(warmupTonnage * 100) / 100,
+        totalSetsCount,
+        effectiveSetsCount,
+        warmupSetsCount,
     };
 }

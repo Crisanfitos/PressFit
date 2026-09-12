@@ -7,6 +7,8 @@ import {
     isEffectiveSet,
     aggregateEffectiveSetsByMuscle,
     calculateWeeklyFatigue,
+    calculateSetTonnage,
+    calculateWorkoutTonnage,
 } from '../../src/utils/analyticsUtils';
 
 describe('analyticsUtils - 1RM Calculation Engine & Effective Sets Aggregator (PF-154, PF-155, PF-157)', () => {
@@ -170,6 +172,20 @@ describe('analyticsUtils - 1RM Calculation Engine & Effective Sets Aggregator (P
             expect(isEffectiveSet({ peso_utilizado: 60, repeticiones: 10, rpe: 5 })).toBe(true);
             expect(isEffectiveSet({ peso_utilizado: 60, repeticiones: 10, rpe: 8.5 })).toBe(true);
         });
+
+        it('formally supports SetType values (PF-316)', () => {
+            // Working set types (normal, feeder, failure, drop)
+            expect(isEffectiveSet({ peso_utilizado: 80, repeticiones: 10, tipo_serie: 'normal' })).toBe(true);
+            expect(isEffectiveSet({ peso_utilizado: 90, repeticiones: 6, tipo_serie: 'feeder' })).toBe(true);
+            expect(isEffectiveSet({ peso_utilizado: 100, repeticiones: 5, tipo_serie: 'failure' })).toBe(true);
+            expect(isEffectiveSet({ peso_utilizado: 70, repeticiones: 12, tipo_serie: 'drop' })).toBe(true);
+
+            // Warmup set type strictly excluded
+            expect(isEffectiveSet({ peso_utilizado: 50, repeticiones: 12, tipo_serie: 'warmup' })).toBe(false);
+
+            // Invalid / unknown types excluded
+            expect(isEffectiveSet({ peso_utilizado: 80, repeticiones: 10, tipo_serie: 'custom_invalid' })).toBe(false);
+        });
     });
 
     describe('aggregateEffectiveSetsByMuscle (PF-155)', () => {
@@ -259,6 +275,31 @@ describe('analyticsUtils - 1RM Calculation Engine & Effective Sets Aggregator (P
             expect(emptyResult.porGrupoMuscular).toEqual({});
             expect(emptyResult.distribucion).toEqual([]);
         });
+
+        it('aggregates volume computing strictly normal, feeder, failure, and drop while ignoring warmup (PF-316)', () => {
+            const exerciseData = [
+                {
+                    ejercicio: {
+                        nombre: 'Press Militar',
+                        grupo_muscular_principal: 'Hombros',
+                    },
+                    series: [
+                        { peso_utilizado: 20, repeticiones: 15, tipo_serie: 'warmup' }, // warmup excluded
+                        { peso_utilizado: 30, repeticiones: 12, is_warmup: true }, // warmup excluded
+                        { peso_utilizado: 50, repeticiones: 10, tipo_serie: 'normal' }, // effective
+                        { peso_utilizado: 55, repeticiones: 8, tipo_serie: 'feeder' }, // effective
+                        { peso_utilizado: 60, repeticiones: 6, tipo_serie: 'failure' }, // effective
+                        { peso_utilizado: 45, repeticiones: 10, tipo_serie: 'drop' }, // effective
+                    ],
+                },
+            ];
+
+            const result = aggregateEffectiveSetsByMuscle(exerciseData as any);
+            expect(result.totalSeriesEfectivas).toBe(4);
+            expect(result.porGrupoMuscular['Hombros']).toBe(4);
+            expect(result.distribucion).toHaveLength(1);
+            expect(result.distribucion[0].series_efectivas).toBe(4);
+        });
     });
 
     describe('calculateWeeklyFatigue (PF-157)', () => {
@@ -339,6 +380,132 @@ describe('analyticsUtils - 1RM Calculation Engine & Effective Sets Aggregator (P
 
             const resultNull = calculateWeeklyFatigue(null as any);
             expect(resultNull.fatigueLevel).toBe('sin_datos');
+        });
+    });
+
+    describe('calculateSetTonnage (PF-316)', () => {
+        it('calculates set tonnage as weight * reps', () => {
+            expect(calculateSetTonnage({ peso_utilizado: 100, repeticiones: 5 })).toBe(500);
+            expect(calculateSetTonnage({ peso_utilizado: 82.5, repeticiones: 8 })).toBe(660);
+            expect(calculateSetTonnage({ peso_utilizado: 67.25, repeticiones: 7 })).toBe(470.75);
+        });
+
+        it('returns 0 for bodyweight exercises with 0 kg weight', () => {
+            expect(calculateSetTonnage({ peso_utilizado: 0, repeticiones: 12 })).toBe(0);
+        });
+
+        it('returns 0 for invalid, missing or negative inputs', () => {
+            expect(calculateSetTonnage({ peso_utilizado: -50, repeticiones: 10 })).toBe(0);
+            expect(calculateSetTonnage({ peso_utilizado: 50, repeticiones: 0 })).toBe(0);
+            expect(calculateSetTonnage({ peso_utilizado: 50, repeticiones: -5 })).toBe(0);
+            expect(calculateSetTonnage({ peso_utilizado: null, repeticiones: 10 })).toBe(0);
+            expect(calculateSetTonnage({ peso_utilizado: 100, repeticiones: NaN })).toBe(0);
+            expect(calculateSetTonnage(null as any)).toBe(0);
+            expect(calculateSetTonnage(undefined as any)).toBe(0);
+        });
+    });
+
+    describe('calculateWorkoutTonnage (PF-316)', () => {
+        it('separates effective tonnage from warmup tonnage with mixed set types', () => {
+            const mixedWorkout = [
+                // 2 warmups
+                { peso_utilizado: 40, repeticiones: 15, tipo_serie: 'warmup' }, // 600 kg
+                { peso_utilizado: 60, repeticiones: 10, is_warmup: true },       // 600 kg
+                // 4 working sets
+                { peso_utilizado: 80, repeticiones: 10, tipo_serie: 'normal' },  // 800 kg
+                { peso_utilizado: 90, repeticiones: 6, tipo_serie: 'feeder' },   // 540 kg
+                { peso_utilizado: 100, repeticiones: 5, tipo_serie: 'failure' }, // 500 kg
+                { peso_utilizado: 70, repeticiones: 10, tipo_serie: 'drop' },    // 700 kg
+            ];
+
+            const result = calculateWorkoutTonnage(mixedWorkout);
+
+            // Effective tonnage: 800 + 540 + 500 + 700 = 2540 kg
+            expect(result.effectiveTonnage).toBe(2540);
+            // Warmup tonnage: 600 + 600 = 1200 kg
+            expect(result.warmupTonnage).toBe(1200);
+            // Total tonnage: 2540 + 1200 = 3740 kg
+            expect(result.totalTonnage).toBe(3740);
+
+            // Set counts
+            expect(result.totalSetsCount).toBe(6);
+            expect(result.effectiveSetsCount).toBe(4);
+            expect(result.warmupSetsCount).toBe(2);
+        });
+
+        it('handles workouts with only effective sets', () => {
+            const workingSetsOnly = [
+                { peso_utilizado: 100, repeticiones: 5, tipo_serie: 'normal' },
+                { peso_utilizado: 100, repeticiones: 5, tipo_serie: 'normal' },
+            ];
+
+            const result = calculateWorkoutTonnage(workingSetsOnly);
+            expect(result.effectiveTonnage).toBe(1000);
+            expect(result.warmupTonnage).toBe(0);
+            expect(result.totalTonnage).toBe(1000);
+            expect(result.effectiveSetsCount).toBe(2);
+            expect(result.warmupSetsCount).toBe(0);
+            expect(result.totalSetsCount).toBe(2);
+        });
+
+        it('handles workouts with only warmup sets', () => {
+            const warmupOnly = [
+                { peso_utilizado: 40, repeticiones: 15, tipo_serie: 'warmup' },
+                { peso_utilizado: 50, repeticiones: 12, tipo_serie: 'warmup' },
+            ];
+
+            const result = calculateWorkoutTonnage(warmupOnly);
+            expect(result.effectiveTonnage).toBe(0);
+            expect(result.warmupTonnage).toBe(1200);
+            expect(result.totalTonnage).toBe(1200);
+            expect(result.effectiveSetsCount).toBe(0);
+            expect(result.warmupSetsCount).toBe(2);
+            expect(result.totalSetsCount).toBe(2);
+        });
+
+        it('handles legacy sets without tipo_serie as effective sets', () => {
+            const legacyWorkout = [
+                { peso_utilizado: 80, repeticiones: 10 },
+                { peso_utilizado: 85, repeticiones: 8 },
+            ];
+
+            const result = calculateWorkoutTonnage(legacyWorkout);
+            expect(result.effectiveTonnage).toBe(1480);
+            expect(result.warmupTonnage).toBe(0);
+            expect(result.totalTonnage).toBe(1480);
+            expect(result.effectiveSetsCount).toBe(2);
+        });
+
+        it('discards invalid sets and handles empty/null arrays safely', () => {
+            expect(calculateWorkoutTonnage([])).toEqual({
+                effectiveTonnage: 0,
+                totalTonnage: 0,
+                warmupTonnage: 0,
+                totalSetsCount: 0,
+                effectiveSetsCount: 0,
+                warmupSetsCount: 0,
+            });
+
+            expect(calculateWorkoutTonnage(null as any)).toEqual({
+                effectiveTonnage: 0,
+                totalTonnage: 0,
+                warmupTonnage: 0,
+                totalSetsCount: 0,
+                effectiveSetsCount: 0,
+                warmupSetsCount: 0,
+            });
+
+            const invalidSets = [
+                { peso_utilizado: -10, repeticiones: 10 },
+                { peso_utilizado: 50, repeticiones: 0 },
+                { peso_utilizado: NaN, repeticiones: 5 },
+                null,
+                undefined,
+            ];
+
+            const result = calculateWorkoutTonnage(invalidSets as any);
+            expect(result.totalTonnage).toBe(0);
+            expect(result.totalSetsCount).toBe(0);
         });
     });
 });
