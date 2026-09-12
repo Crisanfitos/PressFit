@@ -36,6 +36,27 @@ describe('AnalyticsService (PF-154, PF-155, PF-157)', () => {
             ])).toBe(112.5);
             expect(AnalyticsService.isEffectiveSet({ peso_utilizado: 80, repeticiones: 8 })).toBe(true);
             expect(AnalyticsService.isEffectiveSet({ peso_utilizado: 80, repeticiones: 8, is_warmup: true })).toBe(false);
+            expect(AnalyticsService.isEffectiveSet({ peso_utilizado: 80, repeticiones: 8, tipo_serie: 'warmup' })).toBe(false);
+            expect(AnalyticsService.isEffectiveSet({ peso_utilizado: 80, repeticiones: 8, tipo_serie: 'feeder' })).toBe(true);
+            expect(AnalyticsService.isEffectiveSet({ peso_utilizado: 80, repeticiones: 8, tipo_serie: 'failure' })).toBe(true);
+            expect(AnalyticsService.isEffectiveSet({ peso_utilizado: 80, repeticiones: 8, tipo_serie: 'drop' })).toBe(true);
+        });
+
+        it('proxies calculateSetTonnage and calculateWorkoutTonnage (PF-316)', () => {
+            expect(AnalyticsService.calculateSetTonnage({ peso_utilizado: 100, repeticiones: 5 })).toBe(500);
+
+            const tonnageSummary = AnalyticsService.calculateWorkoutTonnage([
+                { peso_utilizado: 50, repeticiones: 10, tipo_serie: 'warmup' }, // 500 kg
+                { peso_utilizado: 100, repeticiones: 5, tipo_serie: 'normal' },  // 500 kg
+                { peso_utilizado: 80, repeticiones: 8, tipo_serie: 'drop' },     // 640 kg
+            ]);
+
+            expect(tonnageSummary.effectiveTonnage).toBe(1140);
+            expect(tonnageSummary.warmupTonnage).toBe(500);
+            expect(tonnageSummary.totalTonnage).toBe(1640);
+            expect(tonnageSummary.totalSetsCount).toBe(3);
+            expect(tonnageSummary.effectiveSetsCount).toBe(2);
+            expect(tonnageSummary.warmupSetsCount).toBe(1);
         });
 
         it('proxies aggregateEffectiveSetsByMuscle', () => {

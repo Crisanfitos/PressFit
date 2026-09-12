@@ -10,12 +10,18 @@ import {
     isEffectiveSet,
     aggregateEffectiveSetsByMuscle,
     calculateWeeklyFatigue,
+    calculateSetTonnage,
+    calculateWorkoutTonnage,
     OneRMFormula,
     EffectiveSetsSummary,
     ExerciseWithSeriesForVolume,
     AggregateOptions,
     FatigueAnalysisResult,
+    WorkoutTonnageSummary,
 } from '../utils/analyticsUtils';
+import { SetType } from '../types/setTypes';
+
+export type { WorkoutTonnageSummary };
 
 export interface OneRMHistoryEntry {
     fecha: string;
@@ -87,7 +93,7 @@ export const AnalyticsService = {
         peso_utilizado?: number | null;
         repeticiones?: number | null;
         rpe?: number | null;
-        tipo_serie?: string | null;
+        tipo_serie?: SetType | string | null;
         is_warmup?: boolean | null;
     }): boolean {
         return isEffectiveSet(set);
@@ -112,10 +118,42 @@ export const AnalyticsService = {
             peso_utilizado?: number | null;
             repeticiones?: number | null;
             is_warmup?: boolean | null;
-            tipo_serie?: string | null;
+            tipo_serie?: SetType | string | null;
         }>
     ): FatigueAnalysisResult {
         return calculateWeeklyFatigue(series);
+    },
+
+    /**
+     * Calculates tonnage for an individual set (weight * reps).
+     *
+     * @param set - Set object with weight and reps.
+     * @returns Tonnage in kg rounded to 2 decimal places.
+     */
+    calculateSetTonnage(set: {
+        peso_utilizado?: number | null;
+        repeticiones?: number | null;
+    }): number {
+        return calculateSetTonnage(set);
+    },
+
+    /**
+     * Calculates workout session tonnage discriminating effective vs warmup tonnage.
+     *
+     * @param series - Array of performed sets in the workout.
+     * @returns WorkoutTonnageSummary with effectiveTonnage, totalTonnage, warmupTonnage and counts.
+     */
+    calculateWorkoutTonnage(
+        series: Array<{
+            peso_utilizado?: number | null;
+            repeticiones?: number | null;
+            rpe?: number | null;
+            tipo_serie?: SetType | string | null;
+            is_warmup?: boolean | null;
+            [key: string]: any;
+        }>
+    ): WorkoutTonnageSummary {
+        return calculateWorkoutTonnage(series);
     },
 
     /**
