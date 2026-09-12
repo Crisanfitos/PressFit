@@ -102,6 +102,7 @@ export const WorkoutService = {
                                     ...s,
                                     is_completed: isCompleted,
                                     completada: isCompleted,
+                                    is_pr: Boolean(s.is_pr || cachedSet?.is_pr),
                                     tipo_serie: s.tipo_serie || cachedSet?.tipo_serie || 'normal',
                                     peso_utilizado: s.peso_utilizado !== undefined && s.peso_utilizado !== null
                                         ? s.peso_utilizado
@@ -481,7 +482,7 @@ export const WorkoutService = {
 
     async updateSet(
         setId: string,
-        updates: { weight?: number; reps?: number; rpe?: number; descanso_segundos?: number; tipo_serie?: SetType; numero_serie?: number; is_completed?: boolean; completada?: boolean }
+        updates: { weight?: number; reps?: number; rpe?: number; descanso_segundos?: number; tipo_serie?: SetType; numero_serie?: number; is_completed?: boolean; completada?: boolean; is_pr?: boolean }
     ): Promise<ServiceResponse<Serie>> {
         const dbUpdates: SetUpdatePayload = {};
         if (updates.weight !== undefined) dbUpdates.peso_utilizado = updates.weight;
@@ -492,6 +493,7 @@ export const WorkoutService = {
         if (updates.numero_serie !== undefined) dbUpdates.numero_serie = updates.numero_serie;
         if (updates.is_completed !== undefined) dbUpdates.is_completed = updates.is_completed;
         if (updates.completada !== undefined) dbUpdates.completada = updates.completada;
+        if (updates.is_pr !== undefined) dbUpdates.is_pr = updates.is_pr;
 
         const effectiveCompleted = updates.is_completed !== undefined
             ? updates.is_completed
@@ -530,9 +532,12 @@ export const WorkoutService = {
                         delete fallbackUpdates.tipo_serie;
                     } else if (errorMsg.includes('is_completed')) {
                         delete fallbackUpdates.is_completed;
+                    } else if (errorMsg.includes('is_pr')) {
+                        delete fallbackUpdates.is_pr;
                     } else {
                         delete fallbackUpdates.tipo_serie;
                         delete fallbackUpdates.is_completed;
+                        delete fallbackUpdates.is_pr;
                     }
 
                     const fallbackRes = await supabase

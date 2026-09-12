@@ -972,6 +972,67 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
         });
     });
+
+    describe('PF-318: PRBadge Rendering and Memoization', () => {
+        it('renders PRBadge when set.is_pr is true', async () => {
+            const prSet = {
+                ...defaultSet,
+                is_pr: true,
+                is_completed: true,
+            };
+
+            const { getByTestId } = await render(
+                <WorkoutSetRow
+                    set={prSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                />
+            );
+
+            expect(getByTestId('set-pr-badge-0')).toBeTruthy();
+        });
+
+        it('does not render PRBadge when set.is_pr is false or undefined', async () => {
+            const { queryByTestId } = await render(
+                <WorkoutSetRow
+                    set={defaultSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                />
+            );
+
+            expect(queryByTestId('set-pr-badge-0')).toBeNull();
+        });
+
+        it('invalidates memoization when set.is_pr changes', () => {
+            const baseProps: any = {
+                set: { ...defaultSet, is_pr: false },
+                setIndex: 0,
+                exerciseId: 'ex-1',
+                tipoPeso: 'total',
+                isInputEditable: true,
+                isStructureEditable: false,
+                colors: mockColors,
+            };
+
+            const nextProps = {
+                ...baseProps,
+                set: { ...defaultSet, is_pr: true },
+            };
+
+            expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
+        });
+    });
 });
 
 

@@ -10,6 +10,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useWorkoutController } from '../controllers/useWorkoutController';
 import { saveActiveWorkoutParams } from '../services/TimerNotificationService';
 import { ShareModal, SocialCardData } from '../components/social';
+import PRCelebrationModal from '../components/workout/PRCelebrationModal';
 import {
     WorkoutHeader,
     ExerciseCard,
@@ -56,6 +57,8 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         updateWeightType,
         toggleCompleteSet,
         reloadExercises,
+        activePRCelebration,
+        dismissPRCelebration,
     } = useWorkoutController(initialWorkoutId || null, routineDayId, user?.id || '', dayOfWeek || 0, navMode === 'edit');
 
     const [shareModalVisible, setShareModalVisible] = useState(false);
@@ -221,6 +224,13 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                 visible={shareModalVisible}
                 onClose={handleCloseShareModal}
                 data={shareCardData}
+                colors={colors}
+            />
+            <PRCelebrationModal
+                visible={Boolean(activePRCelebration)}
+                exerciseName={activePRCelebration?.exerciseName || ''}
+                brokenPRs={activePRCelebration?.brokenPRs || []}
+                onClose={dismissPRCelebration}
                 colors={colors}
             />
         </SafeAreaView>

@@ -7,6 +7,7 @@ import { TipoPeso, SetType, SET_TYPE_COLORS } from '../types/setTypes';
 import { validateRpe } from '../utils/rpeValidation';
 import SetTypePickerModal from './workout/SetTypePickerModal';
 import { SetActionModal } from './workout/SetActionModal';
+import PRBadge from './workout/PRBadge';
 
 export interface SetData {
     id: string;
@@ -19,6 +20,7 @@ export interface SetData {
     tipo_serie?: SetType;
     is_completed?: boolean;
     completada?: boolean;
+    is_pr?: boolean;
 }
 
 export interface WorkoutSetRowProps {
@@ -191,46 +193,54 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
             activeOpacity={1}
             style={[
                 styles.container,
-                isCompleted && styles.completedContainer,
-            ]}
+                isCompleted && styles.completedContainer,            ]}
         >
             <View style={styles.mainRow}>
-                <TouchableOpacity
-                    testID={`set-type-button-${setIndex}`}
-                    style={[
-                        styles.setTypeBadgeButton,
-                        isSpecialType
-                            ? {
-                                backgroundColor: typeVisual.badgeBg,
-                                borderColor: typeVisual.border,
-                            }
-                            : canEditSetType
-                                ? {
-                                    backgroundColor: colors.surfaceHighlight,
-                                    borderColor: colors.border,
-                                }
-                                : {
-                                    backgroundColor: 'transparent',
-                                    borderColor: 'transparent',
-                                },
-                    ]}
-                    onPress={handleOpenSetTypePicker}
-                    disabled={!canEditSetType}
-                    activeOpacity={0.7}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                    <Text
+                <View style={styles.setNumberWrapper}>
+                    <TouchableOpacity
+                        testID={`set-type-button-${setIndex}`}
                         style={[
-                            styles.setNumber,
+                            styles.setTypeBadgeButton,
                             isSpecialType
-                                ? [styles.specialBadgeText, { color: typeVisual.badgeText }]
-                                : { color: canEditSetType ? colors.text : colors.textSecondary },
+                                ? {
+                                    backgroundColor: typeVisual.badgeBg,
+                                    borderColor: typeVisual.border,
+                                }
+                                : canEditSetType
+                                    ? {
+                                        backgroundColor: colors.surfaceHighlight,
+                                        borderColor: colors.border,
+                                    }
+                                    : {
+                                        backgroundColor: 'transparent',
+                                        borderColor: 'transparent',
+                                    },
                         ]}
+                        onPress={handleOpenSetTypePicker}
+                        disabled={!canEditSetType}
+                        activeOpacity={0.7}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
-                        {isSpecialType ? typeVisual.shortLabel : set.numero_serie}
-                    </Text>
-                </TouchableOpacity>
-                {/* Weight Column */}
+                        <Text
+                            style={[
+                                styles.setNumber,
+                                isSpecialType
+                                    ? [styles.specialBadgeText, { color: typeVisual.badgeText }]
+                                    : { color: canEditSetType ? colors.text : colors.textSecondary },
+                            ]}
+                        >
+                            {isSpecialType ? typeVisual.shortLabel : set.numero_serie}
+                        </Text>
+                    </TouchableOpacity>
+                    {Boolean(set.is_pr) && (
+                        <PRBadge
+                            testID={`set-pr-badge-${setIndex}`}
+                            size="small"
+                            style={styles.prBadgeFloating}
+                        />
+                    )}
+                </View>
+                {/* Weight Column */}
                 <View style={[styles.inputGroup, { maxWidth: 80 }]}>
                     {isBodyweight ? (
                         <View
@@ -360,6 +370,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
+    setNumberWrapper: {
+        position: 'relative',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    prBadgeFloating: {
+        position: 'absolute',
+        top: -7,
+        zIndex: 10,
+    },
     setTypeBadgeButton: {
         width: 32,
         height: 42,
@@ -431,7 +451,8 @@ export const areWorkoutSetRowPropsEqual = (
         prevSet.rpe !== nextSet.rpe ||
         prevSet.descanso_segundos !== nextSet.descanso_segundos ||
         prevSet.tipo_serie !== nextSet.tipo_serie ||
-        Boolean(prevSet.is_completed || prevSet.completada) !== Boolean(nextSet.is_completed || nextSet.completada)
+        Boolean(prevSet.is_completed || prevSet.completada) !== Boolean(nextSet.is_completed || nextSet.completada) ||
+        Boolean(prevSet.is_pr) !== Boolean(nextSet.is_pr)
     ) {
         return false;
     }

@@ -96,6 +96,14 @@ export const HapticService = {
     async timerFinished(): Promise<void> {
         await this.success();
     },
+
+    /**
+     * Semantic action: Trigger celebration vibration pattern when achieving a new personal record (PR).
+     */
+    async prCelebration(): Promise<void> {
+        await this.heavy();
+        await this.success();
+    },
 };
 
 export default HapticService;

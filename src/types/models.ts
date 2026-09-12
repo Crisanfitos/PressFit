@@ -53,6 +53,7 @@ export interface Serie {
     tipo_serie?: SetType;
     is_completed?: boolean;
     completada?: boolean;
+    is_pr?: boolean;
     created_at?: string;
 }
 
@@ -202,6 +203,7 @@ export interface SetUpdatePayload {
     numero_serie?: number;
     is_completed?: boolean;
     completada?: boolean;
+    is_pr?: boolean;
 }
 
 /**

@@ -31,6 +31,28 @@ jest.mock('../../../src/services/RoutineService', () => ({
     },
 }));
 
+jest.mock('../../../src/services/PersonalRecordService', () => ({
+    PersonalRecordService: {
+        getHistoricalPRs: jest.fn().mockResolvedValue({
+            data: { maxWeight: 80, maxVolume: 800, max1RM: 100 },
+            error: null,
+        }),
+        checkSetForPR: jest.fn().mockReturnValue({ isPR: false, brokenPRs: [] }),
+    },
+}));
+
+jest.mock('../../../src/services/HapticService', () => ({
+    HapticService: {
+        selection: jest.fn(),
+        prCelebration: jest.fn(),
+        success: jest.fn(),
+        light: jest.fn(),
+    },
+}));
+
+import { PersonalRecordService } from '../../../src/services/PersonalRecordService';
+import { HapticService } from '../../../src/services/HapticService';
+
 describe('useWorkoutController (PF-257)', () => {
     let mockAlert: jest.SpyInstance;
     let consoleErrorSpy: jest.SpyInstance;
@@ -1234,7 +1256,7 @@ describe('useWorkoutController (PF-257)', () => {
             });
 
             expect(hook.result.current.exercises[0].sets[0].is_completed).toBe(true);
-            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', { is_completed: true, completada: true });
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', expect.objectContaining({ is_completed: true, completada: true }));
         });
 
         it('toggles set completed state to false via toggleCompleteSet (unlock)', async () => {
@@ -1250,7 +1272,7 @@ describe('useWorkoutController (PF-257)', () => {
             });
 
             expect(hook.result.current.exercises[0].sets[0].is_completed).toBe(false);
-            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', { is_completed: false, completada: false });
+            expect(WorkoutService.updateSet).toHaveBeenCalledWith('s-1', expect.objectContaining({ is_completed: false, completada: false }));
         });
 
         it('updates set completion state via updateSet with field is_completed', async () => {

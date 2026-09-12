@@ -6,6 +6,8 @@ import { TipoPeso, SetType } from '../types/setTypes';
 import { validateRpe } from '../utils/rpeValidation';
 import { MAX_TOTAL_SETS_PER_EXERCISE, MAX_WARMUP_SETS_PER_EXERCISE, checkSetLimits } from '../utils/setLimits';
 import { clearActiveWorkoutParams, saveActiveWorkoutParams } from '../services/TimerNotificationService';
+import { PersonalRecordService, ExercisePRs, BrokenPRDetail } from '../services/PersonalRecordService';
+import { HapticService } from '../services/HapticService';
 
 export type WorkoutMode = 'ACTIVE' | 'VIEW' | 'MISSED' | 'PREVIEW' | 'PENDING';
 
@@ -20,7 +22,14 @@ interface Set {
     tipo_serie?: SetType;
     is_completed?: boolean;
     completada?: boolean;
+    is_pr?: boolean;
     pending?: boolean;
+}
+
+export interface ActivePRCelebration {
+    exerciseName: string;
+    brokenPRs: BrokenPRDetail[];
+    setId: string;
 }
 
 interface Exercise {
@@ -60,7 +69,24 @@ export const useWorkoutController = (
     const [isTimerRunning, setIsTimerRunning] = useState(false);
     const [mode, setMode] = useState<WorkoutMode>('ACTIVE');
     const [previousWorkout, setPreviousWorkout] = useState<any>(null);
+    const [activePRCelebration, setActivePRCelebration] = useState<ActivePRCelebration | null>(null);
+    const exercisePRsRef = useRef<Record<string, ExercisePRs>>({});
     const timerInterval = useRef<NodeJS.Timeout | null>(null);
+
+    const prefetchPRs = useCallback(async (exerciseList: Exercise[]) => {
+        if (!userId) return;
+        const uniqueExerciseIds = Array.from(new Set(exerciseList.map((e) => e.id).filter(Boolean)));
+        await Promise.all(
+            uniqueExerciseIds.map(async (exId) => {
+                if (!exercisePRsRef.current[exId]) {
+                    const res = await PersonalRecordService.getHistoricalPRs(userId, exId);
+                    if (res.data) {
+                        exercisePRsRef.current[exId] = res.data;
+                    }
+                }
+            })
+        );
+    }, [userId]);
 
     const loadExercises = useCallback(async (rDayId: string, wId: string | null, prevWorkout?: any) => {
         let finalExercises: Exercise[] = [];
@@ -85,6 +111,7 @@ export const useWorkoutController = (
                             ...s,
                             is_completed: Boolean(s.is_completed || s.completada),
                             completada: Boolean(s.is_completed || s.completada),
+                            is_pr: Boolean(s.is_pr),
                         })),
                         is_routine: true,
                         tipo_peso: (ex.tipo_peso as TipoPeso) || 'total',
@@ -127,7 +154,8 @@ export const useWorkoutController = (
         }
 
         setExercises(finalExercises);
-    }, []);
+        prefetchPRs(finalExercises);
+    }, [prefetchPRs]);
 
     const initWorkout = useCallback(async () => {
         setLoading(true);
@@ -452,15 +480,87 @@ export const useWorkoutController = (
         const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
         if (!canEdit) return;
 
+        let isPR = false;
+        let celebrationData: ActivePRCelebration | null = null;
+
+        if (isCompleted) {
+            let targetEx: Exercise | undefined;
+            let targetSet: Set | undefined;
+
+            for (const ex of exercises) {
+                const s = ex.sets.find((item) => item.id === setId);
+                if (s) {
+                    targetEx = ex;
+                    targetSet = s;
+                    break;
+                }
+            }
+
+            if (targetEx && targetSet) {
+                const exId = targetEx.id;
+                let currentPRs = exercisePRsRef.current[exId];
+
+                if (!currentPRs && userId) {
+                    const prRes = await PersonalRecordService.getHistoricalPRs(userId, exId);
+                    if (prRes.data) {
+                        exercisePRsRef.current[exId] = prRes.data;
+                        currentPRs = prRes.data;
+                    }
+                }
+
+                const prResult = PersonalRecordService.checkSetForPR(
+                    { weight: targetSet.peso_utilizado, reps: targetSet.repeticiones },
+                    currentPRs
+                );
+
+                if (prResult.isPR) {
+                    isPR = true;
+                    celebrationData = {
+                        exerciseName: targetEx.titulo,
+                        brokenPRs: prResult.brokenPRs,
+                        setId,
+                    };
+
+                    const w = Number(targetSet.peso_utilizado) || 0;
+                    const r = Number(targetSet.repeticiones) || 0;
+                    const v = w * r;
+                    const est1rm = prResult.brokenPRs.find((b) => b.type === '1rm')?.newValue;
+
+                    exercisePRsRef.current[exId] = {
+                        maxWeight: Math.max(currentPRs?.maxWeight || 0, w),
+                        maxVolume: Math.max(currentPRs?.maxVolume || 0, v),
+                        max1RM: Math.max(currentPRs?.max1RM || 0, est1rm || (currentPRs?.max1RM || 0)),
+                    };
+
+                    if (HapticService.prCelebration) {
+                        HapticService.prCelebration();
+                    }
+                }
+            }
+        }
+
         setExercises((prev) =>
             prev.map((ex) => ({
                 ...ex,
-                sets: ex.sets.map((s) => (s.id === setId ? { ...s, is_completed: isCompleted, completada: isCompleted } : s)),
+                sets: ex.sets.map((s) => (s.id === setId ? {
+                    ...s,
+                    is_completed: isCompleted,
+                    completada: isCompleted,
+                    is_pr: isCompleted ? (isPR || s.is_pr) : false,
+                } : s)),
             }))
         );
 
+        if (celebrationData) {
+            setActivePRCelebration(celebrationData);
+        }
+
         try {
-            await WorkoutService.updateSet(setId, { is_completed: isCompleted, completada: isCompleted });
+            await WorkoutService.updateSet(setId, {
+                is_completed: isCompleted,
+                completada: isCompleted,
+                is_pr: isCompleted ? isPR : false,
+            });
         } catch (error) {
             console.error('Failed to toggle set completion', error);
         }
@@ -652,6 +752,8 @@ export const useWorkoutController = (
         finishWorkout,
         updateWeightType,
         loadSeriesForExercise,
+        activePRCelebration,
+        dismissPRCelebration: () => setActivePRCelebration(null),
         reloadExercises: () => loadExercises(routineDayId, workout?.id || null),
     };
 };
