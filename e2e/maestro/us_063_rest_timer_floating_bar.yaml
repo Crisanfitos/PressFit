@@ -1,0 +1,170 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_063_rest_timer_floating_bar.yaml — US-063: Barra flotante global de temporizador de descanso
+
+- launchApp:
+    clearState: false
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with Continue or back
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 1. Autenticación condicional si el usuario no tiene sesión activa
+- runFlow:
+    when:
+      visible:
+        id: "welcome-screen"
+    commands:
+      - tapOn:
+          id: "login-button"
+      - extendedWaitUntil:
+          visible:
+            id: "email-input"
+          timeout: 10000
+      - tapOn:
+          id: "email-input"
+      - inputText: "${E2E_TEST_EMAIL}"
+      - tapOn:
+          id: "password-input"
+      - inputText: "${E2E_TEST_PASSWORD}"
+      - tapOn:
+          id: "login-submit-button"
+
+# 2. Si aparece el modal de recuperación de sesión (ResumeWorkoutModal), descartar para empezar limpios
+- runFlow:
+    when:
+      visible:
+        id: "resume-workout-modal"
+    commands:
+      - tapOn:
+          id: "resume-workout-discard-button"
+      - tapOn: "Descartar"
+
+# 3. Verificar entrada al calendario mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 3. Navegar al día actual y cargar la sesión de entrenamiento
+- tapOn:
+    id: "calendar-day-today"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 15000
+
+- tapOn:
+    id: "start-workout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 4. Completar primera serie para iniciar el temporizador de descanso
+- extendedWaitUntil:
+    visible:
+      id: "set-complete-checkbox-0"
+    timeout: 10000
+
+- tapOn:
+    id: "set-complete-checkbox-0"
+
+# 5. Verificar que el banner de temporizador de descanso es visible en WorkoutScreen
+- extendedWaitUntil:
+    visible:
+      id: "rest-timer-banner"
+    timeout: 10000
+
+- assertVisible:
+    id: "rest-timer-banner"
+
+# 6. Salir de WorkoutScreen hacia WorkoutDayScreen
+- back
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-day-screen"
+
+# 7. Verificar que la barra flotante global de descanso está visible con su contador
+- extendedWaitUntil:
+    visible:
+      id: "rest-timer-floating-bar"
+    timeout: 10000
+
+- assertVisible:
+    id: "rest-timer-floating-bar"
+
+- assertVisible:
+    id: "rest-timer-floating-bar-time"
+
+# 8. Finalizar temporizador de descanso desde la barra flotante
+- tapOn:
+    id: "rest-timer-floating-bar-finish"
+
+# 9. Verificar que la pantalla del día de entrenamiento sigue visible y estable
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "workout-day-screen"
+
+# 10. Regresar al calendario y cerrar sesión para limpiar estado
+- tapOn:
+    id: "workout-day-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+- tapOn: "Perfil"
+
+- scroll
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
