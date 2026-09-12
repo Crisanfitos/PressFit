@@ -1,0 +1,191 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+- launchApp:
+    clearState: true
+
+# Seleccionar servidor Metro de Expo
+- assertVisible:
+    text: ".*8081.*"
+- tapOn:
+    text: ".*8081.*"
+
+# Manejar posible menú de desarrollador
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 60000
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# Iniciar Sesión
+- tapOn:
+    id: "login-button"
+
+- assertVisible:
+    id: "email-input"
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# Verificar inicio de sesión exitoso
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# Navegar a la pestaña Progreso en la barra inferior
+- tapOn: "Progreso"
+
+- extendedWaitUntil:
+    visible:
+      id: "progress-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "progress-screen"
+
+# Navegar a Volumen de Hipertrofia
+- scrollUntilVisible:
+    element:
+      id: "progress-item-hypertrophy"
+    direction: DOWN
+
+- tapOn:
+    id: "progress-item-hypertrophy"
+
+- extendedWaitUntil:
+    visible:
+      id: "hypertrophy-volume-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "hypertrophy-volume-screen"
+
+- assertVisible:
+    id: "hypertrophy-back-button"
+
+- assertVisible:
+    id: "hypertrophy-info-button"
+
+- assertVisible:
+    id: "hypertrophy-week-selector"
+
+- assertVisible:
+    id: "hypertrophy-prev-week"
+
+- assertVisible:
+    id: "hypertrophy-week-label"
+
+- assertVisible:
+    id: "hypertrophy-next-week"
+
+# Validar tarjeta resumen de volumen o estado vacío según datos del usuario
+- runFlow:
+    when:
+      visible:
+        id: "hypertrophy-summary-card"
+    commands:
+      - assertVisible:
+          id: "hypertrophy-summary-total-sets"
+      - assertVisible:
+          id: "hypertrophy-summary-optimal-muscles"
+      - assertVisible:
+          id: "hypertrophy-summary-fatigue"
+
+- runFlow:
+    when:
+      visible:
+        id: "hypertrophy-empty-state"
+    commands:
+      - assertVisible:
+          id: "hypertrophy-empty-state"
+
+# Probar navegación entre semanas
+- tapOn:
+    id: "hypertrophy-prev-week"
+
+- assertVisible:
+    id: "hypertrophy-week-label"
+
+- tapOn:
+    id: "hypertrophy-next-week"
+
+- assertVisible:
+    id: "hypertrophy-week-label"
+
+# Probar apertura y cierre de leyenda de hipertrofia MEV / MAV / MRV
+- tapOn:
+    id: "hypertrophy-info-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "hypertrophy-legend-card"
+    timeout: 5000
+
+- assertVisible:
+    id: "hypertrophy-legend-card"
+
+- tapOn:
+    id: "hypertrophy-info-button"
+
+# Regresar a la pantalla de Progreso
+- tapOn:
+    id: "hypertrophy-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "progress-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "progress-screen"
+
+# Cierre de sesión limpio
+- tapOn: "Perfil"
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- assertVisible:
+    id: "logout-confirm-button"
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"
