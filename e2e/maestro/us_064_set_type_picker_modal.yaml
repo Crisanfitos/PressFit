@@ -1,0 +1,210 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_064_set_type_picker_modal.yaml — US-064: Modal de selección de tipo de serie (SetTypePickerModal)
+
+- launchApp:
+    clearState: false
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with Continue or back
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 1. Autenticación si el usuario no tiene sesión activa
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+    optional: true
+
+- runFlow:
+    when:
+      visible:
+        id: "welcome-screen"
+    commands:
+      - tapOn:
+          id: "login-button"
+      - extendedWaitUntil:
+          visible:
+            id: "email-input"
+          timeout: 10000
+      - tapOn:
+          id: "email-input"
+      - inputText: "${E2E_TEST_EMAIL}"
+      - tapOn:
+          id: "password-input"
+      - inputText: "${E2E_TEST_PASSWORD}"
+      - tapOn:
+          id: "login-submit-button"
+
+# 2. Descartar sesión previa si aparece ResumeWorkoutModal
+- runFlow:
+    when:
+      visible:
+        id: "resume-workout-modal"
+    commands:
+      - tapOn:
+          id: "resume-workout-discard-button"
+      - tapOn: "Descartar"
+
+# 3. Verificar entrada al calendario mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 4. Navegar al día actual y cargar la sesión de entrenamiento
+- tapOn:
+    id: "calendar-day-today"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 15000
+
+- tapOn:
+    id: "start-workout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 5. Si la primera serie está completada (ej. de tests previos), desbloquearla
+- runFlow:
+    when:
+      visible:
+        id: "edit-set-button-0"
+    commands:
+      - tapOn:
+          id: "edit-set-button-0"
+      - extendedWaitUntil:
+          visible: "Desbloquear"
+          timeout: 5000
+      - tapOn: "Desbloquear"
+
+# 6. Abrir el modal de selección de tipo de serie para la primera serie
+- extendedWaitUntil:
+    visible:
+      id: "set-type-button-0"
+    timeout: 10000
+
+- tapOn:
+    id: "set-type-button-0"
+
+# 6. Validar apertura de SetTypePickerModal
+- extendedWaitUntil:
+    visible:
+      id: "set-type-picker-modal"
+    timeout: 10000
+
+- assertVisible:
+    id: "set-type-picker-modal"
+
+# 7. Seleccionar serie de Calentamiento (Warm-up)
+- tapOn:
+    id: "set-type-option-warmup"
+
+# 8. Verificar que regresó a WorkoutScreen
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 9. Abrir modal nuevamente y seleccionar Drop Set
+- tapOn:
+    id: "set-type-button-0"
+
+- extendedWaitUntil:
+    visible:
+      id: "set-type-picker-modal"
+    timeout: 10000
+
+- tapOn:
+    id: "set-type-option-drop"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 10000
+
+# 10. Abrir modal nuevamente y cerrar mediante el botón de cierre
+- tapOn:
+    id: "set-type-button-0"
+
+- extendedWaitUntil:
+    visible:
+      id: "set-type-picker-modal"
+    timeout: 10000
+
+- tapOn:
+    id: "set-type-picker-close-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 11. Salir del entrenamiento y cerrar sesión para limpiar estado
+- back
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "workout-day-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+- tapOn: "Perfil"
+
+- scroll
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000

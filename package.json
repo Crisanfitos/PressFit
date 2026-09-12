@@ -93,6 +93,8 @@
     "test:e2e:PF-342": "npm run test:e2e:us062",
     "test:e2e:us063": "node e2e/run-maestro.js e2e/maestro/us_063_rest_timer_floating_bar.yaml",
     "test:e2e:PF-343": "npm run test:e2e:us063",
+    "test:e2e:us064": "node e2e/run-maestro.js e2e/maestro/us_064_set_type_picker_modal.yaml",
+    "test:e2e:PF-344": "npm run test:e2e:us064",
     "test:e2e:all": "node e2e/run-maestro.js e2e/maestro/"
   },
   "dependencies": {
