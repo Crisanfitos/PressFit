@@ -119,7 +119,8 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                         )}
                         {exercise.tipo_peso !== 'corporal' && onOpenPlateCalculator && (
                             <TouchableOpacity
-                                testID={`plate-calculator-exercise-button-${index}`}
+                                testID={`plate-calculator-trigger-${index}`}
+                                accessibilityLabel={`plate-calculator-exercise-button-${index}`}
                                 style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
                                 onPress={() => {
                                     const firstSet = setsList[0];
@@ -128,7 +129,12 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                                 }}
                                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                             >
-                                <MaterialIcons name="fitness-center" size={20} color={colors.primary} />
+                                <MaterialIcons
+                                    testID={`plate-calculator-exercise-button-${index}`}
+                                    name="fitness-center"
+                                    size={20}
+                                    color={colors.primary}
+                                />
                             </TouchableOpacity>
                         )}
                         <TouchableOpacity

@@ -54,11 +54,20 @@ if (!email || !password) {
 // Construir comando final: maestro <deviceArgs> test <envArgs> <targetArgs>
 const maestroArgs = [...deviceArgs, 'test', ...envArgs, ...rawArgs];
 
+const homeDir = process.env.HOME || process.env.USERPROFILE || '';
+const maestroBin = path.join(homeDir, '.maestro', 'bin');
+const pathDelimiter = path.delimiter || ':';
+const currentPath = process.env.PATH || '';
+const extendedPath = fs.existsSync(maestroBin) && !currentPath.includes(maestroBin)
+  ? `${maestroBin}${pathDelimiter}${currentPath}`
+  : currentPath;
+
 const result = spawnSync('maestro', maestroArgs, {
   stdio: 'inherit',
   shell: true,
   env: {
     ...process.env,
+    PATH: extendedPath,
     ...(email ? { E2E_TEST_EMAIL: email, E2E_EMAIL: email } : {}),
     ...(password ? { E2E_TEST_PASSWORD: password, E2E_PASSWORD: password } : {}),
   },

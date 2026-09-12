@@ -1,0 +1,154 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_062_plate_calculator_modal.yaml — US-062: Calculadora visual de placas en sesión activa de entrenamiento
+
+- launchApp:
+    clearState: false
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with Continue or back
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 1. Autenticación condicional si el usuario no tiene sesión activa
+- runFlow:
+    when:
+      visible:
+        id: "welcome-screen"
+    commands:
+      - tapOn:
+          id: "login-button"
+      - extendedWaitUntil:
+          visible:
+            id: "email-input"
+          timeout: 10000
+      - tapOn:
+          id: "email-input"
+      - inputText: "${E2E_TEST_EMAIL}"
+      - tapOn:
+          id: "password-input"
+      - inputText: "${E2E_TEST_PASSWORD}"
+      - tapOn:
+          id: "login-submit-button"
+
+# 3. Verificar entrada al calendario mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 4. Navegar al día actual y cargar la sesión de entrenamiento
+- tapOn:
+    id: "calendar-day-today"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 15000
+
+- tapOn:
+    id: "start-workout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 5. Abrir la Calculadora Visual de Placas desde el disparador del ejercicio
+- extendedWaitUntil:
+    visible:
+      id: "plate-calculator-trigger-0"
+    timeout: 10000
+
+- tapOn:
+    id: "plate-calculator-trigger-0"
+
+# 6. Validar apertura de PlateCalculatorModal
+- extendedWaitUntil:
+    visible:
+      id: "plate-calculator-modal"
+    timeout: 10000
+
+- assertVisible:
+    id: "plate-calculator-modal"
+
+# 7. Incrementar peso (+5 kg) y decrementar (-2.5 kg)
+- tapOn:
+    id: "plate-calc-plus-5"
+
+- tapOn:
+    id: "plate-calc-minus-2-5"
+
+# 8. Verificar resumen de distribución de placas
+- assertVisible:
+    id: "plate-summary-text"
+
+# 9. Aplicar peso calculado y regresar al entrenamiento activo
+- tapOn:
+    id: "apply-plate-calc-btn"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 10. Salir del entrenamiento y cerrar sesión para limpiar estado
+- back
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "workout-day-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+- tapOn: "Perfil"
+
+- scroll
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000

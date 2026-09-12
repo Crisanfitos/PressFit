@@ -89,6 +89,8 @@
     "test:e2e:PF-340": "npm run test:e2e:us060",
     "test:e2e:us061": "node e2e/run-maestro.js e2e/maestro/us_061_plate_settings_configuration.yaml",
     "test:e2e:PF-341": "npm run test:e2e:us061",
+    "test:e2e:us062": "node e2e/run-maestro.js e2e/maestro/us_062_plate_calculator_modal.yaml",
+    "test:e2e:PF-342": "npm run test:e2e:us062",
     "test:e2e:all": "node e2e/run-maestro.js e2e/maestro/"
   },
   "dependencies": {
