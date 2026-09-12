@@ -1,0 +1,168 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+- launchApp:
+    clearState: true
+
+# Seleccionar servidor Metro de Expo
+- assertVisible:
+    text: ".*8081.*"
+- tapOn:
+    text: ".*8081.*"
+
+# Manejar posible menú de desarrollador
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 60000
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# Iniciar Sesión
+- tapOn:
+    id: "login-button"
+
+- assertVisible:
+    id: "email-input"
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# Verificar inicio de sesión exitoso
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# Navegar a la pestaña Perfil en la barra inferior
+- tapOn: "Perfil"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "profile-screen"
+
+# Navegar a la Configuración de Discos y Barra
+- scrollUntilVisible:
+    element:
+      id: "plate-settings-navigation-button"
+    direction: DOWN
+
+- tapOn:
+    id: "plate-settings-navigation-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "plate-settings-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "plate-settings-screen"
+
+- assertVisible:
+    id: "back-button"
+
+- assertVisible:
+    id: "reset-defaults-button"
+
+- assertVisible:
+    id: "unit-selector-kg"
+
+- assertVisible:
+    id: "unit-selector-lb"
+
+- assertVisible:
+    id: "plate-visualizer"
+
+# Probar alternancia de unidad de peso (kg / lb)
+- tapOn:
+    id: "unit-selector-lb"
+
+- assertVisible:
+    id: "plate-visualizer"
+
+- tapOn:
+    id: "unit-selector-kg"
+
+- assertVisible:
+    id: "plate-visualizer"
+
+# Probar selección de preset de barra (Barra Olímpica 20 kg)
+- tapOn:
+    id: "bar-preset-20"
+
+# Guardar ajustes de configuración
+- scrollUntilVisible:
+    element:
+      id: "save-settings-button"
+    direction: DOWN
+
+- tapOn:
+    id: "save-settings-button"
+
+# Regresar a la pantalla de Perfil
+- scrollUntilVisible:
+    element:
+      id: "back-button"
+    direction: UP
+
+- tapOn:
+    id: "back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "profile-screen"
+
+# Cierre de sesión limpio
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- assertVisible:
+    id: "logout-confirm-button"
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"

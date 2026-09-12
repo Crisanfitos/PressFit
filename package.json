@@ -87,6 +87,8 @@
     "test:e2e:PF-310": "node e2e/run-maestro.js e2e/maestro/us_059_swap_exercise_flow.yaml",
     "test:e2e:us060": "node e2e/run-maestro.js e2e/maestro/us_060_hypertrophy_volume_dashboard.yaml",
     "test:e2e:PF-340": "npm run test:e2e:us060",
+    "test:e2e:us061": "node e2e/run-maestro.js e2e/maestro/us_061_plate_settings_configuration.yaml",
+    "test:e2e:PF-341": "npm run test:e2e:us061",
     "test:e2e:all": "node e2e/run-maestro.js e2e/maestro/"
   },
   "dependencies": {
