@@ -1,0 +1,172 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_069_rpe_input_validation.yaml — US-069: Validación del Campo RPE (Rango, Clamping y Aceptación Decimal)
+
+- launchApp:
+    clearState: true
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 1. Esperar bienvenida y navegar a Login
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+- inputText: "${E2E_TEST_EMAIL}"
+
+- tapOn:
+    id: "password-input"
+- inputText: "${E2E_TEST_PASSWORD}"
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# 2. Esperar pantalla del Calendario Mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 3. Seleccionar el día de hoy para ir a WorkoutDayScreen
+- tapOn:
+    id: "calendar-day-today"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-day-screen"
+
+# 4. Iniciar sesión de entrenamiento
+- tapOn:
+    id: "start-workout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-screen"
+
+- assertVisible:
+    id: "set-rpe-input-0"
+
+# 5. Caso 1: Entrada fuera de rango > 10 (input "12" -> clampeado a "10")
+- tapOn:
+    id: "set-rpe-input-0"
+- inputText: "12"
+
+# Blur para activar validación y clamping
+- tapOn:
+    id: "set-weight-input-0"
+
+- hideKeyboard
+
+# Verificar visualmente que se clampeó a 10
+- assertVisible:
+    text: "10"
+
+# 6. Caso 2: Entrada fuera de rango < 1 (input "0" -> clampeado a "1")
+- tapOn:
+    id: "set-rpe-input-0"
+- eraseText: 5
+- inputText: "0"
+
+# Blur para activar validación y clamping
+- tapOn:
+    id: "set-weight-input-0"
+
+- hideKeyboard
+
+# Verificar visualmente que se clampeó a 1
+- assertVisible:
+    text: "1"
+
+# 7. Caso 3: Entrada decimal válida en rango (input "7.5" -> aceptado sin modificación)
+- tapOn:
+    id: "set-rpe-input-0"
+- eraseText: 5
+- inputText: "7.5"
+
+# Blur para persistir
+- tapOn:
+    id: "set-weight-input-0"
+
+- hideKeyboard
+
+# Verificar visualmente que el valor 7.5 fue aceptado
+- assertVisible:
+    text: "7.5"
+
+# 8. Retorno a WorkoutDayScreen y Calendario
+- back
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "workout-day-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+# 9. Limpieza: Navegar a Perfil y Cerrar Sesión
+- tapOn: "Perfil"
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"
