@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import KeyboardAwareContainer from '../components/KeyboardAwareContainer';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
+import { AlertContext } from '../context/AlertContext';
 import { useWorkoutController } from '../controllers/useWorkoutController';
 import { saveActiveWorkoutParams } from '../services/TimerNotificationService';
 import { ShareModal, SocialCardData } from '../components/social';
@@ -34,6 +35,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
     const { routineDayId, dayName, workoutId: initialWorkoutId, dayOfWeek, mode: navMode } = route.params || {};
     const { colors } = useTheme().theme;
     const user = useContext(AuthContext)?.user;
+    const alertContext = useContext(AlertContext);
 
     useEffect(() => {
         if (routineDayId || initialWorkoutId) {
@@ -93,6 +95,19 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         });
     };
 
+    const handleToggleCompleteSet = (setId: string, isCompleted: boolean) => {
+        toggleCompleteSet(setId, isCompleted);
+        if (isCompleted && alertContext?.showToast) {
+            alertContext.showToast({
+                type: 'success',
+                title: t('workout.setCompletedTitle', 'Serie completada'),
+                message: t('workout.setCompletedMessage', 'Serie guardada con éxito'),
+                position: 'top',
+                duration: 8000,
+            });
+        }
+    };
+
     const handleFinishWorkout = () => {
         Alert.alert(t('workout.finishWorkout', 'Finalizar Entrenamiento'), t('workout.finishWorkoutConfirm', '¿Deseas finalizar este entrenamiento?'), [
             { text: t('common.cancel', 'Cancelar'), style: 'cancel' },
@@ -111,6 +126,15 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                     const success = await finishWorkout();
                     state.setSaving(false);
                     if (success) {
+                        if (alertContext?.showToast) {
+                            alertContext.showToast({
+                                type: 'success',
+                                title: t('workout.completedWorkout', 'Entrenamiento Completado'),
+                                message: t('workout.workoutSavedSuccessfully', 'Entrenamiento guardado con éxito'),
+                                position: 'top',
+                                duration: 8000,
+                            });
+                        }
                         const cardData: SocialCardData = {
                             workoutName: dayName || workout?.nombre || workout?.descripcion || t('workout.completedWorkout', 'Entrenamiento Completado'),
                             date: new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }),
@@ -188,7 +212,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                 onAddSet={async (id) => { state.setSaving(true); await addSet(id); state.setSaving(false); }}
                                 onSwapExercise={(mode === 'ACTIVE' || isStructureEditable) ? handleSwapExercise : undefined}
                                 onOpenPlateCalculator={state.handleOpenPlateCalculator}
-                                onToggleCompleteSet={toggleCompleteSet}
+                                onToggleCompleteSet={handleToggleCompleteSet}
                                 getGhostValue={(eId, sNum, fld) => getGhostValue(previousWorkout, eId, sNum, fld)}
                             />
                         ))
