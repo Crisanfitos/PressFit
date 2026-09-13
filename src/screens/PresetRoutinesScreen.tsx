@@ -110,6 +110,7 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                 style={styles.scrollContainer}
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
+                testID="preset-routines-list"
             >
                 {/* Intro Title & Description */}
                 <View style={styles.introBlock}>
@@ -211,10 +212,11 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
 
                 {/* Preset Routines List */}
                 {filteredPresets.length > 0 ? (
-                    filteredPresets.map((preset) => (
+                    filteredPresets.map((preset, index) => (
                         <PresetRoutineCard
                             key={preset.id}
                             preset={preset}
+                            index={index}
                             onPressSelect={handleSelectPreset}
                         />
                     ))

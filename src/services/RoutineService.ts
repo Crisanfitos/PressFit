@@ -48,6 +48,25 @@ export const mapPresetDaysToWeeklySchedule = <T = any>(presetDays: T[] = []): (T
 };
 
 /**
+ * Helper to retry an async network operation on transient network/socket drops (e.g. OkHttp keep-alive resets)
+ */
+export const retryOnNetworkFailure = async <T>(fn: () => Promise<T>, retries = 3, delayMs = 300): Promise<T> => {
+    try {
+        return await fn();
+    } catch (err: any) {
+        const isNetworkErr =
+            err?.message?.includes('Network request failed') ||
+            err?.message?.includes('network') ||
+            err?.name === 'TypeError';
+        if (retries > 0 && isNetworkErr) {
+            await new Promise((resolve) => setTimeout(resolve, delayMs));
+            return retryOnNetworkFailure(fn, retries - 1, delayMs * 1.5);
+        }
+        throw err;
+    }
+};
+
+/**
  * Finds an exercise ID in catalog by normalized name or creates a custom exercise in catalog.
  */
 export const resolveOrCreateExercise = async (
@@ -63,18 +82,20 @@ export const resolveOrCreateExercise = async (
 
     if (matched) return matched.id;
 
-    const { data: newEx, error: newExError } = await supabase
-        .from('ejercicios')
-        .insert({
-            titulo: name,
-            categoria: muscleGroup,
-            musculos_primarios: [muscleGroup],
-            dificultad: 'intermediate',
-            is_custom: true,
-            created_by: userId,
-        })
-        .select('id')
-        .single();
+    const { data: newEx, error: newExError } = await retryOnNetworkFailure(() =>
+        supabase
+            .from('ejercicios')
+            .insert({
+                titulo: name,
+                categoria: muscleGroup,
+                musculos_primarios: [muscleGroup],
+                dificultad: 'intermediate',
+                is_custom: true,
+                created_by: userId,
+            })
+            .select('id')
+            .single()
+    );
 
     if (newExError || !newEx) throw newExError || new Error(`Failed to create exercise ${name}`);
     return newEx.id;
@@ -97,17 +118,19 @@ export const createPresetDailyRoutines = async (
             ? (presetDay.descripcion ? `${presetDay.nombre_dia} - ${presetDay.descripcion}` : presetDay.nombre_dia)
             : 'Descanso / Recuperación';
 
-        const { data: newDay, error: dayError } = await supabase
-            .from('rutinas_diarias')
-            .insert({
-                rutina_semanal_id: weeklyRoutineId,
-                nombre_dia: dayName,
-                descripcion: description,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-            })
-            .select()
-            .single();
+        const { data: newDay, error: dayError } = await retryOnNetworkFailure(() =>
+            supabase
+                .from('rutinas_diarias')
+                .insert({
+                    rutina_semanal_id: weeklyRoutineId,
+                    nombre_dia: dayName,
+                    descripcion: description,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                })
+                .select()
+                .single()
+        );
 
         if (dayError || !newDay) {
             if (dayError) throw dayError;
@@ -123,18 +146,20 @@ export const createPresetDailyRoutines = async (
                     userId
                 );
 
-                const { data: newScheduledEx, error: schError } = await supabase
-                    .from('ejercicios_programados')
-                    .insert({
-                        rutina_diaria_id: newDay.id,
-                        ejercicio_id: exerciseId,
-                        orden_ejecucion: ex.orden_ejecucion,
-                        tipo_peso: ex.tipo_peso || 'total',
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString(),
-                    })
-                    .select()
-                    .single();
+                const { data: newScheduledEx, error: schError } = await retryOnNetworkFailure(() =>
+                    supabase
+                        .from('ejercicios_programados')
+                        .insert({
+                            rutina_diaria_id: newDay.id,
+                            ejercicio_id: exerciseId,
+                            orden_ejecucion: ex.orden_ejecucion,
+                            tipo_peso: ex.tipo_peso || 'total',
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString(),
+                        })
+                        .select()
+                        .single()
+                );
 
                 if (schError || !newScheduledEx) {
                     if (schError) throw schError;
@@ -152,7 +177,9 @@ export const createPresetDailyRoutines = async (
                         created_at: new Date().toISOString(),
                     }));
 
-                    const { error: seriesErr } = await supabase.from('series').insert(seriesInserts);
+                    const { error: seriesErr } = await retryOnNetworkFailure(() =>
+                        supabase.from('series').insert(seriesInserts)
+                    );
                     if (seriesErr) throw seriesErr;
                 }
             }
@@ -421,21 +448,25 @@ export const RoutineService = {
     async setActiveRoutine(userId: string, routineId: string): Promise<ServiceResponse<WeeklyRoutine>> {
         try {
             // Deactivate ALL routines for this user
-            await supabase
-                .from('rutinas_semanales')
-                .update({ activa: false, updated_at: new Date().toISOString() })
-                .eq('usuario_id', userId);
+            await retryOnNetworkFailure(() =>
+                supabase
+                    .from('rutinas_semanales')
+                    .update({ activa: false, updated_at: new Date().toISOString() })
+                    .eq('usuario_id', userId)
+            );
 
             // Then, activate the selected routine
-            const { data, error } = await supabase
-                .from('rutinas_semanales')
-                .update({
-                    activa: true,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', routineId)
-                .select()
-                .single();
+            const { data, error } = await retryOnNetworkFailure(() =>
+                supabase
+                    .from('rutinas_semanales')
+                    .update({
+                        activa: true,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', routineId)
+                    .select()
+                    .single()
+            );
 
             if (error) throw error;
             return { data, error: null };
@@ -611,27 +642,29 @@ export const RoutineService = {
             }
 
             // 2. Fetch all exercises from catalog to map exercise names to UUIDs
-            const { data: catalogExercises, error: catalogError } = await supabase
-                .from('ejercicios')
-                .select('id, titulo');
+            const { data: catalogExercises, error: catalogError } = await retryOnNetworkFailure(() =>
+                supabase.from('ejercicios').select('id, titulo')
+            );
 
             if (catalogError) throw catalogError;
 
             // 3. Create the new weekly routine
-            const { data: newRoutine, error: routineError } = await supabase
-                .from('rutinas_semanales')
-                .insert({
-                    usuario_id: userId,
-                    nombre: preset.nombre,
-                    objetivo: preset.categoria,
-                    es_plantilla: true,
-                    activa: false, // will activate via setActiveRoutine if setActive === true
-                    fecha_inicio_semana: formatLocalDateKey(getStartOfWeekUtil(new Date())),
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString(),
-                })
-                .select()
-                .single();
+            const { data: newRoutine, error: routineError } = await retryOnNetworkFailure(() =>
+                supabase
+                    .from('rutinas_semanales')
+                    .insert({
+                        usuario_id: userId,
+                        nombre: preset.nombre,
+                        objetivo: preset.categoria,
+                        es_plantilla: true,
+                        activa: false, // will activate via setActiveRoutine if setActive === true
+                        fecha_inicio_semana: formatLocalDateKey(getStartOfWeekUtil(new Date())),
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                    })
+                    .select()
+                    .single()
+            );
 
             if (routineError || !newRoutine) throw routineError || new Error('Failed to create weekly routine');
 
@@ -641,7 +674,9 @@ export const RoutineService = {
 
             // 5. Activate routine if requested
             if (setActive) {
-                const { error: activeErr } = await this.setActiveRoutine(userId, newRoutine.id);
+                const { error: activeErr } = await retryOnNetworkFailure(() =>
+                    this.setActiveRoutine(userId, newRoutine.id)
+                );
                 if (activeErr) throw activeErr;
                 newRoutine.activa = true;
             }
