@@ -1,0 +1,197 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_065_exercise_progress_detail.yaml — US-065: Detalle de Progreso por Ejercicio (ExerciseProgressDetailScreen)
+
+- launchApp:
+    clearState: false
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with Continue or back
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 1. Autenticación si el usuario no tiene sesión activa
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+    optional: true
+
+- runFlow:
+    when:
+      visible:
+        id: "welcome-screen"
+    commands:
+      - tapOn:
+          id: "login-button"
+      - extendedWaitUntil:
+          visible:
+            id: "email-input"
+          timeout: 10000
+      - tapOn:
+          id: "email-input"
+      - inputText: "${E2E_TEST_EMAIL}"
+      - tapOn:
+          id: "password-input"
+      - inputText: "${E2E_TEST_PASSWORD}"
+      - tapOn:
+          id: "login-submit-button"
+
+# 2. Descartar sesión previa si aparece ResumeWorkoutModal
+- runFlow:
+    when:
+      visible:
+        id: "resume-workout-modal"
+    commands:
+      - tapOn:
+          id: "resume-workout-discard-button"
+      - tapOn: "Descartar"
+
+# 3. Esperar a la pantalla principal
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 4. Navegar a la pestaña Progreso en la barra inferior
+- tapOn: "Progreso"
+
+- extendedWaitUntil:
+    visible:
+      id: "progress-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "progress-screen"
+
+# 5. Navegar a Progreso por Ejercicio (ExerciseTrackingScreen)
+- scrollUntilVisible:
+    element:
+      id: "progress-item-exercise"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "progress-item-exercise"
+
+- extendedWaitUntil:
+    visible:
+      id: "exercise-tracking-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "exercise-tracking-screen"
+
+# 6. Esperar a que cargue la lista de ejercicios con progreso
+- extendedWaitUntil:
+    visible:
+      id: "exercise-tracking-item-0"
+    timeout: 15000
+
+- assertVisible:
+    id: "exercise-tracking-item-0"
+
+# 7. Seleccionar el primer ejercicio para abrir detalle de progreso
+- tapOn:
+    id: "exercise-tracking-item-0"
+
+- extendedWaitUntil:
+    visible:
+      id: "exercise-progress-detail-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "exercise-progress-detail-screen"
+
+# 8. Verificar contenedor de gráfica y controles de alternancia
+- extendedWaitUntil:
+    visible:
+      id: "exercise-progress-chart-container"
+    timeout: 10000
+
+- assertVisible:
+    id: "exercise-progress-chart-container"
+
+- assertVisible:
+    id: "exercise-progress-toggle-weight"
+
+- assertVisible:
+    id: "exercise-progress-toggle-volume"
+
+# Alternar modo a Volumen Total y de vuelta a Max Peso
+- tapOn:
+    id: "exercise-progress-toggle-volume"
+
+- tapOn:
+    id: "exercise-progress-toggle-weight"
+
+# 9. Verificar tarjeta de recomendaciones y análisis de IA
+- assertVisible:
+    id: "exercise-progress-recommendation"
+
+# 10. Regresar a ExerciseTrackingScreen
+- tapOn:
+    id: "exercise-progress-detail-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "exercise-tracking-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "exercise-tracking-screen"
+
+# 11. Regresar a ProgressScreen
+- tapOn:
+    id: "exercise-tracking-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "progress-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "progress-screen"
+
+# 12. Cerrar sesión limpiamente para mantener el entorno aislado e idempotente
+- tapOn: "Perfil"
+
+- scroll
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"

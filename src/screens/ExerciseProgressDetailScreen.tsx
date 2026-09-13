@@ -305,15 +305,17 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
                 {/* Chart Section */}
-                <View style={styles.chartContainer}>
+                <View style={styles.chartContainer} testID="exercise-progress-chart-container">
                     <View style={styles.toggleContainer}>
                         <TouchableOpacity
+                            testID="exercise-progress-toggle-weight"
                             style={[styles.toggleButton, chartMode === 'peso' && styles.toggleButtonActive]}
                             onPress={() => setChartMode('peso')}
                         >
                             <Text style={[styles.toggleText, chartMode === 'peso' && styles.toggleTextActive]}>{t('progress.maxWeight', 'Max Peso')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
+                            testID="exercise-progress-toggle-volume"
                             style={[styles.toggleButton, chartMode === 'volumen' && styles.toggleButtonActive]}
                             onPress={() => setChartMode('volumen')}
                         >
@@ -363,7 +365,7 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                 </View>
 
                 {/* Recommendations */}
-                <View style={styles.recommendationCard}>
+                <View style={styles.recommendationCard} testID="exercise-progress-recommendation">
                     <View style={styles.recommendationHeader}>
                         <MaterialIcons name="lightbulb" size={20} color={colors.primary} />
                         <Text style={styles.recommendationTitle}>{t('progress.aiAnalysis', 'Análisis de IA')}</Text>
@@ -374,10 +376,11 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                 {/* History List */}
                 <Text style={styles.sectionTitle}>{t('progress.setsHistory', 'Historial de Series')}</Text>
 
-                {sortedDates.map((date) => (
-                    <View key={date} style={styles.sessionCard}>
-                        <View style={styles.sessionDateRow}>
-                            <MaterialIcons name="event" size={20} color={colors.primary} />
+                <View testID="exercise-progress-history-list">
+                    {sortedDates.map((date) => (
+                        <View key={date} style={styles.sessionCard}>
+                            <View style={styles.sessionDateRow}>
+                                <MaterialIcons name="event" size={20} color={colors.primary} />
                             <Text style={styles.sessionDate}>{format(parseISO(date), "EEEE, d 'de' MMMM yyyy", { locale: i18n.language?.startsWith('en') ? enUS : es })}</Text>
                         </View>
 
@@ -401,6 +404,7 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                         })}
                     </View>
                 ))}
+                </View>
 
             </ScrollView>
         </SafeAreaView>

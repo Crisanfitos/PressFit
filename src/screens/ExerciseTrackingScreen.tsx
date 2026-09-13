@@ -55,9 +55,10 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
         exerciseName: { fontSize: 16, fontWeight: '600', color: colors.text, flex: 1 },
     }), [colors]);
 
-    const renderItem = ({ item }: { item: any }) => (
+    const renderItem = ({ item, index }: { item: any; index: number }) => (
         <TouchableOpacity
             style={styles.exerciseCard}
+            testID={`exercise-tracking-item-${index}`}
             onPress={() => navigation.navigate('ExerciseProgressDetail', { exerciseId: item.id })}
         >
             <Text style={styles.exerciseName} numberOfLines={1}>{item.titulo}</Text>
@@ -78,6 +79,7 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
             <View style={styles.searchContainer}>
                 <MaterialIcons name="search" size={20} color={colors.textSecondary} />
                 <TextInput
+                    testID="exercise-tracking-search-input"
                     style={styles.searchInput}
                     placeholder={t('progress.searchExercise', 'Buscar ejercicio...')}
                     placeholderTextColor={colors.textSecondary}
@@ -92,13 +94,14 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
                 </View>
             ) : (
                 <FlatList
+                    testID="exercise-tracking-list"
                     data={filteredExercises}
                     renderItem={renderItem}
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
                     ListEmptyComponent={
-                        <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 40 }}>
+                        <View testID="exercise-tracking-empty" style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 40 }}>
                             <Text style={{ color: colors.textSecondary, fontSize: 15 }}>
                                 {t('progress.noExercisesTracked', 'No hay ejercicios registrados todavía')}
                             </Text>
