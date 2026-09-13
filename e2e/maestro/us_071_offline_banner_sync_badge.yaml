@@ -1,0 +1,164 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_071_offline_banner_sync_badge.yaml — US-071: Verificación de Banner Offline y Badge de Sincronización
+
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible: ".*8081.*"
+    timeout: 20000
+
+- tapOn:
+    text: ".*8081.*"
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- tapOn:
+    text: "Continue"
+    optional: true
+
+# 1. Esperar bienvenida y navegar a Login
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 25000
+
+- assertVisible:
+    id: "welcome-screen"
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+- inputText: "${E2E_TEST_EMAIL}"
+
+- tapOn:
+    id: "password-input"
+- inputText: "${E2E_TEST_PASSWORD}"
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# 2. Esperar pantalla del Calendario Mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 3. Verificar que el banner offline NO es visible cuando hay conexión
+- assertNotVisible:
+    id: "offline-banner"
+
+# 4. Navegar al día de entrenamiento (día de hoy)
+- tapOn:
+    id: "calendar-day-today"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-day-screen"
+
+# Verificar que el banner offline tampoco se muestra en el detalle del día
+- assertNotVisible:
+    id: "offline-banner"
+
+# 5. Iniciar o continuar la sesión de entrenamiento
+- tapOn:
+    id: "start-workout-button"
+
+# Descartar cualquier confirmación si fuera requerida
+- tapOn:
+    text: "OK"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 6. Verificar presencia del Badge de Estado de Sincronización en WorkoutHeader
+- extendedWaitUntil:
+    visible:
+      id: "sync-status-badge"
+    timeout: 10000
+
+- assertVisible:
+    id: "sync-status-badge"
+
+# 7. Verificar que el banner offline continúa sin ser visible en sesión activa
+- assertNotVisible:
+    id: "offline-banner"
+
+# 8. Regresar a la pantalla del día de entrenamiento
+- tapOn:
+    id: "workout-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+# 9. Regresar a la pantalla principal del Calendario
+- tapOn:
+    id: "workout-day-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 10. Limpieza y Cierre de Sesión (Navegación a Perfil -> Logout)
+- tapOn: "Perfil"
+
+- scroll
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "welcome-screen"

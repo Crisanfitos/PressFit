@@ -107,6 +107,8 @@
     "test:e2e:PF-349": "npm run test:e2e:us069",
     "test:e2e:us070": "node e2e/run-maestro.js e2e/maestro/us_070_preset_routines_filter_import.yaml",
     "test:e2e:PF-350": "npm run test:e2e:us070",
+    "test:e2e:us071": "node e2e/run-maestro.js e2e/maestro/us_071_offline_banner_sync_badge.yaml",
+    "test:e2e:PF-351": "npm run test:e2e:us071",
     "test:e2e:all": "node e2e/run-maestro.js e2e/maestro/"
   },
   "dependencies": {
