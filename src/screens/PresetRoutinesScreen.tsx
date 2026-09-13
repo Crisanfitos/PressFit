@@ -87,6 +87,7 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
         <SafeAreaView
             style={[styles.safeArea, { backgroundColor: colors.background || '#09090B' }]}
             edges={['top', 'left', 'right']}
+            testID="preset-routines-screen"
         >
             {/* Top Navigation Header */}
             <View style={[styles.headerBar, { borderBottomColor: colors.border || '#27272A' }]}>

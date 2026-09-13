@@ -99,6 +99,8 @@
     "test:e2e:PF-345": "npm run test:e2e:us065",
     "test:e2e:us066": "node e2e/run-maestro.js e2e/maestro/us_066_toast_system_verification.yaml",
     "test:e2e:PF-346": "npm run test:e2e:us066",
+    "test:e2e:us067": "node e2e/run-maestro.js e2e/maestro/us_067_drawer_navigation_destinations.yaml",
+    "test:e2e:PF-347": "npm run test:e2e:us067",
     "test:e2e:all": "node e2e/run-maestro.js e2e/maestro/"
   },
   "dependencies": {

@@ -102,7 +102,7 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({ visible, onClose, menuIt
                   item.onPress();
                 }}
                 activeOpacity={0.7}
-                testID={`drawer-item-${index}`}
+                testID={item.testID || `drawer-item-${index}`}
                 accessibilityLabel={item.testID || item.label}
               >
                 {item.testID && (

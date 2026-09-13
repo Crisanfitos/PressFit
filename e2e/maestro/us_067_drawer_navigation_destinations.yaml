@@ -1,0 +1,171 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_067_drawer_navigation_destinations.yaml — US-067: Navegación Completa del Drawer Lateral a Destinos
+
+- launchApp:
+    clearState: false
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with Continue or back
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 1. Autenticación si el usuario no tiene sesión activa
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+    optional: true
+
+- runFlow:
+    when:
+      visible:
+        id: "welcome-screen"
+    commands:
+      - tapOn:
+          id: "login-button"
+      - extendedWaitUntil:
+          visible:
+            id: "email-input"
+          timeout: 10000
+      - tapOn:
+          id: "email-input"
+      - inputText: "${E2E_TEST_EMAIL}"
+      - tapOn:
+          id: "password-input"
+      - inputText: "${E2E_TEST_PASSWORD}"
+      - tapOn:
+          id: "login-submit-button"
+
+# 2. Descartar sesión previa si aparece ResumeWorkoutModal
+- runFlow:
+    when:
+      visible:
+        id: "resume-workout-modal"
+    commands:
+      - tapOn:
+          id: "resume-workout-discard-button"
+      - tapOn: "Descartar"
+
+# 3. Verificar entrada al calendario mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 4. Abrir menú lateral con botón hamburguesa
+- tapOn:
+    id: "hamburger-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "side-drawer"
+    timeout: 5000
+
+- assertVisible:
+    id: "side-drawer"
+
+- assertVisible:
+    id: "drawer-title"
+
+# 5. Navegar a Plantillas Prémium
+- tapOn:
+    id: "drawer-item-preset-routines"
+
+- extendedWaitUntil:
+    visible:
+      id: "preset-routines-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "preset-routines-screen"
+
+- assertVisible: "Plantillas Prémium"
+
+# 6. Regresar al calendario mensual mediante back-button
+- tapOn:
+    id: "back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 7. Reabrir menú lateral con botón hamburguesa
+- tapOn:
+    id: "hamburger-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "side-drawer"
+    timeout: 5000
+
+- assertVisible:
+    id: "side-drawer"
+
+# 8. Navegar a Catálogo de Ejercicios
+- tapOn:
+    id: "drawer-item-exercise-catalog"
+
+- extendedWaitUntil:
+    visible:
+      id: "exercise-catalog-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "exercise-catalog-screen"
+
+# 9. Regresar al calendario mensual mediante exercise-catalog-back-button
+- tapOn:
+    id: "exercise-catalog-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 10. Limpieza (Logout final para dejar estado limpio)
+- tapOn: "Perfil"
+
+- scroll
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
