@@ -1,0 +1,305 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_073_personal_note_bodyweight.yaml — US-073 / PF-353: Nota Personal y Placeholder de Peso Corporal en Entrenamiento
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# Si aparece modal de sesión de entrenamiento previa, descartarla limpiamente
+- runFlow:
+    when:
+      visible:
+        id: "resume-workout-modal"
+    commands:
+      - tapOn:
+          id: "resume-workout-discard-button"
+      - tapOn: "Descartar"
+
+# 2. Esperar pantalla del Calendario Mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 3. Navegar al día actual de entrenamiento
+- tapOn:
+    id: "calendar-day-today"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-day-screen"
+
+# 4. Iniciar sesión de entrenamiento
+- tapOn:
+    id: "start-workout-button"
+
+- tapOn:
+    text: "OK"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 5. Expandir el primer ejercicio si estuviera colapsado
+- tapOn:
+    id: "exercise-card-0"
+
+# 6. Verificar placeholder de peso corporal (conmutando tipo de peso a corporal)
+- extendedWaitUntil:
+    visible:
+      id: "weight-type-badge-button"
+    timeout: 5000
+
+- tapOn:
+    id: "weight-type-badge-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "weight-type-menu"
+    timeout: 5000
+
+- tapOn:
+    id: "weight-type-option-corporal"
+
+- extendedWaitUntil:
+    visible:
+      id: "bodyweight-placeholder-0"
+    timeout: 5000
+
+- assertVisible:
+    id: "bodyweight-placeholder-0"
+
+- assertVisible:
+    text: "BW"
+
+# 7. Conmutar de nuevo a total para verificar restauración del input de peso
+- tapOn:
+    id: "weight-type-badge-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "weight-type-menu"
+    timeout: 5000
+
+- tapOn:
+    id: "weight-type-option-total"
+
+- extendedWaitUntil:
+    visible:
+      id: "set-weight-input-0"
+    timeout: 5000
+
+- assertVisible:
+    id: "set-weight-input-0"
+
+# 8. Interactuar con Nota Personal (añadir o editar)
+- runFlow:
+    when:
+      visible:
+        id: "add-note-button"
+    commands:
+      - tapOn:
+          id: "add-note-button"
+
+- runFlow:
+    when:
+      visible:
+        id: "edit-note-button"
+    commands:
+      - tapOn:
+          id: "edit-note-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "note-modal-content"
+    timeout: 8000
+
+- assertVisible:
+    id: "note-modal-content"
+
+- tapOn:
+    id: "note-text-input"
+
+- eraseText: 100
+
+- inputText: "Nota E2E: Pausa de 2s abajo y mantener tension"
+
+- hideKeyboard
+
+- tapOn:
+    id: "note-save-button"
+
+- extendedWaitUntil:
+    notVisible:
+      id: "note-modal-content"
+    timeout: 5000
+
+- assertVisible:
+    id: "note-display-text"
+
+- assertVisible:
+    text: ".*Pausa de 2s abajo.*"
+
+- assertVisible:
+    id: "edit-note-button"
+
+# 9. Verificar persistencia de la nota al salir del entrenamiento y volver a entrar
+- tapOn:
+    id: "workout-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "workout-day-screen"
+
+- runFlow:
+    when:
+      notVisible:
+        id: "start-workout-button"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "start-workout-button"
+    timeout: 10000
+
+- tapOn:
+    id: "start-workout-button"
+
+- tapOn:
+    text: "OK"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-screen"
+
+- tapOn:
+    id: "exercise-card-0"
+
+- extendedWaitUntil:
+    visible:
+      id: "note-display-text"
+    timeout: 10000
+
+- assertVisible:
+    id: "note-display-text"
+
+- assertVisible:
+    text: ".*Pausa de 2s abajo.*"
+
+# 10. Salir del entrenamiento mediante back y volver al calendario
+- tapOn:
+    id: "workout-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "workout-day-back-button"
+    optional: true
+
+- runFlow:
+    when:
+      notVisible:
+        id: "monthly-calendar-screen"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 11. Limpieza y Cierre de Sesión (Navegación a Perfil -> Logout)
+- tapOn: "Perfil"
+
+- scroll
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "welcome-screen"
