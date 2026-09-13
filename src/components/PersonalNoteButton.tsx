@@ -42,6 +42,7 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
             return;
         }
         const { success, error } = await saveNote(tempNote);
+        Keyboard.dismiss();
         if (success) {
             setModalVisible(false);
         } else {
@@ -107,7 +108,10 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
                 animationType="fade"
                 transparent={true}
                 visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
+                onRequestClose={() => {
+                    Keyboard.dismiss();
+                    setModalVisible(false);
+                }}
                 testID="note-modal"
             >
                 <KeyboardAvoidingView
@@ -151,7 +155,6 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
                                     placeholderTextColor={colors.textSecondary}
                                     value={tempNote}
                                     onChangeText={setTempNote}
-                                    autoFocus
                                 />
                             </View>
                         </ScrollView>
@@ -159,7 +162,10 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
                             <TouchableOpacity
                                 testID="note-cancel-button"
                                 style={[styles.button, styles.cancelButton]}
-                                onPress={() => setModalVisible(false)}
+                                onPress={() => {
+                                    Keyboard.dismiss();
+                                    setModalVisible(false);
+                                }}
                             >
                                 <Text style={[styles.buttonTextCancel, { color: colors.textSecondary }]}>
                                     Cancelar
