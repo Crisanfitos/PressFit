@@ -1,0 +1,233 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_072_edit_set_row_actions.yaml — US-072: Acciones de Edición y Completado de Sets Individuales (WorkoutSetRow)
+
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible: ".*8081.*"
+    timeout: 20000
+
+- tapOn:
+    text: ".*8081.*"
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- tapOn:
+    text: "Continue"
+    optional: true
+
+# 1. Esperar bienvenida y navegar a Login
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 25000
+
+- assertVisible:
+    id: "welcome-screen"
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+- inputText: "${E2E_TEST_EMAIL}"
+
+- tapOn:
+    id: "password-input"
+- inputText: "${E2E_TEST_PASSWORD}"
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# Si aparece modal de sesión de entrenamiento previa, descartarla limpiamente
+- runFlow:
+    when:
+      visible:
+        id: "resume-workout-modal"
+    commands:
+      - tapOn:
+          id: "resume-workout-discard-button"
+      - tapOn: "Descartar"
+
+# 2. Esperar pantalla del Calendario Mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 3. Navegar al día actual de entrenamiento
+- tapOn:
+    id: "calendar-day-today"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-day-screen"
+
+# 4. Iniciar o cargar sesión activa de entrenamiento
+- tapOn:
+    id: "start-workout-button"
+
+- tapOn:
+    text: "OK"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 5. Asegurar que la primera serie existe y está desbloqueada
+- extendedWaitUntil:
+    visible:
+      id: "set-row-0"
+    timeout: 10000
+
+- assertVisible:
+    id: "set-row-0"
+
+# Si la primera serie ya estuviera completada de sesiones previas, desbloquearla
+- runFlow:
+    when:
+      visible:
+        id: "edit-set-button-0"
+    commands:
+      - tapOn:
+          id: "edit-set-button-0"
+      - extendedWaitUntil:
+          visible: "Desbloquear"
+          timeout: 5000
+      - tapOn: "Desbloquear"
+
+# 6. Interactuar con los inputs de la primera serie
+- tapOn:
+    id: "set-reps-input-0"
+
+- inputText: "10"
+
+- hideKeyboard
+
+# 7. Completar la serie mediante el checkbox
+- tapOn:
+    id: "set-complete-checkbox-0"
+
+# Descartar modal de celebración de PR si se rompió récord personal
+- tapOn:
+    id: "pr-modal-continue-button"
+    optional: true
+
+# 8. Verificar que aparece el botón de edición de serie completada (edit-set-button-0)
+- extendedWaitUntil:
+    visible:
+      id: "edit-set-button-0"
+    timeout: 10000
+
+- assertVisible:
+    id: "edit-set-button-0"
+
+# 9. Pulsar el botón de edición y verificar diálogo de confirmación para desbloquear
+- tapOn:
+    id: "edit-set-button-0"
+
+- extendedWaitUntil:
+    visible: "Desbloquear"
+    timeout: 5000
+
+- assertVisible: "Desbloquear"
+
+# 10. Desbloquear la serie y verificar que el botón de edición se oculta
+- tapOn: "Desbloquear"
+
+- extendedWaitUntil:
+    notVisible:
+      id: "edit-set-button-0"
+    timeout: 5000
+
+- assertNotVisible:
+    id: "edit-set-button-0"
+
+# 11. Regresar de WorkoutScreen a WorkoutDayScreen
+- back
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+# Finalizar temporizador de descanso si estuviera activo en barra flotante
+- tapOn:
+    id: "rest-timer-floating-bar-finish"
+    optional: true
+
+# 12. Regresar al calendario
+- tapOn:
+    id: "workout-day-back-button"
+    optional: true
+
+- runFlow:
+    when:
+      notVisible:
+        id: "monthly-calendar-screen"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 13. Limpieza y Cierre de Sesión (Navegación a Perfil -> Logout)
+- tapOn: "Perfil"
+
+- scroll
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "welcome-screen"
