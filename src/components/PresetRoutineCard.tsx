@@ -6,11 +6,13 @@ import { useTheme } from '../context/ThemeContext';
 
 interface PresetRoutineCardProps {
     preset: PresetRoutine;
+    index?: number;
     onPressSelect: (preset: PresetRoutine) => void;
 }
 
 export const PresetRoutineCard: React.FC<PresetRoutineCardProps> = ({
     preset,
+    index,
     onPressSelect,
 }) => {
     const { theme } = useTheme();
@@ -35,7 +37,8 @@ export const PresetRoutineCard: React.FC<PresetRoutineCardProps> = ({
         <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => onPressSelect(preset)}
-            testID={`preset-card-${preset.id}`}
+            testID={index !== undefined ? `preset-routine-card-${index}` : `preset-card-${preset.id}`}
+            accessibilityLabel={`preset-card-${preset.id}`}
             style={[
                 styles.card,
                 {
@@ -44,61 +47,61 @@ export const PresetRoutineCard: React.FC<PresetRoutineCardProps> = ({
                 },
             ]}
         >
-            {/* Top Badges Row */}
-            <View style={styles.topRow}>
-                <View
-                    style={[
-                        styles.categoryBadge,
-                        {
-                            backgroundColor: categoryBadgeStyle.bg,
-                            borderColor: categoryBadgeStyle.border,
-                        },
-                    ]}
-                >
-                    <Text style={[styles.categoryText, { color: categoryBadgeStyle.text }]}>
-                        {preset.categoria}
-                    </Text>
-                </View>
-
-                <View style={styles.metaBadgesRow}>
-                    <View style={[styles.metaBadge, { backgroundColor: colors.background || '#121212' }]}>
-                        <MaterialIcons name="date-range" size={14} color={colors.textSecondary || '#9CA3AF'} />
-                        <Text style={[styles.metaText, { color: colors.textSecondary || '#9CA3AF' }]}>
-                            {preset.dias_por_semana} días/sem
+                {/* Top Badges Row */}
+                <View style={styles.topRow}>
+                    <View
+                        style={[
+                            styles.categoryBadge,
+                            {
+                                backgroundColor: categoryBadgeStyle.bg,
+                                borderColor: categoryBadgeStyle.border,
+                            },
+                        ]}
+                    >
+                        <Text style={[styles.categoryText, { color: categoryBadgeStyle.text }]}>
+                            {preset.categoria}
                         </Text>
                     </View>
 
-                    <View style={[styles.metaBadge, { backgroundColor: colors.background || '#121212' }]}>
-                        <MaterialIcons name="fitness-center" size={14} color={colors.textSecondary || '#9CA3AF'} />
-                        <Text style={[styles.metaText, { color: colors.textSecondary || '#9CA3AF' }]}>
-                            {preset.nivel}
-                        </Text>
+                    <View style={styles.metaBadgesRow}>
+                        <View style={[styles.metaBadge, { backgroundColor: colors.background || '#121212' }]}>
+                            <MaterialIcons name="date-range" size={14} color={colors.textSecondary || '#9CA3AF'} />
+                            <Text style={[styles.metaText, { color: colors.textSecondary || '#9CA3AF' }]}>
+                                {preset.dias_por_semana} días/sem
+                            </Text>
+                        </View>
+
+                        <View style={[styles.metaBadge, { backgroundColor: colors.background || '#121212' }]}>
+                            <MaterialIcons name="fitness-center" size={14} color={colors.textSecondary || '#9CA3AF'} />
+                            <Text style={[styles.metaText, { color: colors.textSecondary || '#9CA3AF' }]}>
+                                {preset.nivel}
+                            </Text>
+                        </View>
                     </View>
                 </View>
-            </View>
 
-            {/* Title & Description */}
-            <Text style={[styles.title, { color: colors.text || '#FFFFFF' }]} numberOfLines={1}>
-                {preset.nombre}
-            </Text>
-            <Text style={[styles.description, { color: colors.textSecondary || '#9CA3AF' }]} numberOfLines={2}>
-                {preset.descripcion}
-            </Text>
-
-            {/* Footer Row */}
-            <View style={[styles.footerRow, { borderTopColor: colors.border || '#27272A' }]}>
-                <Text style={[styles.sessionsText, { color: colors.primary || '#10B981' }]}>
-                    {preset.rutinas_diarias.length} sesiones diseñadas
+                {/* Title & Description */}
+                <Text style={[styles.title, { color: colors.text || '#FFFFFF' }]} numberOfLines={1}>
+                    {preset.nombre}
+                </Text>
+                <Text style={[styles.description, { color: colors.textSecondary || '#9CA3AF' }]} numberOfLines={2}>
+                    {preset.descripcion}
                 </Text>
 
-                <View style={styles.detailsBtn}>
-                    <Text style={[styles.detailsBtnText, { color: colors.primary || '#10B981' }]}>
-                        Ver Detalles
+                {/* Footer Row */}
+                <View style={[styles.footerRow, { borderTopColor: colors.border || '#27272A' }]}>
+                    <Text style={[styles.sessionsText, { color: colors.primary || '#10B981' }]}>
+                        {preset.rutinas_diarias.length} sesiones diseñadas
                     </Text>
-                    <MaterialIcons name="chevron-right" size={18} color={colors.primary || '#10B981'} />
+
+                    <View style={styles.detailsBtn}>
+                        <Text style={[styles.detailsBtnText, { color: colors.primary || '#10B981' }]}>
+                            Ver Detalles
+                        </Text>
+                        <MaterialIcons name="chevron-right" size={18} color={colors.primary || '#10B981'} />
+                    </View>
                 </View>
-            </View>
-        </TouchableOpacity>
+            </TouchableOpacity>
     );
 };
 

@@ -1,0 +1,201 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_070_preset_routines_filter_import.yaml — US-070: Filtrado e Importación Completa de Rutinas Preset
+
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible: ".*8081.*"
+    timeout: 20000
+
+- tapOn:
+    text: ".*8081.*"
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- tapOn:
+    text: "Continue"
+    optional: true
+
+# 1. Esperar bienvenida y navegar a Login
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 25000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+- inputText: "${E2E_TEST_EMAIL}"
+
+- tapOn:
+    id: "password-input"
+- inputText: "${E2E_TEST_PASSWORD}"
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# 2. Esperar pantalla del Calendario Mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 3. Acceso a PresetRoutinesScreen desde Drawer
+- tapOn:
+    id: "hamburger-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "side-drawer"
+    timeout: 5000
+
+- assertVisible:
+    id: "side-drawer"
+
+- tapOn:
+    id: "drawer-item-preset-routines"
+
+- extendedWaitUntil:
+    visible:
+      id: "preset-routines-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "preset-routines-screen"
+
+- assertVisible:
+    id: "preset-routines-list"
+
+- assertVisible: "Biblioteca de Rutinas"
+
+# 4. Filtrado por categoría (Fuerza -> PHUL)
+- tapOn:
+    id: "filter-category-Fuerza"
+
+- extendedWaitUntil:
+    visible: "PHUL (Power Hypertrophy Upper Lower) 4 Días"
+    timeout: 5000
+
+- assertVisible: "PHUL (Power Hypertrophy Upper Lower) 4 Días"
+
+# Restablecer filtro de categoría a Todas
+- tapOn:
+    id: "filter-category-Todas"
+
+# 5. Filtrado por frecuencia de días (6 días -> Push / Pull / Legs (PPL) 6 Días)
+- tapOn:
+    id: "filter-days-6"
+
+- extendedWaitUntil:
+    visible: "Push / Pull / Legs (PPL) 6 Días"
+    timeout: 5000
+
+- assertVisible: "Push / Pull / Legs (PPL) 6 Días"
+
+# 6. Selección y previsualización de rutina
+- assertVisible:
+    id: "preset-routine-card-0"
+
+- tapOn:
+    id: "preset-routine-card-0"
+
+- extendedWaitUntil:
+    visible:
+      id: "preset-routine-import-button"
+    timeout: 5000
+
+- assertVisible:
+    id: "preset-routine-import-button"
+
+- assertVisible: "Estructura de la Rutina"
+
+# 7. Importación exitosa con confirmación visual
+- tapOn:
+    id: "confirm-import-button"
+
+- extendedWaitUntil:
+    visible: "¡Rutina Asignada!"
+    timeout: 15000
+
+- assertVisible: "¡Rutina Asignada!"
+
+# Navegar a Mis Rutinas (RoutineEditorScreen) desde la alerta de confirmación
+- tapOn: "Ir a Mis Rutinas"
+
+- extendedWaitUntil:
+    visible:
+      id: "routine-editor-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "routine-editor-screen"
+
+# 8. Retorno al calendario mensual
+- tapOn:
+    id: "routine-editor-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "preset-routines-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "preset-routines-screen"
+
+- tapOn:
+    id: "back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 9. Limpieza: Navegar a Perfil y Cerrar Sesión
+- tapOn: "Perfil"
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"

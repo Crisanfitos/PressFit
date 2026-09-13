@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { PresetRoutinesScreen } from '../../src/screens/PresetRoutinesScreen';
 
 jest.mock('../../src/context/AuthContext', () => ({
@@ -31,6 +31,26 @@ describe('PresetRoutinesScreen Component (RNTL)', () => {
 
         fireEvent.press(getByTestId('filter-category-Hipertrofia'));
         expect(getByText('Push / Pull / Legs (PPL) 6 Días')).toBeTruthy();
+    });
+
+    test('renders preset-routines-list and indexed routine cards', async () => {
+        const { getByTestId } = await render(
+            <PresetRoutinesScreen navigation={mockNavigation} />
+        );
+
+        expect(getByTestId('preset-routines-list')).toBeTruthy();
+        expect(getByTestId('preset-routine-card-0')).toBeTruthy();
+    });
+
+    test('opens detail modal with preset-routine-import-button when card is pressed', async () => {
+        const { getByTestId } = await render(
+            <PresetRoutinesScreen navigation={mockNavigation} />
+        );
+
+        fireEvent.press(getByTestId('preset-routine-card-0'));
+        await waitFor(() => {
+            expect(getByTestId('preset-routine-import-button')).toBeTruthy();
+        });
     });
 
     test('navigates back when pressing back button', async () => {

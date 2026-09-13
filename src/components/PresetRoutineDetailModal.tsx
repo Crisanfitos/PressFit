@@ -141,26 +141,28 @@ export const PresetRoutineDetailModal: React.FC<PresetRoutineDetailModalProps> =
 
                     {/* Footer CTA */}
                     <View style={[styles.footer, { borderTopColor: colors.border || '#27272A' }]}>
-                        <TouchableOpacity
-                            onPress={() => onConfirmUse(preset)}
-                            disabled={isImporting}
-                            testID="confirm-import-button"
-                            style={[
-                                styles.confirmBtn,
-                                { backgroundColor: colors.primary || '#10B981' },
-                            ]}
-                        >
-                            {isImporting ? (
-                                <ActivityIndicator color="#000000" />
-                            ) : (
-                                <>
-                                    <MaterialIcons name="check-circle" size={20} color="#000000" />
-                                    <Text style={styles.confirmBtnText}>
-                                        {t('presetRoutines.useThisRoutine', 'Usar esta Rutina')}
-                                    </Text>
-                                </>
-                            )}
-                        </TouchableOpacity>
+                        <View testID="preset-routine-import-button">
+                            <TouchableOpacity
+                                onPress={() => onConfirmUse(preset)}
+                                disabled={isImporting}
+                                testID="confirm-import-button"
+                                style={[
+                                    styles.confirmBtn,
+                                    { backgroundColor: colors.primary || '#10B981' },
+                                ]}
+                            >
+                                {isImporting ? (
+                                    <ActivityIndicator color="#000000" />
+                                ) : (
+                                    <>
+                                        <MaterialIcons name="check-circle" size={20} color="#000000" />
+                                        <Text style={styles.confirmBtnText}>
+                                            {t('presetRoutines.useThisRoutine', 'Usar esta Rutina')}
+                                        </Text>
+                                    </>
+                                )}
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </View>
