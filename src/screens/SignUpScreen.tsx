@@ -42,6 +42,12 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
             return;
         }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setError('Por favor introduce un email válido');
+            return;
+        }
+
         if (password !== confirmPassword) {
             setError('Las contraseñas no coinciden');
             return;
@@ -305,7 +311,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
 
                         {error ? (
                             <View style={styles.errorContainer}>
-                                <Text style={styles.errorText}>{error}</Text>
+                                <Text style={styles.errorText} testID="signup-error-text">{error}</Text>
                             </View>
                         ) : null}
                     </View>

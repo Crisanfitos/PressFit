@@ -66,6 +66,23 @@ describe('SignUpScreen Component (RNTL)', () => {
     expect(await findByText('Las contraseñas no coinciden')).toBeTruthy();
   });
 
+  it('shows error if email format is invalid', async () => {
+    const { getByTestId, findByText } = await renderSignUpScreen();
+
+    await act(async () => {
+      fireEvent.changeText(getByTestId('signup-fullname-input'), 'Carlos');
+      fireEvent.changeText(getByTestId('signup-email-input'), 'invalid-email');
+      fireEvent.changeText(getByTestId('signup-password-input'), '123456');
+      fireEvent.changeText(getByTestId('signup-confirmpassword-input'), '123456');
+    });
+
+    await act(async () => {
+      fireEvent.press(getByTestId('signup-submit-button'));
+    });
+
+    expect(await findByText('Por favor introduce un email válido')).toBeTruthy();
+  });
+
   it('calls signUpWithEmail when valid details are provided', async () => {
     mockSignUpWithEmail.mockResolvedValue({});
     const { getByTestId } = await renderSignUpScreen();

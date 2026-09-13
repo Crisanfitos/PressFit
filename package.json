@@ -101,6 +101,8 @@
     "test:e2e:PF-346": "npm run test:e2e:us066",
     "test:e2e:us067": "node e2e/run-maestro.js e2e/maestro/us_067_drawer_navigation_destinations.yaml",
     "test:e2e:PF-347": "npm run test:e2e:us067",
+    "test:e2e:us068": "node e2e/run-maestro.js e2e/maestro/us_068_signup_form_validation.yaml",
+    "test:e2e:PF-348": "npm run test:e2e:us068",
     "test:e2e:all": "node e2e/run-maestro.js e2e/maestro/"
   },
   "dependencies": {
