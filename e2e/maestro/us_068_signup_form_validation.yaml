@@ -1,0 +1,154 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_068_signup_form_validation.yaml — US-068: Validación Completa del Formulario de Registro (SignUpScreen)
+
+- launchApp:
+    clearState: true
+
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# If Stylus tutorial modal appears, dismiss it
+- runFlow:
+    when:
+      visible: ".*stylus.*"
+    commands:
+      - back
+
+# 1. Esperar pantalla de bienvenida
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "signup-button"
+
+# 2. Navegar a SignUpScreen
+- tapOn:
+    id: "signup-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "signup-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "signup-screen"
+
+- assertVisible:
+    id: "signup-fullname-input"
+
+- assertVisible:
+    id: "signup-email-input"
+
+- assertVisible:
+    id: "signup-password-input"
+
+- assertVisible:
+    id: "signup-confirmpassword-input"
+
+- assertVisible:
+    id: "signup-submit-button"
+
+# 3. Submit con campos vacíos → error visible
+- tapOn:
+    id: "signup-submit-button"
+
+- assertVisible:
+    id: "signup-error-text"
+
+- assertVisible:
+    text: "Por favor completa todos los campos"
+
+# 4. Email inválido → error de formato
+- tapOn:
+    id: "signup-fullname-input"
+- inputText: "Test User"
+- hideKeyboard
+
+# If stylus modal popped up on typing
+- runFlow:
+    when:
+      visible: ".*stylus.*"
+    commands:
+      - back
+
+- tapOn:
+    id: "signup-email-input"
+- inputText: "invalidemailformat"
+- hideKeyboard
+
+- tapOn:
+    id: "signup-password-input"
+- inputText: "Pass1234"
+- hideKeyboard
+
+- tapOn:
+    id: "signup-confirmpassword-input"
+- inputText: "Pass1234"
+- hideKeyboard
+
+- tapOn:
+    id: "signup-submit-button"
+
+- assertVisible:
+    id: "signup-error-text"
+
+- assertVisible:
+    text: "Por favor introduce un email válido"
+
+# 5. Contraseñas que no coinciden → error de mismatch
+- tapOn:
+    id: "signup-email-input"
+- eraseText: 25
+- inputText: "tester@pressfit.app"
+- hideKeyboard
+
+- tapOn:
+    id: "signup-confirmpassword-input"
+- eraseText: 15
+- inputText: "Mismatch999"
+- hideKeyboard
+
+- tapOn:
+    id: "signup-submit-button"
+
+- assertVisible:
+    id: "signup-error-text"
+
+- assertVisible:
+    text: "Las contraseñas no coinciden"
+
+# 6. Toggle de visibilidad de contraseñas
+- assertVisible:
+    id: "signup-password-toggle"
+
+- tapOn:
+    id: "signup-password-toggle"
+
+- assertVisible:
+    id: "signup-confirmpassword-toggle"
+
+- tapOn:
+    id: "signup-confirmpassword-toggle"
+
+# 7. Retornar a pantalla de bienvenida
+- back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "welcome-screen"
