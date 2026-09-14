@@ -67,3 +67,7 @@ build-*.
 
 /scratch/
 *.apk
+
+# Supabase CLI local metadata
+supabase/.temp/
+supabase/.branches/

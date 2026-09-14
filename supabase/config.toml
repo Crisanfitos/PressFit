@@ -1,6 +1,6 @@
 # Supabase CLI configuration for PressFit Expo
 
-project_id = "pressfit-expo"
+project_id = "suaxmalkquricsbwkczt"
 
 [api]
 enabled = true
