@@ -517,6 +517,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                 <>
                     <TouchableOpacity
                         testID="rest-timer-confirm-button"
+                        accessibilityLabel="timer-ok-button"
                         style={[styles.actionButton, { backgroundColor: '#22c55e' }]}
                         onPress={handleConfirm}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -544,6 +545,7 @@ const RestTimer: React.FC<RestTimerProps> = ({ visible, onDismiss, onTimerStop, 
                 <View style={styles.runningControlsRow}>
                     <TouchableOpacity
                         testID="rest-timer-finish-button"
+                        accessibilityLabel="timer-ok-button"
                         style={styles.finishButton}
                         onPress={handleConfirm}
                         hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}

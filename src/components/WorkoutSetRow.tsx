@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Pressable, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Pressable, StyleSheet, Alert, Keyboard } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import SetInput from './SetInput';
 import { HapticService } from '../services/HapticService';
@@ -128,6 +128,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     };
 
     const handleToggleComplete = () => {
+        Keyboard.dismiss();
         if (isCompleted) {
             promptUnlockConfirmation();
         } else {
@@ -314,6 +315,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
                         <MaterialIcons
+                            testID={isCompleted ? `set-completed-icon-${setIndex}` : `set-uncompleted-icon-${setIndex}`}
                             name={isCompleted ? 'check-box' : 'check-box-outline-blank'}
                             size={24}
                             color={isCompleted ? '#22c55e' : colors.textSecondary}

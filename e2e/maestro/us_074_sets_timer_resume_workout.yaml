@@ -1,0 +1,268 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_074_sets_timer_resume_workout.yaml — US-074 / PF-354: Completado de series con temporizador, salida y reanudación
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# Si aparece modal de sesión de entrenamiento previa, descartarla para comenzar limpios
+- runFlow:
+    when:
+      visible:
+        id: "resume-workout-modal"
+    commands:
+      - tapOn:
+          id: "resume-workout-discard-button"
+      - tapOn: "Descartar"
+
+# 1. Esperar pantalla del Calendario Mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 2. Navegar al día actual de entrenamiento
+- tapOn:
+    id: "calendar-day-today"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-day-screen"
+
+# Ocultar teclado suave si estuviera desplegado
+- runFlow:
+    when:
+      notVisible:
+        id: "start-workout-button"
+    commands:
+      - back
+
+# 3. Iniciar sesión de entrenamiento
+- tapOn:
+    id: "start-workout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 4. Verificar estado inicial: series 0 y 1 no completadas
+- extendedWaitUntil:
+    visible:
+      id: "set-uncompleted-icon-0"
+    timeout: 10000
+
+- assertVisible:
+    id: "set-uncompleted-icon-0"
+
+- assertVisible:
+    id: "set-uncompleted-icon-1"
+
+# 5. Completar Serie 0: pulsar checkbox, confirmar temporizador de descanso con OK ("Listo")
+- tapOn:
+    id: "set-complete-checkbox-0"
+
+- extendedWaitUntil:
+    visible:
+      id: "rest-timer-banner"
+    timeout: 10000
+
+- assertVisible:
+    id: "rest-timer-banner"
+
+- tapOn:
+    id: "rest-timer-finish-button"
+
+- extendedWaitUntil:
+    notVisible:
+      id: "rest-timer-banner"
+    timeout: 10000
+
+- extendedWaitUntil:
+    visible:
+      id: "set-completed-icon-0"
+    timeout: 10000
+
+- assertVisible:
+    id: "set-completed-icon-0"
+
+# 6. Completar Serie 1: pulsar checkbox, confirmar temporizador de descanso con OK ("Listo")
+- tapOn:
+    id: "set-complete-checkbox-1"
+
+- extendedWaitUntil:
+    visible:
+      id: "rest-timer-banner"
+    timeout: 10000
+
+- assertVisible:
+    id: "rest-timer-banner"
+
+- tapOn:
+    id: "rest-timer-finish-button"
+
+- extendedWaitUntil:
+    notVisible:
+      id: "rest-timer-banner"
+    timeout: 10000
+
+- extendedWaitUntil:
+    visible:
+      id: "set-completed-icon-1"
+    timeout: 10000
+
+- assertVisible:
+    id: "set-completed-icon-1"
+
+# 7. Salir del entrenamiento mediante el botón de volver a WorkoutDayScreen
+- tapOn:
+    id: "workout-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "workout-day-screen"
+
+# 8. Verificar que la sesión se mantiene en progreso y el botón indica "Continuar Entrenamiento"
+- extendedWaitUntil:
+    visible:
+      id: "status-badge-in-progress"
+    timeout: 10000
+
+- assertVisible:
+    id: "status-badge-in-progress"
+
+- assertVisible: "Continuar Entrenamiento"
+
+# 9. Reanudar el entrenamiento pulsando el botón de acción
+- tapOn:
+    id: "start-workout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 10. Comprobar fehacientemente que las series 0 y 1 siguen completadas
+- extendedWaitUntil:
+    visible:
+      id: "set-completed-icon-0"
+    timeout: 10000
+
+- assertVisible:
+    id: "set-completed-icon-0"
+
+- assertVisible:
+    id: "set-completed-icon-1"
+
+# 11. Salir del entrenamiento y volver al Calendario Mensual
+- tapOn:
+    id: "workout-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "workout-day-back-button"
+    optional: true
+
+- runFlow:
+    when:
+      notVisible:
+        id: "monthly-calendar-screen"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 10000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 12. Limpieza y Cierre de Sesión (Navegación a Perfil -> Logout)
+- tapOn: "Perfil"
+
+- scroll
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "welcome-screen"

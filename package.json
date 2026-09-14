@@ -113,6 +113,8 @@
     "test:e2e:PF-352": "npm run test:e2e:us072",
     "test:e2e:us073": "node e2e/run-maestro.js e2e/maestro/us_073_personal_note_bodyweight.yaml",
     "test:e2e:PF-353": "npm run test:e2e:us073",
+    "test:e2e:us074": "node e2e/run-maestro.js e2e/maestro/us_074_sets_timer_resume_workout.yaml",
+    "test:e2e:PF-354": "npm run test:e2e:us074",
     "test:e2e:all": "node e2e/run-maestro.js e2e/maestro/"
   },
   "dependencies": {
