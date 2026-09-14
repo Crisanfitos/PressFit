@@ -113,6 +113,7 @@ export const ResumeWorkoutModal: React.FC<ResumeWorkoutModalProps> = ({
                     <View style={styles.actionButtons}>
                         <TouchableOpacity
                             testID="resume-workout-confirm-button"
+                            accessibilityLabel="resume-workout-confirm-button"
                             style={[styles.resumeButton, { backgroundColor: colors.primary }]}
                             onPress={onResume}
                             activeOpacity={0.8}
@@ -123,6 +124,7 @@ export const ResumeWorkoutModal: React.FC<ResumeWorkoutModalProps> = ({
 
                         <TouchableOpacity
                             testID="resume-workout-discard-button"
+                            accessibilityLabel="resume-workout-discard-button"
                             style={[styles.discardButton, { borderColor: colors.border }]}
                             onPress={handleDiscardPress}
                             activeOpacity={0.7}
