@@ -115,6 +115,8 @@
     "test:e2e:PF-353": "npm run test:e2e:us073",
     "test:e2e:us074": "node e2e/run-maestro.js e2e/maestro/us_074_sets_timer_resume_workout.yaml",
     "test:e2e:PF-354": "npm run test:e2e:us074",
+    "test:e2e:us075": "node e2e/run-maestro.js e2e/maestro/us_075_workout_recovery_crash.yaml",
+    "test:e2e:PF-355": "npm run test:e2e:us075",
     "test:e2e:all": "node e2e/run-maestro.js e2e/maestro/"
   },
   "dependencies": {

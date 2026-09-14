@@ -1,0 +1,208 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_075_workout_recovery_crash.yaml — US-075 / PF-355: Diálogo y Flujo de Recuperación de Entrenamiento tras Crash o Reinicio Inesperado
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# Si aparece modal de sesión previa residual, descartarla para comenzar limpios
+- runFlow:
+    when:
+      visible:
+        id: "resume-workout-modal"
+    commands:
+      - tapOn:
+          id: "resume-workout-discard-button"
+      - tapOn: "Descartar"
+
+# 1. Esperar pantalla del Calendario Mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 2. Navegar al día actual de entrenamiento
+- tapOn:
+    id: "calendar-day-today"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-day-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-day-screen"
+
+# Ocultar teclado suave si estuviera desplegado
+- runFlow:
+    when:
+      notVisible:
+        id: "start-workout-button"
+    commands:
+      - back
+
+# 3. Iniciar sesión de entrenamiento activa
+- tapOn:
+    id: "start-workout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 4. Interactuar con la primera serie y asegurar persistencia del estado activo
+- extendedWaitUntil:
+    visible:
+      id: "set-complete-checkbox-0"
+    timeout: 10000
+
+- tapOn:
+    id: "set-complete-checkbox-0"
+
+# Si salta el temporizador de descanso, confirmarlo con el botón 'Listo'
+- runFlow:
+    when:
+      visible:
+        id: "rest-timer-finish-button"
+    commands:
+      - tapOn:
+          id: "rest-timer-finish-button"
+
+# Pequeña pausa para asegurar que AsyncStorage y Supabase registraron la sesión activa
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# 5. SIMULACIÓN DE CRASH / CIERRE INESPERADO: Matar la aplicación
+- stopApp
+
+# 6. RELANZAMIENTO DE LA APP PRESERVANDO ESTADO LOCAL (clearState: false)
+- launchApp:
+    clearState: false
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible Dev Menu de Expo tras relanzar
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 7. COMPROBACIÓN DEL DIÁLOGO DE RECUPERACIÓN TRAS CRASH
+# Al cargar MainNavigator, useWorkoutRecovery detecta la sesión activa y levanta ResumeWorkoutModal
+- extendedWaitUntil:
+    visible:
+      id: "resume-workout-modal"
+    timeout: 25000
+
+- assertVisible:
+    id: "resume-workout-modal"
+
+- assertVisible: "Entrenamiento en Curso"
+
+- assertVisible:
+    id: "resume-workout-confirm-button"
+
+- assertVisible:
+    id: "resume-workout-discard-button"
+
+# 8. REANUDAR SESIÓN DESDE EL MODAL DE RECUPERACIÓN
+- tapOn:
+    id: "resume-workout-confirm-button"
+
+# 9. COMPROBACIÓN DE RETORNO DIRECTO A LA SESIÓN ACTIVA
+- extendedWaitUntil:
+    visible:
+      id: "workout-screen"
+    timeout: 20000
+
+- assertVisible:
+    id: "workout-screen"
+
+# 10. Salir ordenadamente del entrenamiento (regresa al Calendario)
+- tapOn:
+    id: "workout-back-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "monthly-calendar-screen"
+
+# 11. Limpieza y Cierre de Sesión (Navegación a Perfil -> Logout)
+- tapOn: "Perfil"
+
+- scroll
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 10000
+
+- tapOn:
+    id: "logout-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "logout-confirm-button"
+    timeout: 5000
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 15000
+
+- assertVisible:
+    id: "welcome-screen"
