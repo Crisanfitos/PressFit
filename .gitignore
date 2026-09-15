@@ -65,8 +65,10 @@ e2e/.env.e2e
 
 build-*.
 
+# Build artifacts & Binaries
 /scratch/
 *.apk
+*.aab
 
 # Supabase CLI local metadata
 supabase/.temp/
