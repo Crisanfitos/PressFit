@@ -1,12 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import { RoutineService } from '../services/RoutineService';
+import { RoutineDay, ServiceResponse } from '../types/models';
 
 interface Routine {
     id: string;
     nombre: string;
     activa: boolean;
     usuario_id: string;
-    rutinas_diarias?: any[];
+    rutinas_diarias?: RoutineDay[];
 }
 
 interface WorkoutStats {
@@ -50,7 +51,7 @@ export const useRoutineController = (userId: string | undefined, routineId: stri
 
             // Load stats for each routine day
             if (data && data.length > 0) {
-                const statsPromises: Promise<any>[] = [];
+                const statsPromises: Promise<ServiceResponse<WorkoutStats>>[] = [];
                 const routineDayIds: string[] = [];
 
                 data.forEach((routine) => {
@@ -82,8 +83,8 @@ export const useRoutineController = (userId: string | undefined, routineId: stri
 
     const handleDayPress = async (
         dayOfWeek: number,
-        existingRoutineDay: any | null,
-        navigation: any
+        existingRoutineDay: RoutineDay | null,
+        navigation: { navigate: (screen: string, params?: unknown) => void; [key: string]: unknown }
     ) => {
         try {
             let routineDay = existingRoutineDay;

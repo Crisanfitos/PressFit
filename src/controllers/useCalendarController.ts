@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { RoutineService } from '../services/RoutineService';
+import { RoutineDay, WeeklyRoutine } from '../types/models';
 
 interface CalendarDay {
     type: 'week-header' | 'day';
@@ -35,7 +36,7 @@ interface DayStatus {
 export const useCalendarController = (userId: string | undefined, routineId: string | null = null) => {
     const [calendarDays, setCalendarDays] = useState<CalendarDay[]>([]);
     const [workoutStats, setWorkoutStats] = useState<Record<string, WorkoutStats>>({});
-    const [routineTemplates, setRoutineTemplates] = useState<any[]>([]);
+    const [routineTemplates, setRoutineTemplates] = useState<WeeklyRoutine[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -132,10 +133,10 @@ export const useCalendarController = (userId: string | undefined, routineId: str
         return days;
     }, []);
 
-    const fetchRoutineTemplates = useCallback(async (): Promise<any[]> => {
+    const fetchRoutineTemplates = useCallback(async (): Promise<WeeklyRoutine[]> => {
         if (!userId) return [];
         try {
-            let data: any[] = [];
+            let data: WeeklyRoutine[] = [];
             if (routineId) {
                 const result = await RoutineService.getWeeklyRoutineWithDays(routineId);
                 data = result.data ? [result.data] : [];
@@ -150,7 +151,7 @@ export const useCalendarController = (userId: string | undefined, routineId: str
         }
     }, [userId, routineId]);
 
-    const fetchStatsForRange = useCallback(async (templates: any[], minWeek: number, maxWeek: number): Promise<Record<string, WorkoutStats>> => {
+    const fetchStatsForRange = useCallback(async (templates: WeeklyRoutine[], minWeek: number, maxWeek: number): Promise<Record<string, WorkoutStats>> => {
         if (!templates || templates.length === 0) return {};
 
         const startDate = formatDateKey(getMondayOfWeek(minWeek));
@@ -162,8 +163,9 @@ export const useCalendarController = (userId: string | undefined, routineId: str
         const allStats: Record<string, WorkoutStats> = {};
 
         if (workouts) {
-            workouts.forEach((workout: any) => {
+            workouts.forEach((workout: RoutineDay) => {
                 const dateKey = workout.fecha_dia;
+                if (!dateKey) return;
                 const existingStats = allStats[dateKey];
 
                 if (existingStats?.isCompleted && !workout.completada) return;
@@ -250,7 +252,7 @@ export const useCalendarController = (userId: string | undefined, routineId: str
     const getRoutineDayForName = (dayName: string) => {
         for (const routine of routineTemplates) {
             if (!routine.rutinas_diarias) continue;
-            const rd = routine.rutinas_diarias.find((r: any) => r.nombre_dia === dayName);
+            const rd = routine.rutinas_diarias.find((r: RoutineDay) => r.nombre_dia === dayName);
             if (rd) return { routine, routineDay: rd };
         }
         return null;

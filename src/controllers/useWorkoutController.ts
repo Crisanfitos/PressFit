@@ -8,6 +8,7 @@ import { MAX_TOTAL_SETS_PER_EXERCISE, MAX_WARMUP_SETS_PER_EXERCISE, checkSetLimi
 import { clearActiveWorkoutParams, saveActiveWorkoutParams } from '../services/TimerNotificationService';
 import { PersonalRecordService, ExercisePRs, BrokenPRDetail } from '../services/PersonalRecordService';
 import { HapticService } from '../services/HapticService';
+import { RoutineDay, ScheduledExercise, Serie, SetUpdatePayload } from '../types/models';
 
 export type WorkoutMode = 'ACTIVE' | 'VIEW' | 'MISSED' | 'PREVIEW' | 'PENDING';
 
@@ -52,7 +53,7 @@ interface Workout {
     descripcion?: string;
     fecha_dia?: string;
     nombre_dia?: string;
-    ejercicios_programados?: any[];
+    ejercicios_programados?: ScheduledExercise[];
 }
 
 export const useWorkoutController = (
@@ -68,7 +69,7 @@ export const useWorkoutController = (
     const [timer, setTimer] = useState(0);
     const [isTimerRunning, setIsTimerRunning] = useState(false);
     const [mode, setMode] = useState<WorkoutMode>('ACTIVE');
-    const [previousWorkout, setPreviousWorkout] = useState<any>(null);
+    const [previousWorkout, setPreviousWorkout] = useState<RoutineDay | null>(null);
     const [activePRCelebration, setActivePRCelebration] = useState<ActivePRCelebration | null>(null);
     const exercisePRsRef = useRef<Record<string, ExercisePRs>>({});
     const timerInterval = useRef<NodeJS.Timeout | null>(null);
@@ -88,7 +89,7 @@ export const useWorkoutController = (
         );
     }, [userId]);
 
-    const loadExercises = useCallback(async (rDayId: string, wId: string | null, prevWorkout?: any) => {
+    const loadExercises = useCallback(async (rDayId: string, wId: string | null, prevWorkout?: RoutineDay | null) => {
         let finalExercises: Exercise[] = [];
 
         // Set previousWorkout atomically with exercises to avoid timing issues
@@ -101,13 +102,13 @@ export const useWorkoutController = (
             if (workoutData) {
                 setWorkout(workoutData);
                 if (workoutData.ejercicios_programados) {
-                    finalExercises = workoutData.ejercicios_programados.map((ex: any) => ({
+                    finalExercises = workoutData.ejercicios_programados.map((ex: ScheduledExercise) => ({
                         ...ex.ejercicio,
-                        titulo: ex.ejercicio?.titulo || ex.ejercicio?.nombre || 'Ejercicio',
-                        id: ex.ejercicio.id,
+                        titulo: ex.ejercicio?.titulo || 'Ejercicio',
+                        id: ex.ejercicio?.id || ex.ejercicio_id,
                         routine_exercise_id: ex.id,
                         target_sets: 3,
-                        sets: (ex.series || []).map((s: any) => ({
+                        sets: (ex.series || []).map((s: Serie) => ({
                             ...s,
                             is_completed: Boolean(s.is_completed || s.completada),
                             completada: Boolean(s.is_completed || s.completada),
@@ -121,17 +122,17 @@ export const useWorkoutController = (
         } else {
             const { data: routineDay } = await RoutineService.getRoutineDayById(rDayId);
             if (routineDay) {
-                setWorkout(routineDay as any);
+                setWorkout(routineDay as unknown as Workout);
                 if (routineDay.ejercicios_programados) {
-                    finalExercises = routineDay.ejercicios_programados.map((re: any) => {
+                    finalExercises = routineDay.ejercicios_programados.map((re: ScheduledExercise) => {
                         // Use series from previous workout if available, otherwise use template's own series
                         let setsToUse: Set[] = re.series || [];
                         if (prevWorkout?.ejercicios_programados) {
                             const prevExercise = prevWorkout.ejercicios_programados.find(
-                                (pe: any) => pe.ejercicio_id === re.ejercicio.id
+                                (pe: ScheduledExercise) => pe.ejercicio_id === re.ejercicio?.id || pe.ejercicio_id === re.ejercicio_id
                             );
                             if (prevExercise?.series && prevExercise.series.length > 0) {
-                                setsToUse = prevExercise.series.map((s: any) => ({
+                                setsToUse = prevExercise.series.map((s: Serie) => ({
                                     ...s,
                                     fromPrevious: true,
                                 }));
@@ -412,9 +413,9 @@ export const useWorkoutController = (
 
             // Backend ok → reload series for this exercise
             await loadSeriesForExercise(targetWorkoutId, exerciseId);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Failed to add sets', error);
-            Alert.alert('Error Add Sets', JSON.stringify(error));
+            Alert.alert('Error Add Sets', String(error));
         }
     };
 
@@ -422,7 +423,7 @@ export const useWorkoutController = (
         await addSets(exerciseId, 1, setType);
     };
 
-    const updateSet = async (setId: string, field: string, value: any) => {
+    const updateSet = async (setId: string, field: string, value: string | number | boolean | SetType | null) => {
         const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
         if (!canEdit) return;
 
@@ -434,7 +435,7 @@ export const useWorkoutController = (
         // 'rpe' maps directly to 'rpe' in DB — no renaming needed
 
         let processedValue = value;
-        let dbValue: any = value === '' || value === undefined ? null : value;
+        let dbValue: string | number | boolean | SetType | null = value === '' || value === undefined ? null : value;
 
         if (field === 'rpe') {
             const validation = validateRpe(value);
@@ -465,11 +466,11 @@ export const useWorkoutController = (
         );
 
         try {
-            const updatesPayload: any = (field === 'setType' || field === 'tipo_serie')
-                ? { tipo_serie: dbValue }
+            const updatesPayload: Parameters<typeof WorkoutService.updateSet>[1] = (field === 'setType' || field === 'tipo_serie')
+                ? { tipo_serie: dbValue as SetType }
                 : (field === 'is_completed' || field === 'completada')
-                    ? { is_completed: dbValue, completada: dbValue }
-                    : { [field]: dbValue };
+                    ? { is_completed: Boolean(dbValue), completada: Boolean(dbValue) }
+                    : { [field]: dbValue as number };
             await WorkoutService.updateSet(setId, updatesPayload);
         } catch (error) {
             console.error('Failed to update set', error);

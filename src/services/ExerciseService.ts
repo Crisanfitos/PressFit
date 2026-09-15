@@ -21,16 +21,27 @@ interface Exercise {
     grupo_muscular?: string;
     url_video?: string;
     imagen_url?: string;
-    [key: string]: any;
+    [key: string]: unknown;
+}
+
+interface CatalogExerciseItem {
+    id: string;
+    nombre?: string;
+    titulo?: string;
+    grupo_muscular?: string;
+    musculos_primarios?: string;
+    is_custom?: boolean;
+    es_personalizado?: boolean;
+    [key: string]: unknown;
 }
 
 export const ExerciseService = {
     async getExercises(): Promise<ServiceResponse<Exercise[]>> {
         if (isE2EMockEnabled()) {
             return {
-                data: mockStore.getCatalogExercises().map((ex: any) => ({
+                data: (mockStore.getCatalogExercises() as CatalogExerciseItem[]).map((ex) => ({
                     ...ex,
-                    titulo: ex.nombre || ex.titulo,
+                    titulo: ex.nombre || ex.titulo || '',
                     grupo_muscular: ex.grupo_muscular || 'General',
                     musculos_primarios: ex.musculos_primarios || ex.grupo_muscular || 'General',
                     is_custom: !!(ex.is_custom || ex.es_personalizado),
@@ -113,7 +124,7 @@ export const ExerciseService = {
             };
         }
         try {
-            const updatePayload: any = {};
+            const updatePayload: Record<string, unknown> = {};
             if (exerciseData.titulo) updatePayload.titulo = exerciseData.titulo;
             if (exerciseData.descripcion !== undefined) updatePayload.description = exerciseData.descripcion;
             if (exerciseData.grupo_muscular) updatePayload.categoria = exerciseData.grupo_muscular;
@@ -178,7 +189,7 @@ export const ExerciseService = {
         userId: string,
         routineDayId: string,
         exerciseIds: string[]
-    ): Promise<ServiceResponse<any[]>> {
+    ): Promise<ServiceResponse<unknown[]>> {
         if (isE2EMockEnabled()) {
             mockStore.addExercisesToRoutineDay(routineDayId, exerciseIds);
             return { data: [], error: null };
@@ -233,7 +244,7 @@ export const ExerciseService = {
         }
     },
 
-    async savePersonalNote(userId: string, exerciseId: string, content: string): Promise<ServiceResponse<any>> {
+    async savePersonalNote(userId: string, exerciseId: string, content: string): Promise<ServiceResponse<unknown>> {
         try {
             const { data, error } = await supabase
                 .from('notas_personales_ejercicios')
@@ -280,7 +291,7 @@ export const ExerciseService = {
 
             // Extract unique exercise IDs from user's completed series
             const exerciseIds = new Set<string>();
-            seriesData?.forEach((serie: any) => {
+            seriesData?.forEach((serie: { ejercicio_programado?: { ejercicio_id?: string; rutina_diaria?: { rutina_semanal?: { usuario_id?: string } } } }) => {
                 const userId_from_data = serie.ejercicio_programado?.rutina_diaria?.rutina_semanal?.usuario_id;
                 if (userId_from_data === userId && serie.ejercicio_programado?.ejercicio_id) {
                     exerciseIds.add(serie.ejercicio_programado.ejercicio_id);

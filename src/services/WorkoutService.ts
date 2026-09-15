@@ -24,24 +24,26 @@ async function checkIsOffline(): Promise<boolean> {
     }
 }
 
-function isNetworkError(error: any): boolean {
+function isNetworkError(error: unknown): boolean {
     if (!error) return false;
-    const msg = String(error.message || error.name || error).toLowerCase();
+    const errObj = error as { message?: string; name?: string } | null;
+    const msg = String(errObj?.message || errObj?.name || error).toLowerCase();
     return msg.includes('fetch') || msg.includes('network') || msg.includes('offline') || msg.includes('timeout');
 }
 
-export function isSchemaColumnError(error: any): boolean {
+export function isSchemaColumnError(error: unknown): boolean {
     if (!error) return false;
-    if (error.code === 'PGRST204') return true;
-    if (error.code === '42703') return true;
-    const msg = String(error.message || error.details || error.hint || error).toLowerCase();
+    const errObj = error as { code?: string; message?: string; details?: string; hint?: string } | null;
+    if (errObj?.code === 'PGRST204') return true;
+    if (errObj?.code === '42703') return true;
+    const msg = String(errObj?.message || errObj?.details || errObj?.hint || error).toLowerCase();
     return msg.includes('tipo_serie') || msg.includes('is_completed') || msg.includes('completada') || (msg.includes('column') && msg.includes('schema cache'));
 }
 
 export const WorkoutService = {
     async getWorkoutDetails(workoutId: string): Promise<ServiceResponse<RoutineDay>> {
         if (isE2EMockEnabled()) {
-            return { data: mockStore.getMockRoutineDay(workoutId) as any, error: null };
+            return { data: mockStore.getMockRoutineDay(workoutId) as unknown as RoutineDay, error: null };
         }
 
         const offline = await checkIsOffline();
@@ -71,9 +73,9 @@ export const WorkoutService = {
                 const existingCachedWorkout = currentCached.find((w) => w.id === workoutId);
                 const cachedSeriesMap = new Map<string, Serie>();
                 if (existingCachedWorkout?.ejercicios_programados) {
-                    existingCachedWorkout.ejercicios_programados.forEach((ex: any) => {
+                    existingCachedWorkout.ejercicios_programados.forEach((ex: ScheduledExercise) => {
                         if (ex.series) {
-                            ex.series.forEach((s: any) => {
+                            ex.series.forEach((s: Serie) => {
                                 if (s.id) cachedSeriesMap.set(s.id, s);
                             });
                         }
@@ -134,9 +136,9 @@ export const WorkoutService = {
         const cachedWorkout = cachedRes.data?.find((w) => w.id === workoutId);
         if (cachedWorkout) {
             if (cachedWorkout.ejercicios_programados) {
-                cachedWorkout.ejercicios_programados.forEach((ex: any) => {
+                cachedWorkout.ejercicios_programados.forEach((ex: ScheduledExercise) => {
                     if (ex.series) {
-                        ex.series = ex.series.map((s: any) => {
+                        ex.series = ex.series.map((s: Serie) => {
                             const isCompleted = Boolean(s.is_completed || s.completada);
                             return {
                                 ...s,
@@ -155,7 +157,7 @@ export const WorkoutService = {
 
     async createWorkout(userId: string, routineDayId: string): Promise<ServiceResponse<RoutineDay>> {
         if (isE2EMockEnabled()) {
-            return { data: mockStore.startWorkout(routineDayId) as any, error: null };
+            return { data: mockStore.startWorkout(routineDayId) as unknown as RoutineDay, error: null };
         }
         try {
             const { data: templateDay, error: templateError } = await supabase
@@ -270,9 +272,8 @@ export const WorkoutService = {
                             if (insertCopyRes.error && isSchemaColumnError(insertCopyRes.error)) {
                                 console.warn('[WorkoutService] tipo_serie column not supported on insert copy, inserting legacy series');
                                 const legacySeries = seriesToInsert.map((s) => {
-                                    const copy = { ...s };
-                                    delete (copy as any).tipo_serie;
-                                    return copy;
+                                    const { tipo_serie: _removed, ...legacyCopy } = s;
+                                    return legacyCopy;
                                 });
                                 await supabase.from('series').insert(legacySeries);
                             }
@@ -295,7 +296,7 @@ export const WorkoutService = {
 
     async completeWorkout(workoutId: string, durationMinutes?: number): Promise<ServiceResponse<RoutineDay>> {
         if (isE2EMockEnabled()) {
-            return { data: mockStore.completeWorkout() as any, error: null };
+            return { data: mockStore.completeWorkout() as unknown as RoutineDay, error: null };
         }
 
         const offline = await checkIsOffline();
@@ -351,7 +352,7 @@ export const WorkoutService = {
         }
 
         return {
-            data: updatedWorkout || ({ id: workoutId, completada: true, hora_fin: nowIso } as any),
+            data: updatedWorkout || ({ id: workoutId, completada: true, hora_fin: nowIso } as unknown as RoutineDay),
             error: null,
         };
     },
@@ -383,7 +384,7 @@ export const WorkoutService = {
             if (seriesError) throw seriesError;
             const normalizedSeries = (series || []).map((s) => ({
                 ...s,
-                tipo_serie: (s as any).tipo_serie || 'normal',
+                tipo_serie: (s as { tipo_serie?: SetType }).tipo_serie || 'normal',
             }));
             return { data: normalizedSeries, error: null };
         } catch (error) {
@@ -466,12 +467,13 @@ export const WorkoutService = {
 
             if (isE2EMockEnabled()) {
                 const mockAdded = mockStore.addSet(exerciseId, setType);
-                return { data: (mockAdded || data) as any, error: null };
+                return { data: (mockAdded || data) as unknown as Serie, error: null };
             }
 
             if (error) throw error;
-            const normalizedData = data
-                ? { ...data, tipo_serie: (data as any).tipo_serie || setType || 'normal' }
+            const serieData = data as (Serie & { tipo_serie?: SetType }) | null;
+            const normalizedData = serieData
+                ? { ...serieData, tipo_serie: serieData.tipo_serie || setType || 'normal' }
                 : data;
             return { data: normalizedData, error: null };
         } catch (error) {
@@ -505,14 +507,14 @@ export const WorkoutService = {
 
         if (isE2EMockEnabled()) {
             const mockUpdated = mockStore.updateSet(setId, dbUpdates);
-            return { data: mockUpdated as any, error: null };
+            return { data: mockUpdated as unknown as Serie, error: null };
         }
 
         const offline = await checkIsOffline();
         if (!offline) {
             try {
                 // PostgREST column is is_completed (completada is an internal/client alias)
-                const supabasePayload: any = { ...dbUpdates };
+                const supabasePayload: Partial<SetUpdatePayload> = { ...dbUpdates };
                 delete supabasePayload.completada;
 
                 let { data, error } = await supabase
@@ -556,13 +558,14 @@ export const WorkoutService = {
                 }
 
                 // Update local cache
-                let normalized: any = data;
+                let normalized: Serie | null = data;
                 if (data) {
+                    const rawData = data as Serie & { tipo_serie?: SetType; is_completed?: boolean; completada?: boolean };
                     normalized = {
                         ...data,
-                        tipo_serie: (data as any).tipo_serie || dbUpdates.tipo_serie || 'normal',
-                        is_completed: (data as any).is_completed ?? dbUpdates.is_completed ?? false,
-                        completada: (data as any).completada ?? (data as any).is_completed ?? dbUpdates.completada ?? dbUpdates.is_completed ?? false,
+                        tipo_serie: rawData.tipo_serie || dbUpdates.tipo_serie || 'normal',
+                        is_completed: rawData.is_completed ?? dbUpdates.is_completed ?? false,
+                        completada: rawData.completada ?? rawData.is_completed ?? dbUpdates.completada ?? dbUpdates.is_completed ?? false,
                     };
                     const cachedRes = await OfflineStorageService.getCachedWorkouts();
                     const workouts = cachedRes.data || [];
@@ -800,8 +803,23 @@ export const WorkoutService = {
 
             if (error) throw error;
 
+            interface ExerciseHistoryDbRow {
+                id: string;
+                numero_serie: number;
+                peso_utilizado?: number | null;
+                repeticiones?: number | null;
+                rpe?: number | null;
+                ejercicios_programados?: {
+                    tipo_peso?: string | null;
+                    rutinas_diarias?: {
+                        fecha_dia?: string | null;
+                        id?: string | null;
+                    } | null;
+                } | null;
+            }
+
             // Flatten and sort the data in JS to ensure correctness
-            const history: ExerciseHistoryRow[] = (data || []).map((row: any) => ({
+            const history: ExerciseHistoryRow[] = ((data || []) as ExerciseHistoryDbRow[]).map((row) => ({
                 id: row.id,
                 numero_serie: row.numero_serie,
                 peso_utilizado: row.peso_utilizado ?? 0,
@@ -860,7 +878,7 @@ export const WorkoutService = {
                     ejercicio_id: newExerciseId,
                     orden_ejecucion: 1,
                     created_at: new Date().toISOString(),
-                } as any,
+                } as unknown as ScheduledExercise,
                 error: null,
             };
         }

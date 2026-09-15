@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { ExerciseService } from '../services/ExerciseService';
+import { ExerciseService, CustomExerciseInput } from '../services/ExerciseService';
 
 export interface Exercise {
     id: string;
@@ -165,7 +165,7 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
         }
     };
 
-    const createCustomExercise = useCallback(async (input: any) => {
+    const createCustomExercise = useCallback(async (input: CustomExerciseInput) => {
         setSaving(true);
         try {
             const { data, error } = await ExerciseService.createCustomExercise(input);

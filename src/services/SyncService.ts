@@ -20,7 +20,7 @@ export interface RetryLogEntry {
 export interface PendingSyncOperation {
     id: string;
     type: SyncOperationType;
-    payload: any;
+    payload: unknown;
     timestamp: number;
     attempts: number;
     nextRetryTimestamp?: number;
@@ -41,7 +41,7 @@ export interface TimestampedEntity {
     updated_at?: string | number | null;
     created_at?: string | number | null;
     timestamp?: number | null;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export const SYNC_QUEUE_STORAGE_KEY = '@pressfit_sync_queue';
@@ -83,13 +83,13 @@ export const SyncService = {
      * Resolves conflict between local and remote entity states.
      * Uses Last-Write-Wins (LWW) strategy by comparing timestamps.
      */
-    resolveConflict<T extends Record<string, any>>(
+    resolveConflict<T extends Record<string, unknown>>(
         local: T | null | undefined,
         remote: T | null | undefined,
         strategy: ConflictResolutionStrategy = 'LAST_WRITE_WINS'
     ): ConflictResolutionResult<T> {
         if (!local && !remote) {
-            return { winner: 'REMOTE', resolved: null as any, isConflict: false };
+            return { winner: 'REMOTE', resolved: null as unknown as T, isConflict: false };
         }
         if (!local) {
             return { winner: 'REMOTE', resolved: remote!, isConflict: false };
@@ -157,7 +157,7 @@ export const SyncService = {
      */
     async enqueueOperation(
         type: SyncOperationType,
-        payload: any
+        payload: unknown
     ): Promise<ServiceResponse<PendingSyncOperation>> {
         try {
             const queueRes = await SyncService.getQueue();
@@ -285,9 +285,9 @@ export const SyncService = {
                         if (!success) {
                             failureError = 'Executor returned false';
                         }
-                    } catch (err: any) {
+                    } catch (err: unknown) {
                         success = false;
-                        failureError = err?.message || String(err);
+                        failureError = err instanceof Error ? err.message : String(err);
                     }
                 } else {
                     // Default fallback: simulate successful processing

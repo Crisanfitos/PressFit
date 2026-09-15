@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ServiceResponse } from '../types/models';
+import { ServiceResponse, WeeklyRoutine, RoutineDay, Exercise, ExerciseHistoryRow } from '../types/models';
 
 export const STORAGE_KEYS = {
     ROUTINES: '@pressfit_cached_routines',
@@ -9,7 +9,7 @@ export const STORAGE_KEYS = {
     TIMESTAMPS: '@pressfit_cached_timestamps',
 };
 
-export interface CacheEnvelope<T = any> {
+export interface CacheEnvelope<T = unknown> {
     data: T;
     createdAt: number;
     lastAccessedAt: number;
@@ -104,13 +104,13 @@ export const OfflineStorageService = {
             const now = Date.now();
             const ttl = customTTL ?? this.getTTL(key);
 
-            let processedData: any = data;
+            let processedData: T = data;
             // If data is an array and exceeds max entries, keep the most recent entries (LRU / tail)
             if (Array.isArray(data) && data.length > maxEntriesLimit) {
-                processedData = data.slice(-maxEntriesLimit);
+                processedData = (data.slice(-maxEntriesLimit) as unknown) as T;
             }
 
-            const envelope: CacheEnvelope<any> = {
+            const envelope: CacheEnvelope<T> = {
                 data: processedData,
                 createdAt: now,
                 lastAccessedAt: now,
@@ -133,7 +133,7 @@ export const OfflineStorageService = {
             const rawData = await AsyncStorage.getItem(key);
             if (!rawData) return { data: null, error: null };
 
-            let parsed: any;
+            let parsed: unknown;
             try {
                 parsed = JSON.parse(rawData);
             } catch {
@@ -383,57 +383,57 @@ export const OfflineStorageService = {
     /**
      * Cache weekly routines
      */
-    async saveRoutines(routines: any[]): Promise<ServiceResponse<boolean>> {
+    async saveRoutines(routines: WeeklyRoutine[]): Promise<ServiceResponse<boolean>> {
         return this._saveCacheItem(STORAGE_KEYS.ROUTINES, routines);
     },
 
     /**
      * Get cached weekly routines
      */
-    async getCachedRoutines(): Promise<ServiceResponse<any[] | null>> {
-        return this._getCachedItem<any[]>(STORAGE_KEYS.ROUTINES);
+    async getCachedRoutines(): Promise<ServiceResponse<WeeklyRoutine[] | null>> {
+        return this._getCachedItem<WeeklyRoutine[]>(STORAGE_KEYS.ROUTINES);
     },
 
     /**
      * Cache workouts
      */
-    async saveWorkouts(workouts: any[]): Promise<ServiceResponse<boolean>> {
+    async saveWorkouts(workouts: RoutineDay[]): Promise<ServiceResponse<boolean>> {
         return this._saveCacheItem(STORAGE_KEYS.WORKOUTS, workouts);
     },
 
     /**
      * Get cached workouts
      */
-    async getCachedWorkouts(): Promise<ServiceResponse<any[] | null>> {
-        return this._getCachedItem<any[]>(STORAGE_KEYS.WORKOUTS);
+    async getCachedWorkouts(): Promise<ServiceResponse<RoutineDay[] | null>> {
+        return this._getCachedItem<RoutineDay[]>(STORAGE_KEYS.WORKOUTS);
     },
 
     /**
      * Cache exercises
      */
-    async saveExercises(exercises: any[]): Promise<ServiceResponse<boolean>> {
+    async saveExercises(exercises: Exercise[]): Promise<ServiceResponse<boolean>> {
         return this._saveCacheItem(STORAGE_KEYS.EXERCISES, exercises);
     },
 
     /**
      * Get cached exercises
      */
-    async getCachedExercises(): Promise<ServiceResponse<any[] | null>> {
-        return this._getCachedItem<any[]>(STORAGE_KEYS.EXERCISES);
+    async getCachedExercises(): Promise<ServiceResponse<Exercise[] | null>> {
+        return this._getCachedItem<Exercise[]>(STORAGE_KEYS.EXERCISES);
     },
 
     /**
      * Cache exercise weight history
      */
-    async saveHistory(history: any[]): Promise<ServiceResponse<boolean>> {
+    async saveHistory(history: ExerciseHistoryRow[]): Promise<ServiceResponse<boolean>> {
         return this._saveCacheItem(STORAGE_KEYS.HISTORY, history);
     },
 
     /**
      * Get cached exercise weight history
      */
-    async getCachedHistory(): Promise<ServiceResponse<any[] | null>> {
-        return this._getCachedItem<any[]>(STORAGE_KEYS.HISTORY);
+    async getCachedHistory(): Promise<ServiceResponse<ExerciseHistoryRow[] | null>> {
+        return this._getCachedItem<ExerciseHistoryRow[]>(STORAGE_KEYS.HISTORY);
     },
 
     /**

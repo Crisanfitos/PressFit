@@ -75,7 +75,7 @@ export class ShareService {
      * Returns the URI of the temporary file generated.
      */
     static async captureCard(
-        viewRef: React.RefObject<any>,
+        viewRef: React.RefObject<unknown>,
         options?: CaptureOptions
     ): Promise<string | null> {
         if (!viewRef || !viewRef.current) {
@@ -90,7 +90,7 @@ export class ShareService {
                 result: options?.result || 'tmpfile',
             });
             return uri;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('[ShareService] Error capturing card view:', error);
             return null;
         }
@@ -147,11 +147,11 @@ export class ShareService {
                 action: result.action,
                 imageUri: options.imageUri || null,
             };
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('[ShareService] Error sharing workout:', error);
             return {
                 success: false,
-                error: error.message || 'Error desconocido al compartir',
+                error: error instanceof Error ? error.message : 'Error desconocido al compartir',
                 imageUri: options.imageUri || null,
             };
         }
@@ -161,7 +161,7 @@ export class ShareService {
      * Combined convenience method: captures view ref and immediately opens share sheet.
      */
     static async captureAndShare(
-        viewRef: React.RefObject<any>,
+        viewRef: React.RefObject<unknown>,
         options?: { data?: SocialCardData; title?: string; captureOptions?: CaptureOptions }
     ): Promise<ShareResult> {
         let imageUri: string | null = null;
