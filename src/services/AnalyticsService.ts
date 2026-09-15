@@ -150,7 +150,7 @@ export const AnalyticsService = {
             rpe?: number | null;
             tipo_serie?: SetType | string | null;
             is_warmup?: boolean | null;
-            [key: string]: any;
+            [key: string]: unknown;
         }>
     ): WorkoutTonnageSummary {
         return calculateWorkoutTonnage(series);
@@ -204,7 +204,19 @@ export const AnalyticsService = {
                 rutina_id?: string;
             }>>();
 
-            for (const row of (data as any[]) || []) {
+            interface OneRMQueryRow {
+                numero_serie?: number | null;
+                peso_utilizado?: number | null;
+                repeticiones?: number | null;
+                ejercicios_programados?: {
+                    rutinas_diarias?: {
+                        id?: string;
+                        fecha_dia?: string;
+                    } | null;
+                } | null;
+            }
+
+            for (const row of (data as unknown as OneRMQueryRow[]) || []) {
                 const fecha = row.ejercicios_programados?.rutinas_diarias?.fecha_dia;
                 const rutinaId = row.ejercicios_programados?.rutinas_diarias?.id;
                 const peso = Number(row.peso_utilizado);
@@ -325,7 +337,29 @@ export const AnalyticsService = {
             // Group sets by exercise
             const exerciseMap = new Map<string, ExerciseWithSeriesForVolume>();
 
-            for (const row of (data as any[]) || []) {
+            interface VolumeQueryRow {
+                id?: string;
+                numero_serie?: number | null;
+                peso_utilizado?: number | null;
+                repeticiones?: number | null;
+                rpe?: number | null;
+                tipo_serie?: SetType | string | null;
+                is_warmup?: boolean | null;
+                ejercicios_programados?: {
+                    id?: string;
+                    ejercicio?: {
+                        id?: string;
+                        titulo?: string;
+                        nombre?: string;
+                        musculos_primarios?: string | string[] | null;
+                        musculos_secundarios?: string | string[] | null;
+                        grupo_muscular_principal?: string | null;
+                        grupos_musculares_secundarios?: string | string[] | null;
+                    } | null;
+                } | null;
+            }
+
+            for (const row of (data as unknown as VolumeQueryRow[]) || []) {
                 const epId = row.ejercicios_programados?.id;
                 const ejercicio = row.ejercicios_programados?.ejercicio;
                 if (!epId || !ejercicio) continue;
@@ -435,7 +469,17 @@ export const AnalyticsService = {
 
             if (error) throw error;
 
-            const seriesList = ((data as any[]) || []).map((row) => ({
+            interface FatigueQueryRow {
+                id?: string;
+                numero_serie?: number;
+                peso_utilizado?: number;
+                repeticiones?: number;
+                rpe?: number;
+                is_warmup?: boolean;
+                tipo_serie?: string;
+            }
+
+            const seriesList = ((data as unknown as FatigueQueryRow[]) || []).map((row) => ({
                 id: row.id,
                 numero_serie: row.numero_serie,
                 peso_utilizado: row.peso_utilizado,

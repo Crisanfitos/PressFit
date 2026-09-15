@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { RoutineService } from '../services/RoutineService';
+import { RoutineDay } from '../types/models';
 
 interface WeeklyRoutine {
     id: string;
@@ -8,7 +9,7 @@ interface WeeklyRoutine {
 
     activa: boolean;
     objetivo?: string;
-    rutinas_diarias?: any[];
+    rutinas_diarias?: RoutineDay[];
 }
 
 export const useWeeklyRoutineController = (userId: string | undefined) => {
@@ -64,9 +65,9 @@ export const useWeeklyRoutineController = (userId: string | undefined) => {
 
             if (data) setRoutines((prev) => [data, ...prev]);
             return { success: true };
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error creating routine:', err);
-            return { success: false, error: err.message };
+            return { success: false, error: err instanceof Error ? err.message : String(err) };
         } finally {
             setLoading(false);
         }

@@ -3,6 +3,14 @@ import { supabase } from '../lib/supabase';
 import { PostgrestError, UserMetrics, ServiceResponse, UserProfile } from '../types/models';
 
 
+export interface DbUserMetrics {
+    peso: number | null;
+    altura: number | null;
+    grasa_corporal: number | null;
+    imc: number | null;
+    updated_at?: string | null;
+}
+
 export const UserService = {
     async createOrUpdateProfile(user: User): Promise<ServiceResponse<UserProfile>> {
         try {
@@ -66,7 +74,7 @@ export const UserService = {
         }
     },
 
-    async getUserMetrics(userId: string): Promise<ServiceResponse<any>> {
+    async getUserMetrics(userId: string): Promise<ServiceResponse<DbUserMetrics>> {
         try {
             const { data, error } = await supabase
                 .from('usuarios')
@@ -88,7 +96,7 @@ export const UserService = {
         }
     },
 
-    async uploadProfilePhoto(userId: string, photoUri: string): Promise<{ url: string | null; error: any | null }> {
+    async uploadProfilePhoto(userId: string, photoUri: string): Promise<{ url: string | null; error: unknown }> {
         try {
             const fileExt = photoUri.split('.').pop()?.toLowerCase() || 'jpg';
             const fileName = `${userId}/${Date.now()}.${fileExt}`;

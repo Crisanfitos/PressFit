@@ -53,11 +53,12 @@ export const mapPresetDaysToWeeklySchedule = <T = any>(presetDays: T[] = []): (T
 export const retryOnNetworkFailure = async <T>(fn: () => Promise<T>, retries = 3, delayMs = 300): Promise<T> => {
     try {
         return await fn();
-    } catch (err: any) {
+    } catch (err: unknown) {
+        const errObj = err as { message?: string; name?: string } | null;
         const isNetworkErr =
-            err?.message?.includes('Network request failed') ||
-            err?.message?.includes('network') ||
-            err?.name === 'TypeError';
+            errObj?.message?.includes('Network request failed') ||
+            errObj?.message?.includes('network') ||
+            errObj?.name === 'TypeError';
         if (retries > 0 && isNetworkErr) {
             await new Promise((resolve) => setTimeout(resolve, delayMs));
             return retryOnNetworkFailure(fn, retries - 1, delayMs * 1.5);
@@ -167,7 +168,7 @@ export const createPresetDailyRoutines = async (
                 }
 
                 if (ex.series && ex.series.length > 0) {
-                    const seriesInserts = ex.series.map((s: any) => ({
+                    const seriesInserts = ex.series.map((s: { numero_serie: number; repeticiones_objetivo?: number; peso_sugerido?: number; rpe_objetivo?: number; descanso_segundos?: number }) => ({
                         ejercicio_programado_id: newScheduledEx.id,
                         numero_serie: s.numero_serie,
                         repeticiones: s.repeticiones_objetivo || 0,
@@ -190,7 +191,7 @@ export const createPresetDailyRoutines = async (
 export const RoutineService = {
     async getWeeklyRoutineWithDays(routineId: string): Promise<ServiceResponse<WeeklyRoutine>> {
         if (isE2EMockEnabled()) {
-            return { data: mockStore.getActiveRoutine() as any, error: null };
+            return { data: mockStore.getActiveRoutine() as unknown as WeeklyRoutine, error: null };
         }
         try {
             const { data, error } = await supabase
@@ -238,7 +239,7 @@ export const RoutineService = {
 
     async getUserRoutines(userId: string): Promise<ServiceResponse<WeeklyRoutine[]>> {
         if (isE2EMockEnabled()) {
-            return { data: [mockStore.getActiveRoutine() as any], error: null };
+            return { data: [mockStore.getActiveRoutine() as unknown as WeeklyRoutine], error: null };
         }
         try {
             const { data, error } = await supabase
@@ -530,7 +531,7 @@ export const RoutineService = {
 
                 for (let i = 0; i < template.rutinas_diarias.length; i++) {
                     const day = template.rutinas_diarias[i];
-                    const newDay = insertedDays.find((d: any) => d.nombre_dia === day.nombre_dia) || insertedDays[i];
+                    const newDay = insertedDays.find((d: RoutineDay) => d.nombre_dia === day.nombre_dia) || insertedDays[i];
 
                     if (!newDay) continue;
 
@@ -553,12 +554,12 @@ export const RoutineService = {
                         if (exError || !insertedExercises) continue;
 
                         // 5. Copy series for this day's exercises in batch
-                        const allSeriesToInsert: any[] = [];
+                        const allSeriesToInsert: SeriesInsert[] = [];
 
                         for (let j = 0; j < day.ejercicios_programados.length; j++) {
                             const exercise = day.ejercicios_programados[j];
                             const newExercise = insertedExercises.find(
-                                (e: any) => e.ejercicio_id === exercise.ejercicio_id && e.orden_ejecucion === exercise.orden_ejecucion
+                                (e: ScheduledExercise) => e.ejercicio_id === exercise.ejercicio_id && e.orden_ejecucion === exercise.orden_ejecucion
                             ) || insertedExercises[j];
 
                             if (!newExercise) continue;
@@ -632,7 +633,7 @@ export const RoutineService = {
         setActive: boolean = true
     ): Promise<ServiceResponse<WeeklyRoutine>> {
         if (isE2EMockEnabled()) {
-            return { data: mockStore.getActiveRoutine() as any, error: null };
+            return { data: mockStore.getActiveRoutine() as unknown as WeeklyRoutine, error: null };
         }
         try {
             // 1. Fetch the preset routine template from local assets

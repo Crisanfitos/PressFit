@@ -8,7 +8,7 @@ interface ProgressPhoto {
     url_foto: string;
     comentario?: string;
     created_at: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export const ProgressService = {
@@ -153,7 +153,7 @@ export const ProgressService = {
 
     async deleteProgressPhotos(
         photoIds: string[]
-    ): Promise<{ success: boolean; error: any | null }> {
+    ): Promise<{ success: boolean; error: unknown }> {
         try {
             const { data: photos, error: fetchError } = await supabase
                 .from('fotos_progreso')

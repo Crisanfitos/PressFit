@@ -2,13 +2,14 @@ import { useState, useCallback } from 'react';
 import { ProgressService } from '../services/ProgressService';
 import { HistoryService } from '../services/HistoryService';
 import { parseDateKeyAsLocalDate } from '../utils/dateUtils';
+import { RoutineDay, ScheduledExercise, Serie } from '../types/models';
 
 interface DailyStats {
     exercises: number;
     sets: number;
     totalWeight: number;
     duration: number;
-    workoutDetails: any;
+    workoutDetails: RoutineDay | null;
 }
 
 interface WeeklyData {
@@ -44,9 +45,9 @@ export const useProgressController = (userId: string | undefined) => {
             const { data } = await HistoryService.getDailyProgress(userId, date);
             if (data && data.length > 0) {
                 const workout = data[0];
-                const sets = workout.ejercicios_programados?.flatMap((ep: any) => ep.series || []) || [];
-                const exercises = new Set(workout.ejercicios_programados?.map((ep: any) => ep.ejercicio_id)).size;
-                const totalWeight = sets.reduce((sum: number, set: any) => sum + ((set.peso_utilizado || 0) * (set.repeticiones || 0)), 0);
+                const sets = workout.ejercicios_programados?.flatMap((ep: ScheduledExercise) => ep.series || []) || [];
+                const exercises = new Set(workout.ejercicios_programados?.map((ep: ScheduledExercise) => ep.ejercicio_id)).size;
+                const totalWeight = sets.reduce((sum: number, set: Serie) => sum + ((set.peso_utilizado || 0) * (set.repeticiones || 0)), 0);
 
                 let duration = 0;
                 if (workout.hora_inicio && workout.hora_fin) {
@@ -113,7 +114,7 @@ export const useProgressController = (userId: string | undefined) => {
             }
 
             let totalDurationMinutes = 0;
-            data.forEach((workout: any) => {
+            data.forEach((workout: RoutineDay) => {
                 if (workout.hora_inicio && workout.hora_fin) {
                     const start = new Date(workout.hora_inicio);
                     const end = new Date(workout.hora_fin);
@@ -132,13 +133,13 @@ export const useProgressController = (userId: string | undefined) => {
                 weekEnd.setDate(weekEnd.getDate() + 6);
                 weekEnd.setHours(23, 59, 59, 999);
 
-                const weekWorkouts = data.filter((w: any) => {
+                const weekWorkouts = data.filter((w: RoutineDay) => {
                     if (!w.fecha_dia) return false;
                     const date = parseDateKeyAsLocalDate(w.fecha_dia);
                     return date >= weekStart && date <= weekEnd;
                 });
 
-                const weekDuration = weekWorkouts.reduce((acc: number, w: any) => {
+                const weekDuration = weekWorkouts.reduce((acc: number, w: RoutineDay) => {
                     if (w.hora_inicio && w.hora_fin) {
                         const start = new Date(w.hora_inicio);
                         const end = new Date(w.hora_fin);
