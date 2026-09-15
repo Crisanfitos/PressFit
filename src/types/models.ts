@@ -192,6 +192,21 @@ export interface ExerciseHistoryEntry {
 }
 
 /**
+ * Row representing a historical exercise set with its routine date and weight type.
+ * Returned by WorkoutService.getExerciseHistory().
+ */
+export interface ExerciseHistoryRow {
+    id: string;
+    numero_serie: number;
+    peso_utilizado: number;
+    repeticiones: number;
+    rpe: number | null;
+    tipo_peso: TipoPeso;
+    fecha: string;
+    rutina_id: string;
+}
+
+/**
  * Partial update payload for a set (serie).
  */
 export interface SetUpdatePayload {
