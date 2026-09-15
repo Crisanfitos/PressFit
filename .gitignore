@@ -58,7 +58,7 @@ Documentacion/
 .maestro/
 coverage/
 coverage-components/
-failed_test.txt
+failed_test*.txt
 e2e/.env.e2e
 
 # EAS configuration (tracked by git for EAS Cloud build)
