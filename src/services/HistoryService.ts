@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { formatLocalDateKey, getStartOfWeek } from '../utils/dateUtils';
+import { ServiceResponse } from '../types/models';
 
 interface WorkoutSession {
     id: string;
@@ -8,11 +9,6 @@ interface WorkoutSession {
     fecha_dia?: string;
     ejercicios_programados?: any[];
     [key: string]: any;
-}
-
-interface ServiceResponse<T> {
-    data: T | null;
-    error: any | null;
 }
 
 export const HistoryService = {
