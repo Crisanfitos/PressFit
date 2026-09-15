@@ -13,6 +13,7 @@
     "test:components:coverage": "jest --config jest.component.config.js --coverage",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "type-check": "tsc --noEmit",
     "prebuild": "expo prebuild",
     "db:link": "npx supabase link --project-ref suaxmalkquricsbwkczt",
     "db:push": "npx supabase db push",
