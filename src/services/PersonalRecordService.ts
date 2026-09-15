@@ -1,20 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { calculate1RM } from '../utils/analyticsUtils';
-import { ServiceResponse } from '../types/models';
-
-export interface PersonalRecord {
-    peso_maximo: number;
-    repeticiones: number;
-    fecha_pr: string;
-    fecha_dia: string;
-}
-
-export interface ExerciseHistoryEntry {
-    fecha_dia: string;
-    peso_sesion: number;
-    reps_totales: number;
-    volumen_sesion: number;
-}
+import { ServiceResponse, PersonalRecord, ExerciseHistoryEntry } from '../types/models';
 
 export interface ExercisePRs {
     maxWeight: number;    // Best single set weight (kg)
@@ -36,7 +22,7 @@ export interface PRDetectionResult {
     brokenPRs: BrokenPRDetail[];
 }
 
-export type { ServiceResponse };
+export type { ServiceResponse, PersonalRecord, ExerciseHistoryEntry };
 
 export const PersonalRecordService = {
     /**
