@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { calculate1RM } from '../utils/analyticsUtils';
+import { ServiceResponse } from '../types/models';
 
 export interface PersonalRecord {
     peso_maximo: number;
@@ -35,10 +36,7 @@ export interface PRDetectionResult {
     brokenPRs: BrokenPRDetail[];
 }
 
-export interface ServiceResponse<T> {
-    data: T | null;
-    error: any | null;
-}
+export type { ServiceResponse };
 
 export const PersonalRecordService = {
     /**

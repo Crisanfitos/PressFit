@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { HistoryService } from './HistoryService';
+import { ServiceResponse } from '../types/models';
 
 interface ProgressPhoto {
     id: string;
@@ -8,11 +9,6 @@ interface ProgressPhoto {
     comentario?: string;
     created_at: string;
     [key: string]: any;
-}
-
-interface ServiceResponse<T> {
-    data: T | null;
-    error: any | null;
 }
 
 export const ProgressService = {

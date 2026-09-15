@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { isE2EMockEnabled, mockStore, e2eFixtures } from '../lib/e2eMockAdapter';
+import { ServiceResponse } from '../types/models';
 
 export interface CustomExerciseInput {
     titulo: string;
@@ -21,11 +22,6 @@ interface Exercise {
     url_video?: string;
     imagen_url?: string;
     [key: string]: any;
-}
-
-interface ServiceResponse<T> {
-    data: T | null;
-    error: any | null;
 }
 
 export const ExerciseService = {
