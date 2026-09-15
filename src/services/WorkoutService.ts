@@ -801,17 +801,17 @@ export const WorkoutService = {
             if (error) throw error;
 
             // Flatten and sort the data in JS to ensure correctness
-            const history = (data || []).map((row: ExerciseHistoryRow) => ({
+            const history: ExerciseHistoryRow[] = (data || []).map((row: any) => ({
                 id: row.id,
                 numero_serie: row.numero_serie,
-                peso_utilizado: row.peso_utilizado,
-                repeticiones: row.repeticiones,
-                rpe: row.rpe,
-                tipo_peso: row.ejercicios_programados?.tipo_peso || 'total',
-                fecha: row.ejercicios_programados?.rutinas_diarias?.fecha_dia,
-                rutina_id: row.ejercicios_programados?.rutinas_diarias?.id,
+                peso_utilizado: row.peso_utilizado ?? 0,
+                repeticiones: row.repeticiones ?? 0,
+                rpe: row.rpe ?? null,
+                tipo_peso: (row.ejercicios_programados?.tipo_peso || 'total') as TipoPeso,
+                fecha: row.ejercicios_programados?.rutinas_diarias?.fecha_dia || '',
+                rutina_id: row.ejercicios_programados?.rutinas_diarias?.id || '',
             }))
-                .filter((item) => item.fecha)
+                .filter((item) => Boolean(item.fecha))
                 .sort((a, b) => parseDateKeyAsLocalDate(a.fecha).getTime() - parseDateKeyAsLocalDate(b.fecha).getTime());
 
             return { data: history, error: null };
