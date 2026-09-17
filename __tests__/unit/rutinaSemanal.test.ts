@@ -77,6 +77,23 @@ describe('Rutinas Semanales', () => {
             const result = await RoutineService.createWeeklyRoutine({ nombre: 'Test' });
             expect(result.error).toBeDefined();
         });
+
+        it('should support custom / english day names', async () => {
+            mockChain.single.mockResolvedValueOnce({ data: { id: 'new-r-en' }, error: null });
+            mockChain.then.mockImplementationOnce((resolve: any) =>
+                Promise.resolve({ error: null }).then(resolve)
+            );
+            const englishDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            const result = await RoutineService.createWeeklyRoutine({ nombre: 'English Routine' }, englishDays);
+            expect(result.error).toBeNull();
+            expect(result.data!.id).toBe('new-r-en');
+            expect(mockChain.insert).toHaveBeenCalledWith(
+                expect.arrayContaining([
+                    expect.objectContaining({ nombre_dia: 'Monday' }),
+                    expect.objectContaining({ nombre_dia: 'Sunday' }),
+                ])
+            );
+        });
     });
 
     describe('updateWeeklyRoutine', () => {

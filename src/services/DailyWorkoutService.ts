@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { formatLocalDateKey, getStartOfWeek as getStartOfWeekUtil } from "../utils/dateUtils";
+import { getEquivalentDayName } from "../utils/dayUtils";
 import { isE2EMockEnabled, mockStore } from '../lib/e2eMockAdapter';
 import {
     RoutineDay,
@@ -110,7 +111,7 @@ export const DailyWorkoutService = {
             return { data: mockStore.getMockRoutineDay(nombreDia) as any, error: null };
         }
         try {
-            const { data, error } = await supabase
+            let { data, error } = await supabase
                 .from('rutinas_diarias')
                 .select(`
                     *,
@@ -127,6 +128,33 @@ export const DailyWorkoutService = {
                 .eq('nombre_dia', nombreDia)
                 .is('fecha_dia', null)
                 .single();
+
+            // Fallback for bilingual routine matching if not found
+            if ((!data || error?.code === 'PGRST116') && getEquivalentDayName(nombreDia) !== nombreDia) {
+                const altName = getEquivalentDayName(nombreDia);
+                const altRes = await supabase
+                    .from('rutinas_diarias')
+                    .select(`
+                        *,
+                        ejercicios_programados (
+                            id,
+                            ejercicio_id,
+                            orden_ejecucion,
+                            tipo_peso,
+                            ejercicio:ejercicios (*),
+                            series (*)
+                        )
+                    `)
+                    .eq('rutina_semanal_id', routineId)
+                    .eq('nombre_dia', altName)
+                    .is('fecha_dia', null)
+                    .single();
+
+                if (altRes.data) {
+                    data = altRes.data;
+                    error = null;
+                }
+            }
 
             if (error && error.code !== 'PGRST116') throw error;
 

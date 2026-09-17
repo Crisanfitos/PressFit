@@ -49,7 +49,12 @@ export const useWeeklyRoutineController = (userId: string | undefined) => {
         }
     };
 
-    const createRoutine = async (name: string, isTemplate = false, isActive = false) => {
+    const createRoutine = async (
+        name: string,
+        isTemplate = false,
+        isActive = false,
+        daysOfWeek?: readonly string[] | string[]
+    ) => {
         if (!userId) return { success: false, error: 'No user' };
         setLoading(true);
         try {
@@ -60,7 +65,7 @@ export const useWeeklyRoutineController = (userId: string | undefined) => {
                 activa: isActive,
                 objetivo: 'Nueva Rutina',
             };
-            const { data, error: createError } = await RoutineService.createWeeklyRoutine(newRoutine);
+            const { data, error: createError } = await RoutineService.createWeeklyRoutine(newRoutine, daysOfWeek);
             if (createError) throw createError;
 
             if (data) setRoutines((prev) => [data, ...prev]);

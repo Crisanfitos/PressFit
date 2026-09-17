@@ -16,15 +16,20 @@ import {
 import { PresetRoutineService } from './PresetRoutineService';
 
 
-export const DAYS_OF_WEEK = [
-    'Lunes',
-    'Martes',
-    'Miércoles',
-    'Jueves',
-    'Viernes',
-    'Sábado',
-    'Domingo',
-] as const;
+export {
+    DAYS_OF_WEEK,
+    DAYS_OF_WEEK_EN,
+    DAYS_OF_WEEK_KEYS,
+    DAY_NAME_TO_KEY,
+    ES_TO_EN_DAYS,
+    EN_TO_ES_DAYS,
+    getDaysOfWeek,
+    getEquivalentDayName,
+    isSameDayName,
+    getTranslatedDayName,
+    type DayOfWeekKey,
+} from '../utils/dayUtils';
+import { DAYS_OF_WEEK } from '../utils/dayUtils';
 
 /**
  * Maps preset template days to a 7-day weekly schedule (Lunes - Domingo).
@@ -50,7 +55,7 @@ export const mapPresetDaysToWeeklySchedule = <T = any>(presetDays: T[] = []): (T
 /**
  * Helper to retry an async network operation on transient network/socket drops (e.g. OkHttp keep-alive resets)
  */
-export const retryOnNetworkFailure = async <T>(fn: () => Promise<T>, retries = 3, delayMs = 300): Promise<T> => {
+export const retryOnNetworkFailure = async <T>(fn: () => PromiseLike<T> | Promise<T>, retries = 3, delayMs = 300): Promise<T> => {
     try {
         return await fn();
     } catch (err: unknown) {
@@ -109,15 +114,17 @@ export const createPresetDailyRoutines = async (
     weeklyRoutineId: string,
     schedule: (any | null)[],
     catalogExercises: { id: string; titulo?: string | null }[] | null,
-    userId: string
+    userId: string,
+    daysOfWeek: readonly string[] | string[] = DAYS_OF_WEEK,
+    restDayDescription: string = 'Descanso / Recuperación'
 ): Promise<void> => {
-    for (let i = 0; i < DAYS_OF_WEEK.length; i++) {
-        const dayName = DAYS_OF_WEEK[i];
+    for (let i = 0; i < daysOfWeek.length; i++) {
+        const dayName = daysOfWeek[i];
         const presetDay = schedule[i];
 
         const description = presetDay
             ? (presetDay.descripcion ? `${presetDay.nombre_dia} - ${presetDay.descripcion}` : presetDay.nombre_dia)
-            : 'Descanso / Recuperación';
+            : restDayDescription;
 
         const { data: newDay, error: dayError } = await retryOnNetworkFailure(() =>
             supabase
@@ -319,7 +326,10 @@ export const RoutineService = {
         }
     },
 
-    async createWeeklyRoutine(routineData: Partial<WeeklyRoutine>): Promise<ServiceResponse<WeeklyRoutine>> {
+    async createWeeklyRoutine(
+        routineData: Partial<WeeklyRoutine>,
+        daysOfWeek: readonly string[] | string[] = DAYS_OF_WEEK
+    ): Promise<ServiceResponse<WeeklyRoutine>> {
         try {
             // For non-template routines, set fecha_inicio_semana to Monday of current week
             const insertData: WeeklyRoutineInsert = {
@@ -336,8 +346,6 @@ export const RoutineService = {
                 .single();
 
             if (error) throw error;
-
-            const daysOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
             const dailyRoutinesData = daysOfWeek.map((dayName) => ({
                 rutina_semanal_id: routine.id,
@@ -619,18 +627,15 @@ export const RoutineService = {
      * @param userId The ID of the user importing the routine
      * @param presetRoutineId The ID of the preset routine (e.g. 'preset-ppl-6d')
      * @param setActive Whether to automatically set this routine as active (defaults to true)
-
-
-    /**
-     * Imports/clones a pre-defined seed routine into the user's active weekly routine in Supabase.
-     * @param userId The ID of the user importing the routine
-     * @param presetRoutineId The ID of the preset routine (e.g. 'preset-ppl-6d')
-     * @param setActive Whether to automatically set this routine as active (defaults to true)
+     * @param daysOfWeek Optional days of the week array (defaults to DAYS_OF_WEEK)
+     * @param restDayDescription Optional rest day description (defaults to 'Descanso / Recuperación')
      */
     async importPresetRoutine(
         userId: string,
         presetRoutineId: string,
-        setActive: boolean = true
+        setActive: boolean = true,
+        daysOfWeek: readonly string[] | string[] = DAYS_OF_WEEK,
+        restDayDescription: string = 'Descanso / Recuperación'
     ): Promise<ServiceResponse<WeeklyRoutine>> {
         if (isE2EMockEnabled()) {
             return { data: mockStore.getActiveRoutine() as unknown as WeeklyRoutine, error: null };
@@ -671,7 +676,7 @@ export const RoutineService = {
 
             // 4. Map preset days into 7-day weekly schedule and persist daily routines
             const schedule = mapPresetDaysToWeeklySchedule(preset.rutinas_diarias || []);
-            await createPresetDailyRoutines(newRoutine.id, schedule, catalogExercises, userId);
+            await createPresetDailyRoutines(newRoutine.id, schedule, catalogExercises, userId, daysOfWeek, restDayDescription);
 
             // 5. Activate routine if requested
             if (setActive) {
@@ -695,8 +700,13 @@ export const RoutineService = {
     async createWeeklyRoutineFromPreset(
         userId: string,
         presetRoutineId: string,
-        setActive: boolean = true
+        setActive: boolean = true,
+        daysOfWeek?: readonly string[] | string[],
+        restDayDescription?: string
     ): Promise<ServiceResponse<WeeklyRoutine>> {
+        if (daysOfWeek !== undefined || restDayDescription !== undefined) {
+            return this.importPresetRoutine(userId, presetRoutineId, setActive, daysOfWeek, restDayDescription);
+        }
         return this.importPresetRoutine(userId, presetRoutineId, setActive);
     },
 };

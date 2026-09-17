@@ -210,5 +210,21 @@
       "preferenceLabel": "Rest notification",
       "preferenceDescription": "Show timer in notification drawer"
     }
+  },
+  "days": {
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday"
+  },
+  "routine": {
+    "daysOfWeek": "Days of the Week",
+    "restDayDescription": "Rest / Recovery",
+    "noExercises": "No exercises - Tap to add",
+    "exercisesCount_one": "{{count}} exercise",
+    "exercisesCount_other": "{{count}} exercises"
   }
 }

@@ -1,11 +1,17 @@
 import {
     mapPresetDaysToWeeklySchedule,
     DAYS_OF_WEEK,
+    DAYS_OF_WEEK_EN,
+    DAYS_OF_WEEK_KEYS,
+    getDaysOfWeek,
+    getEquivalentDayName,
+    isSameDayName,
+    getTranslatedDayName,
     RoutineService,
 } from '../../src/services/RoutineService';
 
-describe('Preset Schedule Mapping and Decomposition (PF-303)', () => {
-    describe('DAYS_OF_WEEK constant', () => {
+describe('Preset Schedule Mapping and Decomposition (PF-303 / PF-371)', () => {
+    describe('DAYS_OF_WEEK and i18n day constants', () => {
         it('has 7 days ordered from Lunes to Domingo', () => {
             expect(DAYS_OF_WEEK).toEqual([
                 'Lunes',
@@ -17,6 +23,62 @@ describe('Preset Schedule Mapping and Decomposition (PF-303)', () => {
                 'Domingo',
             ]);
             expect(DAYS_OF_WEEK.length).toBe(7);
+        });
+
+        it('has 7 English days ordered from Monday to Sunday', () => {
+            expect(DAYS_OF_WEEK_EN).toEqual([
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday',
+                'Sunday',
+            ]);
+            expect(DAYS_OF_WEEK_EN.length).toBe(7);
+        });
+
+        it('returns correct days array based on locale via getDaysOfWeek', () => {
+            expect(getDaysOfWeek('es')).toBe(DAYS_OF_WEEK);
+            expect(getDaysOfWeek('es-ES')).toBe(DAYS_OF_WEEK);
+            expect(getDaysOfWeek('en')).toBe(DAYS_OF_WEEK_EN);
+            expect(getDaysOfWeek('en-US')).toBe(DAYS_OF_WEEK_EN);
+        });
+
+        it('translates day name or returns fallback via getTranslatedDayName', () => {
+            const mockT = jest.fn((key: string) => {
+                const map: Record<string, string> = {
+                    'days.monday': 'Monday',
+                    'days.tuesday': 'Tuesday',
+                    'days.wednesday': 'Wednesday',
+                };
+                return map[key] || key;
+            });
+
+            expect(getTranslatedDayName('Lunes', mockT)).toBe('Monday');
+            expect(getTranslatedDayName('lunes', mockT)).toBe('Monday');
+            expect(getTranslatedDayName('Martes', mockT)).toBe('Tuesday');
+            expect(getTranslatedDayName('CustomDay', mockT)).toBe('CustomDay');
+            expect(getTranslatedDayName('Lunes')).toBe('Lunes');
+        });
+
+        it('resolves equivalent day names between Spanish and English', () => {
+            expect(getEquivalentDayName('Lunes')).toBe('Monday');
+            expect(getEquivalentDayName('Monday')).toBe('Lunes');
+            expect(getEquivalentDayName('Miércoles')).toBe('Wednesday');
+            expect(getEquivalentDayName('Wednesday')).toBe('Miércoles');
+            expect(getEquivalentDayName('Domingo')).toBe('Sunday');
+            expect(getEquivalentDayName('Sunday')).toBe('Domingo');
+        });
+
+        it('correctly compares day names across languages and casing via isSameDayName', () => {
+            expect(isSameDayName('Lunes', 'Monday')).toBe(true);
+            expect(isSameDayName('lunes', 'monday')).toBe(true);
+            expect(isSameDayName('Miércoles', 'Wednesday')).toBe(true);
+            expect(isSameDayName('Miercoles', 'Wednesday')).toBe(true);
+            expect(isSameDayName('Lunes', 'Martes')).toBe(false);
+            expect(isSameDayName('Lunes', 'Tuesday')).toBe(false);
+            expect(isSameDayName('', 'Lunes')).toBe(false);
         });
     });
 

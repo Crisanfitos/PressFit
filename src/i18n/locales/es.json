@@ -210,5 +210,21 @@
       "preferenceLabel": "Notificación de descanso",
       "preferenceDescription": "Mostrar temporizador en la barra de notificaciones"
     }
+  },
+  "days": {
+    "monday": "Lunes",
+    "tuesday": "Martes",
+    "wednesday": "Miércoles",
+    "thursday": "Jueves",
+    "friday": "Viernes",
+    "saturday": "Sábado",
+    "sunday": "Domingo"
+  },
+  "routine": {
+    "daysOfWeek": "Días de la Semana",
+    "restDayDescription": "Descanso / Recuperación",
+    "noExercises": "Sin ejercicios - Toca para añadir",
+    "exercisesCount_one": "{{count}} ejercicio",
+    "exercisesCount_other": "{{count}} ejercicios"
   }
 }

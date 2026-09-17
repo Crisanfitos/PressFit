@@ -12,11 +12,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { RoutineService } from '../services/RoutineService';
+import { DAYS_OF_WEEK, getTranslatedDayName } from '../utils/dayUtils';
 
-const DAY_NAMES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const DAY_NAMES = DAYS_OF_WEEK;
 
 type RoutineDetailScreenProps = {
     navigation: any;
@@ -24,6 +26,7 @@ type RoutineDetailScreenProps = {
 };
 
 const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, route }) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
     const authContext = useContext(AuthContext);
@@ -263,11 +266,12 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
             </View>
 
             <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 100 }}>
-                <Text style={styles.sectionTitle}>Días de la Semana</Text>
+                <Text style={styles.sectionTitle}>{t('routine.daysOfWeek', 'Días de la Semana')}</Text>
 
                 {DAY_NAMES.map((dayName) => {
                     const exerciseCount = getDayExerciseCount(dayName);
                     const dayId = getDayId(dayName);
+                    const translatedDay = getTranslatedDayName(dayName, t);
 
                     return (
                         <TouchableOpacity
@@ -299,14 +303,16 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
                             }}
                         >
                             <View style={styles.dayInfo}>
-                                <Text style={styles.dayName}>{dayName}</Text>
+                                <Text style={styles.dayName}>{translatedDay}</Text>
                                 {getDayDescription(dayName) ? (
                                     <Text style={styles.dayDescription}>{getDayDescription(dayName)}</Text>
                                 ) : null}
                                 <Text style={styles.dayExercises}>
                                     {exerciseCount > 0
-                                        ? `${exerciseCount} ejercicio${exerciseCount > 1 ? 's' : ''}`
-                                        : 'Sin ejercicios - Toca para añadir'}
+                                        ? (exerciseCount === 1
+                                            ? t('routine.exercisesCount_one', '1 ejercicio', { count: 1 })
+                                            : t('routine.exercisesCount_other', `${exerciseCount} ejercicios`, { count: exerciseCount }))
+                                        : t('routine.noExercises', 'Sin ejercicios - Toca para añadir')}
                                 </Text>
                             </View>
                             <TouchableOpacity
