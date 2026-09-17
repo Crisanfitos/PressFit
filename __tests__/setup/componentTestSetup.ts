@@ -127,6 +127,26 @@ jest.mock('react-native-view-shot', () => ({
     releaseCapture: jest.fn(),
 }));
 
+// Mock Sentry React Native globally
+jest.mock('@sentry/react-native', () => ({
+    init: jest.fn(),
+    wrap: jest.fn((component: any) => component),
+    captureException: jest.fn(),
+    captureMessage: jest.fn(),
+    withScope: jest.fn((callback: (scope: any) => void) => {
+        const scope = {
+            setExtras: jest.fn(),
+            setTag: jest.fn(),
+            setUser: jest.fn(),
+            setExtra: jest.fn(),
+            setLevel: jest.fn(),
+        };
+        callback(scope);
+    }),
+    setUser: jest.fn(),
+    addBreadcrumb: jest.fn(),
+}));
+
 import i18n from '../../src/i18n';
 
 // Reset i18n language to Spanish before each test to guarantee deterministic UI text across environments (Linux CI vs Windows)
