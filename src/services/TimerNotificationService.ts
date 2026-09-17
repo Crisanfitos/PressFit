@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../i18n';
 import { WorkoutService } from './WorkoutService';
+import { LogService } from './LogService';
 
 export const TIMER_STORAGE_KEY = '@pressfit_rest_timer_start';
 export const TIMER_PENDING_ACTION_KEY = '@pressfit_timer_action';
@@ -37,10 +38,11 @@ export function setTimerNotificationLogLevel(level: TimerLogLevel): void {
 export function logTimerNotification(level: 'error' | 'warn' | 'info' | 'debug', message: string, ...args: any[]): void {
     const priority: Record<TimerLogLevel, number> = { none: 0, error: 1, warn: 2, info: 3, debug: 4 };
     if (priority[level] <= priority[currentLogLevel]) {
-        if (level === 'error') console.error(`[TimerNotification] ${message}`, ...args);
-        else if (level === 'warn') console.warn(`[TimerNotification] ${message}`, ...args);
-        else if (level === 'debug') console.debug(`[TimerNotification] ${message}`, ...args);
-        else console.log(`[TimerNotification] ${message}`, ...args);
+        const extra = args.length > 0 ? (args.length === 1 ? args[0] : args) : undefined;
+        if (level === 'error') LogService.error(`[TimerNotification] ${message}`, args[0], extra);
+        else if (level === 'warn') LogService.warn(`[TimerNotification] ${message}`, extra);
+        else if (level === 'debug') LogService.debug(`[TimerNotification] ${message}`, extra);
+        else LogService.info(`[TimerNotification] ${message}`, extra);
     }
 }
 

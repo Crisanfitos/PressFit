@@ -1,6 +1,7 @@
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { PostgrestError, UserMetrics, ServiceResponse, UserProfile } from '../types/models';
+import { LogService } from './LogService';
 
 
 export interface DbUserMetrics {
@@ -28,7 +29,7 @@ export const UserService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error creating/updating profile:', error);
+            LogService.error('Error creating/updating profile:', error);
             return { data: null, error };
         }
     },
@@ -69,7 +70,7 @@ export const UserService = {
 
             return { data, error: null };
         } catch (error) {
-            console.error('Error saving user metrics:', error);
+            LogService.error('Error saving user metrics:', error);
             return { data: null, error };
         }
     },
@@ -91,7 +92,7 @@ export const UserService = {
 
             return { data, error: null };
         } catch (error) {
-            console.error('Error fetching user metrics:', error);
+            LogService.error('Error fetching user metrics:', error);
             return { data: null, error };
         }
     },
@@ -138,7 +139,7 @@ export const UserService = {
 
             return { url: publicUrl, error: null };
         } catch (error) {
-            console.error('Error uploading profile photo:', error);
+            LogService.error('Error uploading profile photo:', error);
             return { url: null, error };
         }
     },
@@ -155,7 +156,7 @@ export const UserService = {
             if (error) throw error;
             return { data: data || [], error: null };
         } catch (error) {
-            console.error('Error fetching weight history:', error);
+            LogService.error('Error fetching weight history:', error);
             return { data: null, error };
         }
     },

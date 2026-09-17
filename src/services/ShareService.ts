@@ -2,6 +2,7 @@ import { Share, Platform } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import { SocialCardData } from '../components/social';
 import { formatDuration, formatVolume } from '../components/social/SocialCardCanvas.styles';
+import { LogService } from './LogService';
 
 export interface CaptureOptions {
     format?: 'png' | 'jpg';
@@ -79,7 +80,7 @@ export class ShareService {
         options?: CaptureOptions
     ): Promise<string | null> {
         if (!viewRef || !viewRef.current) {
-            console.warn('[ShareService] captureCard called without a valid viewRef');
+            LogService.warn('[ShareService] captureCard called without a valid viewRef');
             return null;
         }
 
@@ -91,7 +92,7 @@ export class ShareService {
             });
             return uri;
         } catch (error: unknown) {
-            console.error('[ShareService] Error capturing card view:', error);
+            LogService.error('[ShareService] Error capturing card view:', error);
             return null;
         }
     }
@@ -148,7 +149,7 @@ export class ShareService {
                 imageUri: options.imageUri || null,
             };
         } catch (error: unknown) {
-            console.error('[ShareService] Error sharing workout:', error);
+            LogService.error('[ShareService] Error sharing workout:', error);
             return {
                 success: false,
                 error: error instanceof Error ? error.message : 'Error desconocido al compartir',

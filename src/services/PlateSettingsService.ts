@@ -7,6 +7,7 @@ import {
   DEFAULT_BAR_WEIGHT_LB,
   WeightUnit,
 } from '../utils/plateCalculator';
+import { LogService } from './LogService';
 
 export const PLATE_SETTINGS_STORAGE_KEY = '@pressfit_plate_settings';
 
@@ -88,7 +89,7 @@ export const PlateSettingsService = {
       memoryCache[cacheKey] = merged;
       return { ...merged };
     } catch (error) {
-      console.warn('[PlateSettingsService] Error loading plate settings, using defaults:', error);
+      LogService.warn('[PlateSettingsService] Error loading plate settings, using defaults:', error);
       const defaults = getDefaultPlateSettings();
       memoryCache[cacheKey] = defaults;
       return { ...defaults };
@@ -105,7 +106,7 @@ export const PlateSettingsService = {
       memoryCache[cacheKey] = { ...settings };
       await AsyncStorage.setItem(storageKey, JSON.stringify(settings));
     } catch (error) {
-      console.error('[PlateSettingsService] Error saving plate settings:', error);
+      LogService.error('[PlateSettingsService] Error saving plate settings:', error);
       throw error;
     }
   },

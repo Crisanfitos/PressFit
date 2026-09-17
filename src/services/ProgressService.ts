@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { HistoryService } from './HistoryService';
 import { ServiceResponse } from '../types/models';
+import { LogService } from './LogService';
 
 interface ProgressPhoto {
     id: string;
@@ -67,7 +68,7 @@ export const ProgressService = {
 
             return { data: photosWithSignedUrls, error: null };
         } catch (error) {
-            console.error('Error fetching progress photos:', error);
+            LogService.error('Error fetching progress photos:', error);
             return { data: null, error };
         }
     },
@@ -126,7 +127,7 @@ export const ProgressService = {
 
             return { data: insertData, error: null };
         } catch (error) {
-            console.error('Error uploading progress photo:', error);
+            LogService.error('Error uploading progress photo:', error);
             return { data: null, error };
         }
     },
@@ -146,7 +147,7 @@ export const ProgressService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error updating progress photo:', error);
+            LogService.error('Error updating progress photo:', error);
             return { data: null, error };
         }
     },
@@ -172,7 +173,7 @@ export const ProgressService = {
                     .remove(filePaths);
 
                 if (storageError) {
-                    console.warn('Error deleting from storage:', storageError);
+                    LogService.warn('Error deleting from storage:', storageError);
                 }
             }
 
@@ -185,7 +186,7 @@ export const ProgressService = {
 
             return { success: true, error: null };
         } catch (error) {
-            console.error('Error deleting progress photos:', error);
+            LogService.error('Error deleting progress photos:', error);
             return { success: false, error };
         }
     },

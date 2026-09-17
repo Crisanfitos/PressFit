@@ -10,6 +10,7 @@ import {
     ServiceResponse,
     PostgrestError,
 } from '../types/models';
+import { LogService } from './LogService';
 
 export const DailyWorkoutService = {
     async getRoutineDayById(routineDayId: string): Promise<ServiceResponse<RoutineDay>> {
@@ -54,7 +55,7 @@ export const DailyWorkoutService = {
 
             return { data, error: null };
         } catch (error) {
-            console.error('Error fetching routine day:', error);
+            LogService.error('Error fetching routine day:', error);
             return { data: null, error };
         }
     },
@@ -100,7 +101,7 @@ export const DailyWorkoutService = {
 
             return { data: data || null, error: null };
         } catch (error) {
-            console.error('Error fetching routine day by date:', error);
+            LogService.error('Error fetching routine day by date:', error);
             return { data: null, error };
         }
     },
@@ -174,7 +175,7 @@ export const DailyWorkoutService = {
 
             return { data: data || null, error: null };
         } catch (error) {
-            console.error('Error fetching routine day by name:', error);
+            LogService.error('Error fetching routine day by name:', error);
             return { data: null, error };
         }
     },
@@ -244,7 +245,7 @@ export const DailyWorkoutService = {
                 error: null,
             };
         } catch (error) {
-            console.error('Error getting workout stats:', error);
+            LogService.error('Error getting workout stats:', error);
             return { data: { exerciseCount: 0, duration: null, isCompleted: false }, error };
         }
     },
@@ -279,7 +280,7 @@ export const DailyWorkoutService = {
             if (error && (error as PostgrestError).code !== 'PGRST116') throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error getting active workout:', error);
+            LogService.error('Error getting active workout:', error);
             return { data: null, error };
         }
     },
@@ -480,7 +481,7 @@ export const DailyWorkoutService = {
             if (dayError) throw dayError;
             return { data: newRoutineDay, error: null };
         } catch (error) {
-            console.error('Error getting or creating routine day:', error);
+            LogService.error('Error getting or creating routine day:', error);
             return { data: null, error };
         }
     },
@@ -519,7 +520,7 @@ export const DailyWorkoutService = {
             if (error) throw error;
             return { data: data || [], error: null };
         } catch (error) {
-            console.error('Error fetching batch workouts:', error);
+            LogService.error('Error fetching batch workouts:', error);
             return { data: [], error };
         }
     },
@@ -561,7 +562,7 @@ export const DailyWorkoutService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error updating routine day description:', error);
+            LogService.error('Error updating routine day description:', error);
             return { data: null, error };
         }
     },

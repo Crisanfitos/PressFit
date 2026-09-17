@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { isE2EMockEnabled, mockStore, e2eFixtures } from '../lib/e2eMockAdapter';
 import { ServiceResponse } from '../types/models';
+import { LogService } from './LogService';
 
 export interface CustomExerciseInput {
     titulo: string;
@@ -58,7 +59,7 @@ export const ExerciseService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error fetching exercises:', error);
+            LogService.error('Error fetching exercises:', error);
             return { data: null, error };
         }
     },
@@ -99,7 +100,7 @@ export const ExerciseService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error creating custom exercise:', error);
+            LogService.error('Error creating custom exercise:', error);
             return { data: null, error };
         }
     },
@@ -145,7 +146,7 @@ export const ExerciseService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error updating custom exercise:', error);
+            LogService.error('Error updating custom exercise:', error);
             return { data: null, error };
         }
     },
@@ -164,7 +165,7 @@ export const ExerciseService = {
             if (error) throw error;
             return { data: true, error: null };
         } catch (error) {
-            console.error('Error deleting custom exercise:', error);
+            LogService.error('Error deleting custom exercise:', error);
             return { data: false, error };
         }
     },
@@ -180,7 +181,7 @@ export const ExerciseService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error fetching exercise details:', error);
+            LogService.error('Error fetching exercise details:', error);
             return { data: null, error };
         }
     },
@@ -220,7 +221,7 @@ export const ExerciseService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error adding exercises to routine:', error);
+            LogService.error('Error adding exercises to routine:', error);
             return { data: null, error };
         }
     },
@@ -239,7 +240,7 @@ export const ExerciseService = {
 
             return { data: data?.contenido_nota || null, error: null };
         } catch (error) {
-            console.error('Error fetching personal note:', error);
+            LogService.error('Error fetching personal note:', error);
             return { data: null, error };
         }
     },
@@ -262,7 +263,7 @@ export const ExerciseService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error saving personal note:', error);
+            LogService.error('Error saving personal note:', error);
             return { data: null, error };
         }
     },
@@ -312,7 +313,7 @@ export const ExerciseService = {
             if (exercisesError) throw exercisesError;
             return { data: exercises, error: null };
         } catch (error) {
-            console.error('Error fetching user exercises with progress:', error);
+            LogService.error('Error fetching user exercises with progress:', error);
             return { data: null, error };
         }
     },
