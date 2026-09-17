@@ -15,6 +15,7 @@
 import React, { useMemo } from 'react';
 import { View, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import {
   styles,
@@ -66,11 +67,11 @@ interface StatEntry {
   label: string;
 }
 
-const buildStats = (data: SocialCardData): StatEntry[] => [
-  { value: formatDuration(data.duration), label: 'Duración' },
-  { value: String(data.exerciseCount), label: 'Ejercicios' },
-  { value: String(data.totalSets), label: 'Series' },
-  { value: formatVolume(data.totalVolume), label: 'Volumen' },
+const buildStats = (data: SocialCardData, t: any): StatEntry[] => [
+  { value: formatDuration(data.duration), label: t('social.duration', 'Duración') },
+  { value: String(data.exerciseCount), label: t('social.exercises', 'Ejercicios') },
+  { value: String(data.totalSets), label: t('social.sets', 'Series') },
+  { value: formatVolume(data.totalVolume), label: t('social.volume', 'Volumen') },
 ];
 
 // ============================================================================
@@ -82,11 +83,12 @@ const SocialCardCanvas: React.FC<SocialCardCanvasProps> = ({
   aspectRatio = '9:16',
   testID,
 }) => {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const colors = theme.colors;
   const dimensions = CARD_DIMENSIONS[aspectRatio];
   const isSquare = aspectRatio === '1:1';
-  const stats = useMemo(() => buildStats(data), [data]);
+  const stats = useMemo(() => buildStats(data, t), [data, t]);
   const hasPRs = (data.personalRecords?.length ?? 0) > 0;
 
   return (
@@ -168,7 +170,7 @@ const SocialCardCanvas: React.FC<SocialCardCanvasProps> = ({
       {hasPRs && (
         <View testID="social-card-prs" style={styles.prSection}>
           <Text style={[styles.prTitle, { color: colors.primary }]}>
-            🏆 Personal Records
+            {t('social.personalRecordsTitle', '🏆 Personal Records')}
           </Text>
           {data.personalRecords!.map((pr, idx) => (
             <View key={`pr-${idx}`} style={styles.prItem}>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { ThemeColors } from '../../types/theme';
 
 export interface ExerciseHeaderProps {
@@ -24,6 +25,8 @@ export const ExerciseHeader: React.FC<ExerciseHeaderProps> = ({
     onConfirmSelection,
     onOpenCreateModal,
 }) => {
+    const { t } = useTranslation();
+
     return (
         <View style={styles.header}>
             {isSelectionMode ? (
@@ -42,7 +45,9 @@ export const ExerciseHeader: React.FC<ExerciseHeaderProps> = ({
             )}
 
             <Text style={[styles.headerText, { color: colors.text }]}>
-                {isSelectionMode ? `${selectedCount} Seleccionados` : 'Biblioteca de Ejercicios'}
+                {isSelectionMode
+                    ? t('exerciseCatalog.selectedCount', { count: selectedCount, defaultValue: `${selectedCount} Seleccionados` })
+                    : t('exerciseCatalog.libraryTitle', 'Biblioteca de Ejercicios')}
             </Text>
 
             {isSelectionMode ? (

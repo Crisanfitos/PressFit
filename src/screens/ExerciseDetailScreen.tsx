@@ -15,6 +15,7 @@ import {
 } from 'react-native-safe-area-context';
 import Reanimated from 'react-native-reanimated';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { useExerciseDetailController } from '../controllers/useExerciseDetailController';
@@ -35,6 +36,7 @@ const getVideoId = (url: string | undefined): string | null => {
 };
 
 const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navigation }) => {
+    const { t, i18n } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
     const { exerciseId } = route.params || {};
@@ -182,16 +184,16 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                     </TouchableOpacity>
                 </View>
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ color: colors.textSecondary }}>Ejercicio no encontrado</Text>
+                    <Text style={{ color: colors.textSecondary }}>{t('exerciseDetail.notFound', 'Ejercicio no encontrado')}</Text>
                 </View>
             </SafeAreaView>
         );
     }
 
-    const exerciseName = exercise.titulo || 'Ejercicio';
+    const exerciseName = exercise.titulo || t('workout.exercise', 'Ejercicio');
     const primaryMuscles = exercise.musculos_primarios || 'N/A';
     const secondaryMuscles = exercise.musculos_secundarios || '';
-    const instructions = exercise.descripcion || exercise.description || 'No hay instrucciones disponibles.';
+    const instructions = exercise.descripcion || exercise.description || t('exerciseDetail.noInstructions', 'No hay instrucciones disponibles.');
     const videoId = getVideoId(exercise.url_video);
     const imageUrl = exercise.url_foto || exercise.url_imagen;
 
@@ -243,7 +245,7 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                                     sharedTransitionTag={`exercise-image-${exercise.id}`}
                                 >
                                     <MaterialIcons name="image" size={48} color={colors.textSecondary} />
-                                    <Text style={{ color: colors.textSecondary, marginTop: 8 }}>Sin imagen</Text>
+                                    <Text style={{ color: colors.textSecondary, marginTop: 8 }}>{t('exerciseDetail.noImage', 'Sin imagen')}</Text>
                                 </Reanimated.View>
                             )}
                         </View>
@@ -271,13 +273,13 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                                         }}
                                     >
                                         <MaterialIcons name="play-circle-filled" size={64} color="#FFF" />
-                                        <Text style={{ color: '#FFF', marginTop: 8, fontWeight: '600' }}>Ver en YouTube</Text>
+                                        <Text style={{ color: '#FFF', marginTop: 8, fontWeight: '600' }}>{t('exerciseDetail.viewOnYouTube', 'Ver en YouTube')}</Text>
                                     </View>
                                 </TouchableOpacity>
                             ) : (
                                 <View style={styles.noVideoPlaceholder}>
                                     <MaterialIcons name="videocam-off" size={48} color={colors.textSecondary} />
-                                    <Text style={{ color: colors.textSecondary, marginTop: 8 }}>Sin video</Text>
+                                    <Text style={{ color: colors.textSecondary, marginTop: 8 }}>{t('exerciseDetail.noVideo', 'Sin video')}</Text>
                                 </View>
                             )}
                         </View>
@@ -292,7 +294,7 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
 
                 {/* Muscle Groups */}
                 <View style={styles.infoSection}>
-                    <Text style={styles.sectionTitle}>Músculos Involucrados</Text>
+                    <Text style={styles.sectionTitle}>{t('exerciseDetail.involvedMuscles', 'Músculos Involucrados')}</Text>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
                         <View style={styles.muscleTag}>
                             <MaterialIcons name="fitness-center" size={16} color={colors.primary} style={{ marginRight: 6 }} />
@@ -308,7 +310,7 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
 
                 {/* Instructions */}
                 <View style={styles.infoSection}>
-                    <Text style={styles.sectionTitle}>Instrucciones</Text>
+                    <Text style={styles.sectionTitle}>{t('exerciseDetail.instructions', 'Instrucciones')}</Text>
                     <Text style={styles.description}>{instructions}</Text>
                 </View>
 
@@ -316,14 +318,14 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                 {videoId && (
                     <TouchableOpacity style={styles.youtubeButton} onPress={openYouTube}>
                         <MaterialIcons name="play-arrow" size={24} color="#FFF" />
-                        <Text style={styles.youtubeButtonText}>Ver Video en YouTube</Text>
+                        <Text style={styles.youtubeButtonText}>{t('exerciseDetail.viewVideoOnYouTube', 'Ver Video en YouTube')}</Text>
                     </TouchableOpacity>
                 )}
 
                 {/* Personal Record */}
                 {personalRecord && (
                     <View style={styles.infoSection}>
-                        <Text style={styles.sectionTitle}>Ó Récord Personal</Text>
+                        <Text style={styles.sectionTitle}>🏆 {t('exerciseDetail.personalRecord', 'Récord Personal')}</Text>
                         <View style={styles.prCard}>
                             <View style={styles.prIconContainer}>
                                 <MaterialIcons name="emoji-events" size={26} color={colors.primary} />
@@ -333,7 +335,7 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                                     {personalRecord.peso_maximo} kg × {personalRecord.repeticiones} reps
                                 </Text>
                                 <Text style={styles.prDate}>
-                                    {new Date(personalRecord.fecha_dia).toLocaleDateString()}
+                                    {new Date(personalRecord.fecha_dia).toLocaleDateString(i18n.language)}
                                 </Text>
                             </View>
                         </View>
@@ -343,17 +345,17 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                 {/* Exercise History */}
                 {exerciseHistory.length > 0 && (
                     <View style={styles.infoSection}>
-                        <Text style={styles.sectionTitle}>Historial de Sesiones</Text>
+                        <Text style={styles.sectionTitle}>{t('exerciseDetail.sessionHistory', 'Historial de Sesiones')}</Text>
                         <View style={styles.historyRow}>
-                            <Text style={styles.historyHeaderCell}>Fecha</Text>
-                            <Text style={styles.historyHeaderCell}>Peso Máx</Text>
-                            <Text style={styles.historyHeaderCell}>Reps</Text>
-                            <Text style={styles.historyHeaderCell}>Vol.</Text>
+                            <Text style={styles.historyHeaderCell}>{t('exerciseDetail.tableDate', 'Fecha')}</Text>
+                            <Text style={styles.historyHeaderCell}>{t('exerciseDetail.tableMaxWeight', 'Peso Máx')}</Text>
+                            <Text style={styles.historyHeaderCell}>{t('exerciseDetail.tableReps', 'Reps')}</Text>
+                            <Text style={styles.historyHeaderCell}>{t('exerciseDetail.tableVol', 'Vol.')}</Text>
                         </View>
                         {exerciseHistory.map((entry, i) => (
                             <View key={i} style={styles.historyRow}>
                                 <Text style={styles.historyCell}>
-                                    {new Date(entry.fecha_dia).toLocaleDateString()}
+                                    {new Date(entry.fecha_dia).toLocaleDateString(i18n.language)}
                                 </Text>
                                 <Text style={styles.historyCell}>{entry.peso_sesion} kg</Text>
                                 <Text style={styles.historyCell}>{entry.reps_totales}</Text>

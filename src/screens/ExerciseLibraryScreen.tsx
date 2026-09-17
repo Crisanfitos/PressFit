@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, Keyboard, ActivityIndicator, Alert } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { useExerciseController } from '../controllers/useExerciseController';
 import { CreateCustomExerciseModal } from '../components/CreateCustomExerciseModal';
 import {
@@ -23,6 +24,7 @@ type ExerciseLibraryScreenProps = {
 };
 
 const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigation, route }) => {
+    const { t } = useTranslation();
     const { colors } = useTheme().theme;
     const user = useContext(AuthContext)?.user;
     const { routineDayId } = route.params || {};
@@ -62,18 +64,18 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
 
     const filterRows: FilterRowData[] = useMemo(
         () => [
-            { key: 'primaryMuscle', label: 'Músculo Principal', options: filterOptions.primaryMuscles },
-            { key: 'secondaryMuscle', label: 'Músculo Secundario', options: filterOptions.secondaryMuscles },
-            { key: 'category', label: 'Categoría', options: filterOptions.categories },
-            { key: 'difficulty', label: 'Dificultad', options: filterOptions.difficulties },
+            { key: 'primaryMuscle', label: t('exerciseCatalog.primaryMuscle', 'Músculo Principal'), options: filterOptions.primaryMuscles },
+            { key: 'secondaryMuscle', label: t('exerciseCatalog.secondaryMuscle', 'Músculo Secundario'), options: filterOptions.secondaryMuscles },
+            { key: 'category', label: t('exerciseCatalog.category', 'Categoría'), options: filterOptions.categories },
+            { key: 'difficulty', label: t('exerciseCatalog.difficulty', 'Dificultad'), options: filterOptions.difficulties },
         ],
-        [filterOptions]
+        [filterOptions, t]
     );
 
     const handleConfirmSelection = async () => {
         const success = await saveSelection();
         if (success) navigation.goBack();
-        else Alert.alert('Error', 'No se pudieron añadir los ejercicios');
+        else Alert.alert(t('common.error', 'Error'), t('exerciseCatalog.addExercisesError', 'No se pudieron añadir los ejercicios'));
     };
 
     const openVideo = (videoId: string | null) => {

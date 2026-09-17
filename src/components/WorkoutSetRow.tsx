@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Pressable, StyleSheet, Alert, Keyboard } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import SetInput from './SetInput';
 import { HapticService } from '../services/HapticService';
 import { TipoPeso, SetType, SET_TYPE_COLORS } from '../types/setTypes';
@@ -84,6 +85,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     onDuplicateSet,
     onStartRestTimer,
 }) => {
+    const { t } = useTranslation();
     const isBodyweight = tipoPeso === 'corporal';
     const [isTypePickerVisible, setIsTypePickerVisible] = useState(false);
     const [isActionModalVisible, setIsActionModalVisible] = useState(false);
@@ -115,12 +117,12 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
 
     const promptUnlockConfirmation = () => {
         Alert.alert(
-            'Editar Serie',
-            '¿Deseas desbloquear esta serie para modificar sus valores?',
+            t('workout.unlockSetTitle', 'Editar Serie'),
+            t('workout.unlockSetPrompt', '¿Deseas desbloquear esta serie para modificar sus valores?'),
             [
-                { text: 'Cancelar', style: 'cancel' },
+                { text: t('common.cancel', 'Cancelar'), style: 'cancel' },
                 {
-                    text: 'Desbloquear',
+                    text: t('workout.unlock', 'Desbloquear'),
                     onPress: handleUnlockSet,
                 },
             ]

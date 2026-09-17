@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { BrokenPRDetail } from '../../services/PersonalRecordService';
 import { HapticService } from '../../services/HapticService';
 
@@ -29,6 +30,7 @@ export const PRCelebrationModal: React.FC<PRCelebrationModalProps> = ({
     onShare,
     colors,
 }) => {
+    const { t } = useTranslation();
     if (!visible) return null;
 
     const surfaceBg = colors?.surface || '#1e293b';
@@ -65,13 +67,13 @@ export const PRCelebrationModal: React.FC<PRCelebrationModalProps> = ({
     const getTypeName = (type: string) => {
         switch (type) {
             case 'weight':
-                return 'Peso Máximo';
+                return t('prCelebration.types.weight', 'Peso Máximo');
             case 'volume':
-                return 'Tonelaje de Serie';
+                return t('prCelebration.types.volume', 'Tonelaje de Serie');
             case '1rm':
-                return 'Mejor 1RM Estimado';
+                return t('prCelebration.types.oneRm', '1RM Estimado');
             default:
-                return 'Récord Personal';
+                return t('prCelebration.types.default', 'Récord Personal');
         }
     };
 
@@ -105,7 +107,7 @@ export const PRCelebrationModal: React.FC<PRCelebrationModalProps> = ({
                         </View>
                     </View>
 
-                    <Text style={styles.celebrationSub}>¡NUEVO RÉCORD PERSONAL!</Text>
+                    <Text style={styles.celebrationSub}>{t('prCelebration.title', '¡NUEVO RÉCORD PERSONAL!')}</Text>
                     <Text style={[styles.exerciseTitle, { color: textColor }]} numberOfLines={2}>
                         {exerciseName}
                     </Text>
@@ -145,7 +147,7 @@ export const PRCelebrationModal: React.FC<PRCelebrationModalProps> = ({
                                         {hasPrevious && (
                                             <View style={styles.diffBadge}>
                                                 <Text style={styles.diffText}>
-                                                    +{diff} kg (antes {pr.previousValue} kg)
+                                                    +{diff} kg ({t('prCelebration.before', 'antes')} {pr.previousValue} kg)
                                                 </Text>
                                             </View>
                                         )}
@@ -171,7 +173,7 @@ export const PRCelebrationModal: React.FC<PRCelebrationModalProps> = ({
                                     style={{ marginRight: 6 }}
                                 />
                                 <Text style={[styles.secondaryButtonText, { color: primaryColor }]}>
-                                    Compartir
+                                    {t('common.share', 'Compartir')}
                                 </Text>
                             </TouchableOpacity>
                         )}
@@ -186,7 +188,7 @@ export const PRCelebrationModal: React.FC<PRCelebrationModalProps> = ({
                             onPress={handleContinue}
                             activeOpacity={0.8}
                         >
-                            <Text style={styles.primaryButtonText}>¡A por más!</Text>
+                            <Text style={styles.primaryButtonText}>{t('prCelebration.continue', '¡A por más!')}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

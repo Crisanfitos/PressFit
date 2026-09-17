@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useExerciseController, Exercise } from '../controllers/useExerciseController';
 import { ExerciseListItem } from '../components/exercises/ExerciseListItem';
@@ -39,6 +40,7 @@ interface SwapExerciseScreenProps {
 }
 
 export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigation, route }) => {
+    const { t } = useTranslation();
     const { colors } = useTheme().theme;
     const { workoutId, oldExercise } = route.params || {};
 
@@ -90,7 +92,7 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
 
     const handleFinalizeSwap = async () => {
         if (!selectedCandidate || !oldExercise?.routine_exercise_id || !workoutId) {
-            Alert.alert('Error', 'Faltan datos necesarios para realizar el intercambio.');
+            Alert.alert(t('common.error', 'Error'), t('swapExercise.missingDataError', 'Faltan datos necesarios para realizar el intercambio.'));
             return;
         }
 
@@ -104,7 +106,7 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
             );
 
             if (res.error) {
-                Alert.alert('Error', 'No se pudo intercambiar el ejercicio. Inténtalo de nuevo.');
+                Alert.alert(t('common.error', 'Error'), t('swapExercise.swapError', 'No se pudo intercambiar el ejercicio. Inténtalo de nuevo.'));
                 setIsSubmitting(false);
                 return;
             }
@@ -113,7 +115,7 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
             navigation.goBack();
         } catch (err) {
             console.error('Error swapping exercise:', err);
-            Alert.alert('Error', 'Ocurrió un fallo inesperado al intercambiar el ejercicio.');
+            Alert.alert(t('common.error', 'Error'), t('swapExercise.unexpectedError', 'Ocurrió un fallo inesperado al intercambiar el ejercicio.'));
             setIsSubmitting(false);
         }
     };
@@ -143,12 +145,12 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                             {item.titulo}
                         </Text>
                         <Text style={[styles.candidateSubtitle, { color: colors.textSecondary }]}>
-                            {item.musculos_primarios ? (Array.isArray(item.musculos_primarios) ? item.musculos_primarios.join(', ') : item.musculos_primarios) : 'General'}
+                            {item.musculos_primarios ? (Array.isArray(item.musculos_primarios) ? item.musculos_primarios.join(', ') : item.musculos_primarios) : t('swapExercise.generalMuscle', 'General')}
                         </Text>
                     </View>
                     {isCurrent ? (
                         <View style={[styles.badge, { backgroundColor: colors.border }]}>
-                            <Text style={[styles.badgeText, { color: colors.textSecondary }]}>Actual</Text>
+                            <Text style={[styles.badgeText, { color: colors.textSecondary }]}>{t('swapExercise.currentBadge', 'Actual')}</Text>
                         </View>
                     ) : (
                         <View
@@ -181,10 +183,10 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                 </TouchableOpacity>
                 <View style={styles.headerTitleContainer}>
                     <Text style={[styles.headerTitle, { color: colors.text }]}>
-                        {step === 1 ? 'Intercambiar Ejercicio' : 'Confirmar Intercambio'}
+                        {step === 1 ? t('swapExercise.titleStep1', 'Intercambiar Ejercicio') : t('swapExercise.titleStep2', 'Confirmar Intercambio')}
                     </Text>
                     <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-                        {step === 1 ? 'Paso 1 de 2: Seleccionar nuevo' : 'Paso 2 de 2: Revisar y ajustar'}
+                        {step === 1 ? t('swapExercise.subtitleStep1', 'Paso 1 de 2: Seleccionar nuevo') : t('swapExercise.subtitleStep2', 'Paso 2 de 2: Revisar y ajustar')}
                     </Text>
                 </View>
             </View>
@@ -203,18 +205,18 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                 <View style={styles.currentCardHeader}>
                     <MaterialIcons name="swap-horiz" size={20} color={colors.primary} style={{ marginRight: 6 }} />
                     <Text style={[styles.currentCardLabel, { color: colors.primary }]}>
-                        Ejercicio a sustituir
+                        {t('swapExercise.exerciseToSwap', 'Ejercicio a sustituir')}
                     </Text>
                 </View>
                 <Text style={[styles.currentExerciseTitle, { color: colors.text }]} numberOfLines={1}>
-                    {oldExercise?.titulo || 'Ejercicio actual'}
+                    {oldExercise?.titulo || t('swapExercise.currentExerciseFallback', 'Ejercicio actual')}
                 </Text>
                 <View style={styles.currentExerciseMeta}>
                     <Text style={[styles.currentExerciseMetaText, { color: colors.textSecondary }]}>
-                        {oldExercise?.grupo_muscular || 'Sin grupo especificado'}
+                        {oldExercise?.grupo_muscular || t('swapExercise.noGroupSpecified', 'Sin grupo especificado')}
                     </Text>
                     <Text style={[styles.currentExerciseMetaText, { color: colors.textSecondary }]}>
-                        • {initialSetsCount} {initialSetsCount === 1 ? 'serie actual' : 'series actuales'}
+                        • {initialSetsCount} {initialSetsCount === 1 ? t('swapExercise.singleCurrentSet', 'serie actual') : t('swapExercise.multipleCurrentSets', 'series actuales')}
                     </Text>
                 </View>
             </View>
@@ -229,7 +231,7 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                             <TextInput
                                 testID="swap-exercise-search-input"
                                 style={[styles.searchInput, { color: colors.text }]}
-                                placeholder="Buscar ejercicio de reemplazo..."
+                                placeholder={t('swapExercise.searchPlaceholder', 'Buscar ejercicio de reemplazo...')}
                                 placeholderTextColor={colors.textSecondary}
                                 value={searchQuery}
                                 onChangeText={setSearchQuery}
@@ -261,7 +263,7 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                                         { color: !filters.primaryMuscle ? '#ffffff' : colors.textSecondary },
                                     ]}
                                 >
-                                    Todos
+                                    {t('common.all', 'Todos')}
                                 </Text>
                             </TouchableOpacity>
                             {filterOptions.primaryMuscles.map((muscle) => {
@@ -308,7 +310,7 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                                 <View style={styles.emptyContainer}>
                                     <MaterialIcons name="fitness-center" size={48} color={colors.textSecondary} />
                                     <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                                        No se encontraron ejercicios
+                                        {t('swapExercise.noExercisesFound', 'No se encontraron ejercicios')}
                                     </Text>
                                 </View>
                             }
@@ -319,10 +321,10 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                     <View style={[styles.bottomBar, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
                         <View style={{ flex: 1, marginRight: 12 }}>
                             <Text style={[styles.bottomBarLabel, { color: colors.textSecondary }]}>
-                                {selectedCandidate ? 'Seleccionado:' : 'Selecciona un ejercicio'}
+                                {selectedCandidate ? t('swapExercise.selectedLabel', 'Seleccionado:') : t('swapExercise.selectExercisePrompt', 'Selecciona un ejercicio')}
                             </Text>
                             <Text style={[styles.bottomBarSelected, { color: colors.text }]} numberOfLines={1}>
-                                {selectedCandidate ? selectedCandidate.titulo : 'Ninguno'}
+                                {selectedCandidate ? selectedCandidate.titulo : t('swapExercise.noneSelected', 'Ninguno')}
                             </Text>
                         </View>
                         <TouchableOpacity
@@ -339,7 +341,7 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                                 },
                             ]}
                         >
-                            <Text style={styles.primaryButtonText}>Continuar</Text>
+                            <Text style={styles.primaryButtonText}>{t('common.continue', 'Continuar')}</Text>
                             <MaterialIcons name="arrow-forward" size={18} color="#ffffff" style={{ marginLeft: 4 }} />
                         </TouchableOpacity>
                     </View>
@@ -352,10 +354,10 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                     testID="swap-exercise-step-2"
                 >
                     <Text style={[styles.step2Heading, { color: colors.text }]}>
-                        Comparativa de Ejercicios
+                        {t('swapExercise.compareHeading', 'Comparativa de Ejercicios')}
                     </Text>
                     <Text style={[styles.step2Description, { color: colors.textSecondary }]}>
-                        Revisa el cambio antes de insertarlo en la rutina activa. El nuevo ejercicio ocupará exactamente la misma posición.
+                        {t('swapExercise.compareDescription', 'Revisa el cambio antes de insertarlo en la rutina activa. El nuevo ejercicio ocupará exactamente la misma posición.')}
                     </Text>
 
                     {/* Comparison Cards */}
@@ -363,17 +365,17 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                         {/* Old Exercise Card */}
                         <View style={[styles.compareCard, { backgroundColor: colors.surface, borderColor: '#fca5a5' }]}>
                             <View style={[styles.compareBadge, { backgroundColor: '#fee2e2' }]}>
-                                <Text style={[styles.compareBadgeText, { color: '#dc2626' }]}>Original</Text>
+                                <Text style={[styles.compareBadgeText, { color: '#dc2626' }]}>{t('swapExercise.originalBadge', 'Original')}</Text>
                             </View>
                             <Text style={[styles.compareCardTitle, { color: colors.text }]} numberOfLines={2}>
                                 {oldExercise?.titulo}
                             </Text>
                             <Text style={[styles.compareCardSubtitle, { color: colors.textSecondary }]}>
-                                {oldExercise?.grupo_muscular || 'General'}
+                                {oldExercise?.grupo_muscular || t('swapExercise.generalMuscle', 'General')}
                             </Text>
                             <View style={[styles.compareDivider, { backgroundColor: colors.border }]} />
                             <Text style={[styles.compareCardInfo, { color: colors.textSecondary }]}>
-                                Series actuales: {initialSetsCount}
+                                {t('swapExercise.currentSetsLabel', 'Series actuales:')} {initialSetsCount}
                             </Text>
                         </View>
 
@@ -385,17 +387,17 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                         {/* New Exercise Card */}
                         <View style={[styles.compareCard, { backgroundColor: colors.surface, borderColor: '#86efac' }]}>
                             <View style={[styles.compareBadge, { backgroundColor: '#dcfce7' }]}>
-                                <Text style={[styles.compareBadgeText, { color: '#16a34a' }]}>Nuevo</Text>
+                                <Text style={[styles.compareBadgeText, { color: '#16a34a' }]}>{t('swapExercise.newBadge', 'Nuevo')}</Text>
                             </View>
                             <Text style={[styles.compareCardTitle, { color: colors.text }]} numberOfLines={2}>
                                 {selectedCandidate?.titulo}
                             </Text>
                             <Text style={[styles.compareCardSubtitle, { color: colors.textSecondary }]}>
-                                {selectedCandidate?.musculos_primarios ? (Array.isArray(selectedCandidate.musculos_primarios) ? selectedCandidate.musculos_primarios.join(', ') : selectedCandidate.musculos_primarios) : 'General'}
+                                {selectedCandidate?.musculos_primarios ? (Array.isArray(selectedCandidate.musculos_primarios) ? selectedCandidate.musculos_primarios.join(', ') : selectedCandidate.musculos_primarios) : t('swapExercise.generalMuscle', 'General')}
                             </Text>
                             <View style={[styles.compareDivider, { backgroundColor: colors.border }]} />
                             <Text style={[styles.compareCardInfo, { color: colors.textSecondary }]}>
-                                Dificultad: {selectedCandidate?.dificultad || 'Normal'}
+                                {t('swapExercise.difficultyLabel', 'Dificultad:')} {selectedCandidate?.dificultad || 'Normal'}
                             </Text>
                         </View>
                     </View>
@@ -403,10 +405,10 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                     {/* Sets Config Section */}
                     <View style={[styles.setsConfigCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                         <Text style={[styles.setsConfigTitle, { color: colors.text }]}>
-                            ¿Cuántas series deseas programar?
+                            {t('swapExercise.setsConfigTitle', '¿Cuántas series deseas programar?')}
                         </Text>
                         <Text style={[styles.setsConfigSubtitle, { color: colors.textSecondary }]}>
-                            Se crearán las series en blanco listas para rellenar durante el entrenamiento.
+                            {t('swapExercise.setsConfigSubtitle', 'Se crearán las series en blanco listas para rellenar durante el entrenamiento.')}
                         </Text>
 
                         <View style={styles.counterRow}>
@@ -434,7 +436,7 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                                     {setsCount}
                                 </Text>
                                 <Text style={[styles.counterUnit, { color: colors.textSecondary }]}>
-                                    {setsCount === 1 ? 'serie' : 'series'}
+                                    {setsCount === 1 ? t('swapExercise.setSingular', 'serie') : t('swapExercise.setPlural', 'series')}
                                 </Text>
                             </View>
 
@@ -467,7 +469,7 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                             disabled={isSubmitting}
                         >
                             <Text style={[styles.secondaryButtonText, { color: colors.textSecondary }]}>
-                                Cambiar ejercicio
+                                {t('swapExercise.changeExerciseBtn', 'Cambiar ejercicio')}
                             </Text>
                         </TouchableOpacity>
 
@@ -487,7 +489,7 @@ export const SwapExerciseScreen: React.FC<SwapExerciseScreenProps> = ({ navigati
                             ) : (
                                 <>
                                     <MaterialIcons name="check" size={20} color="#ffffff" style={{ marginRight: 6 }} />
-                                    <Text style={styles.finishButtonText}>Finalizar Intercambio</Text>
+                                    <Text style={styles.finishButtonText}>{t('swapExercise.finalizeSwapBtn', 'Finalizar Intercambio')}</Text>
                                 </>
                             )}
                         </TouchableOpacity>

@@ -12,6 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { ExerciseService, CustomExerciseInput } from '../services/ExerciseService';
 
@@ -32,6 +33,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
   onSuccess,
   initialExercise,
 }) => {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const { colors } = theme;
 
@@ -81,7 +83,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
 
   const handleSubmit = async () => {
     if (!titulo.trim()) {
-      setErrorMsg('El título del ejercicio es obligatorio.');
+      setErrorMsg(t('customExercise.fillNameError', 'El título del ejercicio es obligatorio.'));
       return;
     }
 
@@ -119,7 +121,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
       onClose();
     } catch (err: any) {
       console.error(isEditing ? 'Error al actualizar ejercicio personalizado:' : 'Error al crear ejercicio personalizado:', err);
-      setErrorMsg(err.message || (isEditing ? 'No se pudo actualizar el ejercicio. Inténtalo de nuevo.' : 'No se pudo crear el ejercicio. Inténtalo de nuevo.'));
+      setErrorMsg(err.message || (isEditing ? t('customExercise.updateError', 'No se pudo actualizar el ejercicio. Inténtalo de nuevo.') : t('customExercise.createError', 'No se pudo crear el ejercicio. Inténtalo de nuevo.')));
     } finally {
       setLoading(false);
     }
@@ -141,7 +143,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
           {/* Header */}
           <View style={[styles.header, { borderBottomColor: colors.border }]}>
             <Text style={[styles.headerTitle, { color: colors.text }]}>
-              {isEditing ? 'Editar Ejercicio Personalizado' : 'Nuevo Ejercicio Personalizado'}
+              {isEditing ? t('customExercise.editTitle', 'Editar Ejercicio Personalizado') : t('customExercise.createTitle', 'Nuevo Ejercicio Personalizado')}
             </Text>
             <TouchableOpacity
               onPress={handleClose}
@@ -168,7 +170,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
             {/* Nombre/Título */}
             <View style={styles.inputGroup}>
               <Text style={[styles.label, { color: colors.text }]}>
-                Nombre del Ejercicio <Text style={{ color: colors.error }}>*</Text>
+                {t('customExercise.nameLabel', 'Nombre del Ejercicio')} <Text style={{ color: colors.error }}>*</Text>
               </Text>
               <TextInput
                 style={[
@@ -179,7 +181,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
                     borderColor: colors.border,
                   },
                 ]}
-                placeholder="Ej. Dominadas Lastradas"
+                placeholder={t('customExercise.namePlaceholder', 'Ej. Dominadas Lastradas')}
                 placeholderTextColor={colors.textSecondary}
                 value={titulo}
                 onChangeText={setTitulo}
@@ -189,7 +191,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
 
             {/* Grupo Muscular */}
             <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>Grupo Muscular Principal</Text>
+              <Text style={[styles.label, { color: colors.text }]}>{t('customExercise.muscleGroupLabel', 'Grupo Muscular Principal')}</Text>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -226,7 +228,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
 
             {/* Equipamiento */}
             <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>Equipamiento</Text>
+              <Text style={[styles.label, { color: colors.text }]}>{t('customExercise.equipmentLabel', 'Equipamiento')}</Text>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -263,7 +265,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
 
             {/* Dificultad */}
             <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>Dificultad</Text>
+              <Text style={[styles.label, { color: colors.text }]}>{t('customExercise.difficultyLabel', 'Dificultad')}</Text>
               <View style={styles.rowContainer}>
                 {DIFFICULTIES.map((dif) => {
                   const isSelected = dificultad === dif;
@@ -296,7 +298,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
 
             {/* Descripción */}
             <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>Descripción (Opcional)</Text>
+              <Text style={[styles.label, { color: colors.text }]}>{t('customExercise.descLabel', 'Descripción (Opcional)')}</Text>
               <TextInput
                 style={[
                   styles.input,
@@ -307,7 +309,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
                     borderColor: colors.border,
                   },
                 ]}
-                placeholder="Descripción general del ejercicio..."
+                placeholder={t('customExercise.descPlaceholder', 'Descripción general del ejercicio...')}
                 placeholderTextColor={colors.textSecondary}
                 value={descripcion}
                 onChangeText={setDescripcion}
@@ -319,7 +321,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
 
             {/* Instrucciones */}
             <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>Instrucciones (1 por línea)</Text>
+              <Text style={[styles.label, { color: colors.text }]}>{t('customExercise.instructionsLabel', 'Instrucciones (1 por línea)')}</Text>
               <TextInput
                 style={[
                   styles.input,
@@ -330,7 +332,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
                     borderColor: colors.border,
                   },
                 ]}
-                placeholder="Paso 1: Agarrar la barra&#10;Paso 2: Subir con fuerza"
+                placeholder={t('customExercise.instructionsPlaceholder', 'Paso 1: Agarrar la barra\nPaso 2: Subir con fuerza')}
                 placeholderTextColor={colors.textSecondary}
                 value={instrucciones}
                 onChangeText={setInstrucciones}
@@ -349,7 +351,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
               disabled={loading}
               testID="custom-exercise-cancel-button"
             >
-              <Text style={[styles.buttonText, { color: colors.textSecondary }]}>Cancelar</Text>
+              <Text style={[styles.buttonText, { color: colors.textSecondary }]}>{t('common.cancel', 'Cancelar')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -362,7 +364,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
                 <ActivityIndicator color="#FFF" size="small" />
               ) : (
                 <Text style={[styles.buttonText, { color: '#FFF' }]}>
-                  {isEditing ? 'Guardar Cambios' : 'Guardar Ejercicio'}
+                  {isEditing ? t('common.saveChanges', 'Guardar Cambios') : t('customExercise.saveExercise', 'Guardar Ejercicio')}
                 </Text>
               )}
             </TouchableOpacity>

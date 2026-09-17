@@ -1,6 +1,7 @@
 import React, { useState, useContext, useMemo, useEffect } from 'react';
 import { View, Text, Modal, TextInput, TouchableOpacity, Pressable, StyleSheet, ActivityIndicator, Platform, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import KeyboardAwareContainer from './KeyboardAwareContainer';
@@ -13,6 +14,7 @@ interface EditProfileModalProps {
 }
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, currentMetrics, onSave }) => {
+    const { t } = useTranslation();
     const authContext = useContext(AuthContext);
     const { theme, themeMode } = useTheme();
     const { colors } = theme;
@@ -66,22 +68,22 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
 
         // Height is required only if not already recorded
         if (!hasExistingHeight && !height) {
-            Alert.alert('Error', 'La altura es requerida la primera vez que introduces tus datos');
+            Alert.alert(t('common.error', 'Error'), t('profile.heightRequiredFirstTime', 'La altura es requerida la primera vez que introduces tus datos'));
             return;
         }
 
         if (!weight) {
-            Alert.alert('Error', 'Introduce tu peso para guardar');
+            Alert.alert(t('common.error', 'Error'), t('profile.enterWeightToSave', 'Introduce tu peso para guardar'));
             return;
         }
 
         if (isNaN(weightNum) || (height && isNaN(heightNum))) {
-            Alert.alert('Error', 'Por favor ingresa valores numéricos válidos');
+            Alert.alert(t('common.error', 'Error'), t('profile.enterValidNumericValues', 'Por favor ingresa valores numéricos válidos'));
             return;
         }
 
         if (weightNum <= 0 || (heightNum && heightNum <= 0)) {
-            Alert.alert('Error', 'Los valores deben ser mayores a 0');
+            Alert.alert(t('common.error', 'Error'), t('profile.valuesGreaterThanZero', 'Los valores deben ser mayores a 0'));
             return;
         }
 
@@ -95,7 +97,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
             onClose();
         } catch (error) {
             console.error('Error saving metrics:', error);
-            Alert.alert('Error', 'Ocurrió un error al guardar los datos');
+            Alert.alert(t('common.error', 'Error'), t('profile.saveDataError', 'Ocurrió un error al guardar los datos'));
         } finally {
             setLoading(false);
         }
@@ -138,7 +140,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
                 <Pressable style={{ flex: 1 }} onPress={onClose} />
                 <View style={styles.modalContent} testID="edit-profile-modal">
                     <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle} testID="edit-profile-modal-title">Editar Datos Físicos</Text>
+                        <Text style={styles.modalTitle} testID="edit-profile-modal-title">{t('profile.editPhysicalData', 'Editar Datos Físicos')}</Text>
                         <TouchableOpacity onPress={onClose} testID="edit-profile-modal-close-button">
                             <MaterialIcons name="close" size={24} color={colors.text} />
                         </TouchableOpacity>
@@ -146,7 +148,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
 
                     <View style={styles.form}>
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Peso (kg) *</Text>
+                            <Text style={styles.label}>{t('profile.weightKg', 'Peso (kg) *')}</Text>
                             <TextInput
                                 testID="edit-profile-weight-input"
                                 style={styles.input}
@@ -160,7 +162,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
 
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>
-                                Altura (cm){hasExistingHeight ? ' (opcional)' : ' *'}
+                                {t('profile.heightCm', 'Altura (cm)')}{hasExistingHeight ? ` ${t('profile.optional', '(opcional)')}` : ' *'}
                             </Text>
                             <TextInput
                                 testID="edit-profile-height-input"
@@ -168,19 +170,19 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
                                 value={height}
                                 onChangeText={setHeight}
                                 keyboardType="decimal-pad"
-                                placeholder={hasExistingHeight ? `${currentMetrics?.altura} cm (actual)` : '178'}
+                                placeholder={hasExistingHeight ? `${currentMetrics?.altura} cm (${t('common.current', 'actual')})` : '178'}
                                 placeholderTextColor={colors.textSecondary}
                             />
                             {hasExistingHeight && (
                                 <Text style={styles.optionalHint}>
-                                    Déjalo vacío para mantener {currentMetrics?.altura} cm
+                                    {t('profile.keepExistingHeight', { height: currentMetrics?.altura, defaultValue: `Déjalo vacío para mantener ${currentMetrics?.altura} cm` })}
                                 </Text>
                             )}
                         </View>
 
                         {showImcPreview && imcValue && (
                             <View style={styles.imcPreview} testID="imc-preview">
-                                <Text style={styles.imcLabel}>IMC calculado:</Text>
+                                <Text style={styles.imcLabel}>{t('profile.calculatedBmi', 'IMC calculado:')}</Text>
                                 <Text style={styles.imcValue}>{imcValue}</Text>
                             </View>
                         )}
@@ -188,13 +190,13 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
 
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity style={styles.cancelButton} onPress={onClose} disabled={loading} testID="edit-profile-cancel-button">
-                            <Text style={styles.cancelButtonText}>Cancelar</Text>
+                            <Text style={styles.cancelButtonText}>{t('common.cancel', 'Cancelar')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={[styles.saveButton, loading && styles.saveButtonDisabled]} onPress={handleSave} disabled={loading} testID="edit-profile-save-button">
                             {loading ? (
                                 <ActivityIndicator size="small" color={colors.background} />
                             ) : (
-                                <Text style={styles.saveButtonText}>Guardar</Text>
+                                <Text style={styles.saveButtonText}>{t('common.save', 'Guardar')}</Text>
                             )}
                         </TouchableOpacity>
                     </View>

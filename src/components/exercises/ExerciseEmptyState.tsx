@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { ThemeColors } from '../../types/theme';
 
 export interface ExerciseEmptyStateProps {
@@ -14,6 +15,8 @@ export const ExerciseEmptyState: React.FC<ExerciseEmptyStateProps> = ({
     searchQuery,
     colors,
 }) => {
+    const { t } = useTranslation();
+
     return (
         <View style={styles.emptyStateContainer}>
             <MaterialIcons
@@ -23,8 +26,8 @@ export const ExerciseEmptyState: React.FC<ExerciseEmptyStateProps> = ({
             />
             <Text style={[styles.emptyStateText, { color: colors.textSecondary }]}>
                 {hasActiveFilters || searchQuery.length > 0
-                    ? 'No se encontraron ejercicios con los filtros actuales'
-                    : 'Usa los filtros o el buscador para encontrar ejercicios'}
+                    ? t('exerciseCatalog.noExercisesFound', 'No se encontraron ejercicios con los filtros actuales')
+                    : t('exerciseCatalog.useFiltersPrompt', 'Usa los filtros o el buscador para encontrar ejercicios')}
             </Text>
         </View>
     );

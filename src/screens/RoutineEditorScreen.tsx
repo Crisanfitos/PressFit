@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import KeyboardAwareContainer from '../components/KeyboardAwareContainer';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
@@ -32,6 +33,7 @@ type RoutineEditorScreenProps = {
 };
 
 const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation }) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
     const authContext = useContext(AuthContext);
@@ -96,12 +98,12 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
 
     const handleDeleteRoutine = async (routineId: string) => {
         Alert.alert(
-            'Eliminar Rutina',
-            '¿Estás seguro de que quieres eliminar esta rutina? Esta acción no se puede deshacer.',
+            t('routineEditor.deleteTitle', 'Eliminar Rutina'),
+            t('routineEditor.deleteConfirm', '¿Estás seguro de que quieres eliminar esta rutina? Esta acción no se puede deshacer.'),
             [
-                { text: 'Cancelar', style: 'cancel' },
+                { text: t('common.cancel', 'Cancelar'), style: 'cancel' },
                 {
-                    text: 'Eliminar',
+                    text: t('common.delete', 'Eliminar'),
                     style: 'destructive',
                     onPress: async () => {
                         const routineToDelete = routines.find((r) => r.id === routineId);
@@ -327,19 +329,19 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                 >
                     <MaterialIcons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Mis Plantillas</Text>
+                <Text style={styles.headerTitle}>{t('routineEditor.title', 'Mis Plantillas')}</Text>
             </View>
 
             <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 100 }}>
                 {routines.length === 0 && !loading ? (
                     <View style={styles.emptyState}>
                         <MaterialIcons name="fitness-center" size={64} color={colors.textSecondary} />
-                        <Text style={styles.emptyStateText}>No tienes plantillas creadas</Text>
+                        <Text style={styles.emptyStateText}>{t('routineEditor.emptyState', 'No tienes plantillas creadas')}</Text>
                         <TouchableOpacity
                             style={styles.createButton}
                             onPress={() => setShowCreateModal(true)}
                         >
-                            <Text style={styles.createButtonText}>Crear Primera Plantilla</Text>
+                            <Text style={styles.createButtonText}>{t('routineEditor.createFirst', 'Crear Primera Plantilla')}</Text>
                         </TouchableOpacity>
                     </View>
                 ) : (
@@ -353,7 +355,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                                     <Text style={styles.routineName}>{routine.nombre}</Text>
                                     {routine.activa && (
                                         <View style={styles.activeBadge}>
-                                            <Text style={styles.activeBadgeText}>ACTIVA</Text>
+                                            <Text style={styles.activeBadgeText}>{t('routineEditor.active', 'ACTIVA')}</Text>
                                         </View>
                                     )}
                                 </View>
@@ -371,7 +373,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                                         >
                                             <MaterialIcons name="check-circle-outline" size={18} color={colors.primary} />
                                             <Text style={[styles.actionButtonText, { color: colors.primary }]}>
-                                                Activar
+                                                {t('routineEditor.activate', 'Activar')}
                                             </Text>
                                         </TouchableOpacity>
                                     )}
@@ -390,7 +392,7 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                                             />
                                         )}
                                         <MaterialIcons name="edit" size={18} color={colors.text} />
-                                        <Text style={styles.actionButtonText}>Editar</Text>
+                                        <Text style={styles.actionButtonText}>{t('common.edit', 'Editar')}</Text>
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
@@ -431,13 +433,13 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                     dismissOnClickOutside={false}
                 >
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Nueva Plantilla</Text>
+                        <Text style={styles.modalTitle}>{t('routineEditor.newRoutine', 'Nueva Plantilla')}</Text>
 
                         <View style={styles.inputGroup}>
-                            <Text style={styles.inputLabel}>Nombre de la Plantilla</Text>
+                            <Text style={styles.inputLabel}>{t('routineEditor.routineNameLabel', 'Nombre de la Plantilla')}</Text>
                             <TextInput
                                 style={styles.input}
-                                placeholder="ej. Volumen 4 días"
+                                placeholder={t('routineEditor.routineNamePlaceholder', 'ej. Volumen 4 días')}
                                 placeholderTextColor={colors.textSecondary}
                                 value={newRoutineName}
                                 onChangeText={setNewRoutineName}
@@ -445,10 +447,10 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <Text style={styles.inputLabel}>Objetivo (opcional)</Text>
+                            <Text style={styles.inputLabel}>{t('routineEditor.routineGoalLabel', 'Objetivo (opcional)')}</Text>
                             <TextInput
                                 style={styles.input}
-                                placeholder="ej. Ganar masa muscular"
+                                placeholder={t('routineEditor.routineGoalPlaceholder', 'ej. Ganar masa muscular')}
                                 placeholderTextColor={colors.textSecondary}
                                 value={newRoutineGoal}
                                 onChangeText={setNewRoutineGoal}
@@ -460,13 +462,13 @@ const RoutineEditorScreen: React.FC<RoutineEditorScreenProps> = ({ navigation })
                                 style={[styles.modalButton, styles.cancelButton]}
                                 onPress={() => setShowCreateModal(false)}
                             >
-                                <Text style={styles.cancelButtonText}>Cancelar</Text>
+                                <Text style={styles.cancelButtonText}>{t('common.cancel', 'Cancelar')}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[styles.modalButton, styles.confirmButton]}
                                 onPress={handleCreateRoutine}
                             >
-                                <Text style={styles.confirmButtonText}>Crear</Text>
+                                <Text style={styles.confirmButtonText}>{t('common.create', 'Crear')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
