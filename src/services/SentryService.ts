@@ -1,51 +1,71 @@
-let Sentry: any = null;
-try {
-    Sentry = require('@sentry/react-native');
-} catch (e) {
-    // Sentry not installed or not loaded
-}
+import * as Sentry from '@sentry/react-native';
 
 export const SentryService = {
+    isInitialized: false,
+
     init() {
-        if (Sentry) {
-            try {
-                Sentry.init({
-                    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN || '',
-                    enableInExponentDevelopment: true,
-                    debug: __DEV__,
-                });
-            } catch (error) {
-                console.error('Failed to initialize Sentry:', error);
+        const dsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
+        try {
+            Sentry.init({
+                dsn: dsn || '',
+                enabled: !!dsn,
+                debug: __DEV__,
+                tracesSampleRate: 1.0,
+            });
+            this.isInitialized = true;
+            if (!dsn) {
+                console.log('[SentryService] EXPO_PUBLIC_SENTRY_DSN not configured. Crash reporting disabled in this environment.');
+            } else {
+                console.log('[SentryService] Sentry initialized successfully.');
             }
-        } else {
-            console.log('[SentryService] Sentry is not installed. Logs will fallback to console.');
+        } catch (error) {
+            console.error('Failed to initialize Sentry:', error);
         }
     },
 
-    captureException(error: any, extraInfo?: any) {
+    captureException(error: any, extraInfo?: Record<string, any>) {
         console.error('[SentryService Exception]', error, extraInfo);
-        if (Sentry) {
-            try {
-                Sentry.withScope((scope: any) => {
-                    if (extraInfo) {
-                        scope.setExtras(extraInfo);
-                    }
-                    Sentry.captureException(error);
-                });
-            } catch (e) {
-                console.error('Failed to capture exception in Sentry:', e);
-            }
+        try {
+            Sentry.withScope((scope: any) => {
+                if (extraInfo) {
+                    scope.setExtras(extraInfo);
+                }
+                Sentry.captureException(error);
+            });
+        } catch (e) {
+            console.error('Failed to capture exception in Sentry:', e);
         }
     },
 
     captureMessage(message: string, level: 'info' | 'warning' | 'error' = 'info') {
         console.log(`[SentryService Message - ${level}]`, message);
-        if (Sentry) {
-            try {
-                Sentry.captureMessage(message, level);
-            } catch (e) {
-                console.error('Failed to capture message in Sentry:', e);
-            }
+        try {
+            Sentry.captureMessage(message, level);
+        } catch (e) {
+            console.error('Failed to capture message in Sentry:', e);
         }
+    },
+
+    setUser(user: { id: string; email?: string; username?: string } | null) {
+        try {
+            Sentry.setUser(user);
+        } catch (e) {
+            console.error('Failed to set user in Sentry:', e);
+        }
+    },
+
+    addBreadcrumb(breadcrumb: { message: string; category?: string; level?: 'info' | 'warning' | 'error'; data?: Record<string, any> }) {
+        try {
+            Sentry.addBreadcrumb(breadcrumb);
+        } catch (e) {
+            console.error('Failed to add breadcrumb in Sentry:', e);
+        }
+    },
+
+    wrap<T>(component: T): T {
+        if (typeof Sentry.wrap === 'function') {
+            return Sentry.wrap(component);
+        }
+        return component;
     }
 };
