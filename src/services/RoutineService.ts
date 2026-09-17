@@ -14,6 +14,7 @@ import {
     SeriesInsert,
 } from '../types/models';
 import { PresetRoutineService } from './PresetRoutineService';
+import { LogService } from './LogService';
 
 
 export {
@@ -239,7 +240,7 @@ export const RoutineService = {
 
             return { data, error: null };
         } catch (error) {
-            console.error('Error fetching weekly routine details:', error);
+            LogService.error('Error fetching weekly routine details:', error);
             return { data: null, error };
         }
     },
@@ -269,7 +270,7 @@ export const RoutineService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error fetching routines:', error);
+            LogService.error('Error fetching routines:', error);
             return { data: null, error };
         }
     },
@@ -321,7 +322,7 @@ export const RoutineService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error fetching all weekly routines:', error);
+            LogService.error('Error fetching all weekly routines:', error);
             return { data: null, error };
         }
     },
@@ -361,7 +362,7 @@ export const RoutineService = {
 
             return { data: routine, error: null };
         } catch (error) {
-            console.error('Error creating weekly routine:', error);
+            LogService.error('Error creating weekly routine:', error);
             return { data: null, error };
         }
     },
@@ -381,7 +382,7 @@ export const RoutineService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error updating weekly routine:', error);
+            LogService.error('Error updating weekly routine:', error);
             return { data: null, error };
         }
     },
@@ -396,7 +397,7 @@ export const RoutineService = {
             if (error) throw error;
             return { error: null };
         } catch (error) {
-            console.error('Error deleting weekly routine:', error);
+            LogService.error('Error deleting weekly routine:', error);
             return { error };
         }
     },
@@ -440,7 +441,7 @@ export const RoutineService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error starting weekly session:', error);
+            LogService.error('Error starting weekly session:', error);
             return { data: null, error };
         }
     },
@@ -480,7 +481,7 @@ export const RoutineService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error setting active routine:', error);
+            LogService.error('Error setting active routine:', error);
             return { data: null, error };
         }
     },
@@ -603,7 +604,7 @@ export const RoutineService = {
 
             return { data: newRoutine, error: null };
         } catch (error) {
-            console.error('Error creating routine from template:', error);
+            LogService.error('Error creating routine from template:', error);
             return { data: null, error };
         }
     },
@@ -689,7 +690,7 @@ export const RoutineService = {
 
             return { data: newRoutine, error: null };
         } catch (error) {
-            console.error('Error importing preset routine:', error);
+            LogService.error('Error importing preset routine:', error);
             return { data: null, error };
         }
     },

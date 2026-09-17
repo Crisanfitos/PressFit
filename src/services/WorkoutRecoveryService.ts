@@ -1,5 +1,6 @@
 import { getActiveWorkoutParams, clearActiveWorkoutParams, cancelTimerNotification } from './TimerNotificationService';
 import { WorkoutService } from './WorkoutService';
+import { LogService } from './LogService';
 
 export interface RecoverySession {
     workoutId: string;
@@ -80,7 +81,7 @@ export const WorkoutRecoveryService = {
                 totalSetsCount,
             };
         } catch (error) {
-            console.error('Error checking pending workout session:', error);
+            LogService.error('Error checking pending workout session:', error);
             return null;
         }
     },
@@ -93,7 +94,7 @@ export const WorkoutRecoveryService = {
             await clearActiveWorkoutParams();
             await Promise.resolve(cancelTimerNotification()).catch(() => {});
         } catch (error) {
-            console.error('Error discarding recovery session:', error);
+            LogService.error('Error discarding recovery session:', error);
         }
     },
 };

@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { formatLocalDateKey, getStartOfWeek } from '../utils/dateUtils';
 import { ServiceResponse, ScheduledExercise } from '../types/models';
+import { LogService } from './LogService';
 
 interface WorkoutSession {
     id: string;
@@ -35,7 +36,7 @@ export const HistoryService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error fetching daily progress:', error);
+            LogService.error('Error fetching daily progress:', error);
             return { data: null, error };
         }
     },
@@ -61,7 +62,7 @@ export const HistoryService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error fetching weekly progress:', error);
+            LogService.error('Error fetching weekly progress:', error);
             return { data: null, error };
         }
     },
@@ -99,7 +100,7 @@ export const HistoryService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error fetching monthly progress:', error);
+            LogService.error('Error fetching monthly progress:', error);
             return { data: null, error };
         }
     },
@@ -128,7 +129,7 @@ export const HistoryService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error fetching exercise history:', error);
+            LogService.error('Error fetching exercise history:', error);
             return { data: null, error };
         }
     },

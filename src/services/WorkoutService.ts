@@ -15,6 +15,7 @@ import {
     SeriesInsert,
     ExerciseHistoryRow,
 } from '../types/models';
+import { LogService } from './LogService';
 
 async function checkIsOffline(): Promise<boolean> {
     try {
@@ -127,7 +128,7 @@ export const WorkoutService = {
 
                 return { data, error: null };
             } catch (error) {
-                console.warn('Network query failed for workout details, trying offline cache:', error);
+                LogService.warn('Network query failed for workout details, trying offline cache:', error);
             }
         }
 
@@ -221,7 +222,7 @@ export const WorkoutService = {
                         .limit(1);
 
                     if (lastWorkoutsRes.error && isSchemaColumnError(lastWorkoutsRes.error)) {
-                        console.warn('[WorkoutService] tipo_serie column not found in schema cache, querying previous series without tipo_serie');
+                        LogService.warn('[WorkoutService] tipo_serie column not found in schema cache, querying previous series without tipo_serie');
                         lastWorkoutsRes = await supabase
                             .from('rutinas_diarias')
                             .select(`
@@ -270,7 +271,7 @@ export const WorkoutService = {
                         if (seriesToInsert.length > 0) {
                             const insertCopyRes = await supabase.from('series').insert(seriesToInsert);
                             if (insertCopyRes.error && isSchemaColumnError(insertCopyRes.error)) {
-                                console.warn('[WorkoutService] tipo_serie column not supported on insert copy, inserting legacy series');
+                                LogService.warn('[WorkoutService] tipo_serie column not supported on insert copy, inserting legacy series');
                                 const legacySeries = seriesToInsert.map((s) => {
                                     const { tipo_serie: _removed, ...legacyCopy } = s;
                                     return legacyCopy;
@@ -280,7 +281,7 @@ export const WorkoutService = {
                         }
                     }
                 } catch (copyError) {
-                    console.warn('Could not copy series from last workout:', copyError);
+                    LogService.warn('Could not copy series from last workout:', copyError);
                     // Continue even if copying fails - workout is still created
                 }
             }
@@ -289,7 +290,7 @@ export const WorkoutService = {
             const { data: completeWorkout } = await this.getWorkoutDetails(newWorkout.id);
             return { data: completeWorkout || newWorkout, error: null };
         } catch (error) {
-            console.error('Error creating workout:', error);
+            LogService.error('Error creating workout:', error);
             return { data: null, error };
         }
     },
@@ -327,7 +328,7 @@ export const WorkoutService = {
 
                 return { data, error: null };
             } catch (error) {
-                console.warn('Supabase completeWorkout network failure, falling back to offline enqueue:', error);
+                LogService.warn('Supabase completeWorkout network failure, falling back to offline enqueue:', error);
             }
         }
 
@@ -388,7 +389,7 @@ export const WorkoutService = {
             }));
             return { data: normalizedSeries, error: null };
         } catch (error) {
-            console.error('Error fetching series for exercise:', error);
+            LogService.error('Error fetching series for exercise:', error);
             return { data: null, error };
         }
     },
@@ -450,7 +451,7 @@ export const WorkoutService = {
 
             // Defensive schema cache / migration fallback (PF-332)
             if (error && isSchemaColumnError(error)) {
-                console.warn('[WorkoutService] tipo_serie column missing in schema cache, falling back to insert without tipo_serie');
+                LogService.warn('[WorkoutService] tipo_serie column missing in schema cache, falling back to insert without tipo_serie');
                 const fallbackRes = await supabase
                     .from('series')
                     .insert({
@@ -477,7 +478,7 @@ export const WorkoutService = {
                 : data;
             return { data: normalizedData, error: null };
         } catch (error) {
-            console.error('Error adding set:', error);
+            LogService.error('Error adding set:', error);
             return { data: null, error };
         }
     },
@@ -526,7 +527,7 @@ export const WorkoutService = {
 
                 // Defensive schema cache / migration fallback (PF-332)
                 if (error && isSchemaColumnError(error)) {
-                    console.warn('[WorkoutService] schema column missing in cache, falling back to update without optional columns');
+                    LogService.warn('[WorkoutService] schema column missing in cache, falling back to update without optional columns');
                     const errorMsg = String(error.message || error.details || error.hint || '').toLowerCase();
                     const fallbackUpdates = { ...supabasePayload };
 
@@ -584,7 +585,7 @@ export const WorkoutService = {
 
                 return { data: normalized, error: null };
             } catch (error) {
-                console.warn('Supabase updateSet network failure, falling back to offline enqueue:', error);
+                LogService.warn('Supabase updateSet network failure, falling back to offline enqueue:', error);
             }
         }
 
@@ -641,7 +642,7 @@ export const WorkoutService = {
             if (error) throw error;
             return { error: null };
         } catch (error) {
-            console.error('Error deleting set:', error);
+            LogService.error('Error deleting set:', error);
             return { error };
         }
     },
@@ -660,7 +661,7 @@ export const WorkoutService = {
             if (error) throw error;
             return { error: null };
         } catch (error) {
-            console.error('Error removing exercise from routine:', error);
+            LogService.error('Error removing exercise from routine:', error);
             return { error };
         }
     },
@@ -710,7 +711,7 @@ export const WorkoutService = {
 
             return { data, error: null };
         } catch (error) {
-            console.error('Error fetching last completed workout:', error);
+            LogService.error('Error fetching last completed workout:', error);
             return { data: null, error };
         }
     },
@@ -743,7 +744,7 @@ export const WorkoutService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error adding exercise to workout:', error);
+            LogService.error('Error adding exercise to workout:', error);
             return { data: null, error };
         }
     },
@@ -766,7 +767,7 @@ export const WorkoutService = {
             if (error) throw error;
             return { error: null };
         } catch (error) {
-            console.error('Error removing exercise from workout:', error);
+            LogService.error('Error removing exercise from workout:', error);
             return { error };
         }
     },
@@ -834,7 +835,7 @@ export const WorkoutService = {
 
             return { data: history, error: null };
         } catch (error) {
-            console.error('Error fetching exercise history:', error);
+            LogService.error('Error fetching exercise history:', error);
             return { data: null, error };
         }
     },
@@ -854,7 +855,7 @@ export const WorkoutService = {
             if (error) throw error;
             return { data, error: null };
         } catch (error) {
-            console.error('Error updating weight type:', error);
+            LogService.error('Error updating weight type:', error);
             return { data: null, error };
         }
     },
@@ -901,7 +902,7 @@ export const WorkoutService = {
                 .eq('ejercicio_programado_id', programmedExerciseId);
 
             if (deleteSeriesError) {
-                console.warn('Could not delete old series during exercise swap:', deleteSeriesError);
+                LogService.warn('Could not delete old series during exercise swap:', deleteSeriesError);
             }
 
             // 3. Insert new clean initial sets
@@ -917,7 +918,7 @@ export const WorkoutService = {
                     .insert(newSeries);
 
                 if (insertSeriesError) {
-                    console.warn('Could not insert new series during exercise swap:', insertSeriesError);
+                    LogService.warn('Could not insert new series during exercise swap:', insertSeriesError);
                 }
             }
 
@@ -949,12 +950,12 @@ export const WorkoutService = {
                 });
                 await OfflineStorageService.saveWorkouts(updatedList);
             } catch (cacheErr) {
-                console.warn('Could not update cache on swapExerciseInWorkout:', cacheErr);
+                LogService.warn('Could not update cache on swapExerciseInWorkout:', cacheErr);
             }
 
             return { data: updatedProgrammed, error: null };
         } catch (error) {
-            console.error('Error swapping exercise in workout:', error);
+            LogService.error('Error swapping exercise in workout:', error);
             return { data: null, error };
         }
     },

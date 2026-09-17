@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { calculate1RM } from '../utils/analyticsUtils';
 import { ServiceResponse, PersonalRecord, ExerciseHistoryEntry } from '../types/models';
+import { LogService } from './LogService';
 
 export interface ExercisePRs {
     maxWeight: number;    // Best single set weight (kg)
@@ -157,7 +158,7 @@ export const PersonalRecordService = {
                 error: null,
             };
         } catch (error) {
-            console.error('Error fetching historical PRs:', error);
+            LogService.error('Error fetching historical PRs:', error);
             return {
                 data: { maxWeight: 0, maxVolume: 0, max1RM: 0 },
                 error,
@@ -185,7 +186,7 @@ export const PersonalRecordService = {
             const record = Array.isArray(data) && data.length > 0 ? data[0] : null;
             return { data: record, error: null };
         } catch (error) {
-            console.error('Error fetching personal record:', error);
+            LogService.error('Error fetching personal record:', error);
             return { data: null, error };
         }
     },
@@ -207,7 +208,7 @@ export const PersonalRecordService = {
             if (error) throw error;
             return { data: data || [], error: null };
         } catch (error) {
-            console.error('Error fetching exercise history:', error);
+            LogService.error('Error fetching exercise history:', error);
             return { data: null, error };
         }
     },

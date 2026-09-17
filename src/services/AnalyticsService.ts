@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { ServiceResponse } from '../types/models';
+import { LogService } from './LogService';
 import { parseDateKeyAsLocalDate, formatLocalDateKey } from '../utils/dateUtils';
 import {
     calculate1RM,
@@ -263,7 +264,7 @@ export const AnalyticsService = {
 
             return { data: history, error: null };
         } catch (error) {
-            console.error('Error fetching 1RM history:', error);
+            LogService.error('Error fetching 1RM history:', error);
             return { data: null, error };
         }
     },
@@ -406,7 +407,7 @@ export const AnalyticsService = {
 
             return { data: summary, error: null };
         } catch (error) {
-            console.error('Error fetching effective sets by muscle group:', error);
+            LogService.error('Error fetching effective sets by muscle group:', error);
             return { data: null, error };
         }
     },
@@ -493,7 +494,7 @@ export const AnalyticsService = {
 
             return { data: analysis, error: null };
         } catch (error) {
-            console.error('Error fetching weekly fatigue analysis:', error);
+            LogService.error('Error fetching weekly fatigue analysis:', error);
             return { data: null, error };
         }
     },
