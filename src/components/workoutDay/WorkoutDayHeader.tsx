@@ -12,6 +12,8 @@ interface WorkoutDayHeaderProps {
     selectedDate: Date;
     workoutStats: WorkoutStats | null;
     activeWorkout: any;
+    isToday?: boolean;
+    isPendingPreviousWorkout?: boolean;
     formatDate: (d: Date) => string;
     formatDuration: (minutes: number | null) => string;
     onBack: () => void;
@@ -23,6 +25,8 @@ export const WorkoutDayHeader: React.FC<WorkoutDayHeaderProps> = ({
     selectedDate,
     workoutStats,
     activeWorkout,
+    isToday = true,
+    isPendingPreviousWorkout = false,
     formatDate,
     formatDuration,
     onBack,
@@ -94,7 +98,33 @@ export const WorkoutDayHeader: React.FC<WorkoutDayHeaderProps> = ({
             fontWeight: '600',
             color: colors.text,
         },
+        pendingBanner: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+            marginTop: 14,
+            padding: 12,
+            borderRadius: 12,
+            borderWidth: 1,
+        },
+        pendingBannerTitle: {
+            fontSize: 14,
+            fontWeight: 'bold',
+        },
+        pendingBannerText: {
+            fontSize: 13,
+            marginTop: 2,
+        },
     });
+
+    const formatStartTime = (iso?: string | null) => {
+        if (!iso) return '-';
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return '-';
+        const hours = d.getHours().toString().padStart(2, '0');
+        const minutes = d.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    };
 
     return (
         <Reanimated.View
@@ -148,7 +178,45 @@ export const WorkoutDayHeader: React.FC<WorkoutDayHeaderProps> = ({
                 </View>
             )}
 
-            {activeWorkout && !workoutStats?.isCompleted && (
+            {isPendingPreviousWorkout && (
+                <View
+                    style={[styles.statusBadge, { backgroundColor: `${colors.statusWarning}20` }]}
+                    testID="status-badge-pending-finish"
+                >
+                    <MaterialIcons name="schedule" size={18} color={colors.statusWarning} />
+                    <Text style={[styles.statusText, { color: colors.statusWarning }]}>
+                        {t('workout.statusPendingFinish', 'Pendiente de Finalizar')}
+                    </Text>
+                </View>
+            )}
+
+            {isPendingPreviousWorkout && (
+                <View
+                    style={[
+                        styles.pendingBanner,
+                        {
+                            backgroundColor: `${colors.statusWarning}15`,
+                            borderColor: `${colors.statusWarning}40`,
+                        },
+                    ]}
+                    testID="pending-workout-banner"
+                >
+                    <MaterialIcons name="warning" size={22} color={colors.statusWarning} />
+                    <View style={{ flex: 1 }}>
+                        <Text style={[styles.pendingBannerTitle, { color: colors.statusWarning }]}>
+                            {t('workout.pendingFinishTitle', 'Rutina pendiente de días anteriores')}
+                        </Text>
+                        <Text
+                            style={[styles.pendingBannerText, { color: colors.textSecondary }]}
+                            testID="pending-workout-start-time"
+                        >
+                            {t('workout.startedAt', 'Hora de inicio')}: {formatStartTime(dayData?.hora_inicio || activeWorkout?.hora_inicio || workoutStats?.startTime)}
+                        </Text>
+                    </View>
+                </View>
+            )}
+
+            {!isPendingPreviousWorkout && activeWorkout && !workoutStats?.isCompleted && (
                 <View
                     style={[styles.statusBadge, { backgroundColor: `${colors.statusWarning}20` }]}
                     testID="status-badge-in-progress"

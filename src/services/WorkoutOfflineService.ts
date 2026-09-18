@@ -114,17 +114,17 @@ export const WorkoutOfflineService = {
         }
     },
 
-    async enqueueAndCacheCompleteWorkout(workoutId: string, durationMinutes?: number): Promise<ServiceResponse<RoutineDay>> {
-        await SyncService.enqueueOperation('WORKOUT_COMPLETE', { workoutId, durationMinutes, timestamp: Date.now() });
+    async enqueueAndCacheCompleteWorkout(workoutId: string, durationMinutes?: number, customEndTime?: string): Promise<ServiceResponse<RoutineDay>> {
+        const endTimeIso = customEndTime || new Date().toISOString();
+        await SyncService.enqueueOperation('WORKOUT_COMPLETE', { workoutId, durationMinutes, customEndTime: endTimeIso, timestamp: Date.now() });
 
         const cachedRes = await OfflineStorageService.getCachedWorkouts();
         const workouts = cachedRes.data || [];
-        const nowIso = new Date().toISOString();
 
         let updatedWorkout: RoutineDay | null = null;
         const updatedList = workouts.map((w) => {
             if (w.id === workoutId) {
-                updatedWorkout = { ...w, completada: true, hora_fin: nowIso };
+                updatedWorkout = { ...w, completada: true, hora_fin: endTimeIso };
                 return updatedWorkout;
             }
             return w;
@@ -135,7 +135,7 @@ export const WorkoutOfflineService = {
         }
 
         return {
-            data: updatedWorkout || ({ id: workoutId, completada: true, hora_fin: nowIso } as unknown as RoutineDay),
+            data: updatedWorkout || ({ id: workoutId, completada: true, hora_fin: endTimeIso } as unknown as RoutineDay),
             error: null,
         };
     },

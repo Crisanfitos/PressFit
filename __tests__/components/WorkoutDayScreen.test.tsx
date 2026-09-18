@@ -4,6 +4,7 @@ import WorkoutDayScreen from '../../src/screens/WorkoutDayScreen';
 import { ThemeProvider } from '../../src/context/ThemeContext';
 import { AuthContext } from '../../src/context/AuthContext';
 import { RoutineService } from '../../src/services/RoutineService';
+import { WorkoutService } from '../../src/services/WorkoutService';
 import { Alert } from 'react-native';
 
 const mockNavigation = {
@@ -206,6 +207,69 @@ describe('WorkoutDayScreen Component (RNTL)', () => {
 
     await waitFor(() => {
       expect(alertSpy).toHaveBeenCalledWith('Error', 'No se pudo crear el entrenamiento');
+    });
+  });
+
+  it('detects pending workout from previous day and allows manual finish via modal (PF-376)', async () => {
+    jest.spyOn(RoutineService, 'getRoutineDayByDate').mockResolvedValue({
+      data: {
+        id: 'rd-pending',
+        nombre_dia: 'Espalda y Bíceps',
+        descripcion: 'Sesión anterior incompleta',
+        completada: false,
+        hora_inicio: '2026-09-17T18:00:00.000Z',
+        hora_fin: null,
+        ejercicios_programados: [
+          {
+            id: 'ep-5',
+            ejercicio_id: 'e-5',
+            ejercicio: { titulo: 'Dominadas', grupo_muscular: 'Espalda' },
+            series: [{ id: 's-5', numero_serie: 1, peso_utilizado: 0, repeticiones: 8 }],
+          },
+        ],
+      },
+      error: null,
+    });
+
+    const completeWorkoutSpy = jest.spyOn(WorkoutService, 'completeWorkout').mockResolvedValue({
+      data: {
+        id: 'rd-pending',
+        completada: true,
+        hora_fin: '2026-09-17T19:00:00.000Z',
+      } as any,
+      error: null,
+    });
+
+    const route = {
+      params: { date: '2026-09-17', routineId: 'r-100', isToday: false },
+    };
+
+    const { getByText, getByTestId } = await render(
+      <AuthContext.Provider value={mockAuthContext}>
+        <ThemeProvider>
+          <WorkoutDayScreen navigation={mockNavigation} route={route} />
+        </ThemeProvider>
+      </AuthContext.Provider>
+    );
+
+    await waitFor(() => {
+      expect(getByText('Espalda y Bíceps')).toBeTruthy();
+      expect(getByTestId('status-badge-pending-finish')).toBeTruthy();
+      expect(getByTestId('pending-workout-banner')).toBeTruthy();
+      expect(getByTestId('manual-finish-workout-button')).toBeTruthy();
+    });
+
+    fireEvent.press(getByTestId('manual-finish-workout-button'));
+
+    await waitFor(() => {
+      expect(getByTestId('manual-finish-modal')).toBeTruthy();
+    });
+
+    fireEvent.press(getByTestId('manual-finish-confirm-button'));
+
+    await waitFor(() => {
+      expect(completeWorkoutSpy).toHaveBeenCalled();
+      expect(getByTestId('status-badge-completed')).toBeTruthy();
     });
   });
 });

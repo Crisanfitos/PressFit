@@ -3,3 +3,4 @@ export * from './useWorkoutDayScreenState';
 export * from './WorkoutDayHeader';
 export * from './WorkoutDayExerciseList';
 export * from './WorkoutDayActionButton';
+export * from './ManualFinishWorkoutModal';

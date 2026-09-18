@@ -149,11 +149,12 @@ export const WorkoutMutationService = {
         }
     },
 
-    async completeWorkout(workoutId: string, durationMinutes?: number): Promise<ServiceResponse<RoutineDay>> {
+    async completeWorkout(workoutId: string, durationMinutes?: number, customEndTime?: string): Promise<ServiceResponse<RoutineDay>> {
         if (isE2EMockEnabled()) {
-            return { data: mockStore.completeWorkout() as unknown as RoutineDay, error: null };
+            return { data: mockStore.completeWorkout(customEndTime) as unknown as RoutineDay, error: null };
         }
 
+        const endTimeIso = customEndTime || new Date().toISOString();
         const offline = await WorkoutOfflineService.checkIsOffline();
         if (!offline) {
             try {
@@ -161,7 +162,7 @@ export const WorkoutMutationService = {
                     .from('rutinas_diarias')
                     .update({
                         completada: true,
-                        hora_fin: new Date().toISOString(),
+                        hora_fin: endTimeIso,
                     })
                     .eq('id', workoutId)
                     .select()
@@ -182,7 +183,7 @@ export const WorkoutMutationService = {
             }
         }
 
-        return WorkoutOfflineService.enqueueAndCacheCompleteWorkout(workoutId, durationMinutes);
+        return WorkoutOfflineService.enqueueAndCacheCompleteWorkout(workoutId, durationMinutes, endTimeIso);
     },
 
     async removeExerciseFromRoutine(routineExerciseId: string): Promise<{ error: unknown }> {

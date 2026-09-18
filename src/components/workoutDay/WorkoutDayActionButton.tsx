@@ -11,6 +11,7 @@ interface WorkoutDayActionButtonProps {
     hasContent: boolean;
     workoutStats: WorkoutStats | null;
     activeWorkout: any;
+    isPendingPreviousWorkout?: boolean;
     onPress: () => void;
 }
 
@@ -19,13 +20,14 @@ export const WorkoutDayActionButton: React.FC<WorkoutDayActionButtonProps> = ({
     hasContent,
     workoutStats,
     activeWorkout,
+    isPendingPreviousWorkout = false,
     onPress,
 }) => {
     const { t } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
 
-    if (!isToday || !hasContent) {
+    if ((!isToday && !isPendingPreviousWorkout) || !hasContent) {
         return null;
     }
 
@@ -50,12 +52,16 @@ export const WorkoutDayActionButton: React.FC<WorkoutDayActionButtonProps> = ({
     });
 
     const getIconName = () => {
+        if (isPendingPreviousWorkout) return 'done-all';
         if (workoutStats?.isCompleted) return 'edit';
         if (activeWorkout) return 'play-arrow';
         return 'play-circle-filled';
     };
 
     const getButtonLabel = () => {
+        if (isPendingPreviousWorkout) {
+            return t('workout.manualFinishButton', 'Finalizar Rutina Pendiente');
+        }
         if (workoutStats?.isCompleted) {
             return t('workout.viewWorkout', 'Ver / Editar Entrenamiento');
         }
@@ -69,10 +75,14 @@ export const WorkoutDayActionButton: React.FC<WorkoutDayActionButtonProps> = ({
         <TouchableOpacity
             style={styles.bottomButton}
             onPress={onPress}
-            testID="start-workout-button"
+            testID={isPendingPreviousWorkout ? 'manual-finish-workout-button' : 'start-workout-button'}
         >
             <LinearGradient
-                colors={[colors.primary, `${colors.primary}CC`]}
+                colors={
+                    isPendingPreviousWorkout
+                        ? [colors.statusWarning || '#f59e0b', colors.primary]
+                        : [colors.primary, `${colors.primary}CC`]
+                }
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.buttonGradient}
