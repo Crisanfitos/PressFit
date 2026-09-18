@@ -19,6 +19,9 @@
     "preview": {
       "node": "22.13.0",
       "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
       "env": {
         "SUPABASE_URL": "https://suaxmalkquricsbwkczt.supabase.co",
         "EXPO_PUBLIC_SUPABASE_URL": "https://suaxmalkquricsbwkczt.supabase.co",
