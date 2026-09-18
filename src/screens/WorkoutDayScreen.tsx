@@ -7,6 +7,7 @@ import {
     WorkoutDayHeader,
     WorkoutDayExerciseList,
     WorkoutDayActionButton,
+    ManualFinishWorkoutModal,
 } from '../components/workoutDay';
 
 type WorkoutDayScreenProps = {
@@ -22,6 +23,9 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
         routineId,
         selectedDate,
         isToday,
+        isPendingPreviousWorkout,
+        showManualFinishModal,
+        setShowManualFinishModal,
         loading,
         dayData,
         exercises,
@@ -30,6 +34,7 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
         formatDate,
         formatDuration,
         handleMainButtonPress,
+        handleManualFinishWorkout,
     } = useWorkoutDayScreenState(navigation, route);
 
     const styles = StyleSheet.create({
@@ -62,6 +67,8 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                 selectedDate={selectedDate}
                 workoutStats={workoutStats}
                 activeWorkout={activeWorkout}
+                isToday={isToday}
+                isPendingPreviousWorkout={isPendingPreviousWorkout}
                 formatDate={formatDate}
                 formatDuration={formatDuration}
                 onBack={() => navigation.goBack()}
@@ -77,7 +84,17 @@ const WorkoutDayScreen: React.FC<WorkoutDayScreenProps> = ({ navigation, route }
                 hasContent={exercises.length > 0 || !!dayData}
                 workoutStats={workoutStats}
                 activeWorkout={activeWorkout}
+                isPendingPreviousWorkout={isPendingPreviousWorkout}
                 onPress={handleMainButtonPress}
+            />
+
+            <ManualFinishWorkoutModal
+                visible={showManualFinishModal}
+                dayName={dayData?.nombre_dia}
+                startTime={dayData?.hora_inicio || activeWorkout?.hora_inicio}
+                workoutDate={selectedDate}
+                onClose={() => setShowManualFinishModal(false)}
+                onConfirm={handleManualFinishWorkout}
             />
         </SafeAreaView>
     );

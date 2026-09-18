@@ -221,10 +221,10 @@ class E2EMockStore {
         return this.currentWorkout;
     }
 
-    completeWorkout() {
+    completeWorkout(customEndTime?: string) {
         if (this.currentWorkout) {
             this.currentWorkout.completada = true;
-            this.currentWorkout.hora_fin = new Date().toISOString();
+            this.currentWorkout.hora_fin = customEndTime || new Date().toISOString();
         }
         return this.currentWorkout;
     }

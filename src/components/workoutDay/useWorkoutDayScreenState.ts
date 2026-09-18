@@ -4,6 +4,7 @@ import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../../context/AuthContext';
 import { RoutineService } from '../../services/RoutineService';
+import { WorkoutService } from '../../services/WorkoutService';
 import { formatLocalDateKey, parseDateKeyAsLocalDate } from '../../utils/dateUtils';
 import { WorkoutDayExercise, WorkoutStats } from './types';
 
@@ -20,6 +21,14 @@ export const useWorkoutDayScreenState = (navigation: any, route: any) => {
     const [exercises, setExercises] = useState<WorkoutDayExercise[]>([]);
     const [workoutStats, setWorkoutStats] = useState<WorkoutStats | null>(null);
     const [activeWorkout, setActiveWorkout] = useState<any>(null);
+    const [showManualFinishModal, setShowManualFinishModal] = useState<boolean>(false);
+
+    const isPendingPreviousWorkout = Boolean(
+        !isToday &&
+        dayData?.hora_inicio &&
+        !dayData?.completada &&
+        !dayData?.hora_fin
+    );
 
     const formatDate = (d: Date) => {
         const isEn = i18n.language?.startsWith('en');
@@ -75,7 +84,7 @@ export const useWorkoutDayScreenState = (navigation: any, route: any) => {
 
             if (targetDay) {
                 setDayData(targetDay);
-                setExercises(targetDay.ejercicios_programados || []);
+                setExercises((targetDay.ejercicios_programados as any) || []);
 
                 const exerciseCount = new Set(
                     targetDay.ejercicios_programados?.map((ex: any) => ex.ejercicio_id) || []
@@ -87,8 +96,10 @@ export const useWorkoutDayScreenState = (navigation: any, route: any) => {
                     const end = new Date(targetDay.hora_fin);
                     const durationMs = end.getTime() - start.getTime();
                     const durationMinutes = Math.round(durationMs / 1000 / 60);
-                    if (durationMinutes >= 5) {
+                    if (durationMinutes >= 1) {
                         duration = durationMinutes;
+                    } else if (durationMinutes >= 0) {
+                        duration = 1;
                     }
                 }
 
@@ -172,6 +183,10 @@ export const useWorkoutDayScreenState = (navigation: any, route: any) => {
     };
 
     const handleMainButtonPress = () => {
+        if (isPendingPreviousWorkout) {
+            setShowManualFinishModal(true);
+            return;
+        }
         if (workoutStats?.isCompleted && dayData) {
             navigation.navigate('Workout', {
                 workoutId: dayData.id,
@@ -186,11 +201,65 @@ export const useWorkoutDayScreenState = (navigation: any, route: any) => {
         }
     };
 
+    const handleManualFinishWorkout = async (endTime: Date): Promise<{ success: boolean; error?: string }> => {
+        if (!dayData || !dayData.hora_inicio) {
+            return { success: false, error: 'No hay datos de inicio de la rutina.' };
+        }
+
+        const start = new Date(dayData.hora_inicio);
+        const diffMs = endTime.getTime() - start.getTime();
+
+        if (diffMs < 60 * 1000) {
+            return {
+                success: false,
+                error: t(
+                    'workout.invalidEndTimeMinDuration',
+                    'La hora final debe ser como mínimo un minuto posterior a la hora inicial.'
+                ),
+            };
+        }
+
+        const durationMinutes = Math.max(1, Math.round(diffMs / (1000 * 60)));
+        const endTimeIso = endTime.toISOString();
+
+        try {
+            const res = await WorkoutService.completeWorkout(dayData.id, durationMinutes, endTimeIso);
+            if (res.error) {
+                return { success: false, error: 'Error al completar el entrenamiento en el servicio.' };
+            }
+
+            setDayData((prev: any) => ({
+                ...prev,
+                completada: true,
+                hora_fin: endTimeIso,
+            }));
+
+            setWorkoutStats((prev) => ({
+                exerciseCount: prev?.exerciseCount || 0,
+                duration: durationMinutes,
+                isCompleted: true,
+                startTime: dayData.hora_inicio,
+                endTime: endTimeIso,
+            }));
+
+            setActiveWorkout(null);
+            setShowManualFinishModal(false);
+
+            return { success: true };
+        } catch (err: any) {
+            console.error('Error completing manual pending workout:', err);
+            return { success: false, error: err?.message || 'Error inesperado al finalizar la rutina.' };
+        }
+    };
+
     return {
         t,
         routineId,
         selectedDate,
         isToday,
+        isPendingPreviousWorkout,
+        showManualFinishModal,
+        setShowManualFinishModal,
         loading,
         dayData,
         exercises,
@@ -199,5 +268,6 @@ export const useWorkoutDayScreenState = (navigation: any, route: any) => {
         formatDate,
         formatDuration,
         handleMainButtonPress,
+        handleManualFinishWorkout,
     };
 };

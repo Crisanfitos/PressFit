@@ -104,7 +104,15 @@
     "statusRest": "Descanso",
     "unlockSetTitle": "Editar Serie",
     "unlockSetPrompt": "¿Deseas desbloquear esta serie para modificar sus valores?",
-    "unlock": "Desbloquear"
+    "unlock": "Desbloquear",
+    "manualFinishTitle": "Finalizar Rutina Pendiente",
+    "manualFinishButton": "Finalizar Rutina Pendiente",
+    "statusPendingFinish": "Pendiente de Finalizar",
+    "pendingFinishTitle": "Rutina pendiente de días anteriores",
+    "startedAt": "Hora de inicio",
+    "selectEndTime": "Hora de finalización",
+    "saveAndComplete": "Guardar y Finalizar",
+    "invalidEndTimeMinDuration": "La hora final debe ser como mínimo un minuto posterior a la hora inicial."
   },
   "calendar": {
     "today": "Hoy",

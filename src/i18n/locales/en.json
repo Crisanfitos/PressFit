@@ -104,7 +104,15 @@
     "statusRest": "REST",
     "unlockSetTitle": "Edit Set",
     "unlockSetPrompt": "Do you want to unlock this set to modify its values?",
-    "unlock": "Unlock"
+    "unlock": "Unlock",
+    "manualFinishTitle": "Finish Pending Workout",
+    "manualFinishButton": "Finish Pending Workout",
+    "statusPendingFinish": "Pending Completion",
+    "pendingFinishTitle": "Pending routine from previous days",
+    "startedAt": "Start time",
+    "selectEndTime": "End time",
+    "saveAndComplete": "Save & Complete",
+    "invalidEndTimeMinDuration": "End time must be at least one minute after start time."
   },
   "calendar": {
     "today": "Today",

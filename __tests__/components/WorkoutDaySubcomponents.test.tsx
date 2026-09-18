@@ -59,6 +59,30 @@ describe('WorkoutDay Subcomponents', () => {
             expect(getByText(/4/)).toBeTruthy();
             expect(getByText('00:55')).toBeTruthy();
         });
+
+        it('renders pending workout banner and start time when isPendingPreviousWorkout is true', async () => {
+            const { getByTestId, getByText } = await render(
+                <ThemeProvider>
+                    <WorkoutDayHeader
+                        dayData={{ nombre_dia: 'Día Pendiente', hora_inicio: '2026-09-17T18:30:00.000Z' }}
+                        routineId="r-1"
+                        selectedDate={new Date(2026, 8, 17)}
+                        workoutStats={null}
+                        activeWorkout={{ hora_inicio: '2026-09-17T18:30:00.000Z' }}
+                        isToday={false}
+                        isPendingPreviousWorkout={true}
+                        formatDate={() => 'Jueves'}
+                        formatDuration={() => '00:00'}
+                        onBack={jest.fn()}
+                    />
+                </ThemeProvider>
+            );
+
+            expect(getByTestId('status-badge-pending-finish')).toBeTruthy();
+            expect(getByTestId('pending-workout-banner')).toBeTruthy();
+            expect(getByTestId('pending-workout-start-time')).toBeTruthy();
+            expect(getByText(/Pendiente de Finalizar/i)).toBeTruthy();
+        });
     });
 
     describe('WorkoutDayExerciseList', () => {
@@ -107,7 +131,7 @@ describe('WorkoutDay Subcomponents', () => {
     });
 
     describe('WorkoutDayActionButton', () => {
-        it('does not render when isToday is false', async () => {
+        it('does not render when isToday is false and not pending', async () => {
             const { queryByTestId } = await render(
                 <ThemeProvider>
                     <WorkoutDayActionButton
@@ -115,12 +139,36 @@ describe('WorkoutDay Subcomponents', () => {
                         hasContent={true}
                         workoutStats={null}
                         activeWorkout={null}
+                        isPendingPreviousWorkout={false}
                         onPress={jest.fn()}
                     />
                 </ThemeProvider>
             );
 
             expect(queryByTestId('start-workout-button')).toBeNull();
+            expect(queryByTestId('manual-finish-workout-button')).toBeNull();
+        });
+
+        it('renders manual finish button when isPendingPreviousWorkout is true even if isToday is false', async () => {
+            const onPressMock = jest.fn();
+            const { getByTestId, getByText } = await render(
+                <ThemeProvider>
+                    <WorkoutDayActionButton
+                        isToday={false}
+                        hasContent={true}
+                        workoutStats={null}
+                        activeWorkout={{ hora_inicio: '2026-09-17T18:30:00.000Z' }}
+                        isPendingPreviousWorkout={true}
+                        onPress={onPressMock}
+                    />
+                </ThemeProvider>
+            );
+
+            const btn = getByTestId('manual-finish-workout-button');
+            expect(btn).toBeTruthy();
+            expect(getByText(/Finalizar Rutina Pendiente/i)).toBeTruthy();
+            fireEvent.press(btn);
+            expect(onPressMock).toHaveBeenCalled();
         });
 
         it('renders and responds to press when isToday is true', async () => {
