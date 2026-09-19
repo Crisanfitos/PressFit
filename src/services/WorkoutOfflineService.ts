@@ -3,6 +3,7 @@ import { OfflineStorageService } from './OfflineStorageService';
 import { SyncService } from './SyncService';
 import { LogService } from './LogService';
 import { RoutineDay, ScheduledExercise, Serie, ServiceResponse, SetUpdatePayload } from '../types/models';
+import { isNetworkError as utilsIsNetworkError, retryWithBackoff } from '../utils/networkRetry';
 
 export async function checkIsOffline(): Promise<boolean> {
     try {
@@ -13,10 +14,7 @@ export async function checkIsOffline(): Promise<boolean> {
 }
 
 export function isNetworkError(error: unknown): boolean {
-    if (!error) return false;
-    const errObj = error as { message?: string; name?: string } | null;
-    const msg = String(errObj?.message || errObj?.name || error).toLowerCase();
-    return msg.includes('fetch') || msg.includes('network') || msg.includes('offline') || msg.includes('timeout');
+    return utilsIsNetworkError(error);
 }
 
 export function isSchemaColumnError(error: unknown): boolean {
@@ -28,10 +26,13 @@ export function isSchemaColumnError(error: unknown): boolean {
     return msg.includes('tipo_serie') || msg.includes('is_completed') || msg.includes('completada') || (msg.includes('column') && msg.includes('schema cache'));
 }
 
+export { retryWithBackoff };
+
 export const WorkoutOfflineService = {
     checkIsOffline,
     isNetworkError,
     isSchemaColumnError,
+    retryWithBackoff,
 
     async getOfflineWorkoutDetails(workoutId: string): Promise<ServiceResponse<RoutineDay>> {
         const cachedRes = await OfflineStorageService.getCachedWorkouts();
