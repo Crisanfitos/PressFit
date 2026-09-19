@@ -9,6 +9,7 @@ export { WorkoutOfflineService };
 export { WorkoutQueryService };
 export { WorkoutMutationService };
 export { WorkoutSetMutationService };
+export { retryWithBackoff, isNetworkError } from '../utils/networkRetry';
 
 /**
  * Unified WorkoutService facade maintaining 100% backward compatibility

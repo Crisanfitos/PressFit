@@ -15,6 +15,7 @@ import {
 } from '../types/models';
 import { PresetRoutineService } from './PresetRoutineService';
 import { LogService } from './LogService';
+import { retryWithBackoff, retryOnNetworkFailure } from '../utils/networkRetry';
 
 
 export {
@@ -53,25 +54,7 @@ export const mapPresetDaysToWeeklySchedule = <T = any>(presetDays: T[] = []): (T
     return Array.from({ length: 7 }, (_, i) => (i < count ? presetDays[i] : null));
 };
 
-/**
- * Helper to retry an async network operation on transient network/socket drops (e.g. OkHttp keep-alive resets)
- */
-export const retryOnNetworkFailure = async <T>(fn: () => PromiseLike<T> | Promise<T>, retries = 3, delayMs = 300): Promise<T> => {
-    try {
-        return await fn();
-    } catch (err: unknown) {
-        const errObj = err as { message?: string; name?: string } | null;
-        const isNetworkErr =
-            errObj?.message?.includes('Network request failed') ||
-            errObj?.message?.includes('network') ||
-            errObj?.name === 'TypeError';
-        if (retries > 0 && isNetworkErr) {
-            await new Promise((resolve) => setTimeout(resolve, delayMs));
-            return retryOnNetworkFailure(fn, retries - 1, delayMs * 1.5);
-        }
-        throw err;
-    }
-};
+export { retryOnNetworkFailure, retryWithBackoff };
 
 /**
  * Finds an exercise ID in catalog by normalized name or creates a custom exercise in catalog.
