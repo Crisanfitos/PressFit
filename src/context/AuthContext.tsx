@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, ReactNode, useContext } from
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 import { AuthService } from '../services/AuthService';
+import { LogService } from '../services/LogService';
 import { parseOAuthCallbackUrl } from '../utils/parseOAuthCallbackUrl';
 import { Session, User } from '@supabase/supabase-js';
 
@@ -40,7 +41,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 setSession(session);
                 setUser(session?.user ?? null);
             } catch (error) {
-                console.error('Error initializing auth:', error);
+                LogService.error('Error initializing auth:', error);
             } finally {
                 const elapsed = Date.now() - start;
                 const remaining = Math.max(0, MIN_SPLASH_MS - elapsed);
@@ -111,7 +112,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
             throw new Error('OAuth flow failed');
         } catch (error) {
-            console.error('Google sign-in error:', error);
+            LogService.error('Google sign-in error:', error);
             throw error;
         }
     };

@@ -19,6 +19,7 @@ import { useExerciseController, FilterKey, Exercise } from '../controllers/useEx
 import { CreateCustomExerciseModal } from '../components/CreateCustomExerciseModal';
 import { ExerciseFilterSection, ExerciseListItem } from '../components/exercises';
 import { ExerciseService } from '../services/ExerciseService';
+import { LogService } from '../services/LogService';
 
 type ExerciseCatalogScreenProps = {
   navigation: any;
@@ -95,11 +96,11 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
       try {
         const { error } = await ExerciseService.deleteCustomExercise(deleteDialogExercise.id);
         if (error) {
-          console.error('Error deleting custom exercise:', error);
+          LogService.error('Error deleting custom exercise:', error);
         }
         await refetchExercises();
       } catch (err) {
-        console.error('Unexpected error in confirmDelete:', err);
+        LogService.error('Unexpected error in confirmDelete:', err);
       } finally {
         setDeleteDialogExercise(null);
       }

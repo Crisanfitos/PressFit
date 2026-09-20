@@ -11,6 +11,7 @@ import {
   PlateCalculationResult,
 } from '../utils/plateCalculator';
 import { HapticService } from '../services/HapticService';
+import { LogService } from '../services/LogService';
 
 export interface BarPreset {
   label: string;
@@ -61,7 +62,7 @@ export const usePlateSettingsController = (userId?: string) => {
       setSettings(data);
       checkIfCustom(data.defaultBarWeight, data.unit);
     } catch (error) {
-      console.error('[usePlateSettingsController] Error loading settings:', error);
+      LogService.error('[usePlateSettingsController] Error loading settings:', error);
     } finally {
       setLoading(false);
     }

@@ -14,6 +14,7 @@ import { LineChart } from 'react-native-gifted-charts';
 import { useTheme } from '../context/ThemeContext';
 import { ExerciseService } from '../services/ExerciseService';
 import { AnalyticsService, OneRMHistoryEntry } from '../services/AnalyticsService';
+import { LogService } from '../services/LogService';
 import { parseDateKeyAsLocalDate } from '../utils/dateUtils';
 
 export interface AdvancedMetricsCardProps {
@@ -74,7 +75,7 @@ const AdvancedMetricsCard: React.FC<AdvancedMetricsCardProps> = ({
                     }
                 }
             } catch (error) {
-                console.error('Error loading exercises in AdvancedMetricsCard:', error);
+                LogService.error('Error loading exercises in AdvancedMetricsCard:', error);
             } finally {
                 if (isMounted) setLoadingExercises(false);
             }
@@ -106,7 +107,7 @@ const AdvancedMetricsCard: React.FC<AdvancedMetricsCardProps> = ({
                     setSelectedPoint(null);
                 }
             } catch (error) {
-                console.error('Error loading 1RM history:', error);
+                LogService.error('Error loading 1RM history:', error);
                 if (isMounted) setHistoryData([]);
             } finally {
                 if (isMounted) setLoadingHistory(false);

@@ -11,6 +11,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
+import { LogService } from '../services/LogService';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AuthNavigator';
 
@@ -124,7 +125,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ navigation }) => {
             await AsyncStorage.setItem(ONBOARDING_PREFERENCES_KEY, JSON.stringify(preferences));
             success = true;
         } catch (error) {
-            console.error('Error saving onboarding preferences:', error);
+            LogService.error('Error saving onboarding preferences:', error);
             setIsSaving(false);
         }
 

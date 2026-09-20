@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { NativeModules, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LogService } from '../services/LogService';
 
 import es from './locales/es.json';
 import en from './locales/en.json';
@@ -61,7 +62,7 @@ export async function saveLanguagePreference(lang: 'es' | 'en'): Promise<void> {
     await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
     await i18n.changeLanguage(lang);
   } catch (error) {
-    console.error('Error saving language preference:', error);
+    LogService.error('Error saving language preference:', error);
   }
 }
 

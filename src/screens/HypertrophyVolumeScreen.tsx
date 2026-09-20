@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { AnalyticsService } from '../services/AnalyticsService';
+import { LogService } from '../services/LogService';
 import { MuscleVolumeBar } from '../components/analytics/MuscleVolumeBar';
 import {
     formatLocalDateKey,
@@ -96,7 +97,7 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
                 });
             }
         } catch (error) {
-            console.error('Error fetching hypertrophy volume:', error);
+            LogService.error('Error fetching hypertrophy volume:', error);
             setSummary({
                 totalSeriesEfectivas: 0,
                 porGrupoMuscular: {},

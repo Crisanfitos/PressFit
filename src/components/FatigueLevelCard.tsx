@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { AnalyticsService } from '../services/AnalyticsService';
+import { LogService } from '../services/LogService';
 import { FatigueAnalysisResult } from '../utils/analyticsUtils';
 
 export interface FatigueLevelCardProps {
@@ -44,7 +45,7 @@ const FatigueLevelCard: React.FC<FatigueLevelCardProps> = ({
                     setFatigueData(data);
                 }
             } catch (error) {
-                console.error('Error loading weekly fatigue analysis:', error);
+                LogService.error('Error loading weekly fatigue analysis:', error);
             } finally {
                 if (isMounted) setLoading(false);
             }

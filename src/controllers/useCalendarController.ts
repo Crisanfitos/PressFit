@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { RoutineService } from '../services/RoutineService';
+import { LogService } from '../services/LogService';
 import { RoutineDay, WeeklyRoutine } from '../types/models';
 
 interface CalendarDay {
@@ -146,7 +147,7 @@ export const useCalendarController = (userId: string | undefined, routineId: str
             }
             return data;
         } catch (error) {
-            console.error('Error fetching routine templates:', error);
+            LogService.error('Error fetching routine templates:', error);
             return [];
         }
     }, [userId, routineId]);
@@ -207,7 +208,7 @@ export const useCalendarController = (userId: string | undefined, routineId: str
             const stats = await fetchStatsForRange(templates, weekRange.min, weekRange.max);
             setWorkoutStats(stats);
         } catch (error) {
-            console.error('Error initializing calendar:', error);
+            LogService.error('Error initializing calendar:', error);
         } finally {
             if (!silent) setLoading(false);
         }

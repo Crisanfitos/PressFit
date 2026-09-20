@@ -11,6 +11,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
 import { ThemeColors } from '../../types/theme';
 import { ShareService } from '../../services/ShareService';
+import { LogService } from '../../services/LogService';
 import SocialCardCanvas, { SocialCardData, CardAspectRatio } from './SocialCardCanvas';
 import { styles } from './ShareModal.styles';
 
@@ -46,7 +47,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         title: data.workoutName ? `Entrenamiento: ${data.workoutName}` : '¡Entrenamiento completado en PressFit!',
       });
     } catch (error) {
-      console.error('[ShareModal] Failed to share workout card:', error);
+      LogService.error('[ShareModal] Failed to share workout card:', error);
     } finally {
       setIsSharing(false);
     }

@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { LogService } from '../services/LogService';
 import KeyboardAwareContainer from './KeyboardAwareContainer';
 
 interface EditProfileModalProps {
@@ -96,7 +97,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, c
             });
             onClose();
         } catch (error) {
-            console.error('Error saving metrics:', error);
+            LogService.error('Error saving metrics:', error);
             Alert.alert(t('common.error', 'Error'), t('profile.saveDataError', 'Ocurrió un error al guardar los datos'));
         } finally {
             setLoading(false);

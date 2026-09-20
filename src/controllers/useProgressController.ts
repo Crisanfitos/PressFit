@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { ProgressService } from '../services/ProgressService';
 import { HistoryService, WorkoutSession } from '../services/HistoryService';
+import { LogService } from '../services/LogService';
 import { parseDateKeyAsLocalDate } from '../utils/dateUtils';
 import { RoutineDay, ScheduledExercise, Serie } from '../types/models';
 
@@ -59,7 +60,7 @@ export const useProgressController = (userId: string | undefined) => {
                 setDailyStats(null);
             }
         } catch (error) {
-            console.error('Error fetching daily progress:', error);
+            LogService.error('Error fetching daily progress:', error);
         } finally {
             setLoading(false);
         }
@@ -72,7 +73,7 @@ export const useProgressController = (userId: string | undefined) => {
             const { data } = await HistoryService.getWeeklyProgress(userId);
             setWeeklyStats(data || []);
         } catch (error) {
-            console.error('Error fetching weekly progress:', error);
+            LogService.error('Error fetching weekly progress:', error);
         } finally {
             setLoading(false);
         }
@@ -85,7 +86,7 @@ export const useProgressController = (userId: string | undefined) => {
             const { data } = await HistoryService.getMonthlyProgress(userId);
             setMonthlyStats(data || []);
         } catch (error) {
-            console.error('Error fetching monthly progress:', error);
+            LogService.error('Error fetching monthly progress:', error);
         } finally {
             setLoading(false);
         }
@@ -161,7 +162,7 @@ export const useProgressController = (userId: string | undefined) => {
 
             setProcessedMonthlyData({ totalDurationMinutes, totalHours, totalMinutes, totalWorkouts: data.length, weeklyData });
         } catch (error) {
-            console.error('Error fetching monthly progress by date:', error);
+            LogService.error('Error fetching monthly progress by date:', error);
         } finally {
             setLoading(false);
         }
@@ -174,7 +175,7 @@ export const useProgressController = (userId: string | undefined) => {
             const { data } = await ProgressService.getProgressPhotos(userId);
             setProgressPhotos(data || []);
         } catch (error) {
-            console.error('Error fetching photos:', error);
+            LogService.error('Error fetching photos:', error);
         } finally {
             setLoading(false);
         }
@@ -187,7 +188,7 @@ export const useProgressController = (userId: string | undefined) => {
             const { data } = await HistoryService.getExerciseHistory(userId, exerciseId);
             setExerciseHistory(data || []);
         } catch (error) {
-            console.error('Error fetching exercise history:', error);
+            LogService.error('Error fetching exercise history:', error);
         } finally {
             setLoading(false);
         }
@@ -203,7 +204,7 @@ export const useProgressController = (userId: string | undefined) => {
             }
             return false;
         } catch (error) {
-            console.error('Error uploading photo:', error);
+            LogService.error('Error uploading photo:', error);
             return false;
         }
     };
@@ -218,7 +219,7 @@ export const useProgressController = (userId: string | undefined) => {
             }
             return false;
         } catch (error) {
-            console.error('Error deleting photos:', error);
+            LogService.error('Error deleting photos:', error);
             return false;
         }
     };
@@ -235,7 +236,7 @@ export const useProgressController = (userId: string | undefined) => {
             }
             return false;
         } catch (error) {
-            console.error('Error updating photo:', error);
+            LogService.error('Error updating photo:', error);
             return false;
         }
     };

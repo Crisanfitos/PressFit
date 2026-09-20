@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { WorkoutRecoveryService, RecoverySession } from '../services/WorkoutRecoveryService';
+import { LogService } from '../services/LogService';
 
 export function useWorkoutRecovery(navigation?: any) {
     const [pendingSession, setPendingSession] = useState<RecoverySession | null>(null);
@@ -11,7 +12,7 @@ export function useWorkoutRecovery(navigation?: any) {
             const session = await WorkoutRecoveryService.checkPendingWorkoutSession();
             setPendingSession(session);
         } catch (error) {
-            console.error('Failed to check recovery session:', error);
+            LogService.error('Failed to check recovery session:', error);
             setPendingSession(null);
         } finally {
             setIsLoading(false);

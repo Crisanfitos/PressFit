@@ -1,6 +1,7 @@
 import { LinkingOptions } from '@react-navigation/native';
 import { Linking } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import { LogService } from '../services/LogService';
 
 export const linkingConfig: LinkingOptions<any> = {
     prefixes: ['pressfit://', 'https://pressfit.app', 'http://pressfit.app'],
@@ -55,7 +56,7 @@ export const linkingConfig: LinkingOptions<any> = {
                 return notifUrl;
             }
         } catch (e) {
-            console.warn('[Linking] Error getting initial URL:', e);
+            LogService.warn('[Linking] Error getting initial URL:', e);
         }
         return null;
     },

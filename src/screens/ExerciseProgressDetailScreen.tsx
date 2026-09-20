@@ -7,6 +7,7 @@ import { useTheme } from '../context/ThemeContext';
 import { WorkoutService } from '../services/WorkoutService';
 import { AuthContext } from '../context/AuthContext';
 import { ExerciseService } from '../services/ExerciseService';
+import { LogService } from '../services/LogService';
 import { format, parseISO } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
@@ -58,7 +59,7 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                     setHistoryData(histRes.data);
                 }
             } catch (error) {
-                console.error('Error loading exercise progress:', error);
+                LogService.error('Error loading exercise progress:', error);
             } finally {
                 setLoading(false);
             }

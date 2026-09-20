@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { WorkoutService } from '../../services/WorkoutService';
 import { RoutineService } from '../../services/RoutineService';
+import { LogService } from '../../services/LogService';
 import { TipoPeso, SetType } from '../../types/setTypes';
 import { validateRpe } from '../../utils/rpeValidation';
 import { checkSetLimits } from '../../utils/setLimits';
@@ -238,7 +239,7 @@ export const useWorkoutSets = ({
 
             await loadSeriesForExercise(targetWorkoutId, exerciseId);
         } catch (error: unknown) {
-            console.error('Failed to add sets', error);
+            LogService.error('Failed to add sets', error);
             Alert.alert('Error Add Sets', String(error));
         }
     };
@@ -296,7 +297,7 @@ export const useWorkoutSets = ({
                     : { [field]: dbValue as number };
             await WorkoutService.updateSet(setId, updatesPayload);
         } catch (error) {
-            console.error('Failed to update set', error);
+            LogService.error('Failed to update set', error);
         }
     };
 
@@ -347,7 +348,7 @@ export const useWorkoutSets = ({
                 is_pr: isCompleted ? isPR : false,
             });
         } catch (error) {
-            console.error('Failed to toggle set completion', error);
+            LogService.error('Failed to toggle set completion', error);
         }
     };
 
@@ -365,7 +366,7 @@ export const useWorkoutSets = ({
         try {
             await WorkoutService.updateSet(setId, { tipo_serie: newType });
         } catch (error) {
-            console.error('Failed to update set type', error);
+            LogService.error('Failed to update set type', error);
         }
     };
 
@@ -401,7 +402,7 @@ export const useWorkoutSets = ({
                 }
             }
         } catch (error) {
-            console.error('Failed to delete set', error);
+            LogService.error('Failed to delete set', error);
             if (workout) loadExercises(routineDayId, workout.id);
         }
     };
@@ -417,7 +418,7 @@ export const useWorkoutSets = ({
                 await WorkoutService.removeExerciseFromWorkout(workout.id, exerciseId);
             }
         } catch (error) {
-            console.error('Failed to remove exercise', error);
+            LogService.error('Failed to remove exercise', error);
             if (workout) loadExercises(routineDayId, workout.id);
         }
     };
@@ -429,7 +430,7 @@ export const useWorkoutSets = ({
             await WorkoutService.addExerciseToWorkout(workout.id, exerciseId);
             loadExercises(routineDayId, workout.id);
         } catch (error) {
-            console.error('Failed to add exercise', error);
+            LogService.error('Failed to add exercise', error);
         }
     };
 
@@ -448,7 +449,7 @@ export const useWorkoutSets = ({
         try {
             await WorkoutService.updateWeightType(routineExerciseId, tipoPeso);
         } catch (error) {
-            console.error('Failed to update weight type', error);
+            LogService.error('Failed to update weight type', error);
             if (workout) loadExercises(routineDayId, workout.id);
         }
     };
@@ -495,7 +496,7 @@ export const useWorkoutSets = ({
             await loadExercises(routineDayId, workout.id);
             return !res.error;
         } catch (error) {
-            console.error('Failed to swap exercise in controller:', error);
+            LogService.error('Failed to swap exercise in controller:', error);
             if (workout) await loadExercises(routineDayId, workout.id);
             return false;
         }

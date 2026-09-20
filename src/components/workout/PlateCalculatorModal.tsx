@@ -24,6 +24,7 @@ import PlateVisualizer from './PlateVisualizer';
 import { HapticService } from '../../services/HapticService';
 import { AuthContext } from '../../context/AuthContext';
 import { PlateSettingsService, UserPlateSettings } from '../../services/PlateSettingsService';
+import { LogService } from '../../services/LogService';
 
 export interface PlateCalculatorModalProps {
   visible: boolean;
@@ -65,7 +66,7 @@ export const PlateCalculatorModal: React.FC<PlateCalculatorModalProps> = ({
           setUserSettings(data);
         }
       }).catch((err) => {
-        console.warn('[PlateCalculatorModal] Failed to load plate settings:', err);
+        LogService.warn('[PlateCalculatorModal] Failed to load plate settings:', err);
       });
     }
     return () => {

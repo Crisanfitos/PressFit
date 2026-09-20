@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { ExerciseService } from '../services/ExerciseService';
+import { LogService } from '../services/LogService';
 
 type ExerciseTrackingScreenProps = { navigation: any };
 
@@ -28,7 +29,7 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
                 const { data } = await ExerciseService.getUserExercisesWithProgress(user.id);
                 setExercises(data || []);
             } catch (error) {
-                console.error('Error loading exercises:', error);
+                LogService.error('Error loading exercises:', error);
             } finally {
                 setLoading(false);
             }

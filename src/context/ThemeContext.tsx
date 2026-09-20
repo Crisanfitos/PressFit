@@ -3,6 +3,7 @@ import { useColorScheme, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as NavigationBar from 'expo-navigation-bar';
 import { themes, Theme } from '../theme/colors';
+import { LogService } from '../services/LogService';
 
 type ThemeMode = 'dark' | 'light' | 'system';
 
@@ -35,7 +36,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
                     setThemeModeState(savedTheme as ThemeMode);
                 }
             } catch (error) {
-                console.error('Error loading theme:', error);
+                LogService.error('Error loading theme:', error);
             } finally {
                 setIsLoaded(true);
             }
@@ -73,7 +74,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         try {
             await AsyncStorage.setItem(THEME_STORAGE_KEY, mode);
         } catch (error) {
-            console.error('Error saving theme:', error);
+            LogService.error('Error saving theme:', error);
         }
     };
 

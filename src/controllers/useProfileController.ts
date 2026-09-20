@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { UserService } from '../services/UserService';
 import { ProgressService } from '../services/ProgressService';
+import { LogService } from '../services/LogService';
 
 interface Metrics {
     peso?: number | null;
@@ -40,7 +41,7 @@ export const useProfileController = (user: User | null | undefined) => {
             } : null);
             setProfile(user);
         } catch (error) {
-            console.error('Error fetching profile data:', error);
+            LogService.error('Error fetching profile data:', error);
         } finally {
             setLoading(false);
         }
@@ -53,7 +54,7 @@ export const useProfileController = (user: User | null | undefined) => {
             const { data } = await ProgressService.getProgressPhotos(user.id);
             setProgressPhotos(data || []);
         } catch (error) {
-            console.error('Error fetching photos:', error);
+            LogService.error('Error fetching photos:', error);
         } finally {
             setLoadingPhotos(false);
         }
@@ -102,7 +103,7 @@ export const useProfileController = (user: User | null | undefined) => {
             if (error) throw error;
             return url;
         } catch (error) {
-            console.error('Error updating profile photo:', error);
+            LogService.error('Error updating profile photo:', error);
             throw error;
         } finally {
             setUploadingPhoto(false);
@@ -118,7 +119,7 @@ export const useProfileController = (user: User | null | undefined) => {
             await fetchPhotos();
             return data;
         } catch (error) {
-            console.error('Error adding progress photo:', error);
+            LogService.error('Error adding progress photo:', error);
             throw error;
         } finally {
             setUploadingPhoto(false);

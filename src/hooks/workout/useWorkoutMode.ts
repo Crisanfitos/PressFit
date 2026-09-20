@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { WorkoutService } from '../../services/WorkoutService';
 import { RoutineService } from '../../services/RoutineService';
+import { LogService } from '../../services/LogService';
 import { clearActiveWorkoutParams, saveActiveWorkoutParams } from '../../services/TimerNotificationService';
 import { RoutineDay } from '../../types/models';
 import { WorkoutData } from './useWorkoutSets';
@@ -152,7 +153,7 @@ export const useWorkoutMode = ({
                 await loadExercises(routineDayId, currentWorkoutId);
             }
         } catch (error) {
-            console.error('Error initializing workout:', error);
+            LogService.error('Error initializing workout:', error);
         } finally {
             setLoading(false);
         }
@@ -193,7 +194,7 @@ export const useWorkoutMode = ({
             await loadExercises(routineDayId, newWorkout.id, ghostSource);
             setIsTimerRunning(true);
         } catch (error) {
-            console.error('Error starting workout:', error);
+            LogService.error('Error starting workout:', error);
         } finally {
             setLoading(false);
         }
@@ -208,7 +209,7 @@ export const useWorkoutMode = ({
             await clearActiveWorkoutParams();
             return true;
         } catch (error) {
-            console.error('Failed to finish workout', error);
+            LogService.error('Failed to finish workout', error);
             return false;
         }
     };

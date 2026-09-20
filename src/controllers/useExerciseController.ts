@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ExerciseService, CustomExerciseInput } from '../services/ExerciseService';
+import { LogService } from '../services/LogService';
 
 export interface Exercise {
     id: string;
@@ -64,7 +65,7 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
             const { data } = await ExerciseService.getExercises();
             setExercises(data || []);
         } catch (error) {
-            console.error('Error fetching exercises:', error);
+            LogService.error('Error fetching exercises:', error);
         } finally {
             setLoading(false);
         }
@@ -158,7 +159,7 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
             if (error) throw error;
             return true;
         } catch (error) {
-            console.error('Error saving selection:', error);
+            LogService.error('Error saving selection:', error);
             return false;
         } finally {
             setSaving(false);
@@ -173,7 +174,7 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
             await fetchExercises();
             return { data, error: null };
         } catch (error) {
-            console.error('Error creating custom exercise:', error);
+            LogService.error('Error creating custom exercise:', error);
             return { data: null, error };
         } finally {
             setSaving(false);

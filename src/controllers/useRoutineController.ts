@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { RoutineService } from '../services/RoutineService';
+import { LogService } from '../services/LogService';
 import { RoutineDay, ServiceResponse } from '../types/models';
 
 interface Routine {
@@ -72,7 +73,7 @@ export const useRoutineController = (userId: string | undefined, routineId: stri
                 setWorkoutStats(statsMap);
             }
         } catch (error) {
-            console.error('Error fetching routines:', error);
+            LogService.error('Error fetching routines:', error);
         } finally {
             if (!isRefresh) setLoading(false);
         }
@@ -111,7 +112,7 @@ export const useRoutineController = (userId: string | undefined, routineId: stri
                 dayOfWeek,
             });
         } catch (error) {
-            console.error('Error handling day press:', error);
+            LogService.error('Error handling day press:', error);
         }
     };
 
@@ -141,7 +142,7 @@ export const useRoutineController = (userId: string | undefined, routineId: stri
             await fetchRoutines(true);
             return true;
         } catch (error) {
-            console.error('Error starting weekly plan:', error);
+            LogService.error('Error starting weekly plan:', error);
             return false;
         }
     };

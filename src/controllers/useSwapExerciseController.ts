@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useExerciseController, Exercise } from './useExerciseController';
 import { WorkoutService } from '../services/WorkoutService';
+import { LogService } from '../services/LogService';
 
 export interface OldExerciseData {
     id: string;
@@ -111,7 +112,7 @@ export const useSwapExerciseController = ({
                 navigation.goBack();
             }
         } catch (err) {
-            console.error('Error swapping exercise:', err);
+            LogService.error('Error swapping exercise:', err);
             Alert.alert(
                 t('common.error', 'Error'),
                 t('swapExercise.unexpectedError', 'Ocurrió un fallo inesperado al intercambiar el ejercicio.')

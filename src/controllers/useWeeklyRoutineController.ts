@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { RoutineService } from '../services/RoutineService';
+import { LogService } from '../services/LogService';
 import { RoutineDay } from '../types/models';
 
 interface WeeklyRoutine {
@@ -27,7 +28,7 @@ export const useWeeklyRoutineController = (userId: string | undefined) => {
             if (fetchError) throw fetchError;
             setRoutines(data || []);
         } catch (err) {
-            console.error('Error fetching weekly routines:', err);
+            LogService.error('Error fetching weekly routines:', err);
             setError('Error al cargar rutinas');
         } finally {
             if (!silent) setLoading(false);
@@ -71,7 +72,7 @@ export const useWeeklyRoutineController = (userId: string | undefined) => {
             if (data) setRoutines((prev) => [data, ...prev]);
             return { success: true };
         } catch (err: unknown) {
-            console.error('Error creating routine:', err);
+            LogService.error('Error creating routine:', err);
             return { success: false, error: err instanceof Error ? err.message : String(err) };
         } finally {
             setLoading(false);
@@ -85,7 +86,7 @@ export const useWeeklyRoutineController = (userId: string | undefined) => {
             if (data) setRoutines((prev) => prev.map((r) => (r.id === id ? data : r)));
             return true;
         } catch (err) {
-            console.error('Error updating routine:', err);
+            LogService.error('Error updating routine:', err);
             return false;
         }
     };
@@ -108,7 +109,7 @@ export const useWeeklyRoutineController = (userId: string | undefined) => {
             }
             return true;
         } catch (err) {
-            console.error('Error deleting routine:', err);
+            LogService.error('Error deleting routine:', err);
             return false;
         }
     };

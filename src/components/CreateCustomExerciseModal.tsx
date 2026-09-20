@@ -15,6 +15,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { ExerciseService, CustomExerciseInput } from '../services/ExerciseService';
+import { LogService } from '../services/LogService';
 
 interface CreateCustomExerciseModalProps {
   visible: boolean;
@@ -120,7 +121,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
       }
       onClose();
     } catch (err: any) {
-      console.error(isEditing ? 'Error al actualizar ejercicio personalizado:' : 'Error al crear ejercicio personalizado:', err);
+      LogService.error(isEditing ? 'Error al actualizar ejercicio personalizado:' : 'Error al crear ejercicio personalizado:', err);
       setErrorMsg(err.message || (isEditing ? t('customExercise.updateError', 'No se pudo actualizar el ejercicio. Inténtalo de nuevo.') : t('customExercise.createError', 'No se pudo crear el ejercicio. Inténtalo de nuevo.')));
     } finally {
       setLoading(false);

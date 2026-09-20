@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../../context/AuthContext';
 import { RoutineService } from '../../services/RoutineService';
 import { WorkoutService } from '../../services/WorkoutService';
+import { LogService } from '../../services/LogService';
 import { formatLocalDateKey, parseDateKeyAsLocalDate } from '../../utils/dateUtils';
 import { WorkoutDayExercise, WorkoutStats } from './types';
 
@@ -123,7 +124,7 @@ export const useWorkoutDayScreenState = (navigation: any, route: any) => {
                 setActiveWorkout(null);
             }
         } catch (error) {
-            console.error('Error loading day data:', error);
+            LogService.error('Error loading day data:', error);
         } finally {
             setLoading(false);
         }
@@ -247,7 +248,7 @@ export const useWorkoutDayScreenState = (navigation: any, route: any) => {
 
             return { success: true };
         } catch (err: any) {
-            console.error('Error completing manual pending workout:', err);
+            LogService.error('Error completing manual pending workout:', err);
             return { success: false, error: err?.message || 'Error inesperado al finalizar la rutina.' };
         }
     };
