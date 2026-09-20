@@ -14,7 +14,7 @@ import { OfflineStorageService } from './src/services/OfflineStorageService';
 SentryService.init();
 
 
-export default function App() {
+function App() {
   React.useEffect(() => {
     OfflineStorageService.initialize().catch(() => { });
     checkActiveRestTimer().then(({ active }) => {
@@ -39,3 +39,5 @@ export default function App() {
     </GestureHandlerRootView>
   );
 }
+
+export default SentryService.wrap(App);
