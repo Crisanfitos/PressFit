@@ -42,7 +42,7 @@ export const PresetRoutineCard: React.FC<PresetRoutineCardProps> = ({
             style={[
                 styles.card,
                 {
-                    backgroundColor: colors.card || colors.surface || '#1E1E1E',
+                    backgroundColor: colors.surface || '#1E1E1E',
                     borderColor: colors.border || '#333',
                 },
             ]}

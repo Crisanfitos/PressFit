@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ThemeColors } from '../../types/theme';
-import { FilterKey } from '../../controllers/useExerciseController';
+import { FilterKey, FilterState } from '../../controllers/useExerciseController';
 
 export interface FilterRowData {
     key: FilterKey;
@@ -15,7 +15,7 @@ export interface ExerciseFilterSectionProps {
     setShowFilters: React.Dispatch<React.SetStateAction<boolean>>;
     hasActiveFilters: boolean;
     filterRows: FilterRowData[];
-    filters: Partial<Record<FilterKey, string>>;
+    filters: FilterState | Partial<Record<FilterKey, string | null>>;
     setFilter: (key: FilterKey, value: string | null) => void;
     clearFilter: (key: FilterKey) => void;
     clearAllFilters: () => void;

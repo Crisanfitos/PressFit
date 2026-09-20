@@ -292,10 +292,19 @@ export const ExerciseService = {
 
             // Extract unique exercise IDs from user's completed series
             const exerciseIds = new Set<string>();
-            seriesData?.forEach((serie: { ejercicio_programado?: { ejercicio_id?: string; rutina_diaria?: { rutina_semanal?: { usuario_id?: string } } } }) => {
-                const userId_from_data = serie.ejercicio_programado?.rutina_diaria?.rutina_semanal?.usuario_id;
-                if (userId_from_data === userId && serie.ejercicio_programado?.ejercicio_id) {
-                    exerciseIds.add(serie.ejercicio_programado.ejercicio_id);
+            seriesData?.forEach((serie) => {
+                const ep = Array.isArray(serie.ejercicio_programado)
+                    ? serie.ejercicio_programado[0]
+                    : serie.ejercicio_programado;
+                const rd = Array.isArray(ep?.rutina_diaria)
+                    ? ep?.rutina_diaria[0]
+                    : ep?.rutina_diaria;
+                const rs = Array.isArray(rd?.rutina_semanal)
+                    ? rd?.rutina_semanal[0]
+                    : rd?.rutina_semanal;
+                const userId_from_data = rs?.usuario_id;
+                if (userId_from_data === userId && ep?.ejercicio_id) {
+                    exerciseIds.add(ep.ejercicio_id);
                 }
             });
 

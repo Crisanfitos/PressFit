@@ -160,7 +160,6 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
                     endSpacing={40}
                     verticalLinesColor={`${colors.textSecondary}30`}
                     rulesColor={`${colors.textSecondary}30`}
-                    activatePointersOnPress
                     pointerConfig={{
                         pointerStripColor: colors.primary,
                         pointerStripWidth: 2,
@@ -168,7 +167,6 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
                         radius: 6,
                         pointerLabelWidth: 100,
                         pointerLabelHeight: 60,
-                        activatePointersOnPress: true,
                         pointerEvents: 'none',
                         pointerLabelComponent: (items: any) => {
                             const item = items[0];

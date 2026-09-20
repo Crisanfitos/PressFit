@@ -268,7 +268,7 @@ export const DailyWorkoutService = {
 
             const { data, error } = await supabase
                 .from('rutinas_diarias')
-                .select('id, hora_inicio, hora_fin, completada')
+                .select('*')
                 .eq('rutina_semanal_id', templateDay.rutina_semanal_id)
                 .eq('nombre_dia', templateDay.nombre_dia)
                 .not('fecha_dia', 'is', null)
@@ -312,7 +312,7 @@ export const DailyWorkoutService = {
 
             // Look for the most recent completed workout for the same day name
             // to use its series data (weight) instead of template values
-            let prevSeriesMap = new Map<string, Serie[]>();
+            let prevSeriesMap = new Map<string, Array<{ numero_serie: number; peso_utilizado?: number | null; repeticiones?: number | null; rpe?: number | null }>>();
             try {
                 const { data: prevWorkouts } = await supabase
                     .from('rutinas_diarias')
@@ -382,7 +382,7 @@ export const DailyWorkoutService = {
                         : (templateEx.series || []);
 
                     if (sourceSeries.length > 0) {
-                        const seriesToInsert = sourceSeries.map((serie: Serie) => ({
+                        const seriesToInsert = sourceSeries.map((serie: { numero_serie: number; peso_utilizado?: number | null }) => ({
                             ejercicio_programado_id: newEx.id,
                             numero_serie: serie.numero_serie,
                             peso_utilizado: serie.peso_utilizado || 0,
@@ -506,10 +506,7 @@ export const DailyWorkoutService = {
                     hora_inicio,
                     hora_fin,
                     completada,
-                    ejercicios_programados (
-                        id,
-                        ejercicio_id
-                    )
+                    ejercicios_programados (*)
                 `)
                 .in('rutina_semanal_id', routineWeeklyIds)
                 .not('fecha_dia', 'is', null)

@@ -229,21 +229,6 @@ class E2EMockStore {
         return this.currentWorkout;
     }
 
-    updateSet(setId: string, updates: any) {
-        if (this.currentWorkout?.ejercicios_programados) {
-            for (const ex of this.currentWorkout.ejercicios_programados) {
-                if (ex.series) {
-                    const targetSet = ex.series.find((s: any) => s.id === setId);
-                    if (targetSet) {
-                        Object.assign(targetSet, updates);
-                        return targetSet;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     addSet(exerciseId: string, setType: string = 'normal') {
         if (!this.currentWorkout) {
             this.currentWorkout = this.getMockRoutineDay();

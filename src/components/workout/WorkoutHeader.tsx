@@ -7,7 +7,7 @@ import { SyncStatusBadge } from '../SyncStatusBadge';
 
 export interface WorkoutHeaderProps {
     dayName?: string;
-    fechaDia?: string;
+    fechaDia?: string | null;
     descripcion?: string;
     routineDayId?: string;
     workoutId?: string;

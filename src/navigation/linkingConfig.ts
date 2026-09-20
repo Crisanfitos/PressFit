@@ -7,7 +7,6 @@ export const linkingConfig: LinkingOptions<any> = {
     config: {
         screens: {
             Semana: {
-                initialRouteName: 'MonthlyCalendar',
                 screens: {
                     MonthlyCalendar: 'calendar',
                     Workout: 'workout/:routineDayId',
@@ -21,7 +20,6 @@ export const linkingConfig: LinkingOptions<any> = {
                 },
             },
             Progreso: {
-                initialRouteName: 'ProgressMain',
                 screens: {
                     ProgressMain: 'progress',
                     MonthlyProgress: 'progress/monthly',
@@ -34,7 +32,6 @@ export const linkingConfig: LinkingOptions<any> = {
                 },
             },
             Perfil: {
-                initialRouteName: 'ProfileMain',
                 screens: {
                     ProfileMain: 'profile',
                     PhysicalProgress: 'profile/physical',

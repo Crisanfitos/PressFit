@@ -393,7 +393,7 @@ export const AnalyticsService = {
 
                 exerciseMap.get(epId)!.series.push({
                     id: row.id,
-                    numero_serie: row.numero_serie,
+                    numero_serie: row.numero_serie ?? undefined,
                     peso_utilizado: row.peso_utilizado,
                     repeticiones: row.repeticiones,
                     rpe: row.rpe,

@@ -186,8 +186,8 @@ export const useCalendarController = (userId: string | undefined, routineId: str
                     exerciseCount,
                     duration,
                     isCompleted: !!workout.completada,
-                    startTime: workout.hora_inicio,
-                    endTime: workout.hora_fin,
+                    startTime: workout.hora_inicio ?? null,
+                    endTime: workout.hora_fin ?? null,
                 };
             });
         }

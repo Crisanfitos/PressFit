@@ -1,3 +1,4 @@
+import React from 'react';
 import { Share, Platform } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import { SocialCardData } from '../components/social';
@@ -76,7 +77,7 @@ export class ShareService {
      * Returns the URI of the temporary file generated.
      */
     static async captureCard(
-        viewRef: React.RefObject<unknown>,
+        viewRef: React.RefObject<any>,
         options?: CaptureOptions
     ): Promise<string | null> {
         if (!viewRef || !viewRef.current) {
@@ -107,11 +108,9 @@ export class ShareService {
                 message = this.buildShareMessage(options.data);
             }
 
-            const sharePayload: { message?: string; url?: string; title?: string } = {};
-
-            if (message) {
-                sharePayload.message = message;
-            }
+            const sharePayload: { message: string; url?: string; title?: string } = {
+                message: message || '¡Entrenamiento completado con PressFit!',
+            };
 
             if (options.title) {
                 sharePayload.title = options.title;
@@ -119,10 +118,6 @@ export class ShareService {
 
             if (options.imageUri) {
                 sharePayload.url = options.imageUri;
-            }
-
-            if (!sharePayload.message && !sharePayload.url) {
-                sharePayload.message = '¡Entrenamiento completado con PressFit!';
             }
 
             const result = await Share.share(sharePayload, {
@@ -139,21 +134,15 @@ export class ShareService {
                 return {
                     success: false,
                     action: result.action,
-                    imageUri: options.imageUri || null,
                 };
             }
 
-            return {
-                success: true,
-                action: result.action,
-                imageUri: options.imageUri || null,
-            };
+            return { success: false };
         } catch (error: unknown) {
             LogService.error('[ShareService] Error sharing workout:', error);
             return {
                 success: false,
                 error: error instanceof Error ? error.message : 'Error desconocido al compartir',
-                imageUri: options.imageUri || null,
             };
         }
     }
@@ -162,7 +151,7 @@ export class ShareService {
      * Combined convenience method: captures view ref and immediately opens share sheet.
      */
     static async captureAndShare(
-        viewRef: React.RefObject<unknown>,
+        viewRef: React.RefObject<any>,
         options?: { data?: SocialCardData; title?: string; captureOptions?: CaptureOptions }
     ): Promise<ShareResult> {
         let imageUri: string | null = null;
