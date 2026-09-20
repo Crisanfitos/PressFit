@@ -116,7 +116,7 @@ export const useWorkoutSets = ({
                 if (workoutData.ejercicios_programados) {
                     finalExercises = workoutData.ejercicios_programados.map((ex: ScheduledExercise) => ({
                         ...ex.ejercicio,
-                        titulo: ex.ejercicio?.titulo || ex.ejercicio?.nombre || 'Ejercicio',
+                        titulo: (ex.ejercicio as any)?.titulo || ex.ejercicio?.nombre || 'Ejercicio',
                         id: ex.ejercicio?.id || ex.ejercicio_id,
                         routine_exercise_id: ex.id,
                         target_sets: 3,
@@ -152,7 +152,7 @@ export const useWorkoutSets = ({
 
                         return {
                             ...re.ejercicio,
-                            titulo: re.ejercicio?.titulo || re.ejercicio?.nombre || 'Ejercicio',
+                            titulo: (re.ejercicio as any)?.titulo || re.ejercicio?.nombre || 'Ejercicio',
                             id: re.ejercicio?.id || re.ejercicio_id,
                             routine_exercise_id: re.id,
                             target_sets: 3,
