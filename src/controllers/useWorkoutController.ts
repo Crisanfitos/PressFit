@@ -1,760 +1,85 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Alert } from 'react-native';
-import { WorkoutService } from '../services/WorkoutService';
-import { RoutineService } from '../services/RoutineService';
-import { TipoPeso, SetType } from '../types/setTypes';
-import { validateRpe } from '../utils/rpeValidation';
-import { MAX_TOTAL_SETS_PER_EXERCISE, MAX_WARMUP_SETS_PER_EXERCISE, checkSetLimits } from '../utils/setLimits';
-import { clearActiveWorkoutParams, saveActiveWorkoutParams } from '../services/TimerNotificationService';
-import { PersonalRecordService, ExercisePRs, BrokenPRDetail } from '../services/PersonalRecordService';
-import { HapticService } from '../services/HapticService';
-import { RoutineDay, ScheduledExercise, Serie, SetUpdatePayload } from '../types/models';
+import { useEffect, useRef, useCallback } from 'react';
+import { useWorkoutTimer } from '../hooks/workout/useWorkoutTimer';
+import { useWorkoutPR, ActivePRCelebration } from '../hooks/workout/useWorkoutPR';
+import { useWorkoutSets, Set, Exercise, WorkoutData } from '../hooks/workout/useWorkoutSets';
+import { useWorkoutMode, WorkoutMode } from '../hooks/workout/useWorkoutMode';
+import { RoutineDay } from '../types/models';
 
-export type WorkoutMode = 'ACTIVE' | 'VIEW' | 'MISSED' | 'PREVIEW' | 'PENDING';
-
-interface Set {
-    id: string;
-    ejercicio_programado_id: string;
-    numero_serie: number;
-    repeticiones: number;
-    peso_utilizado: number;
-    rpe?: number;
-    descanso_segundos?: number;
-    tipo_serie?: SetType;
-    is_completed?: boolean;
-    completada?: boolean;
-    is_pr?: boolean;
-    pending?: boolean;
-}
-
-export interface ActivePRCelebration {
-    exerciseName: string;
-    brokenPRs: BrokenPRDetail[];
-    setId: string;
-}
-
-interface Exercise {
-    id: string;
-    titulo: string;
-    routine_exercise_id: string;
-    target_sets: number;
-    sets: Set[];
-    is_routine: boolean;
-    tipo_peso: TipoPeso;
-    grupo_muscular?: string;
-    imagen_url?: string;
-}
-
-interface Workout {
-    id: string;
-    hora_inicio?: string;
-    hora_fin?: string;
-    completada?: boolean;
-    descripcion?: string;
-    fecha_dia?: string;
-    nombre_dia?: string;
-    ejercicios_programados?: ScheduledExercise[];
-}
+export type { WorkoutMode, ActivePRCelebration, Set, Exercise, WorkoutData };
 
 export const useWorkoutController = (
     initialWorkoutId: string | null,
     routineDayId: string,
     userId: string,
     dayOfWeek: number,
-    isEditingTemplate: boolean = false  // New param to allow editing in template/routine edit mode
+    isEditingTemplate: boolean = false
 ) => {
-    const [workout, setWorkout] = useState<Workout | null>(null);
-    const [exercises, setExercises] = useState<Exercise[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [timer, setTimer] = useState(0);
-    const [isTimerRunning, setIsTimerRunning] = useState(false);
-    const [mode, setMode] = useState<WorkoutMode>('ACTIVE');
-    const [previousWorkout, setPreviousWorkout] = useState<RoutineDay | null>(null);
-    const [activePRCelebration, setActivePRCelebration] = useState<ActivePRCelebration | null>(null);
-    const exercisePRsRef = useRef<Record<string, ExercisePRs>>({});
-    const timerInterval = useRef<NodeJS.Timeout | null>(null);
+    const timerHook = useWorkoutTimer();
+    const prHook = useWorkoutPR(userId);
 
-    const prefetchPRs = useCallback(async (exerciseList: Exercise[]) => {
-        if (!userId) return;
-        const uniqueExerciseIds = Array.from(new Set(exerciseList.map((e) => e.id).filter(Boolean)));
-        await Promise.all(
-            uniqueExerciseIds.map(async (exId) => {
-                if (!exercisePRsRef.current[exId]) {
-                    const res = await PersonalRecordService.getHistoricalPRs(userId, exId);
-                    if (res.data) {
-                        exercisePRsRef.current[exId] = res.data;
-                    }
-                }
-            })
-        );
-    }, [userId]);
+    const loadExercisesRef = useRef<((rDayId: string, wId: string | null, prevWorkout?: RoutineDay | null) => Promise<void>) | null>(null);
 
-    const loadExercises = useCallback(async (rDayId: string, wId: string | null, prevWorkout?: RoutineDay | null) => {
-        let finalExercises: Exercise[] = [];
-
-        // Set previousWorkout atomically with exercises to avoid timing issues
-        if (prevWorkout !== undefined) {
-            setPreviousWorkout(prevWorkout);
+    const loadExercisesProxy = useCallback(async (rDayId: string, wId: string | null, prevWorkout?: RoutineDay | null) => {
+        if (loadExercisesRef.current) {
+            await loadExercisesRef.current(rDayId, wId, prevWorkout);
         }
+    }, []);
 
-        if (wId) {
-            const { data: workoutData } = await WorkoutService.getWorkoutDetails(wId);
-            if (workoutData) {
-                setWorkout(workoutData);
-                if (workoutData.ejercicios_programados) {
-                    finalExercises = workoutData.ejercicios_programados.map((ex: ScheduledExercise) => ({
-                        ...ex.ejercicio,
-                        titulo: ex.ejercicio?.titulo || 'Ejercicio',
-                        id: ex.ejercicio?.id || ex.ejercicio_id,
-                        routine_exercise_id: ex.id,
-                        target_sets: 3,
-                        sets: (ex.series || []).map((s: Serie) => ({
-                            ...s,
-                            is_completed: Boolean(s.is_completed || s.completada),
-                            completada: Boolean(s.is_completed || s.completada),
-                            is_pr: Boolean(s.is_pr),
-                        })),
-                        is_routine: true,
-                        tipo_peso: (ex.tipo_peso as TipoPeso) || 'total',
-                    }));
-                }
-            }
-        } else {
-            const { data: routineDay } = await RoutineService.getRoutineDayById(rDayId);
-            if (routineDay) {
-                setWorkout(routineDay as unknown as Workout);
-                if (routineDay.ejercicios_programados) {
-                    finalExercises = routineDay.ejercicios_programados.map((re: ScheduledExercise) => {
-                        // Use series from previous workout if available, otherwise use template's own series
-                        let setsToUse: Set[] = re.series || [];
-                        if (prevWorkout?.ejercicios_programados) {
-                            const prevExercise = prevWorkout.ejercicios_programados.find(
-                                (pe: ScheduledExercise) => pe.ejercicio_id === re.ejercicio?.id || pe.ejercicio_id === re.ejercicio_id
-                            );
-                            if (prevExercise?.series && prevExercise.series.length > 0) {
-                                setsToUse = prevExercise.series.map((s: Serie) => ({
-                                    ...s,
-                                    fromPrevious: true,
-                                }));
-                            }
-                        }
+    const modeHook = useWorkoutMode({
+        initialWorkoutId,
+        routineDayId,
+        userId,
+        dayOfWeek,
+        isEditingTemplate,
+        loadExercises: loadExercisesProxy,
+        timer: timerHook.timer,
+        setTimer: timerHook.setTimer,
+        setIsTimerRunning: timerHook.setIsTimerRunning,
+        stopTimer: timerHook.stopTimer,
+    });
 
-                        return {
-                            ...re.ejercicio,
-                            titulo: re.ejercicio?.titulo || re.ejercicio?.nombre || 'Ejercicio',
-                            id: re.ejercicio.id,
-                            routine_exercise_id: re.id,
-                            target_sets: 3,
-                            sets: setsToUse,
-                            is_routine: true,
-                            tipo_peso: (re.tipo_peso as TipoPeso) || 'total',
-                        };
-                    });
-                }
-            }
-        }
+    const setsHook = useWorkoutSets({
+        workout: modeHook.workout,
+        setWorkout: modeHook.setWorkout,
+        mode: modeHook.mode,
+        isEditingTemplate,
+        routineDayId,
+        onPrefetchPRs: prHook.prefetchPRs,
+        onCheckPR: prHook.checkAndCelebratePR,
+    });
 
-        setExercises(finalExercises);
-        prefetchPRs(finalExercises);
-    }, [prefetchPRs]);
+    loadExercisesRef.current = setsHook.loadExercises;
 
-    const initWorkout = useCallback(async () => {
-        setLoading(true);
-        try {
-            const today = new Date().getDay();
-            const adjustDay = (d: number) => (d === 0 ? 6 : d - 1);
-            const currentDayAdjusted = adjustDay(today);
-            const targetDayAdjusted = adjustDay(dayOfWeek);
-
-            let calculatedMode: WorkoutMode = 'ACTIVE';
-
-            if (targetDayAdjusted < currentDayAdjusted) {
-                if (initialWorkoutId) {
-                    calculatedMode = 'VIEW';
-                } else {
-                    const { data: stats } = await RoutineService.getWorkoutStatsForRoutineDay(userId, routineDayId);
-                    calculatedMode = stats?.exerciseCount && stats.exerciseCount > 0 ? 'VIEW' : 'MISSED';
-                }
-            } else if (targetDayAdjusted > currentDayAdjusted) {
-                calculatedMode = 'PENDING';
-            } else {
-                if (initialWorkoutId) {
-                    calculatedMode = 'ACTIVE';
-                } else {
-                    const { data: active } = await RoutineService.getActiveWorkout(userId, routineDayId);
-                    calculatedMode = active ? 'ACTIVE' : 'PREVIEW';
-                }
-            }
-
-            setMode(calculatedMode);
-            let currentWorkoutId = initialWorkoutId;
-
-            if (calculatedMode === 'MISSED') {
-                const { data: lastData } = await WorkoutService.getLastCompletedWorkoutForDay(userId, routineDayId);
-                await loadExercises(routineDayId, null, lastData);
-                setLoading(false);
-                return;
-            }
-
-            if (calculatedMode === 'VIEW') {
-                if (currentWorkoutId) {
-                    const { data: workoutData } = await WorkoutService.getWorkoutDetails(currentWorkoutId);
-                    setWorkout(workoutData);
-                    await loadExercises(routineDayId, currentWorkoutId);
-                }
-                setLoading(false);
-                return;
-            }
-
-            // PREVIEW mode: read directly from the template (no workout created)
-            if (calculatedMode === 'PREVIEW' || calculatedMode === 'PENDING') {
-                await loadExercises(routineDayId, null);
-                setLoading(false);
-                return;
-            }
-
-            // ACTIVE mode: find existing active workout
-            if (!currentWorkoutId) {
-                const { data: active } = await RoutineService.getActiveWorkout(userId, routineDayId);
-                if (active) {
-                    currentWorkoutId = active.id;
-                } else {
-                    // No active workout found — show preview
-                    setMode('PREVIEW');
-                    await loadExercises(routineDayId, null);
-                    setLoading(false);
-                    return;
-                }
-            }
-
-            if (currentWorkoutId) {
-                const { data: workoutData } = await WorkoutService.getWorkoutDetails(currentWorkoutId);
-
-                if (workoutData?.hora_inicio && !workoutData.completada) {
-                    const start = new Date(workoutData.hora_inicio);
-                    const now = new Date();
-                    const diffSeconds = Math.floor((now.getTime() - start.getTime()) / 1000);
-
-                    if (diffSeconds > 10800) {
-                        await WorkoutService.completeWorkout(currentWorkoutId, Math.floor(diffSeconds / 60));
-                        await clearActiveWorkoutParams();
-                        setWorkout({ ...workoutData, completada: true, hora_fin: new Date().toISOString() });
-                        setMode('VIEW');
-                    } else {
-                        setWorkout(workoutData);
-                        setTimer(diffSeconds > 0 ? diffSeconds : 0);
-                        setIsTimerRunning(true);
-                    }
-                } else {
-                    setWorkout(workoutData);
-                    if (workoutData?.completada) {
-                        setMode('VIEW');
-                    }
-                }
-            }
-
-            // Load ghost values for ACTIVE mode (reps/RPE placeholders from previous workout)
-            if (calculatedMode === 'ACTIVE') {
-                const { data: prevData } = await WorkoutService.getLastCompletedWorkoutForDay(userId, routineDayId);
-                let ghostSource = prevData;
-                if (!ghostSource) {
-                    const { data: templateDay } = await RoutineService.getRoutineDayById(routineDayId);
-                    ghostSource = templateDay;
-                }
-                await loadExercises(routineDayId, currentWorkoutId, ghostSource);
-            } else {
-                await loadExercises(routineDayId, currentWorkoutId);
-            }
-        } catch (error) {
-            console.error('Error initializing workout:', error);
-        } finally {
-            setLoading(false);
-        }
-    }, [initialWorkoutId, routineDayId, userId, dayOfWeek, isEditingTemplate, loadExercises]);
-
-    const startWorkout = async () => {
-        setLoading(true);
-        try {
-            const now = new Date();
-
-            // Fetch previous workout data for ghost values (reps/RPE placeholders)
-            const { data: prevData } = await WorkoutService.getLastCompletedWorkoutForDay(userId, routineDayId);
-
-            // If no previous workout, use template data as ghost source
-            let ghostSource = prevData;
-            if (!ghostSource) {
-                const { data: templateDay } = await RoutineService.getRoutineDayById(routineDayId);
-                ghostSource = templateDay;
-            }
-
-            // Create a new workout from the template (copies exercises + series with only weight filled)
-            const { data: newWorkout } = await RoutineService.startDailyWorkout(
-                routineDayId,
-                now.toISOString(),
-                now.toISOString()
-            );
-
-            if (!newWorkout) throw new Error('Failed to start workout');
-
-            const { data: fullWorkout } = await WorkoutService.getWorkoutDetails(newWorkout.id);
-            setWorkout(fullWorkout);
-            setMode('ACTIVE');
-            await saveActiveWorkoutParams({
-                routineDayId,
-                workoutId: newWorkout.id,
-                dayName: fullWorkout?.nombre_dia,
-                dayOfWeek,
-                mode: 'ACTIVE',
-            });
-
-            // Pass ghost source to loadExercises so previousWorkout and exercises
-            // are set in the same execution context (atomic React batch)
-            await loadExercises(routineDayId, newWorkout.id, ghostSource);
-            setIsTimerRunning(true);
-        } catch (error) {
-            console.error('Error starting workout:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { initWorkout } = modeHook;
+    const { stopTimer } = timerHook;
 
     useEffect(() => {
         initWorkout();
         return () => stopTimer();
-    }, [initWorkout]);
-
-    useEffect(() => {
-        if (isTimerRunning) {
-            timerInterval.current = setInterval(() => {
-                setTimer((prev) => prev + 1);
-            }, 1000);
-        } else {
-            if (timerInterval.current) clearInterval(timerInterval.current);
-        }
-        return () => {
-            if (timerInterval.current) clearInterval(timerInterval.current);
-        };
-    }, [isTimerRunning]);
-
-    const stopTimer = () => {
-        setIsTimerRunning(false);
-        if (timerInterval.current) clearInterval(timerInterval.current);
-    };
-
-    // Load series for a specific exercise from backend and update only that exercise in local state
-    const loadSeriesForExercise = useCallback(async (targetWorkoutId: string, exerciseId: string) => {
-        const { data: series } = await WorkoutService.getSeriesForExercise(targetWorkoutId, exerciseId);
-        if (series) {
-            setExercises((prev) => {
-                const updated = [...prev];
-                const exIdx = updated.findIndex((e) => e.id === exerciseId);
-                if (exIdx !== -1) {
-                    updated[exIdx] = {
-                        ...updated[exIdx],
-                        sets: (series as Set[]).map((s) => ({
-                            ...s,
-                            tipo_serie: s.tipo_serie || 'normal',
-                        })),
-                    };
-                }
-                return updated;
-            });
-        }
-    }, []);
-
-    const addSets = async (exerciseId: string, count: number = 1, setType: SetType = 'normal') => {
-        // Allow editing in ACTIVE, PREVIEW mode, or when editing a template/routine
-        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
-        if (!workout || !canEdit) return;
-
-        const exerciseIndex = exercises.findIndex((e) => e.id === exerciseId);
-        if (exerciseIndex === -1) return;
-
-        const exercise = exercises[exerciseIndex];
-        const currentSets = exercise.sets || [];
-
-        const limitValidation = checkSetLimits(currentSets, count, setType);
-        if (!limitValidation.allowed) {
-            Alert.alert('Límite de series', limitValidation.reason || 'No se pueden añadir más series.');
-            return;
-        }
-
-        try {
-            const targetWorkoutId = workout.id;
-
-            // Get actual current series count from backend to avoid duplicate numbers
-            const { data: existingSeries } = await WorkoutService.getSeriesForExercise(targetWorkoutId, exerciseId);
-            const currentCount = existingSeries?.length || 0;
-            const lastSeries = existingSeries && existingSeries.length > 0 ? existingSeries[existingSeries.length - 1] : null;
-            const baseRep = lastSeries ? lastSeries.repeticiones : 0;
-            const baseWeight = lastSeries ? lastSeries.peso_utilizado : 0;
-
-            // Create sets in backend on the current workout
-            for (let i = 0; i < count; i++) {
-                if (setType && setType !== 'normal') {
-                    await WorkoutService.addSet(
-                        targetWorkoutId,
-                        exerciseId,
-                        currentCount + 1 + i,
-                        baseWeight,
-                        baseRep,
-                        setType
-                    );
-                } else {
-                    await WorkoutService.addSet(
-                        targetWorkoutId,
-                        exerciseId,
-                        currentCount + 1 + i,
-                        baseWeight,
-                        baseRep
-                    );
-                }
-            }
-
-            // Backend ok → reload series for this exercise
-            await loadSeriesForExercise(targetWorkoutId, exerciseId);
-        } catch (error: unknown) {
-            console.error('Failed to add sets', error);
-            Alert.alert('Error Add Sets', String(error));
-        }
-    };
-
-    const addSet = async (exerciseId: string, setType: SetType = 'normal') => {
-        await addSets(exerciseId, 1, setType);
-    };
-
-    const updateSet = async (setId: string, field: string, value: string | number | boolean | SetType | null) => {
-        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
-        if (!canEdit) return;
-
-        let dbField = field;
-        if (field === 'weight') dbField = 'peso_utilizado';
-        if (field === 'reps') dbField = 'repeticiones';
-        if (field === 'setType' || field === 'tipo_serie') dbField = 'tipo_serie';
-        if (field === 'is_completed' || field === 'completada') dbField = 'is_completed';
-        // 'rpe' maps directly to 'rpe' in DB — no renaming needed
-
-        let processedValue = value;
-        let dbValue: string | number | boolean | SetType | null = value === '' || value === undefined ? null : value;
-
-        if (field === 'rpe') {
-            const validation = validateRpe(value);
-            processedValue = validation.value;
-            dbValue = validation.value;
-        }
-
-        if (field === 'setType' || field === 'tipo_serie') {
-            processedValue = value as SetType;
-            dbValue = value as SetType;
-        }
-
-        if (field === 'is_completed' || field === 'completada') {
-            const boolVal = Boolean(value === true || value === 'true');
-            processedValue = boolVal;
-            dbValue = boolVal;
-        }
-
-        setExercises((prev) =>
-            prev.map((ex) => ({
-                ...ex,
-                sets: ex.sets.map((s) => (s.id === setId ? {
-                    ...s,
-                    [dbField]: processedValue ?? undefined,
-                    ...(dbField === 'is_completed' ? { is_completed: processedValue, completada: processedValue } : {})
-                } : s)),
-            }))
-        );
-
-        try {
-            const updatesPayload: Parameters<typeof WorkoutService.updateSet>[1] = (field === 'setType' || field === 'tipo_serie')
-                ? { tipo_serie: dbValue as SetType }
-                : (field === 'is_completed' || field === 'completada')
-                    ? { is_completed: Boolean(dbValue), completada: Boolean(dbValue) }
-                    : { [field]: dbValue as number };
-            await WorkoutService.updateSet(setId, updatesPayload);
-        } catch (error) {
-            console.error('Failed to update set', error);
-        }
-    };
-
-    const toggleCompleteSet = async (setId: string, isCompleted: boolean) => {
-        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
-        if (!canEdit) return;
-
-        let isPR = false;
-        let celebrationData: ActivePRCelebration | null = null;
-
-        if (isCompleted) {
-            let targetEx: Exercise | undefined;
-            let targetSet: Set | undefined;
-
-            for (const ex of exercises) {
-                const s = ex.sets.find((item) => item.id === setId);
-                if (s) {
-                    targetEx = ex;
-                    targetSet = s;
-                    break;
-                }
-            }
-
-            if (targetEx && targetSet) {
-                const exId = targetEx.id;
-                let currentPRs = exercisePRsRef.current[exId];
-
-                if (!currentPRs && userId) {
-                    const prRes = await PersonalRecordService.getHistoricalPRs(userId, exId);
-                    if (prRes.data) {
-                        exercisePRsRef.current[exId] = prRes.data;
-                        currentPRs = prRes.data;
-                    }
-                }
-
-                const prResult = PersonalRecordService.checkSetForPR(
-                    { weight: targetSet.peso_utilizado, reps: targetSet.repeticiones },
-                    currentPRs
-                );
-
-                if (prResult.isPR) {
-                    isPR = true;
-                    celebrationData = {
-                        exerciseName: targetEx.titulo,
-                        brokenPRs: prResult.brokenPRs,
-                        setId,
-                    };
-
-                    const w = Number(targetSet.peso_utilizado) || 0;
-                    const r = Number(targetSet.repeticiones) || 0;
-                    const v = w * r;
-                    const est1rm = prResult.brokenPRs.find((b) => b.type === '1rm')?.newValue;
-
-                    exercisePRsRef.current[exId] = {
-                        maxWeight: Math.max(currentPRs?.maxWeight || 0, w),
-                        maxVolume: Math.max(currentPRs?.maxVolume || 0, v),
-                        max1RM: Math.max(currentPRs?.max1RM || 0, est1rm || (currentPRs?.max1RM || 0)),
-                    };
-
-                    if (HapticService.prCelebration) {
-                        HapticService.prCelebration();
-                    }
-                }
-            }
-        }
-
-        setExercises((prev) =>
-            prev.map((ex) => ({
-                ...ex,
-                sets: ex.sets.map((s) => (s.id === setId ? {
-                    ...s,
-                    is_completed: isCompleted,
-                    completada: isCompleted,
-                    is_pr: isCompleted ? (isPR || s.is_pr) : false,
-                } : s)),
-            }))
-        );
-
-        if (celebrationData) {
-            setActivePRCelebration(celebrationData);
-        }
-
-        try {
-            await WorkoutService.updateSet(setId, {
-                is_completed: isCompleted,
-                completada: isCompleted,
-                is_pr: isCompleted ? isPR : false,
-            });
-        } catch (error) {
-            console.error('Failed to toggle set completion', error);
-        }
-    };
-
-    const updateSetType = async (setId: string, newType: SetType) => {
-        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
-        if (!canEdit) return;
-
-        setExercises((prev) =>
-            prev.map((ex) => ({
-                ...ex,
-                sets: ex.sets.map((s) => (s.id === setId ? { ...s, tipo_serie: newType } : s)),
-            }))
-        );
-
-        try {
-            await WorkoutService.updateSet(setId, { tipo_serie: newType });
-        } catch (error) {
-            console.error('Failed to update set type', error);
-        }
-    };
-
-    const deleteSet = async (setId: string, exerciseId: string) => {
-        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
-        if (!canEdit) return;
-
-        const targetExercise = exercises.find(
-            (e) => e.id === exerciseId || e.routine_exercise_id === exerciseId
-        );
-        const originalSets = targetExercise?.sets || [];
-        const filtered = originalSets.filter((s) => s.id !== setId);
-        const renumberedSets = filtered.map((s, index) => ({
-            ...s,
-            numero_serie: index + 1,
-        }));
-
-        setExercises((prev) =>
-            prev.map((ex) => {
-                if (ex.id === exerciseId || ex.routine_exercise_id === exerciseId) {
-                    return { ...ex, sets: renumberedSets };
-                }
-                return ex;
-            })
-        );
-
-        try {
-            await WorkoutService.deleteSet(setId);
-            for (const s of renumberedSets) {
-                const prev = originalSets.find((os) => os.id === s.id);
-                if (prev && prev.numero_serie !== s.numero_serie && s.id && !s.id.startsWith('temp-')) {
-                    await WorkoutService.updateSet(s.id, { numero_serie: s.numero_serie });
-                }
-            }
-        } catch (error) {
-            console.error('Failed to delete set', error);
-            if (workout) loadExercises(routineDayId, workout.id);
-        }
-    };
-
-    const removeExercise = async (exerciseId: string, routineExerciseId: string) => {
-        if (mode !== 'ACTIVE' && mode !== 'PREVIEW') return;
-        setExercises((prev) => prev.filter((e) => e.id !== exerciseId));
-
-        try {
-            if (routineExerciseId) {
-                await WorkoutService.removeExerciseFromRoutine(routineExerciseId);
-            } else if (workout) {
-                await WorkoutService.removeExerciseFromWorkout(workout.id, exerciseId);
-            }
-        } catch (error) {
-            console.error('Failed to remove exercise', error);
-            if (workout) loadExercises(routineDayId, workout.id);
-        }
-    };
-
-    const addExercise = async (exerciseId: string) => {
-        if (!workout || (mode !== 'ACTIVE' && mode !== 'PREVIEW')) return;
-
-        try {
-            await WorkoutService.addExerciseToWorkout(workout.id, exerciseId);
-            loadExercises(routineDayId, workout.id);
-        } catch (error) {
-            console.error('Failed to add exercise', error);
-        }
-    };
-
-    const updateWeightType = async (routineExerciseId: string, exerciseId: string, tipoPeso: TipoPeso) => {
-        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
-        if (!canEdit) return;
-
-        setExercises((prev) =>
-            prev.map((ex) =>
-                ex.id === exerciseId && ex.routine_exercise_id === routineExerciseId
-                    ? { ...ex, tipo_peso: tipoPeso }
-                    : ex
-            )
-        );
-
-        try {
-            await WorkoutService.updateWeightType(routineExerciseId, tipoPeso);
-        } catch (error) {
-            console.error('Failed to update weight type', error);
-            if (workout) loadExercises(routineDayId, workout.id);
-        }
-    };
-
-    const swapExercise = async (
-        oldRoutineExerciseId: string,
-        newExercise: { id: string; titulo: string; grupo_muscular?: string; imagen_url?: string; tipo_peso?: TipoPeso },
-        newSetsCount: number = 3
-    ) => {
-        if (!workout) return false;
-
-        try {
-            // Optimistic update in state: replace exercise in place
-            setExercises((prev) =>
-                prev.map((ex) => {
-                    if (ex.routine_exercise_id === oldRoutineExerciseId || ex.id === oldRoutineExerciseId) {
-                        return {
-                            ...ex,
-                            id: newExercise.id,
-                            titulo: newExercise.titulo,
-                            grupo_muscular: newExercise.grupo_muscular || ex.grupo_muscular,
-                            imagen_url: newExercise.imagen_url || ex.imagen_url,
-                            tipo_peso: newExercise.tipo_peso || ex.tipo_peso || 'total',
-                            target_sets: newSetsCount,
-                            sets: Array.from({ length: newSetsCount }, (_, i) => ({
-                                id: `temp-${Date.now()}-${i}`,
-                                ejercicio_programado_id: oldRoutineExerciseId,
-                                numero_serie: i + 1,
-                                peso_utilizado: 0,
-                                repeticiones: 0,
-                            })),
-                        };
-                    }
-                    return ex;
-                })
-            );
-
-            const res = await WorkoutService.swapExerciseInWorkout(
-                workout.id,
-                oldRoutineExerciseId,
-                newExercise.id,
-                newSetsCount
-            );
-
-            // Reload to ensure all IDs and series are synchronized from database
-            await loadExercises(routineDayId, workout.id);
-            return !res.error;
-        } catch (error) {
-            console.error('Failed to swap exercise in controller:', error);
-            if (workout) await loadExercises(routineDayId, workout.id);
-            return false;
-        }
-    };
-
-    const finishWorkout = async () => {
-        if (!workout || mode !== 'ACTIVE') return false;
-        stopTimer();
-        const durationMinutes = Math.floor(timer / 60);
-        try {
-            await WorkoutService.completeWorkout(workout.id, durationMinutes);
-            await clearActiveWorkoutParams();
-            return true;
-        } catch (error) {
-            console.error('Failed to finish workout', error);
-            return false;
-        }
-    };
+    }, [initWorkout, stopTimer]);
 
     return {
-        workout,
-        exercises,
-        loading,
-        timer,
-        mode,
-        previousWorkout,
-        startWorkout,
-        addSet,
-        addSets,
-        updateSet,
-        updateSetType,
-        toggleCompleteSet,
-        deleteSet,
-        removeExercise,
-        addExercise,
-        swapExercise,
-        finishWorkout,
-        updateWeightType,
-        loadSeriesForExercise,
-        activePRCelebration,
-        dismissPRCelebration: () => setActivePRCelebration(null),
-        reloadExercises: () => loadExercises(routineDayId, workout?.id || null),
+        workout: modeHook.workout,
+        exercises: setsHook.exercises,
+        loading: modeHook.loading,
+        timer: timerHook.timer,
+        mode: modeHook.mode,
+        previousWorkout: setsHook.previousWorkout,
+        startWorkout: modeHook.startWorkout,
+        addSet: setsHook.addSet,
+        addSets: setsHook.addSets,
+        updateSet: setsHook.updateSet,
+        updateSetType: setsHook.updateSetType,
+        toggleCompleteSet: setsHook.toggleCompleteSet,
+        deleteSet: setsHook.deleteSet,
+        removeExercise: setsHook.removeExercise,
+        addExercise: setsHook.addExercise,
+        swapExercise: setsHook.swapExercise,
+        finishWorkout: modeHook.finishWorkout,
+        updateWeightType: setsHook.updateWeightType,
+        loadSeriesForExercise: setsHook.loadSeriesForExercise,
+        activePRCelebration: prHook.activePRCelebration,
+        dismissPRCelebration: prHook.dismissPRCelebration,
+        reloadExercises: setsHook.reloadExercises,
     };
 };
