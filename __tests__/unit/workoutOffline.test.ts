@@ -76,7 +76,7 @@ describe('WorkoutService Offline Mode (PF-242)', () => {
       const queueRes = await SyncService.getQueue();
       expect(queueRes.data).toHaveLength(1);
       expect(queueRes.data?.[0].type).toBe('SET_UPSERT');
-      expect(queueRes.data?.[0].payload.setId).toBe('s-1');
+      expect((queueRes.data?.[0].payload as any).setId).toBe('s-1');
 
       // Check cached workout updated
       const cached = await OfflineStorageService.getCachedWorkouts();
@@ -109,8 +109,8 @@ describe('WorkoutService Offline Mode (PF-242)', () => {
       const queueRes = await SyncService.getQueue();
       expect(queueRes.data).toHaveLength(1);
       expect(queueRes.data?.[0].type).toBe('SET_UPSERT');
-      expect(queueRes.data?.[0].payload.setId).toBe('s-1');
-      expect(queueRes.data?.[0].payload.dbUpdates.peso_utilizado).toBe(90);
+      expect((queueRes.data?.[0].payload as any).setId).toBe('s-1');
+      expect((queueRes.data?.[0].payload as any).dbUpdates.peso_utilizado).toBe(90);
 
       // Verify cached workout updated
       const cached = await OfflineStorageService.getCachedWorkouts();
@@ -187,7 +187,7 @@ describe('WorkoutService Offline Mode (PF-242)', () => {
       const queueRes = await SyncService.getQueue();
       expect(queueRes.data).toHaveLength(1);
       expect(queueRes.data?.[0].type).toBe('WORKOUT_COMPLETE');
-      expect(queueRes.data?.[0].payload.workoutId).toBe('w-offline-1');
+      expect((queueRes.data?.[0].payload as any).workoutId).toBe('w-offline-1');
 
       // Check cached workout marked completed
       const cached = await OfflineStorageService.getCachedWorkouts();

@@ -12,10 +12,12 @@ const mockNavigation = {
   goBack: jest.fn(),
 };
 
-const mockAuthContext = {
+const mockAuthContext: any = {
   user: { id: 'u-123', email: 'test@pressfit.com' },
   session: {} as any,
   loading: false,
+  isLoading: false,
+  isAuthenticated: true,
   signInWithEmail: jest.fn(),
   signUpWithEmail: jest.fn(),
   signOut: jest.fn(),
@@ -40,11 +42,11 @@ describe('WorkoutDayScreen Component (RNTL)', () => {
           {
             id: 'ep-1',
             ejercicio_id: 'e-1',
-            ejercicio: { titulo: 'Press de Banca', grupo_muscular: 'Pecho' },
-            series: [{ id: 's-1', numero_serie: 1, peso_utilizado: 80, repeticiones: 10 }],
-          },
+            ejercicio: { id: 'e-1', nombre: 'Press de Banca', titulo: 'Press de Banca', grupo_muscular_principal: 'Pecho', grupo_muscular: 'Pecho' } as any,
+            series: [{ id: 's-1', ejercicio_programado_id: 'ep-1', numero_serie: 1, peso_utilizado: 80, repeticiones: 10 }],
+          } as any,
         ],
-      },
+      } as any,
       error: null,
     });
 
@@ -78,11 +80,11 @@ describe('WorkoutDayScreen Component (RNTL)', () => {
           {
             id: 'ep-2',
             ejercicio_id: 'e-2',
-            ejercicio: { titulo: 'Sentadilla', grupo_muscular: 'Cuádriceps' },
+            ejercicio: { id: 'e-2', nombre: 'Sentadilla', titulo: 'Sentadilla', grupo_muscular_principal: 'Cuádriceps', grupo_muscular: 'Cuádriceps' } as any,
             series: [],
-          },
+          } as any,
         ],
-      },
+      } as any,
       error: null,
     });
 
@@ -125,16 +127,16 @@ describe('WorkoutDayScreen Component (RNTL)', () => {
         nombre_dia: 'Espalda y Biceps',
         completada: false,
         hora_inicio: '2026-08-08T10:00:00Z',
-        hora_fin: null,
+        hora_fin: undefined,
         ejercicios_programados: [
           {
             id: 'ep-3',
             ejercicio_id: 'e-3',
-            ejercicio: { titulo: 'Dominadas', grupo_muscular: 'Espalda' },
+            ejercicio: { id: 'e-3', nombre: 'Dominadas', titulo: 'Dominadas', grupo_muscular_principal: 'Espalda', grupo_muscular: 'Espalda' } as any,
             series: [],
-          },
+          } as any,
         ],
-      },
+      } as any,
       error: null,
     });
 
@@ -173,11 +175,11 @@ describe('WorkoutDayScreen Component (RNTL)', () => {
           {
             id: 'ep-4',
             ejercicio_id: 'e-4',
-            ejercicio: { titulo: 'Press Militar', grupo_muscular: 'Deltoides' },
+            ejercicio: { id: 'e-4', nombre: 'Press Militar', titulo: 'Press Militar', grupo_muscular_principal: 'Deltoides', grupo_muscular: 'Deltoides' } as any,
             series: [],
-          },
+          } as any,
         ],
-      },
+      } as any,
       error: null,
     });
 
@@ -218,16 +220,16 @@ describe('WorkoutDayScreen Component (RNTL)', () => {
         descripcion: 'Sesión anterior incompleta',
         completada: false,
         hora_inicio: '2026-09-17T18:00:00.000Z',
-        hora_fin: null,
+        hora_fin: undefined,
         ejercicios_programados: [
           {
             id: 'ep-5',
             ejercicio_id: 'e-5',
-            ejercicio: { titulo: 'Dominadas', grupo_muscular: 'Espalda' },
-            series: [{ id: 's-5', numero_serie: 1, peso_utilizado: 0, repeticiones: 8 }],
-          },
+            ejercicio: { id: 'e-5', nombre: 'Dominadas', titulo: 'Dominadas', grupo_muscular_principal: 'Espalda', grupo_muscular: 'Espalda' } as any,
+            series: [{ id: 's-5', ejercicio_programado_id: 'ep-5', numero_serie: 1, peso_utilizado: 0, repeticiones: 8 }],
+          } as any,
         ],
-      },
+      } as any,
       error: null,
     });
 

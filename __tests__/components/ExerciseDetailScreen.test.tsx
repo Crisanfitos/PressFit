@@ -7,7 +7,8 @@ import { PersonalRecordService } from '../../src/services/PersonalRecordService'
 jest.mock('../../src/controllers/useExerciseDetailController');
 jest.mock('../../src/services/PersonalRecordService', () => ({
     PersonalRecordService: {
-        getExerciseRecords: jest.fn().mockResolvedValue({ data: [], error: null }),
+        getPersonalRecord: jest.fn().mockResolvedValue({ data: null, error: null }),
+        getExerciseHistory: jest.fn().mockResolvedValue({ data: [], error: null }),
     },
 }));
 
@@ -29,7 +30,11 @@ describe('ExerciseDetailScreen Component (RNTL)', () => {
             loading: false,
         } as any);
 
-        (PersonalRecordService.getExerciseRecords as jest.Mock).mockResolvedValue({
+        (PersonalRecordService.getPersonalRecord as jest.Mock).mockResolvedValue({
+            data: null,
+            error: null,
+        });
+        (PersonalRecordService.getExerciseHistory as jest.Mock).mockResolvedValue({
             data: [],
             error: null,
         });

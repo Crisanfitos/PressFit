@@ -106,7 +106,7 @@ describe('Rutinas Diarias', () => {
             const result = await RoutineService.getRoutineDayById('workout-completed-1');
             expect(result.error).toBeNull();
             expect(result.data!.completada).toBe(true);
-            expect(getRutinaDiariaEstado(result.data!)).toBe('COMPLETADA');
+            expect(getRutinaDiariaEstado(result.data! as any)).toBe('COMPLETADA');
         });
     });
 });

@@ -52,7 +52,7 @@ describe('linkingConfig (PF-279)', () => {
 
     describe('getStateFromPath parsing', () => {
         it('resolves workout/:routineDayId to Workout screen with params', () => {
-            const state = getStateFromPath('workout/day-leg-1', linkingConfig.config);
+            const state = getStateFromPath('workout/day-leg-1', linkingConfig.config as any);
             expect(state).toBeDefined();
             const semanaRoute = state?.routes.find((r) => r.name === 'Semana');
             expect(semanaRoute).toBeDefined();
@@ -63,7 +63,7 @@ describe('linkingConfig (PF-279)', () => {
         });
 
         it('resolves exercise/:exerciseId to ExerciseDetail screen with params', () => {
-            const state = getStateFromPath('exercise/bench-press-101', linkingConfig.config);
+            const state = getStateFromPath('exercise/bench-press-101', linkingConfig.config as any);
             expect(state).toBeDefined();
             const semanaRoute = state?.routes.find((r) => r.name === 'Semana');
             expect(semanaRoute).toBeDefined();
@@ -74,7 +74,7 @@ describe('linkingConfig (PF-279)', () => {
         });
 
         it('resolves calendar to MonthlyCalendar screen', () => {
-            const state = getStateFromPath('calendar', linkingConfig.config);
+            const state = getStateFromPath('calendar', linkingConfig.config as any);
             expect(state).toBeDefined();
             const semanaRoute = state?.routes.find((r) => r.name === 'Semana');
             expect(semanaRoute).toBeDefined();
@@ -84,7 +84,7 @@ describe('linkingConfig (PF-279)', () => {
         });
 
         it('resolves progress to ProgressMain screen', () => {
-            const state = getStateFromPath('progress', linkingConfig.config);
+            const state = getStateFromPath('progress', linkingConfig.config as any);
             expect(state).toBeDefined();
             const progresoRoute = state?.routes.find((r) => r.name === 'Progreso');
             expect(progresoRoute).toBeDefined();
@@ -94,7 +94,7 @@ describe('linkingConfig (PF-279)', () => {
         });
 
         it('resolves profile to ProfileMain screen', () => {
-            const state = getStateFromPath('profile', linkingConfig.config);
+            const state = getStateFromPath('profile', linkingConfig.config as any);
             expect(state).toBeDefined();
             const perfilRoute = state?.routes.find((r) => r.name === 'Perfil');
             expect(perfilRoute).toBeDefined();

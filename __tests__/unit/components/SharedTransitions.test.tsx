@@ -42,21 +42,21 @@ const mockExercise = {
 describe('Shared Element Transitions & Navigation Animations (PF-282)', () => {
     describe('Stack Navigators animation options', () => {
         it('WeeklyPlanNavigator mounts with default screenOptions containing slide_from_right animation', () => {
-            const element = WeeklyPlanNavigator({});
+            const element = WeeklyPlanNavigator({}) as React.ReactElement<any>;
             expect(element).toBeDefined();
             expect(element.props.screenOptions.animation).toBe('slide_from_right');
             expect(element.props.screenOptions.headerShown).toBe(false);
         });
 
         it('ProgressNavigator mounts with screenOptions containing slide_from_right animation', () => {
-            const element = ProgressNavigator({});
+            const element = ProgressNavigator({}) as React.ReactElement<any>;
             expect(element).toBeDefined();
             expect(element.props.screenOptions.animation).toBe('slide_from_right');
             expect(element.props.screenOptions.headerShown).toBe(false);
         });
 
         it('ProfileNavigator mounts with screenOptions containing slide_from_right animation', () => {
-            const element = ProfileNavigator({});
+            const element = ProfileNavigator({}) as React.ReactElement<any>;
             expect(element).toBeDefined();
             expect(element.props.screenOptions.animation).toBe('slide_from_right');
             expect(element.props.screenOptions.headerShown).toBe(false);

@@ -494,7 +494,7 @@ describe('useCalendarController (PF-258)', () => {
             expect(result).not.toBeNull();
             expect(result?.routine.id).toBe('routine-456');
             expect(result?.routineDay.nombre_dia).toBe('Miércoles');
-            expect(result?.routineDay.dia_semana).toBe(3);
+            expect((result?.routineDay as any).dia_semana).toBe(3);
         });
 
         it('returns null if day name is not found in templates', async () => {

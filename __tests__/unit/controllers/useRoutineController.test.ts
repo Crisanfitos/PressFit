@@ -237,7 +237,7 @@ describe('useRoutineController (PF-261)', () => {
                 expect(hook.result.current.loading).toBe(false);
             });
 
-            const existingDay = { id: 'rd-1', nombre_dia: 'Torso' };
+            const existingDay = { id: 'rd-1', nombre_dia: 'Torso' } as any;
 
             await act(async () => {
                 await hook.result.current.handleDayPress(1, existingDay, mockNavigation);

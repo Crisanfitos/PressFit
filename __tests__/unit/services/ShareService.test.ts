@@ -18,15 +18,21 @@ describe('ShareService (PF-163)', () => {
 
     describe('buildShareMessage', () => {
         const sampleData: SocialCardData = {
+            workoutName: 'Entrenamiento',
+            date: '2026-08-08',
+            duration: 75,
+            exerciseCount: 4,
+            totalSets: 18,
+            totalVolume: 12500,
             durationMinutes: 75,
             totalVolumeKg: 12500,
             completedSets: 18,
             totalReps: 142,
             prs: [
                 { exerciseName: 'Press de Banca', weight: 100, reps: 5 },
-                { exerciseName: 'Sentadilla', weight: 140 },
+                { exerciseName: 'Sentadilla', weight: 140, reps: 1 },
             ],
-            username: 'Alex',
+            userName: 'Alex',
         };
 
         it('includes header, duration, volume, sets and reps', () => {
@@ -47,6 +53,7 @@ describe('ShareService (PF-163)', () => {
 
         it('formats correctly without PRs', () => {
             const dataWithoutPRs: SocialCardData = {
+                ...sampleData,
                 durationMinutes: 45,
                 totalVolumeKg: 5000,
                 completedSets: 10,
@@ -61,10 +68,13 @@ describe('ShareService (PF-163)', () => {
 
         it('handles null duration gracefully', () => {
             const dataNullDuration: SocialCardData = {
+                ...sampleData,
+                duration: null,
                 durationMinutes: null,
                 totalVolumeKg: 3000,
                 completedSets: 8,
                 totalReps: 64,
+                prs: [],
             };
             const msg = ShareService.buildShareMessage(dataNullDuration);
             expect(msg).not.toContain('Duración');
@@ -158,6 +168,12 @@ describe('ShareService (PF-163)', () => {
             });
 
             const data: SocialCardData = {
+                workoutName: 'Entrenamiento',
+                date: '2026-08-08',
+                duration: 50,
+                exerciseCount: 3,
+                totalSets: 12,
+                totalVolume: 8000,
                 durationMinutes: 50,
                 totalVolumeKg: 8000,
                 completedSets: 12,
@@ -211,6 +227,12 @@ describe('ShareService (PF-163)', () => {
 
             const dummyRef = { current: {} };
             const data: SocialCardData = {
+                workoutName: 'Entrenamiento',
+                date: '2026-08-08',
+                duration: 60,
+                exerciseCount: 4,
+                totalSets: 15,
+                totalVolume: 10000,
                 durationMinutes: 60,
                 totalVolumeKg: 10000,
                 completedSets: 15,

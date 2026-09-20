@@ -15,6 +15,8 @@ describe('SignUpScreen Component (RNTL)', () => {
     user: null,
     session: null,
     loading: false,
+    isLoading: false,
+    isAuthenticated: false,
   };
 
   const renderSignUpScreen = async () => {

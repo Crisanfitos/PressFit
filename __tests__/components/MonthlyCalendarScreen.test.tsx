@@ -13,12 +13,6 @@ jest.mock('../../src/services/RoutineService', () => ({
     },
 }));
 
-jest.mock('../../src/services/WorkoutService', () => ({
-    WorkoutService: {
-        getWorkoutsForMonth: jest.fn().mockResolvedValue({ data: [], error: null }),
-    },
-}));
-
 describe('MonthlyCalendarScreen Component (RNTL)', () => {
     const mockNavigation = { navigate: jest.fn(), addListener: jest.fn(() => jest.fn()) } as any;
 
@@ -33,10 +27,6 @@ describe('MonthlyCalendarScreen Component (RNTL)', () => {
             error: null,
         });
         (RoutineService.getWorkoutsForDateRange as jest.Mock).mockResolvedValue({
-            data: [],
-            error: null,
-        });
-        (WorkoutService.getWorkoutsForMonth as jest.Mock).mockResolvedValue({
             data: [],
             error: null,
         });

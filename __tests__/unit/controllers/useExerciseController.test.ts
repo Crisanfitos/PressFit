@@ -407,8 +407,8 @@ describe('useExerciseController & useExerciseDetailController (PF-262)', () => {
 
             const customInput = {
                 titulo: 'Fondos en Paralelas',
+                grupo_muscular: 'Pecho',
                 musculos_primarios: 'Pecho, Tríceps',
-                categoria: 'Calistenia',
             };
 
             let response: any;
@@ -436,7 +436,7 @@ describe('useExerciseController & useExerciseDetailController (PF-262)', () => {
 
             let response: any;
             await act(async () => {
-                response = await hook.result.current.createCustomExercise({ titulo: 'Fail' });
+                response = await hook.result.current.createCustomExercise({ titulo: 'Fail', grupo_muscular: 'Pecho' });
             });
 
             expect(response).toEqual({

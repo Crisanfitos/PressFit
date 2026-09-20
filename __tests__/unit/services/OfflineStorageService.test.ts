@@ -30,7 +30,7 @@ describe('OfflineStorageService (PF-275)', () => {
             (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
             (AsyncStorage.setItem as jest.Mock).mockResolvedValue(undefined);
 
-            const res = await OfflineStorageService.saveRoutines(routines);
+            const res = await OfflineStorageService.saveRoutines(routines as any);
             expect(res.data).toBe(true);
             expect(res.error).toBeNull();
 
@@ -136,7 +136,7 @@ describe('OfflineStorageService (PF-275)', () => {
             const workouts = [{ id: 'w-1', completado: true }];
             (AsyncStorage.setItem as jest.Mock).mockResolvedValue(undefined);
 
-            const res = await OfflineStorageService.saveWorkouts(workouts);
+            const res = await OfflineStorageService.saveWorkouts(workouts as any);
             expect(res.data).toBe(true);
             expect(res.error).toBeNull();
             expect(AsyncStorage.setItem).toHaveBeenCalledWith(
@@ -172,7 +172,7 @@ describe('OfflineStorageService (PF-275)', () => {
             };
             (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(envelope));
 
-            const saveRes = await OfflineStorageService.saveExercises(exercises);
+            const saveRes = await OfflineStorageService.saveExercises(exercises as any);
             expect(saveRes.data).toBe(true);
 
             const getRes = await OfflineStorageService.getCachedExercises();
@@ -192,7 +192,7 @@ describe('OfflineStorageService (PF-275)', () => {
             };
             (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(envelope));
 
-            const saveRes = await OfflineStorageService.saveHistory(history);
+            const saveRes = await OfflineStorageService.saveHistory(history as any);
             expect(saveRes.data).toBe(true);
 
             const getRes = await OfflineStorageService.getCachedHistory();
@@ -230,7 +230,7 @@ describe('OfflineStorageService (PF-275)', () => {
 
             (AsyncStorage.setItem as jest.Mock).mockResolvedValue(undefined);
 
-            await OfflineStorageService.saveWorkouts(items);
+            await OfflineStorageService.saveWorkouts(items as any);
 
             // Check that only the last 3 items were saved (LRU tail)
             expect(AsyncStorage.setItem).toHaveBeenCalledWith(
@@ -419,7 +419,7 @@ describe('OfflineStorageService (PF-275)', () => {
                 return Promise.resolve(undefined);
             });
 
-            const res = await OfflineStorageService.saveRoutines(routines);
+            const res = await OfflineStorageService.saveRoutines(routines as any);
             expect(res.data).toBe(true);
             expect(res.error).toBeNull();
             expect(AsyncStorage.setItem).toHaveBeenCalledWith(

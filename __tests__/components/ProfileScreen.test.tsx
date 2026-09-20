@@ -12,7 +12,7 @@ describe('ProfileScreen Component (RNTL)', () => {
     const mockNavigation = { navigate: jest.fn() } as any;
     const mockSignOut = jest.fn();
 
-    const mockAuthContextValue = {
+    const mockAuthContextValue: any = {
         signOut: mockSignOut,
         user: {
             id: 'user-123',
@@ -24,6 +24,8 @@ describe('ProfileScreen Component (RNTL)', () => {
         signUpWithEmail: jest.fn(),
         session: null,
         loading: false,
+        isLoading: false,
+        isAuthenticated: true,
     };
 
     beforeEach(() => {

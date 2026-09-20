@@ -43,8 +43,8 @@ describe('DailyWorkoutService', () => {
 
             expect(result.error).toBeNull();
             expect(result.data?.id).toBe('day-1');
-            expect(result.data?.ejercicios_programados[0].id).toBe('ex-1');
-            expect(result.data?.ejercicios_programados[1].series[0].numero_serie).toBe(1);
+            expect(result.data?.ejercicios_programados![0].id).toBe('ex-1');
+            expect(result.data?.ejercicios_programados![1].series![0].numero_serie).toBe(1);
         });
 
         it('should handle error if query fails', async () => {

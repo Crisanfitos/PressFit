@@ -719,15 +719,15 @@ describe('WorkoutService.getExerciseHistory', () => {
 
 // ─── updateWeightType ─────────────────────────────────────────────────────────
 describe('WorkoutService.updateWeightType', () => {
-    it('should update weight type to mancuernas', async () => {
+    it('should update weight type to por_lado', async () => {
         mockChain.single.mockResolvedValueOnce({
-            data: { id: 'ep-1', tipo_peso: 'mancuernas' },
+            data: { id: 'ep-1', tipo_peso: 'por_lado' },
             error: null,
         });
 
-        const res = await WorkoutService.updateWeightType('ep-1', 'mancuernas');
+        const res = await WorkoutService.updateWeightType('ep-1', 'por_lado');
         expect(res.error).toBeNull();
-        expect(res.data?.tipo_peso).toBe('mancuernas');
+        expect(res.data?.tipo_peso).toBe('por_lado');
     });
 
     it('should update weight type to total', async () => {

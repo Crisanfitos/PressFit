@@ -16,6 +16,8 @@ describe('LoginScreen Component (RNTL)', () => {
         user: null,
         session: null,
         loading: false,
+        isLoading: false,
+        isAuthenticated: false,
     };
 
     beforeEach(() => {

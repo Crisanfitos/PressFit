@@ -89,7 +89,7 @@ describe('WorkoutScreen Component (RNTL)', () => {
     // Simulate pressing 'Finalizar' in the Alert
     const alertButtons = alertSpy.mock.calls[0][2];
     const confirmAlertBtn = alertButtons?.find((b: any) => b.text === 'Finalizar');
-    confirmAlertBtn?.onPress();
+    confirmAlertBtn?.onPress?.();
 
     await waitFor(() => {
       expect(mockFinishWorkout).toHaveBeenCalled();
@@ -109,7 +109,7 @@ describe('WorkoutScreen Component (RNTL)', () => {
 
     const alertButtons = alertSpy.mock.calls[alertSpy.mock.calls.length - 1][2];
     const confirmAlertBtn = alertButtons?.find((b: any) => b.text === 'Finalizar');
-    confirmAlertBtn?.onPress();
+    confirmAlertBtn?.onPress?.();
 
     await waitFor(() => {
       expect(mockFinishWorkout).toHaveBeenCalled();

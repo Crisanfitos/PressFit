@@ -56,6 +56,7 @@ describe('ExerciseItem Component (RNTL)', () => {
                 isSelected={false}
                 selectionMode={false}
                 onSelect={mockOnSelect}
+                onThumbnailPress={jest.fn()}
                 colors={mockColors}
                 navigation={mockNavigation}
             />

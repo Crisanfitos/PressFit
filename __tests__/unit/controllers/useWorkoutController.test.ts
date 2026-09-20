@@ -582,6 +582,7 @@ describe('useWorkoutController (PF-257)', () => {
         it('blocks addSets and shows Alert when reaching maximum 10 sets per exercise limit (PF-314)', async () => {
             const tenSets = Array.from({ length: 10 }, (_, i) => ({
                 id: `s-${i + 1}`,
+                ejercicio_programado_id: 'ep-1',
                 numero_serie: i + 1,
                 repeticiones: 10,
                 peso_utilizado: 50,
@@ -609,11 +610,12 @@ describe('useWorkoutController (PF-257)', () => {
         it('blocks addSets when reaching maximum 4 warmup sets limit (PF-314)', async () => {
             const fourWarmupSets = Array.from({ length: 4 }, (_, i) => ({
                 id: `s-${i + 1}`,
+                ejercicio_programado_id: 'ep-1',
                 numero_serie: i + 1,
                 repeticiones: 10,
                 peso_utilizado: 50,
                 tipo_serie: 'warmup',
-            }));
+            })) as any;
             const mockWorkout = getMockWorkoutWithExercises();
             mockWorkout.ejercicios_programados[0].series = fourWarmupSets;
             (WorkoutService.getWorkoutDetails as jest.Mock).mockResolvedValue({
@@ -771,9 +773,9 @@ describe('useWorkoutController (PF-257)', () => {
 
         it('renumbers remaining sets sequentially and syncs with WorkoutService.updateSet (PF-314)', async () => {
             const threeSets = [
-                { id: 's-1', numero_serie: 1, repeticiones: 10, peso_utilizado: 50 },
-                { id: 's-2', numero_serie: 2, repeticiones: 10, peso_utilizado: 50 },
-                { id: 's-3', numero_serie: 3, repeticiones: 10, peso_utilizado: 50 },
+                { id: 's-1', ejercicio_programado_id: 'ep-1', numero_serie: 1, repeticiones: 10, peso_utilizado: 50 },
+                { id: 's-2', ejercicio_programado_id: 'ep-1', numero_serie: 2, repeticiones: 10, peso_utilizado: 50 },
+                { id: 's-3', ejercicio_programado_id: 'ep-1', numero_serie: 3, repeticiones: 10, peso_utilizado: 50 },
             ];
             const mockWorkout = getMockWorkoutWithExercises();
             mockWorkout.ejercicios_programados[0].series = threeSets;
@@ -937,11 +939,11 @@ describe('useWorkoutController (PF-257)', () => {
             await waitFor(() => expect(hook.result.current.loading).toBe(false));
 
             await act(async () => {
-                await hook.result.current.updateWeightType('re-1', 'ex-1', 'mancuernas');
+                await hook.result.current.updateWeightType('re-1', 'ex-1', 'por_lado');
             });
 
-            expect(hook.result.current.exercises[0].tipo_peso).toBe('mancuernas');
-            expect(WorkoutService.updateWeightType).toHaveBeenCalledWith('re-1', 'mancuernas');
+            expect(hook.result.current.exercises[0].tipo_peso).toBe('por_lado');
+            expect(WorkoutService.updateWeightType).toHaveBeenCalledWith('re-1', 'por_lado');
         });
 
         it('rolls back via loadExercises when updateWeightType fails', async () => {
@@ -954,7 +956,7 @@ describe('useWorkoutController (PF-257)', () => {
 
             (WorkoutService.getWorkoutDetails as jest.Mock).mockClear();
             await act(async () => {
-                await hook.result.current.updateWeightType('re-1', 'ex-1', 'mancuernas');
+                await hook.result.current.updateWeightType('re-1', 'ex-1', 'por_lado');
             });
 
             expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to update weight type', expect.any(Error));
@@ -973,7 +975,7 @@ describe('useWorkoutController (PF-257)', () => {
             await waitFor(() => expect(hook.result.current.mode).toBe('VIEW'));
 
             await act(async () => {
-                await hook.result.current.updateWeightType('re-1', 'ex-1', 'mancuernas');
+                await hook.result.current.updateWeightType('re-1', 'ex-1', 'por_lado');
             });
 
             expect(WorkoutService.updateWeightType).not.toHaveBeenCalled();
