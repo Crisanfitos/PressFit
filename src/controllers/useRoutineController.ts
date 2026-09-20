@@ -64,7 +64,10 @@ export const useRoutineController = (userId: string | undefined, routineId: stri
                 const statsResults = await Promise.all(statsPromises);
                 const statsMap: Record<string, WorkoutStats> = {};
                 routineDayIds.forEach((id, index) => {
-                    statsMap[id] = statsResults[index].data;
+                    const stats = statsResults[index]?.data;
+                    if (stats) {
+                        statsMap[id] = stats;
+                    }
                 });
                 setWorkoutStats(statsMap);
             }
@@ -95,6 +98,8 @@ export const useRoutineController = (userId: string | undefined, routineId: stri
                 routineDay = data;
                 fetchRoutines(true);
             }
+
+            if (!routineDay) return;
 
             const { data: activeWorkout } = await RoutineService.getActiveWorkout(userId!, routineDay.id);
 

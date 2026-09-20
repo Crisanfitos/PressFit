@@ -104,6 +104,7 @@ export interface WeeklyRoutine {
     nombre: string;
     es_plantilla: boolean;
     activa: boolean;
+    objetivo?: string;
     fecha_inicio_semana?: string;
     rutinas_diarias?: RoutineDay[];
     created_at?: string;
@@ -253,11 +254,12 @@ export interface PostgrestError {
 export interface SeriesInsert {
     ejercicio_programado_id: string;
     numero_serie: number;
-    peso_utilizado: number;
-    repeticiones: number;
-    rpe?: number;
+    peso_utilizado?: number | null;
+    repeticiones?: number | null;
+    rpe?: number | null;
     descanso_segundos?: number;
     tipo_serie?: SetType;
+    created_at?: string;
 }
 
 // ============================================================================

@@ -9,8 +9,8 @@ import KeyboardAwareContainer from './KeyboardAwareContainer';
 interface EditProfileModalProps {
     visible: boolean;
     onClose: () => void;
-    currentMetrics: { peso?: number; altura?: number } | null;
-    onSave: (metrics: { weight: number; height: number; bodyFatPercentage: number | null }) => Promise<void>;
+    currentMetrics: { peso?: number | null; altura?: number | null; imc?: number | null; grasa_corporal?: number | null; } | null;
+    onSave: (metrics: { weight: number; height: number; bodyFatPercentage?: number | null }) => Promise<void>;
 }
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose, currentMetrics, onSave }) => {

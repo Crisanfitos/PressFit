@@ -3,11 +3,14 @@ import { formatLocalDateKey, getStartOfWeek } from '../utils/dateUtils';
 import { ServiceResponse, ScheduledExercise } from '../types/models';
 import { LogService } from './LogService';
 
-interface WorkoutSession {
+export interface WorkoutSession {
     id: string;
+    rutina_semanal_id?: string;
+    nombre_dia?: string;
     hora_inicio?: string;
     hora_fin?: string;
     fecha_dia?: string;
+    completada?: boolean;
     ejercicios_programados?: ScheduledExercise[];
     [key: string]: unknown;
 }

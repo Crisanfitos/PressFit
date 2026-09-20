@@ -185,7 +185,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                 <View style={styles.scrollView}>
                     {previousWorkout?.isStale && <StaleWarningBanner daysDiff={previousWorkout.days_diff} />}
                     {exercises.length === 0 ? (
-                        <WorkoutPlaceholder isStructureEditable={isStructureEditable} colors={colors} t={t} onAddExercise={navigateToExerciseLibrary} />
+                        <WorkoutPlaceholder isStructureEditable={isStructureEditable} colors={colors} t={(k, def) => t(k, { defaultValue: def })} onAddExercise={navigateToExerciseLibrary} />
                     ) : (
                         exercises.map((exercise, index) => (
                             <ExerciseCard
@@ -217,7 +217,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                             />
                         ))
                     )}
-                    <WorkoutActions mode={mode} navMode={navMode} saving={state.saving} colors={colors} t={t} onFinishWorkout={handleFinishWorkout} />
+                    <WorkoutActions mode={mode} navMode={navMode} saving={state.saving} colors={colors} t={(k, def) => t(k, { defaultValue: def })} onFinishWorkout={handleFinishWorkout} />
                     <View style={{ height: 100 }} />
                 </View>
             </KeyboardAwareContainer>

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { ProgressService } from '../services/ProgressService';
-import { HistoryService } from '../services/HistoryService';
+import { HistoryService, WorkoutSession } from '../services/HistoryService';
 import { parseDateKeyAsLocalDate } from '../utils/dateUtils';
 import { RoutineDay, ScheduledExercise, Serie } from '../types/models';
 
@@ -9,7 +9,7 @@ interface DailyStats {
     sets: number;
     totalWeight: number;
     duration: number;
-    workoutDetails: RoutineDay | null;
+    workoutDetails: WorkoutSession | RoutineDay | null;
 }
 
 interface WeeklyData {
@@ -114,7 +114,7 @@ export const useProgressController = (userId: string | undefined) => {
             }
 
             let totalDurationMinutes = 0;
-            data.forEach((workout: RoutineDay) => {
+            data.forEach((workout: WorkoutSession) => {
                 if (workout.hora_inicio && workout.hora_fin) {
                     const start = new Date(workout.hora_inicio);
                     const end = new Date(workout.hora_fin);
@@ -133,13 +133,13 @@ export const useProgressController = (userId: string | undefined) => {
                 weekEnd.setDate(weekEnd.getDate() + 6);
                 weekEnd.setHours(23, 59, 59, 999);
 
-                const weekWorkouts = data.filter((w: RoutineDay) => {
+                const weekWorkouts = data.filter((w: WorkoutSession) => {
                     if (!w.fecha_dia) return false;
                     const date = parseDateKeyAsLocalDate(w.fecha_dia);
                     return date >= weekStart && date <= weekEnd;
                 });
 
-                const weekDuration = weekWorkouts.reduce((acc: number, w: RoutineDay) => {
+                const weekDuration = weekWorkouts.reduce((acc: number, w: WorkoutSession) => {
                     if (w.hora_inicio && w.hora_fin) {
                         const start = new Date(w.hora_inicio);
                         const end = new Date(w.hora_fin);

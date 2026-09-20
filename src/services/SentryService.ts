@@ -1,3 +1,4 @@
+import React from 'react';
 import * as Sentry from '@sentry/react-native';
 
 export const SentryService = {
@@ -62,9 +63,9 @@ export const SentryService = {
         }
     },
 
-    wrap<T>(component: T): T {
+    wrap<T extends React.ComponentType<any>>(component: T): T {
         if (typeof Sentry.wrap === 'function') {
-            return Sentry.wrap(component);
+            return Sentry.wrap(component) as unknown as T;
         }
         return component;
     }

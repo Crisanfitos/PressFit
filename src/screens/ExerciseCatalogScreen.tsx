@@ -10,7 +10,7 @@ import {
   Animated,
   Modal,
 } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, FlashListRef } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -52,7 +52,7 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
   const [showFilters, setShowFilters] = useState(true);
 
   const SCROLL_TOP_THRESHOLD = 6;
-  const flatListRef = useRef<FlashList<Exercise>>(null);
+  const flatListRef = useRef<FlashListRef<Exercise>>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const scrollTopOpacity = useRef(new Animated.Value(0)).current;
 
@@ -247,7 +247,6 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
           ref={flatListRef}
           data={exercises}
           renderItem={renderItem}
-          estimatedItemSize={90}
           keyExtractor={(item) => item.id}
           contentContainerStyle={screenStyles.listContent}
           showsVerticalScrollIndicator={false}

@@ -3,10 +3,10 @@ import { UserService } from '../services/UserService';
 import { ProgressService } from '../services/ProgressService';
 
 interface Metrics {
-    peso?: number;
-    altura?: number;
-    imc?: number;
-    grasa_corporal?: number;
+    peso?: number | null;
+    altura?: number | null;
+    imc?: number | null;
+    grasa_corporal?: number | null;
 }
 
 interface User {
@@ -32,7 +32,12 @@ export const useProfileController = (user: User | null | undefined) => {
         setLoading(true);
         try {
             const { data: metricsData } = await UserService.getUserMetrics(user.id);
-            setMetrics(metricsData);
+            setMetrics(metricsData ? {
+                peso: metricsData.peso,
+                altura: metricsData.altura,
+                imc: metricsData.imc,
+                grasa_corporal: metricsData.grasa_corporal,
+            } : null);
             setProfile(user);
         } catch (error) {
             console.error('Error fetching profile data:', error);
@@ -75,7 +80,14 @@ export const useProfileController = (user: User | null | undefined) => {
             const metricsToSave = { ...newMetrics, imc, bodyFatPercentage: bf };
             const { data, error } = await UserService.saveUserMetrics(user.id, metricsToSave);
             if (error) throw error;
-            setMetrics(data);
+            if (data) {
+                setMetrics({
+                    peso: data.peso,
+                    altura: data.altura,
+                    imc: data.imc,
+                    grasa_corporal: data.grasa_corporal,
+                });
+            }
             return data;
         } catch (error) {
             throw error;

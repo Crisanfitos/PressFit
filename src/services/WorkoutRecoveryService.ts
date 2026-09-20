@@ -71,7 +71,7 @@ export const WorkoutRecoveryService = {
 
             return {
                 workoutId: params.workoutId,
-                routineDayId: params.routineDayId || workout.rutina_diaria_id || '',
+                routineDayId: params.routineDayId || workout.id || '',
                 dayName: params.dayName || workout.nombre_dia || 'Entrenamiento',
                 dayOfWeek: params.dayOfWeek ?? (new Date().getDay() === 0 ? 7 : new Date().getDay()),
                 startTime: startTime || new Date().toISOString(),

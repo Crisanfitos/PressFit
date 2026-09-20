@@ -226,7 +226,7 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
       targetWeight: sampleTarget,
       barWeight: bar,
       unit: currentUnit,
-      customPlates: currentPlates,
+      availablePlates: currentPlates,
     });
   }, [settings, currentUnit, currentPlates]);
 
@@ -396,7 +396,7 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
         </View>
 
         {/* Vista Previa de Barra */}
-        {previewCalculation && previewCalculation.success && (
+        {previewCalculation && previewCalculation.platesPerSide.length > 0 && (
           <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.sectionHeaderRow}>
               <MaterialIcons name="visibility" size={20} color={colors.primary} />
@@ -452,14 +452,14 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
                 >
                   {/* Badge de Disco con Color Oficial */}
                   <View style={styles.plateLeftInfo}>
-                    <View style={[styles.colorBadge, { backgroundColor: plate.color }]}>
+                    <View style={[styles.colorBadge, { backgroundColor: plate.color || '#6B7280' }]}>
                       <Text
                         style={[
                           styles.colorBadgeText,
                           {
                             color:
-                              plate.color.toUpperCase() === '#F3F4F6' ||
-                              plate.color.toUpperCase() === '#EAB308'
+                              (plate.color || '').toUpperCase() === '#F3F4F6' ||
+                              (plate.color || '').toUpperCase() === '#EAB308'
                                 ? '#1F2937'
                                 : '#FFFFFF',
                           },

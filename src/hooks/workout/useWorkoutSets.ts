@@ -37,13 +37,20 @@ export interface Exercise {
 
 export interface WorkoutData {
     id: string;
+    rutina_semanal_id?: string;
+    rutina_diaria_id?: string;
+    nombre?: string;
     hora_inicio?: string;
     hora_fin?: string;
     completada?: boolean;
+    descripcion_usuario?: string;
     descripcion?: string;
-    fecha_dia?: string;
+    fecha_dia?: string | null;
     nombre_dia?: string;
     ejercicios_programados?: ScheduledExercise[];
+    rutina_semanal?: { usuario_id: string };
+    isStale?: boolean;
+    days_diff?: number;
 }
 
 export interface UseWorkoutSetsOptions {
@@ -109,7 +116,7 @@ export const useWorkoutSets = ({
                 if (workoutData.ejercicios_programados) {
                     finalExercises = workoutData.ejercicios_programados.map((ex: ScheduledExercise) => ({
                         ...ex.ejercicio,
-                        titulo: ex.ejercicio?.titulo || 'Ejercicio',
+                        titulo: ex.ejercicio?.titulo || ex.ejercicio?.nombre || 'Ejercicio',
                         id: ex.ejercicio?.id || ex.ejercicio_id,
                         routine_exercise_id: ex.id,
                         target_sets: 3,
@@ -146,7 +153,7 @@ export const useWorkoutSets = ({
                         return {
                             ...re.ejercicio,
                             titulo: re.ejercicio?.titulo || re.ejercicio?.nombre || 'Ejercicio',
-                            id: re.ejercicio.id,
+                            id: re.ejercicio?.id || re.ejercicio_id,
                             routine_exercise_id: re.id,
                             target_sets: 3,
                             sets: setsToUse,
@@ -276,7 +283,7 @@ export const useWorkoutSets = ({
                 sets: ex.sets.map((s) => (s.id === setId ? {
                     ...s,
                     [dbField]: processedValue ?? undefined,
-                    ...(dbField === 'is_completed' ? { is_completed: processedValue, completada: processedValue } : {})
+                    ...(dbField === 'is_completed' ? { is_completed: Boolean(processedValue), completada: Boolean(processedValue) } : {})
                 } : s)),
             }))
         );

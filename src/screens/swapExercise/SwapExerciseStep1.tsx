@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Exercise } from '../../controllers/useExerciseController';
+import { Exercise, FilterKey } from '../../controllers/useExerciseController';
 import { OldExerciseData } from '../../controllers/useSwapExerciseController';
 import { styles } from './swapExerciseStyles';
 
@@ -21,8 +21,8 @@ export interface SwapExerciseStep1Props {
     searchQuery: string;
     setSearchQuery: (query: string) => void;
     filters: any;
-    setFilter: (key: string, value: any) => void;
-    clearFilter: (key: string) => void;
+    setFilter: (key: FilterKey, value: string | null) => void;
+    clearFilter: (key: FilterKey) => void;
     filterOptions: any;
     selectedCandidate: Exercise | null;
     oldExercise?: OldExerciseData;

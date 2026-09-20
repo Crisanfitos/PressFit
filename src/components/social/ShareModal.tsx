@@ -79,7 +79,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             </View>
             <TouchableOpacity
               onPress={onClose}
-              style={[styles.closeButton, { backgroundColor: colors.cardBackground }]}
+              style={[styles.closeButton, { backgroundColor: colors.surfaceHighlight }]}
               testID="share-modal-close-btn"
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >

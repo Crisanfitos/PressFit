@@ -73,11 +73,13 @@ export interface ThemeColors {
 export interface Theme {
     mode: 'dark' | 'light';
     colors: ThemeColors;
+    isDark?: boolean;
 }
 
 export const themes: { dark: Theme; light: Theme } = {
     dark: {
         mode: 'dark',
+        isDark: true,
         colors: {
             primary: palette.primary,
             primaryDark: palette.primaryDark,
@@ -120,6 +122,7 @@ export const themes: { dark: Theme; light: Theme } = {
     },
     light: {
         mode: 'light',
+        isDark: false,
         colors: {
             primary: '#13ec6d',
             primaryDark: '#059669',
