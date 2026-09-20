@@ -1,49 +1,18 @@
-import React, { useState, useEffect, useMemo, useCallback, useContext } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Switch,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
+import React, { useContext } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Switch, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
-import {
-  PlateSettingsService,
-  UserPlateSettings,
-} from '../services/PlateSettingsService';
-import {
-  PlateInventoryItem,
-  WeightUnit,
-  DEFAULT_BAR_WEIGHT_KG,
-  DEFAULT_BAR_WEIGHT_LB,
-  calculatePlates,
-} from '../utils/plateCalculator';
 import { PlateVisualizer } from '../components/workout/PlateVisualizer';
 import { HapticService } from '../services/HapticService';
+import { usePlateSettingsController } from '../controllers/usePlateSettingsController';
+import { styles } from './plateSettingsStyles';
 
 interface PlateSettingsScreenProps {
   navigation: any;
 }
-
-const BAR_PRESETS_KG = [
-  { label: '20 kg', value: 20, desc: 'Olímpica estándar' },
-  { label: '15 kg', value: 15, desc: 'Olímpica técnica' },
-  { label: '10 kg', value: 10, desc: 'Multipower / Smith' },
-];
-
-const BAR_PRESETS_LB = [
-  { label: '45 lb', value: 45, desc: 'Olímpica estándar' },
-  { label: '35 lb', value: 35, desc: 'Olímpica técnica' },
-  { label: '25 lb', value: 25, desc: 'Multipower / Smith' },
-];
 
 export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ navigation }) => {
   const { t } = useTranslation();
@@ -52,183 +21,12 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
   const auth = useContext(AuthContext);
   const userId = auth?.user?.id;
 
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [savedSuccess, setSavedSuccess] = useState(false);
-  const [settings, setSettings] = useState<UserPlateSettings | null>(null);
-  const [isCustomBar, setIsCustomBar] = useState(false);
-  const [customBarText, setCustomBarText] = useState('');
-
-  // Cargar configuración inicial
-  useEffect(() => {
-    loadSettings();
-  }, [userId]);
-
-  const loadSettings = async () => {
-    try {
-      setLoading(true);
-      const data = await PlateSettingsService.getSettings(userId);
-      setSettings(data);
-      checkIfCustom(data.defaultBarWeight, data.unit);
-    } catch (error) {
-      console.error('[PlateSettingsScreen] Error loading settings:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const checkIfCustom = (barWeight: number, unit: WeightUnit) => {
-    const presets = unit === 'kg' ? BAR_PRESETS_KG : BAR_PRESETS_LB;
-    const isPreset = presets.some(p => p.value === barWeight);
-    setIsCustomBar(!isPreset);
-    setCustomBarText(barWeight.toString());
-  };
-
-  const currentUnit = settings?.unit ?? 'kg';
-  const barPresets = currentUnit === 'kg' ? BAR_PRESETS_KG : BAR_PRESETS_LB;
-  const currentPlates: PlateInventoryItem[] = useMemo(() => {
-    if (!settings) return [];
-    return currentUnit === 'kg' ? settings.platesKg : settings.platesLb;
-  }, [settings, currentUnit]);
-
-  // Cambiar Unidad
-  const handleUnitChange = async (unit: WeightUnit) => {
-    if (!settings || settings.unit === unit) return;
-    HapticService.selection();
-
-    const updated = await PlateSettingsService.updateUnit(unit, userId);
-    setSettings(updated);
-    checkIfCustom(updated.defaultBarWeight, unit);
-  };
-
-  // Cambiar Preset de Barra
-  const handleBarPresetSelect = async (value: number) => {
-    if (!settings) return;
-    HapticService.light();
-
-    setIsCustomBar(false);
-    setCustomBarText(value.toString());
-
-    const updated = await PlateSettingsService.updateBarWeight(value, currentUnit, userId);
-    setSettings(updated);
-  };
-
-  // Personalizar Peso de Barra
-  const handleCustomBarChange = (text: string) => {
-    setCustomBarText(text);
-    const num = parseFloat(text);
-    if (!isNaN(num) && num > 0 && settings) {
-      const updated: UserPlateSettings = {
-        ...settings,
-        defaultBarWeight: num,
-        ...(currentUnit === 'kg' ? { customBarWeightKg: num } : { customBarWeightLb: num }),
-      };
-      setSettings(updated);
-      PlateSettingsService.saveSettings(updated, userId);
-    }
-  };
-
-  // Alternar Inclusión de Disco (Switch)
-  const handleTogglePlate = async (weight: number, enabled: boolean) => {
-    if (!settings) return;
-    HapticService.selection();
-
-    // enabled = true -> undefined (ilimitado por defecto), enabled = false -> 0 (desactivado)
-    const newPairs = enabled ? undefined : 0;
-    const updated = await PlateSettingsService.updatePlateItem(currentUnit, weight, {
-      availablePairs: newPairs,
-    }, userId);
-    setSettings(updated);
-  };
-
-  // Ajustar Cantidad de Pares (Incremento/Decremento)
-  const handleAdjustPairs = async (plate: PlateInventoryItem, delta: number) => {
-    if (!settings) return;
-    HapticService.light();
-
-    let currentPairs = plate.availablePairs;
-    let nextPairs: number | undefined;
-
-    if (currentPairs === undefined) {
-      // Si era ilimitado y decrementa, baja a 4 pares
-      nextPairs = delta < 0 ? 4 : undefined;
-    } else {
-      const candidate = currentPairs + delta;
-      if (candidate <= 0) {
-        nextPairs = 0; // Desactivado
-      } else if (candidate > 20) {
-        nextPairs = undefined; // Pasa a ilimitado
-      } else {
-        nextPairs = candidate;
-      }
-    }
-
-    const updated = await PlateSettingsService.updatePlateItem(currentUnit, plate.weight, {
-      availablePairs: nextPairs,
-    }, userId);
-    setSettings(updated);
-  };
-
-  // Establecer Ilimitado
-  const handleSetUnlimited = async (weight: number) => {
-    if (!settings) return;
-    HapticService.light();
-
-    const updated = await PlateSettingsService.updatePlateItem(currentUnit, weight, {
-      availablePairs: undefined,
-    }, userId);
-    setSettings(updated);
-  };
-
-  // Restablecer Valores de Fábrica
-  const handleResetDefaults = () => {
-    Alert.alert(
-      t('plateSettings.resetConfirmTitle', 'Restablecer Ajustes'),
-      t('plateSettings.resetConfirmMsg', '¿Deseas restaurar todas las denominaciones de discos y pesos de barra por defecto?'),
-      [
-        { text: t('common.cancel', 'Cancelar'), style: 'cancel' },
-        {
-          text: t('common.confirm', 'Restablecer'),
-          style: 'destructive',
-          onPress: async () => {
-            HapticService.medium();
-            const defaults = await PlateSettingsService.resetToDefaults(userId);
-            setSettings(defaults);
-            checkIfCustom(defaults.defaultBarWeight, defaults.unit);
-          },
-        },
-      ]
-    );
-  };
-
-  // Guardado manual explícito (además del auto-save)
-  const handleSave = async () => {
-    if (!settings) return;
-    setSaving(true);
-    try {
-      await PlateSettingsService.saveSettings(settings, userId);
-      HapticService.light();
-      setSavedSuccess(true);
-      setTimeout(() => setSavedSuccess(false), 2000);
-    } catch (e) {
-      Alert.alert(t('common.error', 'Error'), t('plateSettings.saveError', 'No se pudieron guardar los ajustes.'));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Vista previa de barra calculada con el inventario configurado
-  const previewCalculation = useMemo(() => {
-    if (!settings) return null;
-    const bar = settings.defaultBarWeight;
-    const sampleTarget = currentUnit === 'kg' ? Math.max(bar + 40, 60) : Math.max(bar + 90, 135);
-    return calculatePlates({
-      targetWeight: sampleTarget,
-      barWeight: bar,
-      unit: currentUnit,
-      availablePlates: currentPlates,
-    });
-  }, [settings, currentUnit, currentPlates]);
+  const {
+    loading, saving, savedSuccess, settings, isCustomBar, customBarText,
+    currentUnit, barPresets, currentPlates, previewCalculation,
+    setIsCustomBar, handleUnitChange, handleBarPresetSelect, handleCustomBarChange,
+    handleTogglePlate, handleAdjustPairs, handleSetUnlimited, handleResetDefaults, handleSave,
+  } = usePlateSettingsController(userId);
 
   if (loading || !settings) {
     return (
@@ -257,7 +55,17 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
         <TouchableOpacity
           testID="reset-defaults-button"
           style={styles.headerButton}
-          onPress={handleResetDefaults}
+          onPress={() =>
+            handleResetDefaults(
+              t('plateSettings.resetConfirmTitle', 'Restablecer Ajustes'),
+              t(
+                'plateSettings.resetConfirmMsg',
+                '¿Deseas restaurar todas las denominaciones de discos y pesos de barra por defecto?'
+              ),
+              t('common.cancel', 'Cancelar'),
+              t('common.confirm', 'Restablecer')
+            )
+          }
         >
           <MaterialIcons name="refresh" size={22} color={colors.textSecondary} />
         </TouchableOpacity>
@@ -570,218 +378,3 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
 
 export default PlateSettingsScreen;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  headerButton: {
-    padding: 8,
-    borderRadius: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    gap: 16,
-  },
-  card: {
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  sectionSubtitle: {
-    fontSize: 13,
-    marginBottom: 16,
-    lineHeight: 18,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  unitSelectorContainer: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(150, 150, 150, 0.1)',
-    borderRadius: 10,
-    padding: 4,
-    marginTop: 8,
-  },
-  unitTab: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  unitTabText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  presetsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  presetButton: {
-    flexBasis: '48%',
-    flexGrow: 1,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1.5,
-  },
-  presetValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  presetDesc: {
-    fontSize: 12,
-  },
-  customInputRow: {
-    marginTop: 14,
-    paddingTop: 14,
-    borderTopWidth: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  customInputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  customInput: {
-    width: 80,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  inputUnitLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  visualizerWrapper: {
-    marginTop: 8,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  platesList: {
-    gap: 12,
-  },
-  plateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  plateLeftInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-  },
-  colorBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-  },
-  colorBadgeText: {
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  plateLabelContainer: {
-    justifyContent: 'center',
-  },
-  plateWeightText: {
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  platePairsDesc: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  plateControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  stepperContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  stepperButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 6,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pairCountBadge: {
-    minWidth: 28,
-    height: 28,
-    borderRadius: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-  },
-  pairCountText: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  saveButton: {
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-  },
-  saveContentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  saveButtonText: {
-    fontSize: 15,
-    fontWeight: '700',
-  },
-});
