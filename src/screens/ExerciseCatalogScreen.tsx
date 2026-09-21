@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   StyleSheet,
   Keyboard,
   ActivityIndicator,
@@ -17,7 +16,12 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useExerciseController, FilterKey, Exercise } from '../controllers/useExerciseController';
 import { CreateCustomExerciseModal } from '../components/CreateCustomExerciseModal';
-import { ExerciseFilterSection, ExerciseListItem } from '../components/exercises';
+import {
+  ExerciseCatalogBentoBar,
+  ExerciseSearchBar,
+  ExerciseFilterSection,
+  ExerciseListItem,
+} from '../components/exercises';
 import { ExerciseService } from '../services/ExerciseService';
 import { LogService } from '../services/LogService';
 
@@ -202,30 +206,29 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
         </TouchableOpacity>
       </View>
 
-      <View style={screenStyles.searchContainer}>
-        <MaterialIcons name="search" size={20} color={colors.textSecondary} />
-        <TextInput
-          style={screenStyles.searchInput}
-          placeholder={t('exerciseCatalog.searchPlaceholder', 'Buscar ejercicio...')}
-          placeholderTextColor={colors.textSecondary}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onFocus={() => setIsSearchFocused(true)}
-          onBlur={() => {
-            if (searchQuery.length === 0) setIsSearchFocused(false);
-          }}
-          testID="exercise-catalog-search-input"
+      <ExerciseSearchBar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        isSearchFocused={isSearchFocused}
+        setIsSearchFocused={setIsSearchFocused}
+        onClearSearch={handleClearSearch}
+        colors={colors}
+        placeholder={t('exerciseCatalog.searchPlaceholder', 'Buscar ejercicio...')}
+        showFilterButton={true}
+        onToggleFilter={() => setShowFilters((prev) => !prev)}
+        hasActiveFilters={hasActiveFilters}
+        testID="exercise-catalog-search-input"
+        clearButtonTestID="exercise-catalog-clear-search-button"
+      />
+
+      {!isSearchFocused && searchQuery.length === 0 && (
+        <ExerciseCatalogBentoBar
+          totalExercises={exercises.length}
+          totalPRs={34}
+          totalGroups={filterOptions.primaryMuscles.length || 8}
+          colors={colors}
         />
-        {(searchQuery.length > 0 || isSearchFocused) && (
-          <TouchableOpacity
-            onPress={handleClearSearch}
-            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-            testID="exercise-catalog-clear-search-button"
-          >
-            <MaterialIcons name="close" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-        )}
-      </View>
+      )}
 
       {!isSearchFocused && searchQuery.length === 0 && (
         <ExerciseFilterSection

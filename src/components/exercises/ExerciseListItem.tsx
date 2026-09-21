@@ -61,8 +61,10 @@ export const ExerciseListItem: React.FC<ExerciseListItemProps> = React.memo(
                         styles.exerciseCard,
                         {
                             backgroundColor: colors.surface,
-                            borderColor: isSelected ? colors.primary : colors.border,
-                            borderWidth: isSelected ? 2 : 1,
+                            borderColor: isSelected ? colors.primary : `${colors.border}80`,
+                            borderWidth: 1,
+                            borderLeftWidth: 4,
+                            borderLeftColor: isSelected ? colors.primary : (item.is_custom ? (colors.statusWarning || '#f59e0b') : colors.primary),
                         },
                     ]}
                     onPress={onSelect}
@@ -241,13 +243,19 @@ const styles = StyleSheet.create({
     exerciseCard: {
         flexDirection: 'column',
         padding: 12,
-        marginBottom: 12,
-        borderRadius: 12,
+        marginBottom: 10,
+        borderRadius: 14,
+        borderLeftWidth: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.04,
+        shadowRadius: 4,
+        elevation: 1,
     },
     thumbnailContainer: {
-        width: 80,
-        height: 54,
-        borderRadius: 8,
+        width: 76,
+        height: 52,
+        borderRadius: 10,
         overflow: 'hidden',
         position: 'relative',
         backgroundColor: '#000',
@@ -262,6 +270,7 @@ const styles = StyleSheet.create({
         height: '100%',
         alignItems: 'center',
         justifyContent: 'center',
+        borderRadius: 10,
     },
     playIconOverlay: {
         position: 'absolute',
@@ -271,26 +280,28 @@ const styles = StyleSheet.create({
         right: 0,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(0,0,0,0.3)',
+        backgroundColor: 'rgba(0,0,0,0.35)',
     },
     exerciseInfo: {
         flex: 1,
         justifyContent: 'center',
     },
     exerciseName: {
-        fontSize: 15,
-        fontWeight: '600',
-        marginBottom: 4,
+        fontSize: 16,
+        fontWeight: '700',
+        marginBottom: 3,
+        letterSpacing: -0.2,
     },
     exerciseText: {
         fontSize: 12,
+        fontWeight: '500',
     },
     selectionIndicator: {
-        marginLeft: 12,
+        marginLeft: 10,
     },
     expandedContent: {
-        marginTop: 12,
-        paddingTop: 12,
+        marginTop: 10,
+        paddingTop: 10,
         borderTopWidth: 1,
     },
     descriptionText: {
@@ -304,9 +315,9 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     badge: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
+        paddingHorizontal: 9,
+        paddingVertical: 3,
+        borderRadius: 10,
     },
     badgeText: {
         fontSize: 11,

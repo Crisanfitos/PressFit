@@ -121,6 +121,9 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
                 setIsSearchFocused={setIsSearchFocused}
                 onClearSearch={handleClearSearch}
                 colors={colors}
+                showFilterButton={true}
+                onToggleFilter={() => setShowFilters((prev) => !prev)}
+                hasActiveFilters={hasActiveFilters}
             />
 
             {!isSearchFocused && searchQuery.length === 0 && (
