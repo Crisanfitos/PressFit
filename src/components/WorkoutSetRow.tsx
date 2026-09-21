@@ -187,8 +187,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
         : disableInteraction
             ? '#22c55e'
             : colors.textSecondary;
-
-    return (
+    return (
         <TouchableOpacity
             testID={`set-row-${setIndex}`}
             delayLongPress={400}
@@ -196,7 +195,16 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
             activeOpacity={1}
             style={[
                 styles.container,
-                isCompleted && styles.completedContainer,            ]}
+                {
+                    backgroundColor: isCompleted
+                        ? (colors.secondaryContainer ? `${colors.secondaryContainer}25` : 'rgba(34, 197, 94, 0.08)')
+                        : (colors.surfaceContainerLow || colors.surface),
+                    borderColor: isCompleted
+                        ? (colors.primaryContainer ? `${colors.primaryContainer}50` : 'rgba(34, 197, 94, 0.25)')
+                        : (colors.outlineVariant ? `${colors.outlineVariant}60` : colors.border),
+                },
+                isCompleted && styles.completedContainer,
+            ]}
         >
             <View style={styles.mainRow}>
                 <View style={styles.setNumberWrapper}>
@@ -211,8 +219,8 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                                 }
                                 : canEditSetType
                                     ? {
-                                        backgroundColor: colors.surfaceHighlight,
-                                        borderColor: colors.border,
+                                        backgroundColor: colors.surfaceContainerHighest || colors.surfaceHighlight,
+                                        borderColor: colors.outlineVariant || colors.border,
                                     }
                                     : {
                                         backgroundColor: 'transparent',
@@ -229,7 +237,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                                 styles.setNumber,
                                 isSpecialType
                                     ? [styles.specialBadgeText, { color: typeVisual.badgeText }]
-                                    : { color: canEditSetType ? colors.text : colors.textSecondary },
+                                    : { color: canEditSetType ? (colors.onSurface || colors.text) : (colors.onSurfaceVariant || colors.textSecondary) },
                             ]}
                         >
                             {isSpecialType ? typeVisual.shortLabel : set.numero_serie}
@@ -243,6 +251,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                         />
                     )}
                 </View>
+
                 {/* Weight Column */}
                 <View style={[styles.inputGroup, { maxWidth: 80 }]}>
                     {isBodyweight ? (
@@ -250,10 +259,13 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                             testID={`bodyweight-placeholder-${setIndex}`}
                             style={[
                                 styles.bodyweightPlaceholder,
-                                { backgroundColor: colors.surfaceHighlight, borderColor: colors.border },
+                                {
+                                    backgroundColor: colors.surfaceContainerHigh || colors.surfaceHighlight,
+                                    borderColor: colors.outlineVariant || colors.border,
+                                },
                             ]}
                         >
-                            <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: '600' }}>
+                            <Text style={{ color: colors.onSurfaceVariant || colors.textSecondary, fontSize: 13, fontWeight: '700' }}>
                                 BW
                             </Text>
                         </View>
@@ -300,27 +312,43 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                 {isCompleted && isInputEditable && (
                     <TouchableOpacity
                         testID={`edit-set-button-${setIndex}`}
-                        style={styles.editSetButton}
+                        style={[
+                            styles.editSetButton,
+                            {
+                                backgroundColor: colors.surfaceContainerHigh || colors.surfaceHighlight,
+                                borderColor: colors.outlineVariant || colors.border,
+                            },
+                        ]}
                         onPress={promptUnlockConfirmation}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
-                        <MaterialIcons name="edit" size={18} color={colors.primary} />
+                        <MaterialIcons name="edit" size={16} color={colors.primary} />
                     </TouchableOpacity>
                 )}
 
-                {/* Completion Checkbox */}
+                {/* Completion Checkbox Button (Stitch M3 filled when completed, outline when pending) */}
                 {navMode !== 'edit' && (
                     <TouchableOpacity
                         testID={`set-complete-checkbox-${setIndex}`}
-                        style={styles.completeCheckbox}
+                        style={[
+                            styles.completeCheckbox,
+                            {
+                                backgroundColor: isCompleted
+                                    ? (colors.primaryContainer || '#22c55e')
+                                    : (colors.surfaceContainerHigh || colors.surfaceHighlight),
+                                borderColor: isCompleted
+                                    ? (colors.primaryContainer || '#22c55e')
+                                    : (colors.outlineVariant || colors.border),
+                            },
+                        ]}
                         onPress={handleToggleComplete}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
                         <MaterialIcons
                             testID={isCompleted ? `set-completed-icon-${setIndex}` : `set-uncompleted-icon-${setIndex}`}
                             name={isCompleted ? 'check-box' : 'check-box-outline-blank'}
-                            size={24}
-                            color={isCompleted ? '#22c55e' : colors.textSecondary}
+                            size={22}
+                            color={isCompleted ? (colors.onPrimaryContainer || '#ffffff') : (colors.outline || colors.textSecondary)}
                         />
                     </TouchableOpacity>
                 )}
@@ -361,14 +389,14 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
 const styles = StyleSheet.create({
     container: {
         marginBottom: 8,
-        paddingHorizontal: 4,
-        paddingVertical: 2,
+        paddingHorizontal: 6,
+        paddingVertical: 4,
+        borderRadius: 10,
+        borderWidth: 1,
     },
     completedContainer: {
-        backgroundColor: 'rgba(34, 197, 94, 0.08)',
-        borderRadius: 8,
+        borderRadius: 10,
         borderWidth: 1,
-        borderColor: 'rgba(34, 197, 94, 0.25)',
     },
     mainRow: {
         flexDirection: 'row',
@@ -386,32 +414,32 @@ const styles = StyleSheet.create({
     },
     setTypeBadgeButton: {
         width: 32,
-        height: 42,
+        height: 40,
         borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 1.5,
-        borderColor: 'transparent',
-        marginHorizontal: 4,
+        borderWidth: 1,
+        marginHorizontal: 3,
     },
     setNumber: {
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: '700',
         textAlign: 'center',
+        fontVariant: ['tabular-nums'],
     },
     specialBadgeText: {
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: '800',
     },
     inputGroup: {
         flex: 1,
-        marginHorizontal: 4,
+        marginHorizontal: 3,
         alignItems: 'center',
         justifyContent: 'center',
     },
     bodyweightPlaceholder: {
         width: '100%',
-        height: 42,
+        height: 40,
         borderWidth: 1,
         borderRadius: 8,
         alignItems: 'center',
@@ -422,24 +450,33 @@ const styles = StyleSheet.create({
         marginLeft: 6,
     },
     completeCheckbox: {
-        padding: 4,
+        width: 38,
+        height: 38,
+        borderRadius: 8,
         marginLeft: 4,
-        height: 42,
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 1,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 1.5,
+        elevation: 1,
     },
     editSetButton: {
-        padding: 4,
+        width: 34,
+        height: 38,
+        borderRadius: 8,
         marginLeft: 2,
-        height: 42,
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 1,
     },
     timerButton: {
         padding: 4,
         marginLeft: 4,
     },
-});
+});;
 
 export const areWorkoutSetRowPropsEqual = (
     prevProps: WorkoutSetRowProps,
