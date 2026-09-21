@@ -30,20 +30,20 @@ export const WorkoutDayExerciseList: React.FC<WorkoutDayExerciseListProps> = ({
             marginBottom: 16,
         },
         exerciseCard: {
-            backgroundColor: colors.surface,
+            backgroundColor: colors.surfaceContainerLowest || colors.surface,
             borderRadius: 16,
             padding: 16,
             marginBottom: 12,
             flexDirection: 'row',
             alignItems: 'center',
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.outlineVariant || colors.border,
         },
         exerciseIcon: {
             width: 48,
             height: 48,
             borderRadius: 12,
-            backgroundColor: `${colors.primary}20`,
+            backgroundColor: colors.surfaceContainerHigh || `${colors.primary}20`,
             alignItems: 'center',
             justifyContent: 'center',
             marginRight: 16,
@@ -53,13 +53,14 @@ export const WorkoutDayExerciseList: React.FC<WorkoutDayExerciseListProps> = ({
         },
         exerciseName: {
             fontSize: 16,
-            fontWeight: '600',
-            color: colors.text,
+            fontWeight: '700',
+            color: colors.onSurface || colors.text,
             marginBottom: 4,
         },
         exerciseMuscle: {
-            fontSize: 14,
-            color: colors.textSecondary,
+            fontSize: 13,
+            fontWeight: '500',
+            color: colors.onSurfaceVariant || colors.textSecondary,
         },
         exerciseSets: {
             alignItems: 'center',
@@ -71,7 +72,7 @@ export const WorkoutDayExerciseList: React.FC<WorkoutDayExerciseListProps> = ({
         },
         setsLabel: {
             fontSize: 12,
-            color: colors.textSecondary,
+            color: colors.onSurfaceVariant || colors.textSecondary,
         },
         emptyState: {
             alignItems: 'center',
@@ -84,12 +85,12 @@ export const WorkoutDayExerciseList: React.FC<WorkoutDayExerciseListProps> = ({
             textAlign: 'center',
         },
         completedExerciseCard: {
-            backgroundColor: colors.surface,
-            borderRadius: 12,
+            backgroundColor: colors.surfaceContainerLowest || colors.surface,
+            borderRadius: 16,
             padding: 16,
             marginBottom: 16,
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.outlineVariant || colors.border,
         },
         completedExerciseHeader: {
             flexDirection: 'row',
@@ -97,12 +98,12 @@ export const WorkoutDayExerciseList: React.FC<WorkoutDayExerciseListProps> = ({
             marginBottom: 16,
             paddingBottom: 12,
             borderBottomWidth: StyleSheet.hairlineWidth,
-            borderBottomColor: colors.border,
+            borderBottomColor: colors.outlineVariant || colors.border,
         },
         completedExerciseName: {
             fontSize: 16,
-            fontWeight: 'bold',
-            color: colors.text,
+            fontWeight: '700',
+            color: colors.onSurface || colors.text,
             marginBottom: 2,
         },
         setRow: {

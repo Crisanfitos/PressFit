@@ -7,3 +7,6 @@ export * from './CalendarGrid';
 export * from './CalendarLegend';
 export * from './RoutineSelectorDropdown';
 export * from './CalendarFab';
+export * from './WeeklyDayPillsCarousel';
+export * from './TodayRoutineHeroCard';
+export * from './WeeklyRoutineDayCard';
