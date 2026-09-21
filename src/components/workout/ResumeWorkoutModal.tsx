@@ -56,7 +56,10 @@ export const ResumeWorkoutModal: React.FC<ResumeWorkoutModalProps> = ({
                 <View
                     style={[
                         styles.modalContainer,
-                        { backgroundColor: colors.surface, borderColor: colors.border },
+                        {
+                            backgroundColor: colors.surfaceContainerLow || colors.surface,
+                            borderColor: colors.outlineVariant || colors.border,
+                        },
                     ]}
                     testID="resume-workout-content"
                 >
@@ -71,10 +74,10 @@ export const ResumeWorkoutModal: React.FC<ResumeWorkoutModalProps> = ({
                     </View>
 
                     {/* Titles */}
-                    <Text style={[styles.title, { color: colors.text }]}>
+                    <Text style={[styles.title, { color: colors.onSurface || colors.text }]}>
                         Entrenamiento en Curso
                     </Text>
-                    <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                    <Text style={[styles.subtitle, { color: colors.onSurfaceVariant || colors.textSecondary }]}>
                         Se detectó una sesión previa sin finalizar. Puedes continuar justo donde lo dejaste o descartarla.
                     </Text>
 
@@ -82,19 +85,22 @@ export const ResumeWorkoutModal: React.FC<ResumeWorkoutModalProps> = ({
                     <View
                         style={[
                             styles.detailsCard,
-                            { backgroundColor: colors.surfaceHighlight, borderColor: colors.border },
+                            {
+                                backgroundColor: colors.surfaceContainerHigh || colors.surfaceHighlight,
+                                borderColor: colors.outlineVariant || colors.border,
+                            },
                         ]}
                     >
                         <View style={styles.detailRow}>
                             <MaterialIcons name="calendar-today" size={18} color={colors.primary} />
-                            <Text style={[styles.detailText, { color: colors.text }]}>
+                            <Text style={[styles.detailText, { color: colors.onSurface || colors.text }]}>
                                 {session.dayName}
                             </Text>
                         </View>
 
                         <View style={styles.detailRow}>
                             <MaterialIcons name="timer" size={18} color="#f59e0b" />
-                            <Text style={[styles.detailText, { color: colors.text }]}>
+                            <Text style={[styles.detailText, { color: colors.onSurface || colors.text }]}>
                                 {session.elapsedMinutes > 0
                                     ? `${session.elapsedMinutes} min transcurridos`
                                     : 'Iniciado recientemente'}
@@ -102,8 +108,8 @@ export const ResumeWorkoutModal: React.FC<ResumeWorkoutModalProps> = ({
                         </View>
 
                         <View style={styles.detailRow}>
-                            <MaterialIcons name="fitness-center" size={18} color={colors.textSecondary} />
-                            <Text style={[styles.detailText, { color: colors.textSecondary }]}>
+                            <MaterialIcons name="fitness-center" size={18} color={colors.onSurfaceVariant || colors.textSecondary} />
+                            <Text style={[styles.detailText, { color: colors.onSurfaceVariant || colors.textSecondary }]}>
                                 {session.exerciseCount} ejercicio{session.exerciseCount !== 1 ? 's' : ''} · {session.completedSetsCount} serie{session.completedSetsCount !== 1 ? 's' : ''} completada{session.completedSetsCount !== 1 ? 's' : ''}
                             </Text>
                         </View>
@@ -114,23 +120,23 @@ export const ResumeWorkoutModal: React.FC<ResumeWorkoutModalProps> = ({
                         <TouchableOpacity
                             testID="resume-workout-confirm-button"
                             accessibilityLabel="resume-workout-confirm-button"
-                            style={[styles.resumeButton, { backgroundColor: colors.primary }]}
+                            style={[styles.resumeButton, { backgroundColor: colors.primaryContainer || colors.primary }]}
                             onPress={onResume}
                             activeOpacity={0.8}
                         >
-                            <MaterialIcons name="play-arrow" size={22} color="#ffffff" />
-                            <Text style={styles.resumeButtonText}>Reanudar Sesión</Text>
+                            <MaterialIcons name="play-arrow" size={22} color={colors.onPrimaryContainer || '#ffffff'} />
+                            <Text style={[styles.resumeButtonText, { color: colors.onPrimaryContainer || '#ffffff' }]}>Reanudar Sesión</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
                             testID="resume-workout-discard-button"
                             accessibilityLabel="resume-workout-discard-button"
-                            style={[styles.discardButton, { borderColor: colors.border }]}
+                            style={[styles.discardButton, { borderColor: colors.outlineVariant || colors.border }]}
                             onPress={handleDiscardPress}
                             activeOpacity={0.7}
                         >
-                            <MaterialIcons name="delete-outline" size={20} color="#ef4444" />
-                            <Text style={styles.discardButtonText}>Descartar Sesión</Text>
+                            <MaterialIcons name="delete-outline" size={20} color={colors.error || '#ef4444'} />
+                            <Text style={[styles.discardButtonText, { color: colors.error || '#ef4444' }]}>Descartar Sesión</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

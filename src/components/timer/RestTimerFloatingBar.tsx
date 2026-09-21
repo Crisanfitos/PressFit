@@ -180,8 +180,8 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
             elevation: 12,
         },
         barCard: {
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
+            backgroundColor: colors.surfaceContainerLow || colors.surface,
+            borderColor: colors.outlineVariant || colors.border,
             borderWidth: 1,
             borderRadius: 16,
             paddingVertical: 10,
@@ -206,8 +206,8 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
         iconCircle: {
             width: 36,
             height: 36,
-            borderRadius: 18,
-            backgroundColor: isPaused ? '#eab30820' : `${colors.primary}20`,
+            borderRadius: 10,
+            backgroundColor: isPaused ? '#eab30820' : (colors.secondaryContainer || `${colors.primary}20`),
             alignItems: 'center',
             justifyContent: 'center',
             marginRight: 10,
@@ -218,12 +218,12 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
         timeText: {
             fontSize: 16,
             fontWeight: '700',
-            color: isPaused ? colors.textSecondary : colors.text,
+            color: isPaused ? (colors.onSurfaceVariant || colors.textSecondary) : (colors.onSurface || colors.text),
             fontVariant: ['tabular-nums'],
         },
         labelText: {
             fontSize: 11,
-            color: colors.textSecondary,
+            color: colors.onSurfaceVariant || colors.textSecondary,
             fontWeight: '500',
             marginTop: 1,
         },
@@ -233,7 +233,7 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
             gap: 6,
         },
         finishButton: {
-            backgroundColor: '#22c55e',
+            backgroundColor: colors.primaryContainer || '#22c55e',
             borderRadius: 10,
             paddingVertical: 6,
             paddingHorizontal: 10,
@@ -244,11 +244,11 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
         finishText: {
             fontSize: 12,
             fontWeight: '700',
-            color: '#ffffff',
+            color: colors.onPrimaryContainer || '#ffffff',
         },
         addSecondsButton: {
-            backgroundColor: `${colors.primary}18`,
-            borderColor: colors.primary,
+            backgroundColor: colors.surfaceContainerHigh || `${colors.primary}18`,
+            borderColor: colors.outlineVariant || colors.primary,
             borderWidth: 1,
             borderRadius: 10,
             paddingVertical: 6,
@@ -259,11 +259,11 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
         addSecondsText: {
             fontSize: 12,
             fontWeight: '700',
-            color: colors.primary,
+            color: colors.onSurface || colors.primary,
         },
         skipButton: {
-            backgroundColor: colors.surfaceHighlight || '#2A2A2A',
-            borderColor: colors.border,
+            backgroundColor: colors.surfaceContainerHigh || colors.surfaceHighlight || '#2A2A2A',
+            borderColor: colors.outlineVariant || colors.border,
             borderWidth: 1,
             borderRadius: 10,
             paddingVertical: 6,
@@ -274,11 +274,11 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
         skipText: {
             fontSize: 12,
             fontWeight: '600',
-            color: colors.textSecondary,
+            color: colors.onSurfaceVariant || colors.textSecondary,
         },
         indicatorTrack: {
             height: 2.5,
-            backgroundColor: colors.border,
+            backgroundColor: colors.outlineVariant || colors.border,
             borderRadius: 1.5,
             marginTop: 8,
             overflow: 'hidden',
