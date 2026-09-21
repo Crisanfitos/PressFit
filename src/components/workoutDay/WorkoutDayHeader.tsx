@@ -39,7 +39,8 @@ export const WorkoutDayHeader: React.FC<WorkoutDayHeaderProps> = ({
         header: {
             padding: 20,
             borderBottomWidth: 1,
-            borderBottomColor: colors.border,
+            borderBottomColor: colors.outlineVariant || colors.border,
+            backgroundColor: colors.surfaceContainerLowest || colors.surface,
         },
         backRow: {
             flexDirection: 'row',
@@ -50,13 +51,15 @@ export const WorkoutDayHeader: React.FC<WorkoutDayHeaderProps> = ({
             marginRight: 12,
         },
         dateText: {
-            fontSize: 16,
-            color: colors.textSecondary,
+            fontSize: 15,
+            fontWeight: '500',
+            color: colors.onSurfaceVariant || colors.textSecondary,
         },
         dayTitle: {
             fontSize: 28,
-            fontWeight: 'bold',
-            color: colors.text,
+            fontWeight: '800',
+            letterSpacing: -0.5,
+            color: colors.onSurface || colors.text,
         },
         dayDescription: {
             fontSize: 14,
@@ -81,11 +84,11 @@ export const WorkoutDayHeader: React.FC<WorkoutDayHeaderProps> = ({
         heroSummaryContainer: {
             flexDirection: 'row',
             marginTop: 16,
-            backgroundColor: colors.surface,
-            borderRadius: 12,
-            padding: 12,
+            backgroundColor: colors.surfaceContainerLow || colors.surface,
+            borderRadius: 14,
+            padding: 14,
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.outlineVariant || colors.border,
             gap: 16,
         },
         heroSummaryItem: {
@@ -96,7 +99,7 @@ export const WorkoutDayHeader: React.FC<WorkoutDayHeaderProps> = ({
         heroSummaryText: {
             fontSize: 15,
             fontWeight: '600',
-            color: colors.text,
+            color: colors.onSurface || colors.text,
         },
         pendingBanner: {
             flexDirection: 'row',

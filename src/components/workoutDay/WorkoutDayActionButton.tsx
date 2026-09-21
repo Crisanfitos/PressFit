@@ -44,9 +44,9 @@ export const WorkoutDayActionButton: React.FC<WorkoutDayActionButtonProps> = ({
             justifyContent: 'center',
         },
         buttonText: {
-            fontSize: 18,
-            fontWeight: 'bold',
-            color: colors.background,
+            fontSize: 17,
+            fontWeight: '700',
+            color: colors.onSecondary || colors.onPrimary || '#ffffff',
             marginLeft: 8,
         },
     });
@@ -81,7 +81,7 @@ export const WorkoutDayActionButton: React.FC<WorkoutDayActionButtonProps> = ({
                 colors={
                     isPendingPreviousWorkout
                         ? [colors.statusWarning || '#f59e0b', colors.primary]
-                        : [colors.primary, `${colors.primary}CC`]
+                        : [colors.secondaryContainer || colors.primary, colors.primary]
                 }
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
@@ -90,7 +90,7 @@ export const WorkoutDayActionButton: React.FC<WorkoutDayActionButtonProps> = ({
                 <MaterialIcons
                     name={getIconName()}
                     size={24}
-                    color={colors.background}
+                    color={colors.onSecondary || colors.onPrimary || '#ffffff'}
                 />
                 <Text style={styles.buttonText}>{getButtonLabel()}</Text>
             </LinearGradient>
