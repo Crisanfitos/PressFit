@@ -94,23 +94,27 @@ const MainNavigator: React.FC = () => {
                 screenOptions={{
                     swipeEnabled: true,
                     tabBarStyle: {
-                        backgroundColor: colors.tabBar,
-                        borderTopColor: colors.border,
+                        backgroundColor: colors.surfaceContainerLowest || colors.tabBar,
+                        borderTopColor: colors.outlineVariant || colors.border,
                         borderTopWidth: 1,
                         paddingBottom: insets.bottom,
                         height: 60 + insets.bottom,
+                        elevation: 0,
+                        shadowOpacity: 0,
                     },
                     tabBarActiveTintColor: colors.primary,
-                    tabBarInactiveTintColor: colors.textSecondary,
+                    tabBarInactiveTintColor: colors.onSurfaceVariant || colors.textSecondary,
                     tabBarIndicatorStyle: {
                         backgroundColor: colors.primary,
+                        height: 2,
                         top: 0,
                     },
                     tabBarShowIcon: true,
                     tabBarLabelStyle: {
-                        fontSize: 10,
+                        fontSize: 11,
+                        fontWeight: '600',
                         textTransform: 'none',
-                        marginTop: -5,
+                        marginTop: -4,
                     },
                 }}
             >
@@ -119,9 +123,9 @@ const MainNavigator: React.FC = () => {
                     component={WeeklyPlanNavigatorWithBoundary}
                     options={({ route }) => ({
                         swipeEnabled: getSwipeEnabled(route),
-                        tabBarLabel: t('navigation.semana', 'Semana'),
+                        tabBarLabel: t('navigation.routines', 'Rutinas'),
                         tabBarIcon: ({ color }) => (
-                            <MaterialIcons name="calendar-today" size={24} color={color} />
+                            <MaterialIcons name="calendar-today" size={22} color={color} />
                         ),
                     })}
                 />
@@ -131,7 +135,7 @@ const MainNavigator: React.FC = () => {
                     options={{
                         tabBarLabel: t('navigation.progreso', 'Progreso'),
                         tabBarIcon: ({ color }) => (
-                            <MaterialIcons name="bar-chart" size={24} color={color} />
+                            <MaterialIcons name="trending-up" size={24} color={color} />
                         ),
                     }}
                 />

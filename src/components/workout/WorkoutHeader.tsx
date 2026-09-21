@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import Reanimated from 'react-native-reanimated';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ThemeColors } from '../../types/theme';
@@ -24,13 +24,40 @@ export const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
     colors,
     onBack,
 }) => {
+    const pulseAnim = useRef(new Animated.Value(0.4)).current;
+
+    useEffect(() => {
+        const pulse = Animated.loop(
+            Animated.sequence([
+                Animated.timing(pulseAnim, {
+                    toValue: 1,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(pulseAnim, {
+                    toValue: 0.4,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+            ])
+        );
+        pulse.start();
+        return () => pulse.stop();
+    }, [pulseAnim]);
+
     const formattedDate = fechaDia
         ? ` — ${new Date(fechaDia + 'T00:00:00').getDate()}/${(new Date(fechaDia + 'T00:00:00').getMonth() + 1).toString().padStart(2, '0')}`
         : '';
 
     return (
         <Reanimated.View
-            style={[styles.header, { borderBottomColor: colors.border }]}
+            style={[
+                styles.header,
+                {
+                    backgroundColor: colors.surfaceContainerLowest || colors.headerBackground,
+                    borderBottomColor: colors.outlineVariant || colors.border,
+                },
+            ]}
             sharedTransitionTag={`workout-header-${routineDayId || workoutId || 'active'}`}
         >
             <View style={styles.headerRow}>
@@ -40,15 +67,28 @@ export const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
                     onPress={onBack}
                     hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
                 >
-                    <MaterialIcons name="arrow-back" size={24} color={colors.text} />
+                    <MaterialIcons name="arrow-back" size={24} color={colors.onSurface || colors.text} />
                 </TouchableOpacity>
+
+                {/* Stitch Pulsing Active Session Indicator Dot */}
+                <Animated.View
+                    testID="workout-active-pulse-dot"
+                    style={[
+                        styles.pulseDot,
+                        {
+                            backgroundColor: colors.primaryContainer || colors.primary,
+                            opacity: pulseAnim,
+                        },
+                    ]}
+                />
+
                 <View style={styles.titleContainer}>
-                    <Text style={[styles.headerText, { color: colors.text }]}>
+                    <Text style={[styles.headerText, { color: colors.onSurface || colors.text }]}>
                         {dayName || 'Entrenamiento'}
                         {formattedDate}
                     </Text>
                     {descripcion ? (
-                        <Text style={[styles.descriptionText, { color: colors.primary }]}>
+                        <Text style={[styles.descriptionText, { color: colors.onSurfaceVariant || colors.primary }]}>
                             {descripcion}
                         </Text>
                     ) : null}
@@ -65,23 +105,33 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 20,
-        paddingVertical: 16,
+        paddingVertical: 14,
         borderBottomWidth: 1,
     },
     headerRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        flex: 1,
     },
     backButton: {
         padding: 8,
         marginLeft: -8,
     },
+    pulseDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        marginLeft: 4,
+        marginRight: 8,
+    },
     titleContainer: {
-        marginLeft: 12,
+        marginLeft: 4,
+        flex: 1,
     },
     headerText: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '600',
+        letterSpacing: -0.16,
     },
     descriptionText: {
         fontSize: 12,

@@ -91,15 +91,15 @@ const FloatingTimerPill: React.FC<FloatingTimerPillProps> = ({
         pill: {
             flexDirection: 'row',
             alignItems: 'center',
-            backgroundColor: colors.surface,
-            borderColor: colors.primary,
-            borderWidth: 1.5,
+            backgroundColor: colors.surfaceContainerLowest || colors.surface,
+            borderColor: colors.outlineVariant || colors.primary,
+            borderWidth: 1,
             borderRadius: 24,
             paddingVertical: 8,
             paddingHorizontal: 14,
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.35,
+            shadowOpacity: 0.25,
             shadowRadius: 6,
         },
         iconContainer: {
@@ -108,12 +108,13 @@ const FloatingTimerPill: React.FC<FloatingTimerPillProps> = ({
         timeText: {
             fontSize: 14,
             fontWeight: '700',
-            color: colors.text,
+            color: colors.onSurface || colors.text,
             fontVariant: ['tabular-nums'],
         },
         labelText: {
             fontSize: 11,
-            color: colors.textSecondary,
+            fontWeight: '500',
+            color: colors.onSurfaceVariant || colors.textSecondary,
             marginLeft: 6,
         },
     });
