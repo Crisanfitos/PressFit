@@ -27,17 +27,37 @@ export const WorkoutActions: React.FC<WorkoutActionsProps> = ({
     return (
         <View style={styles.finishButtonContainer}>
             <TouchableOpacity
-                style={[styles.finishButton, { backgroundColor: colors.primary }]}
+                style={[
+                    styles.finishButton,
+                    {
+                        backgroundColor: colors.primaryContainer || colors.primary,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.15,
+                        shadowRadius: 3,
+                        elevation: 3,
+                    },
+                ]}
                 onPress={onFinishWorkout}
                 disabled={saving}
                 testID="finish-workout-button"
+                activeOpacity={0.8}
             >
                 {saving ? (
-                    <ActivityIndicator color={colors.background} />
+                    <ActivityIndicator color={colors.onPrimaryContainer || colors.background} />
                 ) : (
                     <>
-                        <MaterialIcons name="check-circle" size={24} color={colors.background} />
-                        <Text style={[styles.finishButtonText, { color: colors.background }]}>
+                        <MaterialIcons
+                            name="check-circle"
+                            size={22}
+                            color={colors.onPrimaryContainer || colors.background}
+                        />
+                        <Text
+                            style={[
+                                styles.finishButtonText,
+                                { color: colors.onPrimaryContainer || colors.background },
+                            ]}
+                        >
                             {t('workout.finishWorkout', 'Finalizar Entrenamiento')}
                         </Text>
                     </>
@@ -49,19 +69,20 @@ export const WorkoutActions: React.FC<WorkoutActionsProps> = ({
 
 const styles = StyleSheet.create({
     finishButtonContainer: {
-        padding: 16,
+        paddingHorizontal: 4,
+        paddingVertical: 16,
         marginBottom: 20,
     },
     finishButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 16,
+        paddingVertical: 14,
         borderRadius: 12,
     },
     finishButtonText: {
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: '700',
         marginLeft: 8,
     },
 });

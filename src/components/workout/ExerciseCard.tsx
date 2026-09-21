@@ -73,7 +73,16 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     const canDeleteSets = isStructureEditable || mode === 'ACTIVE';
 
     return (
-        <View style={[styles.exerciseCard, { backgroundColor: colors.surface, borderColor: colors.border }]} testID={`exercise-card-${index}`}>
+        <View
+            style={[
+                styles.exerciseCard,
+                {
+                    backgroundColor: colors.surfaceContainer || colors.surface,
+                    borderColor: colors.outlineVariant || colors.border,
+                },
+            ]}
+            testID={`exercise-card-${index}`}
+        >
             <TouchableOpacity onPress={() => onToggleCollapse(exercise.id)} activeOpacity={0.7}>
                 <View style={styles.exerciseHeader}>
                     <View style={styles.exerciseHeaderLeft}>
@@ -83,8 +92,25 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                             color={colors.primary}
                             style={styles.collapseIcon}
                         />
-                        <View style={{ flex: 1, flexDirection: 'column' }}>
-                            <Text style={[styles.exerciseName, { color: colors.text }]} numberOfLines={2}>
+                        <View
+                            style={[
+                                styles.indexBadge,
+                                {
+                                    backgroundColor: colors.secondaryContainer || `${colors.primary}20`,
+                                },
+                            ]}
+                        >
+                            <Text
+                                style={[
+                                    styles.indexBadgeText,
+                                    { color: colors.primary },
+                                ]}
+                            >
+                                {index + 1}
+                            </Text>
+                        </View>
+                        <View style={{ flex: 1, flexDirection: 'column', marginLeft: 8 }}>
+                            <Text style={[styles.exerciseName, { color: colors.onSurface || colors.text }]} numberOfLines={2}>
                                 {exercise.titulo}
                             </Text>
                             <View style={styles.badgesRow}>
@@ -110,7 +136,13 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                         {onSwapExercise && (
                             <TouchableOpacity
                                 testID={`swap-exercise-button-${index}`}
-                                style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                                style={[
+                                    styles.actionButton,
+                                    {
+                                        backgroundColor: colors.surfaceContainerLow || colors.surface,
+                                        borderColor: colors.outlineVariant || colors.border,
+                                    },
+                                ]}
                                 onPress={() => onSwapExercise(exercise)}
                                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                             >
@@ -121,7 +153,13 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                             <TouchableOpacity
                                 testID={`plate-calculator-trigger-${index}`}
                                 accessibilityLabel={`plate-calculator-exercise-button-${index}`}
-                                style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                                style={[
+                                    styles.actionButton,
+                                    {
+                                        backgroundColor: colors.surfaceContainerLow || colors.surface,
+                                        borderColor: colors.outlineVariant || colors.border,
+                                    },
+                                ]}
                                 onPress={() => {
                                     const firstSet = setsList[0];
                                     const initialW = firstSet?.peso_utilizado || 0;
@@ -138,16 +176,22 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                             </TouchableOpacity>
                         )}
                         <TouchableOpacity
-                            style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                            style={[
+                                styles.actionButton,
+                                {
+                                    backgroundColor: colors.surfaceContainerLow || colors.surface,
+                                    borderColor: colors.outlineVariant || colors.border,
+                                },
+                            ]}
                             onPress={() => onNavigateDetail(exercise.id)}
                             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                         >
-                            <MaterialIcons name="info-outline" size={20} color={colors.textSecondary} />
+                            <MaterialIcons name="info-outline" size={20} color={colors.onSurfaceVariant || colors.textSecondary} />
                         </TouchableOpacity>
                         {isStructureEditable && (
                             <TouchableOpacity
                                 testID={`delete-exercise-button-${index}`}
-                                style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: '#fee2e2' }]}
+                                style={[styles.actionButton, { backgroundColor: colors.surfaceContainerLow || colors.surface, borderColor: '#fee2e2' }]}
                                 onPress={() => onDeleteExercise(exercise.id, exercise.titulo, exercise.routine_exercise_id)}
                                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                             >
@@ -161,11 +205,21 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
             {!isCollapsed && (
                 <View style={styles.setsContainer}>
                     {/* Header Row */}
-                    <View style={[styles.setRow, { marginBottom: 8 }]}>
-                        <Text style={[styles.setNumber, { color: colors.textSecondary, fontSize: 12 }]}>Serie</Text>
+                    <View
+                        style={[
+                            styles.setRow,
+                            styles.tableHeaderBorder,
+                            {
+                                borderBottomColor: colors.outlineVariant ? `${colors.outlineVariant}50` : `${colors.border}40`,
+                            },
+                        ]}
+                    >
+                        <Text style={[styles.columnHeaderText, { width: 38, textAlign: 'center', color: colors.onSurfaceVariant || colors.textSecondary }]}>
+                            SERIE
+                        </Text>
                         <View style={[styles.inputGroup, { maxWidth: 80 }]}>
                             <Text style={[styles.referenceText, { color: colors.primary }]}>
-                                {TIPO_PESO_SHORT_LABELS[exercise.tipo_peso || 'total']}
+                                {TIPO_PESO_SHORT_LABELS[exercise.tipo_peso || 'total'] || 'KG'}
                             </Text>
                         </View>
                         <View style={[styles.inputGroup, { maxWidth: 80 }]}>
@@ -174,12 +228,16 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                         <View style={[styles.inputGroup, { maxWidth: 60 }]}>
                             <Text style={[styles.referenceText, { color: colors.primary }]}>RPE</Text>
                         </View>
-                        <View style={{ width: 28 }} />
+                        <View style={{ width: 44, alignItems: 'center' }}>
+                            <Text style={[styles.columnHeaderText, { color: colors.onSurfaceVariant || colors.textSecondary }]}>
+                                ESTADO
+                            </Text>
+                        </View>
                     </View>
 
                     {setsList.length === 0 ? (
                         <View style={styles.emptySetsContainer}>
-                            <Text style={[styles.emptySetsText, { color: colors.textSecondary }]}>
+                            <Text style={[styles.emptySetsText, { color: colors.onSurfaceVariant || colors.textSecondary }]}>
                                 No hay series todavía
                             </Text>
                         </View>
@@ -219,8 +277,10 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                             style={[
                                 styles.addSetButton,
                                 {
-                                    backgroundColor: isAtTotalLimit ? `${colors.border}30` : `${colors.primary}20`,
-                                    borderColor: isAtTotalLimit ? colors.border : colors.primary,
+                                    backgroundColor: isAtTotalLimit
+                                        ? `${colors.border}30`
+                                        : (colors.surfaceContainerHigh || `${colors.primary}15`),
+                                    borderColor: isAtTotalLimit ? colors.border : (colors.outlineVariant || colors.primary),
                                     opacity: isAtTotalLimit ? 0.6 : 1,
                                 },
                             ]}
@@ -259,6 +319,11 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         padding: 16,
         marginBottom: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 2,
     },
     exerciseHeader: {
         flexDirection: 'row',
@@ -271,9 +336,22 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     collapseIcon: {
-        marginRight: 8,
+        marginRight: 6,
         marginTop: 2,
         alignSelf: 'flex-start',
+    },
+    indexBadge: {
+        width: 24,
+        height: 24,
+        borderRadius: 6,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 2,
+        alignSelf: 'flex-start',
+    },
+    indexBadgeText: {
+        fontSize: 12,
+        fontWeight: '700',
     },
     exerciseName: {
         fontSize: 16,
@@ -289,20 +367,30 @@ const styles = StyleSheet.create({
     },
     exerciseActions: {
         flexDirection: 'row',
-        gap: 8,
+        gap: 6,
     },
     actionButton: {
-        padding: 8,
+        padding: 7,
         borderRadius: 8,
         borderWidth: 1,
     },
     setsContainer: {
-        marginTop: 16,
+        marginTop: 14,
+    },
+    tableHeaderBorder: {
+        borderBottomWidth: 1,
+        paddingBottom: 6,
     },
     setRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: 8,
+        paddingHorizontal: 4,
+    },
+    columnHeaderText: {
+        fontSize: 11,
+        fontWeight: '700',
+        letterSpacing: 0.5,
     },
     setNumber: {
         width: 40,
@@ -311,14 +399,15 @@ const styles = StyleSheet.create({
     },
     inputGroup: {
         flex: 1,
-        marginHorizontal: 4,
+        marginHorizontal: 3,
         alignItems: 'center',
         justifyContent: 'center',
     },
     referenceText: {
         fontSize: 11,
+        fontWeight: '700',
         textAlign: 'center',
-        marginTop: 4,
+        letterSpacing: 0.5,
     },
     emptySetsContainer: {
         paddingVertical: 16,
@@ -332,15 +421,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 12,
-        borderRadius: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 10,
         borderWidth: 1,
         borderStyle: 'dashed',
         marginTop: 8,
         gap: 6,
     },
     addSetText: {
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: '600',
     },
     staleBadge: {

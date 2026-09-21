@@ -44,20 +44,21 @@ const SetInput: React.FC<SetInputProps> = React.memo(({
             style={[
                 styles.input,
                 {
-                    backgroundColor: isEditable ? colors.inputBackground : colors.surfaceHighlight,
-                    borderColor: colors.border,
-                    color: isEditable ? colors.text : colors.textSecondary,
+                    backgroundColor: isEditable
+                        ? (colors.surfaceContainerLowest || colors.inputBackground || colors.surface)
+                        : (colors.surfaceContainerHigh || colors.surfaceHighlight || colors.surface),
+                    borderColor: colors.outlineVariant || colors.border,
+                    color: isEditable ? (colors.onSurface || colors.text) : (colors.onSurfaceVariant || colors.textSecondary),
                 },
             ]}
             value={localValue}
             placeholder={placeholder}
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.onSurfaceVariant || colors.textSecondary}
             keyboardType="numeric"
             editable={isEditable}
             onChangeText={setLocalValue}
             onBlur={handleBlur}
             maxLength={maxLength}
-        // Removed selectTextOnFocus so the text is not auto-selected
         />
     );
 });
@@ -65,13 +66,14 @@ const SetInput: React.FC<SetInputProps> = React.memo(({
 const styles = StyleSheet.create({
     input: {
         width: '100%',
-        height: 42,
+        height: 40,
         borderWidth: 1,
         borderRadius: 8,
-        paddingHorizontal: 4,
-        fontSize: 16,
+        paddingHorizontal: 2,
+        fontSize: 15,
         fontWeight: '600',
         textAlign: 'center',
+        fontVariant: ['tabular-nums'],
     },
 });
 

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -180,6 +180,10 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                 workoutId={workout?.id}
                 colors={colors}
                 onBack={() => navigation.goBack()}
+                timer={timer}
+                onFinish={handleFinishWorkout}
+                saving={state.saving}
+                mode={mode}
             />
             <KeyboardAwareContainer style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 100, flexGrow: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" nestedScrollEnabled={true}>
                 <View style={styles.scrollView}>
@@ -216,6 +220,26 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                 getGhostValue={(eId, sNum, fld) => getGhostValue(previousWorkout, eId, sNum, fld)}
                             />
                         ))
+                    )}
+                    {isStructureEditable && exercises.length > 0 && (
+                        <View style={styles.addExerciseBottomContainer}>
+                            <TouchableOpacity
+                                testID="add-exercise-bottom-button"
+                                style={[
+                                    styles.addExerciseBottomButton,
+                                    {
+                                        backgroundColor: colors.surfaceContainer || colors.surface,
+                                        borderColor: colors.outlineVariant || colors.border,
+                                    },
+                                ]}
+                                onPress={navigateToExerciseLibrary}
+                            >
+                                <MaterialIcons name="add-circle" size={20} color={colors.primary} />
+                                <Text style={[styles.addExerciseBottomText, { color: colors.onSurface || colors.text }]}>
+                                    {t('workout.addExerciseToRoutine', 'Agregar Ejercicio a la Rutina')}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                     )}
                     <WorkoutActions mode={mode} navMode={navMode} saving={state.saving} colors={colors} t={(k, def) => t(k, { defaultValue: def })} onFinishWorkout={handleFinishWorkout} />
                     <View style={{ height: 100 }} />
@@ -267,6 +291,24 @@ const styles = StyleSheet.create({
     scrollView: { flex: 1, paddingHorizontal: 16, paddingTop: 16 },
     fab: { position: 'absolute', bottom: 90, right: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 4.65, elevation: 8 },
     fabButton: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center' },
+    addExerciseBottomContainer: {
+        paddingVertical: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    addExerciseBottomButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 12,
+        borderWidth: 1,
+    },
+    addExerciseBottomText: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
 });
 
 export default WorkoutScreen;
