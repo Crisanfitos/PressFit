@@ -6,6 +6,7 @@ import {
     ExerciseSearchBar,
     ExerciseFilterSection,
     ExerciseListItem,
+    ExerciseCatalogBentoBar,
     ScrollToTopFab,
     ExerciseVideoModal,
     ExerciseEmptyState,
@@ -75,7 +76,7 @@ describe('Exercise Sub-components (PF-267)', () => {
         it('renders search input and triggers clear search button', async () => {
             const mockClear = jest.fn();
             const mockSetQuery = jest.fn();
-            const { getByPlaceholderText } = await render(
+            const { getByPlaceholderText, getByTestId } = await render(
                 <ExerciseSearchBar
                     searchQuery="Press"
                     setSearchQuery={mockSetQuery}
@@ -88,6 +89,31 @@ describe('Exercise Sub-components (PF-267)', () => {
 
             const input = getByPlaceholderText('Buscar ejercicio...');
             expect(input.props.value).toBe('Press');
+
+            const clearBtn = getByTestId('exercise-search-clear-button');
+            fireEvent.press(clearBtn);
+            expect(mockClear).toHaveBeenCalled();
+        });
+
+        it('renders filter tune button and triggers onToggleFilter', async () => {
+            const mockToggle = jest.fn();
+            const { getByTestId } = await render(
+                <ExerciseSearchBar
+                    searchQuery=""
+                    setSearchQuery={jest.fn()}
+                    isSearchFocused={false}
+                    setIsSearchFocused={jest.fn()}
+                    onClearSearch={jest.fn()}
+                    colors={mockColors}
+                    showFilterButton={true}
+                    onToggleFilter={mockToggle}
+                    hasActiveFilters={true}
+                />
+            );
+
+            const tuneBtn = getByTestId('exercise-search-tune-button');
+            fireEvent.press(tuneBtn);
+            expect(mockToggle).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -195,6 +221,30 @@ describe('Exercise Sub-components (PF-267)', () => {
             );
 
             expect(getByText(/No se encontraron ejercicios con los filtros actuales/)).toBeTruthy();
+        });
+    });
+
+    describe('ExerciseCatalogBentoBar', () => {
+        it('renders total exercises, PRs, and muscle groups metrics', async () => {
+            const { getByText, getByTestId } = await render(
+                <ExerciseCatalogBentoBar
+                    totalExercises={128}
+                    totalPRs={34}
+                    totalGroups={8}
+                    colors={mockColors}
+                />
+            );
+
+            expect(getByTestId('exercise-catalog-bento-bar')).toBeTruthy();
+            expect(getByText('TOTAL')).toBeTruthy();
+            expect(getByText('128')).toBeTruthy();
+            expect(getByText('Ejercicios')).toBeTruthy();
+            expect(getByText('RÉCORDS')).toBeTruthy();
+            expect(getByText('34 PRs')).toBeTruthy();
+            expect(getByText('Registrados')).toBeTruthy();
+            expect(getByText('GRUPOS')).toBeTruthy();
+            expect(getByText('8 Zonas')).toBeTruthy();
+            expect(getByText('Guiadas')).toBeTruthy();
         });
     });
 });

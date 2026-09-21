@@ -64,7 +64,7 @@ export const ExerciseFilterSection: React.FC<ExerciseFilterSectionProps> = ({
                     if (options.length === 0) return null;
                     const activeValue = filters[key];
                     return (
-                        <View key={key} style={{ marginBottom: 6 }}>
+                        <View key={key} style={styles.filterGroup}>
                             <View style={styles.labelRow}>
                                 <Text style={[styles.labelText, { color: colors.textSecondary }]}>
                                     {label}
@@ -74,7 +74,9 @@ export const ExerciseFilterSection: React.FC<ExerciseFilterSectionProps> = ({
                                         onPress={() => clearFilter(key)}
                                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                                     >
-                                        <MaterialIcons name="close" size={16} color={colors.textSecondary} />
+                                        <Text style={[styles.resetText, { color: colors.primary }]}>
+                                            {t('common.reset', 'Restablecer')}
+                                        </Text>
                                     </TouchableOpacity>
                                 )}
                             </View>
@@ -86,10 +88,9 @@ export const ExerciseFilterSection: React.FC<ExerciseFilterSectionProps> = ({
                                 <TouchableOpacity
                                     style={[
                                         styles.categoryChip,
-                                        { backgroundColor: colors.surface, borderColor: colors.border },
-                                        !activeValue && {
-                                            backgroundColor: `${colors.primary}20`,
-                                            borderColor: colors.primary,
+                                        {
+                                            backgroundColor: !activeValue ? colors.primary : colors.surface,
+                                            borderColor: !activeValue ? colors.primary : `${colors.border}80`,
                                         },
                                     ]}
                                     onPress={() => clearFilter(key)}
@@ -97,8 +98,10 @@ export const ExerciseFilterSection: React.FC<ExerciseFilterSectionProps> = ({
                                     <Text
                                         style={[
                                             styles.categoryText,
-                                            { color: colors.textSecondary },
-                                            !activeValue && { color: colors.primary, fontWeight: '600' },
+                                            {
+                                                color: !activeValue ? (colors.textOnPrimary || '#ffffff') : colors.textSecondary,
+                                                fontWeight: !activeValue ? '700' : '500',
+                                            },
                                         ]}
                                     >
                                         {t('common.all', 'Todos')}
@@ -111,10 +114,9 @@ export const ExerciseFilterSection: React.FC<ExerciseFilterSectionProps> = ({
                                             key={option}
                                             style={[
                                                 styles.categoryChip,
-                                                { backgroundColor: colors.surface, borderColor: colors.border },
-                                                isSelected && {
-                                                    backgroundColor: `${colors.primary}20`,
-                                                    borderColor: colors.primary,
+                                                {
+                                                    backgroundColor: isSelected ? colors.primary : colors.surface,
+                                                    borderColor: isSelected ? colors.primary : `${colors.border}80`,
                                                 },
                                             ]}
                                             onPress={() => setFilter(key, isSelected ? null : option)}
@@ -123,8 +125,10 @@ export const ExerciseFilterSection: React.FC<ExerciseFilterSectionProps> = ({
                                             <Text
                                                 style={[
                                                     styles.categoryText,
-                                                    { color: colors.textSecondary },
-                                                    isSelected && { color: colors.primary, fontWeight: '600' },
+                                                    {
+                                                        color: isSelected ? (colors.textOnPrimary || '#ffffff') : colors.textSecondary,
+                                                        fontWeight: isSelected ? '700' : '500',
+                                                    },
                                                 ]}
                                             >
                                                 {option}
@@ -139,6 +143,7 @@ export const ExerciseFilterSection: React.FC<ExerciseFilterSectionProps> = ({
 
             {showFilters && hasActiveFilters && (
                 <TouchableOpacity style={styles.clearButton} onPress={clearAllFilters}>
+                    <MaterialIcons name="refresh" size={16} color={colors.primary} style={{ marginRight: 4 }} />
                     <Text style={[styles.clearButtonText, { color: colors.primary }]}>
                         {t('exerciseCatalog.clearFilters', 'Limpiar Filtros')}
                     </Text>
@@ -158,7 +163,7 @@ const styles = StyleSheet.create({
     toggleText: {
         fontSize: 13,
         marginLeft: 6,
-        fontWeight: '500',
+        fontWeight: '600',
     },
     activeDot: {
         width: 8,
@@ -166,16 +171,25 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         marginLeft: 6,
     },
+    filterGroup: {
+        marginBottom: 10,
+    },
     labelRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
         paddingHorizontal: 16,
-        marginBottom: 4,
+        marginBottom: 6,
     },
     labelText: {
+        fontSize: 11,
+        fontWeight: '700',
+        letterSpacing: 0.6,
+        textTransform: 'uppercase',
+    },
+    resetText: {
         fontSize: 12,
         fontWeight: '600',
-        flex: 1,
     },
     categoriesScroll: {
         paddingHorizontal: 16,
@@ -183,21 +197,27 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     categoryChip: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
+        paddingHorizontal: 14,
+        paddingVertical: 7,
         borderRadius: 20,
         borderWidth: 1,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.03,
+        shadowRadius: 2,
+        elevation: 1,
     },
     categoryText: {
-        fontSize: 14,
-        fontWeight: '500',
+        fontSize: 13,
     },
     clearButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
         alignSelf: 'center',
         paddingVertical: 6,
         paddingHorizontal: 16,
-        marginTop: 4,
-        marginBottom: 4,
+        marginTop: 2,
+        marginBottom: 6,
     },
     clearButtonText: {
         fontSize: 13,
