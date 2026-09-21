@@ -42,13 +42,14 @@ export const PresetRoutineCard: React.FC<PresetRoutineCardProps> = ({
             style={[
                 styles.card,
                 {
-                    backgroundColor: colors.surface || '#1E1E1E',
-                    borderColor: colors.border || '#333',
+                    backgroundColor: colors.surface,
+                    borderColor: `${colors.border}80`,
                 },
             ]}
         >
-                {/* Top Badges Row */}
-                <View style={styles.topRow}>
+            {/* Top Badges Row */}
+            <View style={styles.topRow}>
+                <View style={styles.badgeGroup}>
                     <View
                         style={[
                             styles.categoryBadge,
@@ -63,45 +64,96 @@ export const PresetRoutineCard: React.FC<PresetRoutineCardProps> = ({
                         </Text>
                     </View>
 
-                    <View style={styles.metaBadgesRow}>
-                        <View style={[styles.metaBadge, { backgroundColor: colors.background || '#121212' }]}>
-                            <MaterialIcons name="date-range" size={14} color={colors.textSecondary || '#9CA3AF'} />
-                            <Text style={[styles.metaText, { color: colors.textSecondary || '#9CA3AF' }]}>
-                                {preset.dias_por_semana} días/sem
-                            </Text>
-                        </View>
-
-                        <View style={[styles.metaBadge, { backgroundColor: colors.background || '#121212' }]}>
-                            <MaterialIcons name="fitness-center" size={14} color={colors.textSecondary || '#9CA3AF'} />
-                            <Text style={[styles.metaText, { color: colors.textSecondary || '#9CA3AF' }]}>
-                                {preset.nivel}
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-
-                {/* Title & Description */}
-                <Text style={[styles.title, { color: colors.text || '#FFFFFF' }]} numberOfLines={1}>
-                    {preset.nombre}
-                </Text>
-                <Text style={[styles.description, { color: colors.textSecondary || '#9CA3AF' }]} numberOfLines={2}>
-                    {preset.descripcion}
-                </Text>
-
-                {/* Footer Row */}
-                <View style={[styles.footerRow, { borderTopColor: colors.border || '#27272A' }]}>
-                    <Text style={[styles.sessionsText, { color: colors.primary || '#10B981' }]}>
-                        {preset.rutinas_diarias.length} sesiones diseñadas
-                    </Text>
-
-                    <View style={styles.detailsBtn}>
-                        <Text style={[styles.detailsBtnText, { color: colors.primary || '#10B981' }]}>
-                            Ver Detalles
+                    <View style={[styles.metaBadge, { backgroundColor: `${colors.border}40` }]}>
+                        <MaterialIcons name="date-range" size={13} color={colors.textSecondary} />
+                        <Text style={[styles.metaText, { color: colors.textSecondary }]}>
+                            {preset.dias_por_semana} días/sem
                         </Text>
-                        <MaterialIcons name="chevron-right" size={18} color={colors.primary || '#10B981'} />
+                    </View>
+
+                    <View style={[styles.metaBadge, { backgroundColor: `${colors.border}40` }]}>
+                        <MaterialIcons name="fitness-center" size={13} color={colors.textSecondary} />
+                        <Text style={[styles.metaText, { color: colors.textSecondary }]}>
+                            {preset.nivel}
+                        </Text>
                     </View>
                 </View>
-            </TouchableOpacity>
+
+                <MaterialIcons name="fitness-center" size={18} color={colors.textSecondary} />
+            </View>
+
+            {/* Title & Description */}
+            <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
+                {preset.nombre}
+            </Text>
+            <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={2}>
+                {preset.descripcion}
+            </Text>
+
+            {/* Micro Spec Matrix */}
+            <View
+                style={[
+                    styles.specMatrix,
+                    {
+                        backgroundColor: `${colors.border}20`,
+                        borderColor: `${colors.border}50`,
+                    },
+                ]}
+            >
+                <View style={styles.specColumn}>
+                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>FRECUENCIA</Text>
+                    <Text style={[styles.specValue, { color: colors.text }]}>
+                        {preset.dias_por_semana} Días
+                    </Text>
+                </View>
+                <View
+                    style={[
+                        styles.specColumn,
+                        styles.specDivider,
+                        { borderColor: `${colors.border}50` },
+                    ]}
+                >
+                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>DURACIÓN</Text>
+                    <Text style={[styles.specValue, { color: colors.text }]}>50-60 min</Text>
+                </View>
+                <View style={styles.specColumn}>
+                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>VOLUMEN</Text>
+                    <Text style={[styles.specValue, { color: colors.text }]}>
+                        {preset.rutinas_diarias.length} sesiones
+                    </Text>
+                </View>
+            </View>
+
+            {/* Footer Row */}
+            <View style={styles.footerRow}>
+                <View
+                    style={[
+                        styles.useButton,
+                        {
+                            backgroundColor: `${colors.primary}18`,
+                            borderColor: `${colors.primary}40`,
+                        },
+                    ]}
+                >
+                    <Text style={[styles.useButtonText, { color: colors.primary }]}>
+                        Usar Plantilla
+                    </Text>
+                    <MaterialIcons name="add-circle" size={16} color={colors.primary} style={{ marginLeft: 4 }} />
+                </View>
+
+                <View
+                    style={[
+                        styles.infoButton,
+                        {
+                            backgroundColor: `${colors.border}30`,
+                            borderColor: `${colors.border}60`,
+                        },
+                    ]}
+                >
+                    <MaterialIcons name="info-outline" size={18} color={colors.textSecondary} />
+                </View>
+            </View>
+        </TouchableOpacity>
     );
 };
 
@@ -164,26 +216,64 @@ const styles = StyleSheet.create({
         lineHeight: 18,
         marginBottom: 14,
     },
+    badgeGroup: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: 6,
+        flex: 1,
+    },
+    specMatrix: {
+        flexDirection: 'row',
+        borderRadius: 10,
+        borderWidth: 1,
+        paddingVertical: 8,
+        paddingHorizontal: 4,
+        marginBottom: 12,
+    },
+    specColumn: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    specDivider: {
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
+    },
+    specLabel: {
+        fontSize: 9,
+        fontWeight: '700',
+        letterSpacing: 0.5,
+        marginBottom: 2,
+    },
+    specValue: {
+        fontSize: 12,
+        fontWeight: '700',
+    },
     footerRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingTop: 12,
-        borderTopWidth: 1,
+        gap: 8,
     },
-    sessionsText: {
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    detailsBtn: {
+    useButton: {
+        flex: 1,
+        height: 38,
+        borderRadius: 10,
+        borderWidth: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 2,
+        justifyContent: 'center',
     },
-    detailsBtnText: {
-        fontSize: 12,
+    useButtonText: {
+        fontSize: 13,
         fontWeight: '700',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
+    },
+    infoButton: {
+        width: 38,
+        height: 38,
+        borderRadius: 10,
+        borderWidth: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });

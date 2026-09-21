@@ -17,6 +17,7 @@ import { RoutineService } from '../services/RoutineService';
 import { PresetRoutine } from '../types/models';
 import { PresetRoutineCard } from '../components/PresetRoutineCard';
 import { PresetRoutineDetailModal } from '../components/PresetRoutineDetailModal';
+import { PresetHeroCard, PresetMetricHighlightBar } from '../components/routine';
 
 const CATEGORY_FILTERS = ['Todas', 'Hipertrofia', 'Fuerza', 'Estética', 'Principiante'];
 const DAYS_FILTERS = [0, 3, 4, 6];
@@ -41,6 +42,24 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
         });
         return res.data || [];
     }, [selectedCategory, selectedDays]);
+
+    const heroPreset = useMemo(() => {
+        return (
+            filteredPresets.find((p) => p.id === 'preset-ppl-6d') ||
+            (filteredPresets.length > 0 ? filteredPresets[0] : null)
+        );
+    }, [filteredPresets]);
+
+    const isHeroVisible = Boolean(
+        heroPreset &&
+        (selectedCategory === 'Todas' || selectedCategory === 'Hipertrofia') &&
+        selectedDays === 0
+    );
+
+    const secondaryPresets = useMemo(() => {
+        if (!isHeroVisible || !heroPreset) return filteredPresets;
+        return filteredPresets.filter((p) => p.id !== heroPreset.id);
+    }, [isHeroVisible, heroPreset, filteredPresets]);
 
     const handleSelectPreset = (preset: PresetRoutine) => {
         setSelectedPreset(preset);
@@ -90,20 +109,29 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
             testID="preset-routines-screen"
         >
             {/* Top Navigation Header */}
-            <View style={[styles.headerBar, { borderBottomColor: colors.border || '#27272A' }]}>
+            <View style={[styles.headerBar, { borderBottomColor: `${colors.border}80` }]}>
                 <TouchableOpacity
                     onPress={() => navigation.goBack()}
                     testID="back-button"
-                    style={[styles.backBtn, { backgroundColor: colors.surface || '#1E1E1E' }]}
+                    style={[styles.backBtn, { backgroundColor: colors.surface }]}
                 >
-                    <MaterialIcons name="arrow-back" size={22} color={colors.text || '#FFFFFF'} />
+                    <MaterialIcons name="arrow-back" size={22} color={colors.text} />
                 </TouchableOpacity>
 
-                <Text style={[styles.headerTitle, { color: colors.text || '#FFFFFF' }]}>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>
                     {t('presetRoutines.title', 'Plantillas Prémium')}
                 </Text>
 
-                <View style={styles.headerRightSpacer} />
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('RoutineEditor')}
+                    style={[styles.createFromScratchBtn, { backgroundColor: `${colors.primary}20` }]}
+                    testID="create-routine-from-scratch-button"
+                >
+                    <MaterialIcons name="add" size={16} color={colors.primary} />
+                    <Text style={[styles.createFromScratchText, { color: colors.primary }]}>
+                        Crear
+                    </Text>
+                </TouchableOpacity>
             </View>
 
             <ScrollView
@@ -114,13 +142,22 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
             >
                 {/* Intro Title & Description */}
                 <View style={styles.introBlock}>
-                    <Text style={[styles.mainHeading, { color: colors.text || '#FFFFFF' }]}>
+                    <View style={styles.engineeringBadge}>
+                        <View style={[styles.badgeAccentBar, { backgroundColor: colors.primary }]} />
+                        <Text style={[styles.engineeringTag, { color: colors.textSecondary }]}>
+                            ENGINEERING PROTOCOLS
+                        </Text>
+                    </View>
+                    <Text style={[styles.mainHeading, { color: colors.text }]}>
                         {t('presetRoutines.libraryTitle', 'Biblioteca de Rutinas')}
                     </Text>
-                    <Text style={[styles.subHeading, { color: colors.textSecondary || '#A1A1AA' }]}>
+                    <Text style={[styles.subHeading, { color: colors.textSecondary }]}>
                         {t('presetRoutines.subtitle', 'Selecciona un programa probado científicamente para tus objetivos.')}
                     </Text>
                 </View>
+
+                {/* Metric Highlight Strip */}
+                <PresetMetricHighlightBar totalPresets={filteredPresets.length || 24} colors={colors} />
 
                 {/* Category Chips (Horizontal Scroll) */}
                 <ScrollView
@@ -140,11 +177,11 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                                     styles.chip,
                                     {
                                         backgroundColor: isSelected
-                                            ? colors.primary || '#10B981'
-                                            : colors.surface || '#18181B',
+                                            ? colors.primary
+                                            : colors.surface,
                                         borderColor: isSelected
-                                            ? colors.primary || '#10B981'
-                                            : colors.border || '#27272A',
+                                            ? colors.primary
+                                            : `${colors.border}80`,
                                     },
                                 ]}
                             >
@@ -153,8 +190,8 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                                         styles.chipText,
                                         {
                                             color: isSelected
-                                                ? '#000000'
-                                                : colors.textSecondary || '#D4D4D8',
+                                                ? (colors.textOnPrimary || '#000000')
+                                                : colors.textSecondary,
                                             fontWeight: isSelected ? '700' : '500',
                                         },
                                     ]}
@@ -168,7 +205,7 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
 
                 {/* Days Filter Chips */}
                 <View style={styles.daysRow}>
-                    <Text style={[styles.daysLabel, { color: colors.textSecondary || '#71717A' }]}>
+                    <Text style={[styles.daysLabel, { color: colors.textSecondary }]}>
                         Frecuencia:
                     </Text>
                     <View style={styles.daysChipsContainer}>
@@ -183,11 +220,11 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                                         styles.dayFilterChip,
                                         {
                                             backgroundColor: isSelected
-                                                ? colors.surface || '#1F2937'
-                                                : colors.background || '#18181B',
+                                                ? colors.surface
+                                                : colors.background,
                                             borderColor: isSelected
-                                                ? colors.primary || '#10B981'
-                                                : colors.border || '#27272A',
+                                                ? colors.primary
+                                                : `${colors.border}80`,
                                         },
                                     ]}
                                 >
@@ -196,8 +233,8 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                                             styles.dayFilterText,
                                             {
                                                 color: isSelected
-                                                    ? colors.primary || '#10B981'
-                                                    : colors.textSecondary || '#A1A1AA',
+                                                    ? colors.primary
+                                                    : colors.textSecondary,
                                                 fontWeight: isSelected ? '700' : '500',
                                             },
                                         ]}
@@ -210,9 +247,19 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                     </View>
                 </View>
 
+                {/* Featured Hero Bento Card for Flagship Routine */}
+                {isHeroVisible && heroPreset && (
+                    <PresetHeroCard
+                        preset={heroPreset}
+                        onPressSelect={handleSelectPreset}
+                        onPressUse={handleConfirmImport}
+                        colors={colors}
+                    />
+                )}
+
                 {/* Preset Routines List */}
-                {filteredPresets.length > 0 ? (
-                    filteredPresets.map((preset, index) => (
+                {secondaryPresets.length > 0 ? (
+                    secondaryPresets.map((preset, index) => (
                         <PresetRoutineCard
                             key={preset.id}
                             preset={preset}
@@ -220,22 +267,51 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                             onPressSelect={handleSelectPreset}
                         />
                     ))
-                ) : (
+                ) : !isHeroVisible ? (
                     <View
                         style={[
                             styles.emptyState,
                             {
-                                backgroundColor: colors.surface || '#18181B',
-                                borderColor: colors.border || '#27272A',
+                                backgroundColor: colors.surface,
+                                borderColor: `${colors.border}80`,
                             },
                         ]}
                     >
-                        <MaterialIcons name="fitness-center" size={40} color={colors.textSecondary || '#71717A'} />
-                        <Text style={[styles.emptyText, { color: colors.textSecondary || '#A1A1AA' }]}>
+                        <MaterialIcons name="fitness-center" size={40} color={colors.textSecondary} />
+                        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                             No hay plantillas con estos filtros
                         </Text>
                     </View>
-                )}
+                ) : null}
+
+                {/* Quick Creation Tile: Crear Plantilla en Blanco */}
+                <TouchableOpacity
+                    style={[
+                        styles.createBlankTile,
+                        {
+                            backgroundColor: colors.surface,
+                            borderColor: `${colors.border}80`,
+                        },
+                    ]}
+                    onPress={() => navigation.navigate('RoutineEditor')}
+                    activeOpacity={0.8}
+                    testID="create-blank-routine-tile"
+                >
+                    <View style={styles.createBlankLeft}>
+                        <View style={[styles.createBlankIcon, { backgroundColor: `${colors.primary}20` }]}>
+                            <MaterialIcons name="post-add" size={22} color={colors.primary} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={[styles.createBlankTitle, { color: colors.text }]}>
+                                Crear Plantilla en Blanco
+                            </Text>
+                            <Text style={[styles.createBlankSubtitle, { color: colors.textSecondary }]}>
+                                Diseña tu propio microciclo biomecánico
+                            </Text>
+                        </View>
+                    </View>
+                    <MaterialIcons name="chevron-right" size={22} color={colors.textSecondary} />
+                </TouchableOpacity>
 
                 <View style={styles.bottomSpacer} />
             </ScrollView>
@@ -278,6 +354,18 @@ const styles = StyleSheet.create({
     headerRightSpacer: {
         width: 36,
     },
+    createFromScratchBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+    },
+    createFromScratchText: {
+        fontSize: 12,
+        fontWeight: '700',
+    },
     scrollContainer: {
         flex: 1,
     },
@@ -287,6 +375,23 @@ const styles = StyleSheet.create({
     },
     introBlock: {
         marginBottom: 16,
+    },
+    engineeringBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 6,
+    },
+    badgeAccentBar: {
+        width: 14,
+        height: 3,
+        borderRadius: 2,
+    },
+    engineeringTag: {
+        fontSize: 10,
+        fontWeight: '800',
+        letterSpacing: 1.5,
+        textTransform: 'uppercase',
     },
     mainHeading: {
         fontSize: 24,
@@ -351,6 +456,37 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         marginTop: 10,
+    },
+    createBlankTile: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 16,
+        borderRadius: 16,
+        borderWidth: 1,
+        marginTop: 12,
+        marginBottom: 8,
+    },
+    createBlankLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        flex: 1,
+    },
+    createBlankIcon: {
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    createBlankTitle: {
+        fontSize: 15,
+        fontWeight: '700',
+        marginBottom: 2,
+    },
+    createBlankSubtitle: {
+        fontSize: 12,
     },
     bottomSpacer: {
         height: 32,
