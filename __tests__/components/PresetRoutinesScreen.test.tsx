@@ -61,5 +61,17 @@ describe('PresetRoutinesScreen Component (RNTL)', () => {
         fireEvent.press(getByTestId('back-button'));
         expect(mockNavigation.goBack).toHaveBeenCalled();
     });
+
+    test('navigates to RoutineEditor when pressing create from scratch button or blank routine tile', async () => {
+        const { getByTestId } = await render(
+            <PresetRoutinesScreen navigation={mockNavigation} />
+        );
+
+        fireEvent.press(getByTestId('create-routine-from-scratch-button'));
+        expect(mockNavigation.navigate).toHaveBeenCalledWith('RoutineEditor');
+
+        fireEvent.press(getByTestId('create-blank-routine-tile'));
+        expect(mockNavigation.navigate).toHaveBeenCalledWith('RoutineEditor');
+    });
 });
 

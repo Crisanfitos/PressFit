@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import RoutineDetailScreen from '../../src/screens/RoutineDetailScreen';
 import { RoutineService } from '../../src/services/RoutineService';
 
@@ -31,5 +31,17 @@ describe('RoutineDetailScreen Component (RNTL)', () => {
 
         expect(await findByText('Rutina Hipertrofia')).toBeTruthy();
         expect(await findByText('Lunes')).toBeTruthy();
+        expect(await findByText('Días Activos')).toBeTruthy();
+        expect(await findByText('Ejercicios')).toBeTruthy();
+    });
+
+    it('navigates back when pressing back button', async () => {
+        mockNavigation.goBack = jest.fn();
+        const { getByTestId } = await render(
+            <RoutineDetailScreen navigation={mockNavigation} route={mockRoute} />
+        );
+
+        fireEvent.press(getByTestId('routine-detail-back-button'));
+        expect(mockNavigation.goBack).toHaveBeenCalled();
     });
 });
