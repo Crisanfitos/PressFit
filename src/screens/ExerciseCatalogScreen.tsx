@@ -344,7 +344,7 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
               Eliminar Ejercicio
             </Text>
             <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginBottom: 24 }}>
-              ¿Estás seguro de que deseas eliminar "{deleteDialogExercise?.titulo}"? Esta acción no se puede deshacer.
+              ¿Estás seguro de que deseas eliminar &quot;{deleteDialogExercise?.titulo}&quot;? Esta acción no se puede deshacer.
             </Text>
             <View style={{ flexDirection: 'row', gap: 12 }}>
               <TouchableOpacity

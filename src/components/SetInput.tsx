@@ -77,4 +77,6 @@ const styles = StyleSheet.create({
     },
 });
 
+SetInput.displayName = 'SetInput';
+
 export default SetInput;

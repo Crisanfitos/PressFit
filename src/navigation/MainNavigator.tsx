@@ -22,11 +22,13 @@ import ResumeWorkoutModal from '../components/workout/ResumeWorkoutModal';
 const withErrorBoundary = <P extends object>(
     Component: React.ComponentType<P>
 ): React.FC<P> => {
-    return (props: P) => (
+    const WithErrorBoundary: React.FC<P> = (props: P) => (
         <ErrorBoundary>
             <Component {...props} />
         </ErrorBoundary>
     );
+    WithErrorBoundary.displayName = `withErrorBoundary(${Component.displayName || Component.name || 'Component'})`;
+    return WithErrorBoundary;
 };
 
 const WeeklyPlanNavigatorWithBoundary = withErrorBoundary(WeeklyPlanNavigator);
