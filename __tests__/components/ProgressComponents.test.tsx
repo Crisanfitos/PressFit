@@ -16,7 +16,7 @@ import {
 jest.mock('react-native-image-viewing', () => {
     const React = require('react');
     const { View } = require('react-native');
-    return ({ visible, HeaderComponent, FooterComponent, imageIndex = 0 }: any) => {
+    const MockImageViewing = ({ visible, HeaderComponent, FooterComponent, imageIndex = 0 }: any) => {
         if (!visible) return null;
         return (
             <View testID="mock-image-viewing">
@@ -25,6 +25,8 @@ jest.mock('react-native-image-viewing', () => {
             </View>
         );
     };
+    MockImageViewing.displayName = 'MockImageViewing';
+    return MockImageViewing;
 });
 
 const mockColors: any = {

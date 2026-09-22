@@ -325,4 +325,6 @@ const styles = StyleSheet.create({
     },
 });
 
+ExerciseListItem.displayName = 'ExerciseListItem';
+
 export default ExerciseListItem;
