@@ -9,6 +9,17 @@ import { useTheme } from '../context/ThemeContext';
 import { useProfileController } from '../controllers/useProfileController';
 import EditProfileModal from '../components/EditProfileModal';
 import LogoutConfirmationModal from '../components/LogoutConfirmationModal';
+import { AthleteHeroCard } from '../components/profile/AthleteHeroCard';
+import { SyncStatusCard } from '../components/profile/SyncStatusCard';
+import { GymPreferencesCard } from '../components/profile/GymPreferencesCard';
+import { DataManagementCard } from '../components/profile/DataManagementCard';
+import { HistoryService } from '../services/HistoryService';
+import {
+    loadGymPreferences,
+    saveGymPreferences,
+    DEFAULT_GYM_PREFERENCES,
+    type GymPreferences,
+} from '../utils/gymPreferences';
 import i18n, { saveLanguagePreference } from '../i18n';
 import {
     isTimerNotificationEnabled,
@@ -31,6 +42,37 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const [sourceModalVisible, setSourceModalVisible] = useState(false);
     const [currentLang, setCurrentLang] = useState(i18n.language || 'es');
     const [timerNotifEnabled, setTimerNotifEnabled] = useState(true);
+    const [gymPrefs, setGymPrefs] = useState<GymPreferences>(DEFAULT_GYM_PREFERENCES);
+    const [monthSessions, setMonthSessions] = useState(0);
+    const [monthMinutes, setMonthMinutes] = useState(0);
+
+    useEffect(() => {
+        loadGymPreferences().then(setGymPrefs);
+    }, []);
+
+    useEffect(() => {
+        if (!user?.id) return;
+        HistoryService.getMonthlyProgress(user.id).then(({ data }) => {
+            const sessions = data || [];
+            let minutes = 0;
+            for (const s of sessions) {
+                if (s.hora_inicio && s.hora_fin) {
+                    const ms = new Date(s.hora_fin).getTime() - new Date(s.hora_inicio).getTime();
+                    if (Number.isFinite(ms) && ms > 0) minutes += Math.round(ms / 60000);
+                }
+            }
+            setMonthSessions(sessions.length);
+            setMonthMinutes(minutes);
+        });
+    }, [user?.id]);
+
+    const handleGymPrefsChange = (patch: Partial<GymPreferences>) => {
+        setGymPrefs((prev) => {
+            const next = { ...prev, ...patch };
+            saveGymPreferences(next);
+            return next;
+        });
+    };
 
     useEffect(() => {
         isTimerNotificationEnabled().then(setTimerNotifEnabled);
@@ -206,23 +248,41 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                 </View>
             ) : (
                 <ScrollView style={styles.scrollView}>
-                    <View style={styles.profileInfo}>
-                        <TouchableOpacity onPress={handlePhotoSelection} style={styles.avatarContainer}>
-                            <Image
-                                source={{ uri: profilePhoto || 'https://via.placeholder.com/96' }}
-                                style={styles.avatar}
-                            />
-                            <View style={styles.cameraIconContainer}>
-                                {uploadingPhoto ? (
-                                    <ActivityIndicator size="small" color={colors.textOnPrimary} />
-                                ) : (
-                                    <MaterialIcons name="camera-alt" size={18} color={colors.textOnPrimary} />
-                                )}
-                            </View>
-                        </TouchableOpacity>
-                        <Text style={styles.userName}>{user?.user_metadata?.full_name || user?.email || 'Usuario'}</Text>
-                        <Text style={styles.userEmail}>{user?.email}</Text>
-                    </View>
+                    <AthleteHeroCard
+                        displayName={user?.user_metadata?.full_name || user?.email || 'Usuario'}
+                        email={user?.email}
+                        photoUri={profilePhoto}
+                        primaryMetricValue={String(monthSessions)}
+                        primaryMetricLabel={t('profile.monthWorkouts', 'Entrenos (mes)')}
+                        secondaryMetricValue={`${monthMinutes}`}
+                        secondaryMetricLabel={t('profile.monthMinutes', 'Minutos (mes)')}
+                        onPressAvatar={handlePhotoSelection}
+                        avatarActionIcon={
+                            uploadingPhoto ? (
+                                <ActivityIndicator size="small" color="#FFFFFF" />
+                            ) : (
+                                <MaterialIcons name="camera-alt" size={13} color="#FFFFFF" />
+                            )
+                        }
+                    />
+
+                    <SyncStatusCard />
+
+                    <GymPreferencesCard
+                        prefs={gymPrefs}
+                        onChange={handleGymPrefsChange}
+                        onOpenPlates={() => navigation.navigate('PlateSettings')}
+                    />
+
+                    <DataManagementCard
+                        prefs={gymPrefs}
+                        profileSnapshot={{
+                            email: user?.email || null,
+                            monthSessions,
+                            monthMinutes,
+                        }}
+                        onRestorePrefs={handleGymPrefsChange}
+                    />
 
                     <View style={styles.section}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -312,18 +372,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                     thumbColor={timerNotifEnabled ? colors.primary : colors.textSecondary}
                                 />
                             </View>
-                            <TouchableOpacity
-                                testID="plate-settings-navigation-button"
-                                style={[styles.settingRow, { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border }]}
-                                onPress={() => navigation.navigate('PlateSettings')}
-                            >
-                                <MaterialIcons name="fitness-center" size={24} color={colors.textSecondary} />
-                                <View style={styles.settingTextContainer}>
-                                    <Text style={styles.settingLabel}>{t('profile.plateSettings', 'Discos y Barras')}</Text>
-                                    <Text style={styles.settingDescription}>{t('profile.plateSettingsDesc', 'Configura tu barra e inventario de discos')}</Text>
-                                </View>
-                                <MaterialIcons name="chevron-right" size={24} color={colors.textSecondary} />
-                            </TouchableOpacity>
                         </View>
                     </View>
 
