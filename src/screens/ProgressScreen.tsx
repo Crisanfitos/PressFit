@@ -1,9 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
+import { AuthContext } from '../context/AuthContext';
+import { useProgressController } from '../controllers/useProgressController';
+import { PRGlowCard } from '../components/history/PRGlowCard';
+import { WeeklyLoadChart } from '../components/history/WeeklyLoadChart';
+import { findLatestPRSet, buildDailyLoad } from '../utils/progressHighlights';
+import { ShareService } from '../services/ShareService';
+import { LogService } from '../services/LogService';
 
 type ProgressScreenProps = {
     navigation: any;
@@ -20,6 +27,31 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
     const { t } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
+    const authContext = useContext(AuthContext);
+    const user = authContext?.user;
+    const { weeklyStats, fetchWeeklyProgress } = useProgressController(user?.id);
+
+    useEffect(() => {
+        fetchWeeklyProgress();
+    }, [fetchWeeklyProgress]);
+
+    const latestPR = useMemo(() => findLatestPRSet(weeklyStats), [weeklyStats]);
+    const dailyLoad = useMemo(() => buildDailyLoad(weeklyStats), [weeklyStats]);
+
+    const handleSharePR = async () => {
+        if (!latestPR) return;
+        try {
+            await ShareService.share({
+                title: t('progress.sharePRTitle', 'Nuevo récord personal en PressFit'),
+                message: t(
+                    'progress.sharePRMessage',
+                    `¡Nuevo récord! ${latestPR.exerciseName}: ${latestPR.weight} kg × ${latestPR.reps} reps 💪`
+                ),
+            });
+        } catch (error) {
+            LogService.error('Error sharing PR achievement:', error);
+        }
+    };
 
     const progressItems: (ProgressItem & { testID: string })[] = [
         { icon: 'calendar-view-month', title: t('progress.monthly'), subtitle: t('progress.monthlySubtitle'), screen: 'MonthlyProgress', testID: 'progress-item-monthly' },
@@ -86,6 +118,8 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
             </View>
 
             <ScrollView style={styles.scrollView}>
+                {latestPR && <PRGlowCard pr={latestPR} onPressShare={handleSharePR} />}
+                {(weeklyStats?.length || 0) > 0 && <WeeklyLoadChart bars={dailyLoad} />}
                 {progressItems.map((item, index) => (
                     <TouchableOpacity
                         key={index}

@@ -7,6 +7,9 @@ import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useProgressController } from '../controllers/useProgressController';
 import FatigueLevelCard from '../components/FatigueLevelCard';
+import { SessionTimeline } from '../components/history/SessionTimeline';
+import { ShareService } from '../services/ShareService';
+import { LogService } from '../services/LogService';
 
 type WeeklyProgressScreenProps = { navigation: any };
 
@@ -46,6 +49,21 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
     const totalWorkouts = weeklyStats?.length || 0;
     const totalDuration = weekData.reduce((acc, d) => acc + d.duration, 0);
     const maxDuration = Math.max(...weekData.map((d) => d.duration), 1);
+
+    const handleExportReport = async () => {
+        try {
+            const message = t(
+                'progress.weeklyReportMessage',
+                `Mi semana en PressFit: ${totalWorkouts} entrenamientos, ${totalDuration} minutos.`
+            );
+            await ShareService.share({
+                title: t('progress.weeklyReportTitle', 'Informe de Progreso Semanal'),
+                message,
+            });
+        } catch (error) {
+            LogService.error('Error exporting weekly progress report:', error);
+        }
+    };
 
     const styles = useMemo(() => StyleSheet.create({
         container: { flex: 1, backgroundColor: colors.background },
@@ -140,6 +158,14 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
                                 <Text style={styles.detailWorkouts}>{data.workouts} {t('workout.sessionSummary', 'entrenamiento(s)')}</Text>
                             </View>
                         ))}
+                    </View>
+
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>{t('progress.sessionHistory', 'Historial de sesiones')}</Text>
+                        <SessionTimeline
+                            sessions={weeklyStats || []}
+                            onPressExport={handleExportReport}
+                        />
                     </View>
                 </ScrollView>
             )}
