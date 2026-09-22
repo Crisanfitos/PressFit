@@ -81,7 +81,7 @@ export const AnalyticsService = {
      * Calculates highest 1RM from an array of sets.
      */
     calculateMax1RM(
-        series: Array<{ peso_utilizado?: number | null; repeticiones?: number | null }>,
+        series: { peso_utilizado?: number | null; repeticiones?: number | null }[],
         formula: OneRMFormula = 'auto'
     ): number {
         return calculateMax1RM(series, formula);
@@ -114,13 +114,13 @@ export const AnalyticsService = {
      * Evaluates weekly fatigue analysis from performed workout sets.
      */
     calculateWeeklyFatigue(
-        series: Array<{
+        series: {
             rpe?: number | null;
             peso_utilizado?: number | null;
             repeticiones?: number | null;
             is_warmup?: boolean | null;
             tipo_serie?: SetType | string | null;
-        }>
+        }[]
     ): FatigueAnalysisResult {
         return calculateWeeklyFatigue(series);
     },
@@ -145,14 +145,14 @@ export const AnalyticsService = {
      * @returns WorkoutTonnageSummary with effectiveTonnage, totalTonnage, warmupTonnage and counts.
      */
     calculateWorkoutTonnage(
-        series: Array<{
+        series: {
             peso_utilizado?: number | null;
             repeticiones?: number | null;
             rpe?: number | null;
             tipo_serie?: SetType | string | null;
             is_warmup?: boolean | null;
             [key: string]: unknown;
-        }>
+        }[]
     ): WorkoutTonnageSummary {
         return calculateWorkoutTonnage(series);
     },
@@ -198,12 +198,12 @@ export const AnalyticsService = {
             if (error) throw error;
 
             // Group sets by session date (fecha_dia)
-            const setsByDate = new Map<string, Array<{
+            const setsByDate = new Map<string, {
                 numero_serie: number;
                 peso_utilizado: number;
                 repeticiones: number;
                 rutina_id?: string;
-            }>>();
+            }[]>();
 
             interface OneRMQueryRow {
                 numero_serie?: number | null;

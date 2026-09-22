@@ -16,6 +16,7 @@ import {
 import { PresetRoutineService } from './PresetRoutineService';
 import { LogService } from './LogService';
 import { retryWithBackoff, retryOnNetworkFailure } from '../utils/networkRetry';
+import { DAYS_OF_WEEK } from '../utils/dayUtils';
 
 
 export {
@@ -31,7 +32,6 @@ export {
     getTranslatedDayName,
     type DayOfWeekKey,
 } from '../utils/dayUtils';
-import { DAYS_OF_WEEK } from '../utils/dayUtils';
 
 /**
  * Maps preset template days to a 7-day weekly schedule (Lunes - Domingo).

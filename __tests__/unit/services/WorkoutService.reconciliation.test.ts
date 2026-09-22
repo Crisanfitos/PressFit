@@ -7,6 +7,10 @@
 
 import { mockChain, resetMocks } from '../../helpers/mockSupabase';
 
+import { WorkoutService } from '../../../src/services/WorkoutService';
+import { NetworkService } from '../../../src/services/NetworkService';
+import { OfflineStorageService } from '../../../src/services/OfflineStorageService';
+
 jest.mock('../../../src/lib/supabase', () => ({
   supabase: require('../../helpers/mockSupabase').mockSupabase,
 }));
@@ -37,10 +41,6 @@ jest.mock('../../../src/services/SyncService', () => ({
     enqueueOperation: jest.fn().mockResolvedValue({ error: null }),
   },
 }));
-
-import { WorkoutService } from '../../../src/services/WorkoutService';
-import { NetworkService } from '../../../src/services/NetworkService';
-import { OfflineStorageService } from '../../../src/services/OfflineStorageService';
 
 describe('WorkoutService — Reconciliation of is_completed (PF-338)', () => {
   beforeEach(() => {

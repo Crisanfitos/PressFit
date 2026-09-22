@@ -8,6 +8,9 @@
 import { mockChain, resetMocks } from '../../helpers/mockSupabase';
 import { createMockSerie } from '../../helpers/testHelpers';
 
+import { WorkoutService, isSchemaColumnError } from '../../../src/services/WorkoutService';
+import { NetworkService } from '../../../src/services/NetworkService';
+
 jest.mock('../../../src/lib/supabase', () => ({
   supabase: require('../../helpers/mockSupabase').mockSupabase,
 }));
@@ -30,9 +33,6 @@ jest.mock('../../../src/services/SyncService', () => ({
     enqueueOperation: jest.fn().mockResolvedValue({ error: null }),
   },
 }));
-
-import { WorkoutService, isSchemaColumnError } from '../../../src/services/WorkoutService';
-import { NetworkService } from '../../../src/services/NetworkService';
 
 describe('WorkoutService — Schema Resilience & Rollback Compatibility (PF-332)', () => {
   beforeEach(() => {

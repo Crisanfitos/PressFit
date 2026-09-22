@@ -8,11 +8,11 @@
 import { mockChain, resetMocks } from '../helpers/mockSupabase';
 import { createMockEjercicioProgramado, createMockSerie } from '../helpers/testHelpers';
 
+import { RoutineService } from '../../src/services/RoutineService';
+
 jest.mock('../../src/lib/supabase', () => ({
     supabase: require('../helpers/mockSupabase').mockSupabase,
 }));
-
-import { RoutineService } from '../../src/services/RoutineService';
 
 describe('startDailyWorkout', () => {
     beforeEach(() => { resetMocks(); });

@@ -8,7 +8,7 @@ export const useScrollToTop = (threshold = 6) => {
 
     const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 10 }).current;
     const onViewableItemsChanged = useRef(
-        ({ viewableItems }: { viewableItems: Array<{ index: number | null }> }) => {
+        ({ viewableItems }: { viewableItems: { index: number | null }[] }) => {
             if (viewableItems.length === 0) return;
             const minIndex = Math.min(...viewableItems.map((v) => v.index ?? 0));
             setShowScrollTop(minIndex >= threshold);

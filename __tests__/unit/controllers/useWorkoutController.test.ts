@@ -4,6 +4,9 @@ import { useWorkoutController } from '../../../src/controllers/useWorkoutControl
 import { WorkoutService } from '../../../src/services/WorkoutService';
 import { RoutineService } from '../../../src/services/RoutineService';
 
+import { PersonalRecordService } from '../../../src/services/PersonalRecordService';
+import { HapticService } from '../../../src/services/HapticService';
+
 jest.mock('../../../src/services/WorkoutService', () => ({
     WorkoutService: {
         getWorkoutDetails: jest.fn(),
@@ -49,9 +52,6 @@ jest.mock('../../../src/services/HapticService', () => ({
         light: jest.fn(),
     },
 }));
-
-import { PersonalRecordService } from '../../../src/services/PersonalRecordService';
-import { HapticService } from '../../../src/services/HapticService';
 
 describe('useWorkoutController (PF-257)', () => {
     let mockAlert: jest.SpyInstance;

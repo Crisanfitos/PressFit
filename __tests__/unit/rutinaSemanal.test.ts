@@ -7,11 +7,11 @@
 import { mockChain, resetMocks } from '../helpers/mockSupabase';
 import { getMondayOfCurrentWeek, parseLocalDate, createMockRutinaSemanal } from '../helpers/testHelpers';
 
+import { RoutineService } from '../../src/services/RoutineService';
+
 jest.mock('../../src/lib/supabase', () => ({
     supabase: require('../helpers/mockSupabase').mockSupabase,
 }));
-
-import { RoutineService } from '../../src/services/RoutineService';
 
 describe('Rutinas Semanales', () => {
     beforeEach(() => { resetMocks(); });

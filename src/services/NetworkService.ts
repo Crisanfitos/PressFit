@@ -7,7 +7,7 @@ export interface NetworkState {
   type: string | null;
 }
 
-let networkListeners: Array<(state: NetworkState) => void> = [];
+let networkListeners: ((state: NetworkState) => void)[] = [];
 let intervalId: any = null;
 let lastKnownState: NetworkState = {
   isConnected: true,

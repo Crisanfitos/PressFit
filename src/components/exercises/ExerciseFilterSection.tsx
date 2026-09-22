@@ -4,6 +4,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { ThemeColors } from '../../types/theme';
 import { FilterKey, FilterState } from '../../controllers/useExerciseController';
 
+import { useTranslation } from 'react-i18next';
+
 export interface FilterRowData {
     key: FilterKey;
     label: string;
@@ -21,8 +23,6 @@ export interface ExerciseFilterSectionProps {
     clearAllFilters: () => void;
     colors: ThemeColors;
 }
-
-import { useTranslation } from 'react-i18next';
 
 export const ExerciseFilterSection: React.FC<ExerciseFilterSectionProps> = ({
     showFilters,

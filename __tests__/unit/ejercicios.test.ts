@@ -7,11 +7,11 @@
 import { mockChain, mockSupabase, resetMocks } from '../helpers/mockSupabase';
 import { createMockExercise } from '../helpers/testHelpers';
 
+import { ExerciseService } from '../../src/services/ExerciseService';
+
 jest.mock('../../src/lib/supabase', () => ({
     supabase: require('../helpers/mockSupabase').mockSupabase,
 }));
-
-import { ExerciseService } from '../../src/services/ExerciseService';
 
 describe('ExerciseService', () => {
     beforeEach(() => {

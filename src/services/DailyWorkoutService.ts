@@ -312,7 +312,7 @@ export const DailyWorkoutService = {
 
             // Look for the most recent completed workout for the same day name
             // to use its series data (weight) instead of template values
-            let prevSeriesMap = new Map<string, Array<{ numero_serie: number; peso_utilizado?: number | null; repeticiones?: number | null; rpe?: number | null }>>();
+            let prevSeriesMap = new Map<string, { numero_serie: number; peso_utilizado?: number | null; repeticiones?: number | null; rpe?: number | null }[]>();
             try {
                 const { data: prevWorkouts } = await supabase
                     .from('rutinas_diarias')

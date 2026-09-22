@@ -2,7 +2,7 @@ import React from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getFocusedRouteNameFromRoute, RouteProp } from '@react-navigation/native';
+import { getFocusedRouteNameFromRoute, RouteProp , useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 
@@ -10,6 +10,14 @@ import WeeklyPlanNavigator from './WeeklyPlanNavigator';
 import ProgressNavigator from './ProgressNavigator';
 import ProfileNavigator from './ProfileNavigator';
 import ErrorBoundary from '../components/ErrorBoundary';
+
+import FloatingTimerPill from '../components/FloatingTimerPill';
+import RestTimerFloatingBar from '../components/timer/RestTimerFloatingBar';
+import { View } from 'react-native';
+
+import { getActiveWorkoutParams } from '../services/TimerNotificationService';
+import { useWorkoutRecovery } from '../hooks/useWorkoutRecovery';
+import ResumeWorkoutModal from '../components/workout/ResumeWorkoutModal';
 
 const withErrorBoundary = <P extends object>(
     Component: React.ComponentType<P>
@@ -32,14 +40,6 @@ export type MainTabParamList = {
 };
 
 const Tab = createMaterialTopTabNavigator<MainTabParamList>();
-
-import FloatingTimerPill from '../components/FloatingTimerPill';
-import RestTimerFloatingBar from '../components/timer/RestTimerFloatingBar';
-import { View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { getActiveWorkoutParams } from '../services/TimerNotificationService';
-import { useWorkoutRecovery } from '../hooks/useWorkoutRecovery';
-import ResumeWorkoutModal from '../components/workout/ResumeWorkoutModal';
 
 const MainNavigator: React.FC = () => {
     const insets = useSafeAreaInsets();
