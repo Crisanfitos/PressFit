@@ -16,6 +16,8 @@ import { useTheme } from '../context/ThemeContext';
 import { AnalyticsService } from '../services/AnalyticsService';
 import { LogService } from '../services/LogService';
 import { MuscleVolumeBar } from '../components/analytics/MuscleVolumeBar';
+import { ScienceCoachCallout } from '../components/analytics/ScienceCoachCallout';
+import { buildScienceRecommendation } from '../utils/scienceRecommendation';
 import {
     formatLocalDateKey,
     getStartOfWeek,
@@ -137,14 +139,15 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
     };
 
     // Calculate aggregated metrics across muscle assessments
-    const { optimalCount, warningCount, overtrainingCount } = useMemo(() => {
+    const { optimalCount, warningCount, overtrainingCount, recoveryCount } = useMemo(() => {
         if (!summary?.distribucion?.length) {
-            return { optimalCount: 0, warningCount: 0, overtrainingCount: 0 };
+            return { optimalCount: 0, warningCount: 0, overtrainingCount: 0, recoveryCount: 0 };
         }
 
         let optimal = 0;
         let warning = 0;
         let overtraining = 0;
+        let recovery = 0;
 
         for (const item of summary.distribucion) {
             const assessment = assessMuscleHypertrophy(
@@ -154,14 +157,39 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
             if (assessment.status === 'optimal') optimal++;
             else if (assessment.status === 'warning') warning++;
             else if (assessment.status === 'overtraining') overtraining++;
+            else if (assessment.status === 'below_mv' || assessment.status === 'maintenance')
+                recovery++;
         }
 
         return {
             optimalCount: optimal,
             warningCount: warning,
             overtrainingCount: overtraining,
+            recoveryCount: recovery,
         };
     }, [summary]);
+
+    const recommendation = useMemo(
+        () => buildScienceRecommendation(summary?.distribucion),
+        [summary]
+    );
+
+    const handleAdjustVolume = useCallback(() => {
+        try {
+            const parent = navigation?.getParent?.();
+            if (parent?.navigate) {
+                parent.navigate('Semana');
+                return;
+            }
+            if (navigation?.navigate) {
+                navigation.navigate('Semana');
+                return;
+            }
+        } catch {
+            // fall through to goBack
+        }
+        navigation?.goBack?.();
+    }, [navigation]);
 
     const styles = useMemo(
         () =>
@@ -230,13 +258,10 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
                     marginTop: 2,
                 },
                 summaryCard: {
-                    backgroundColor: colors.surface,
+                    backgroundColor: 'transparent',
                     marginHorizontal: 16,
                     marginBottom: 16,
-                    borderRadius: 16,
-                    padding: 16,
-                    borderWidth: 1,
-                    borderColor: colors.border,
+                    borderWidth: 0,
                 },
                 summaryCardTitle: {
                     fontSize: 14,
@@ -247,6 +272,26 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
                 summaryGrid: {
                     flexDirection: 'row',
                     justifyContent: 'space-around',
+                    gap: 10,
+                },
+                bentoCard: {
+                    flex: 1,
+                    backgroundColor: colors.surface,
+                    borderRadius: 16,
+                    padding: 14,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    alignItems: 'center',
+                },
+                bentoBadge: {
+                    marginTop: 8,
+                    paddingHorizontal: 8,
+                    paddingVertical: 3,
+                    borderRadius: 12,
+                },
+                bentoBadgeText: {
+                    fontSize: 10,
+                    fontWeight: '700',
                 },
                 summaryItem: {
                     alignItems: 'center',
@@ -421,43 +466,74 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
                     </TouchableOpacity>
                 </View>
 
-                {/* Summary Card */}
+                {/* Summary Bento */}
                 <View style={styles.summaryCard} testID="hypertrophy-summary-card">
                     <Text style={styles.summaryCardTitle}>
                         {t('progress.hypertrophyDashboard', 'Dashboard de Hipertrofia')}
                     </Text>
                     <View style={styles.summaryGrid}>
-                        <View style={styles.summaryItem} testID="hypertrophy-summary-total-sets">
-                            <Text style={styles.summaryValue}>
-                                {summary?.totalSeriesEfectivas ?? 0}
-                            </Text>
-                            <Text style={styles.summaryLabel}>
-                                {t('progress.hypertrophyTotalSets', 'Series Totales')}
-                            </Text>
+                        <View style={styles.bentoCard} testID="hypertrophy-bento-total">
+                            <View style={styles.summaryItem} testID="hypertrophy-summary-total-sets">
+                                <Text style={[styles.summaryValue, { fontVariant: ['tabular-nums'] }]}>
+                                    {summary?.totalSeriesEfectivas ?? 0}
+                                </Text>
+                                <Text style={styles.summaryLabel}>
+                                    {t('progress.hypertrophyTotalSets', 'Series Totales')}
+                                </Text>
+                            </View>
+                            <View style={[styles.bentoBadge, { backgroundColor: `${colors.primary}1A` }]}>
+                                <Text style={[styles.bentoBadgeText, { color: colors.primary }]}>
+                                    {t('progress.hypertrophyEffectiveSets', 'Efectivas')}
+                                </Text>
+                            </View>
                         </View>
-                        <View style={styles.summaryItem} testID="hypertrophy-summary-optimal-muscles">
-                            <Text style={[styles.summaryValue, { color: '#10B981' }]}>
-                                {optimalCount}
-                            </Text>
-                            <Text style={styles.summaryLabel}>
-                                {t('progress.hypertrophyOptimalMuscles', 'Óptimos (MAV)')}
-                            </Text>
+                        <View style={styles.bentoCard} testID="hypertrophy-bento-optimal">
+                            <View style={styles.summaryItem} testID="hypertrophy-summary-optimal-muscles">
+                                <Text style={[styles.summaryValue, { color: '#10B981' }]}>
+                                    {optimalCount}
+                                </Text>
+                                <Text style={styles.summaryLabel}>
+                                    {t('progress.hypertrophyOptimalMuscles', 'Óptimos (MAV)')}
+                                </Text>
+                            </View>
+                            <View style={[styles.bentoBadge, { backgroundColor: '#10B9811A' }]}>
+                                <Text style={[styles.bentoBadgeText, { color: '#10B981' }]}>
+                                    {t('progress.hypertrophyOptimalZone', 'Zona óptima')}
+                                </Text>
+                            </View>
                         </View>
-                        <View style={styles.summaryItem} testID="hypertrophy-summary-fatigue">
-                            <Text
-                                style={[
-                                    styles.summaryValue,
-                                    { color: overtrainingCount > 0 ? '#EF4444' : '#F59E0B' },
-                                ]}
-                            >
-                                {warningCount + overtrainingCount}
-                            </Text>
-                            <Text style={styles.summaryLabel}>
-                                {t('progress.hypertrophyHighFatigue', 'Cerca / > MRV')}
-                            </Text>
+                        <View style={styles.bentoCard} testID="hypertrophy-bento-recovery">
+                            <View style={styles.summaryItem} testID="hypertrophy-summary-fatigue">
+                                <Text
+                                    style={[
+                                        styles.summaryValue,
+                                        { color: overtrainingCount > 0 ? '#EF4444' : '#F59E0B' },
+                                    ]}
+                                >
+                                    {recoveryCount + warningCount + overtrainingCount}
+                                </Text>
+                                <Text style={styles.summaryLabel}>
+                                    {t('progress.hypertrophyHighFatigue', 'Cerca / > MRV')}
+                                </Text>
+                            </View>
+                            <View style={[styles.bentoBadge, { backgroundColor: '#F59E0B1A' }]}>
+                                <Text style={[styles.bentoBadgeText, { color: '#F59E0B' }]}>
+                                    {t('progress.hypertrophyRecovery', 'Recuperación')}
+                                </Text>
+                            </View>
                         </View>
                     </View>
                 </View>
+
+                {/* Scientific Coach Callout */}
+                {!loading && summary && summary.distribucion.length > 0 && (
+                    <ScienceCoachCallout
+                        title={recommendation.title}
+                        message={recommendation.message}
+                        ctaLabel={recommendation.ctaLabel}
+                        onPressCta={handleAdjustVolume}
+                    />
+                )}
 
                 {/* Scientific Legend */}
                 {showLegend && (

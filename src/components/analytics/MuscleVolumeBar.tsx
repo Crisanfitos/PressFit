@@ -67,6 +67,19 @@ export const MuscleVolumeBar: React.FC<MuscleVolumeBarProps> = ({
 
     const safeTestId = testID || `muscle-volume-bar-${normalizeMuscleKey(muscle)}`;
 
+    const segments = useMemo(() => {
+        const maxRef = thresholds.mrv > 0 ? thresholds.mrv * 1.15 : 25;
+        const clamp = (v: number) => Math.min(100, Math.max(0, (v / maxRef) * 100));
+        const mevW = clamp(thresholds.mev);
+        const mavW = clamp(thresholds.mavMax) - mevW;
+        const mrvW = clamp(thresholds.mrv) - clamp(thresholds.mavMax);
+        return {
+            mevWidth: Math.max(0, mevW),
+            mavWidth: Math.max(0, mavW),
+            mrvWidth: Math.max(0, mrvW),
+        };
+    }, [thresholds]);
+
     const styles = useMemo(
         () =>
             StyleSheet.create({
@@ -129,6 +142,22 @@ export const MuscleVolumeBar: React.FC<MuscleVolumeBarProps> = ({
                     overflow: 'hidden',
                     position: 'relative',
                     marginBottom: 8,
+                    flexDirection: 'row',
+                },
+                segmentMEV: {
+                    height: '100%',
+                    backgroundColor: '#3B82F6',
+                    opacity: 0.45,
+                },
+                segmentMAV: {
+                    height: '100%',
+                    backgroundColor: '#10B981',
+                    opacity: 0.55,
+                },
+                segmentMRV: {
+                    height: '100%',
+                    backgroundColor: '#F59E0B',
+                    opacity: 0.35,
                 },
                 progressBarFill: {
                     height: '100%',
@@ -185,7 +214,27 @@ export const MuscleVolumeBar: React.FC<MuscleVolumeBarProps> = ({
             </View>
 
             <View style={styles.progressBarTrack} testID={`${safeTestId}-track`}>
-                <View style={styles.progressBarFill} testID={`${safeTestId}-fill`} />
+                <View
+                    style={[styles.segmentMEV, { width: `${segments.mevWidth}%` }]}
+                    testID={`${safeTestId}-segment-mev`}
+                />
+                <View
+                    style={[styles.segmentMAV, { width: `${segments.mavWidth}%` }]}
+                    testID={`${safeTestId}-segment-mav`}
+                />
+                <View
+                    style={[styles.segmentMRV, { width: `${segments.mrvWidth}%` }]}
+                    testID={`${safeTestId}-segment-mrv`}
+                />
+                <View
+                    style={[
+                        StyleSheet.absoluteFill,
+                        { alignItems: 'flex-start', justifyContent: 'center' },
+                    ]}
+                    pointerEvents="none"
+                >
+                    <View style={[styles.progressBarFill, { opacity: 0.95 }]} testID={`${safeTestId}-fill`} />
+                </View>
             </View>
 
             <View style={styles.landmarksRow}>
