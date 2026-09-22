@@ -25,7 +25,7 @@ export interface SetLimitValidationResult {
 /**
  * Counts sets categorized by their set type.
  */
-export function countSetsByType(sets: Array<{ tipo_serie?: string | null }>): {
+export function countSetsByType(sets: { tipo_serie?: string | null }[]): {
     total: number;
     warmup: number;
     normal: number;
@@ -88,7 +88,7 @@ export function isWarmupSetsLimitReached(
  * Validates whether a new set (or sets) can be added to an exercise given the current set list.
  */
 export function checkSetLimits(
-    currentSets: Array<{ tipo_serie?: string | null }>,
+    currentSets: { tipo_serie?: string | null }[],
     countToAdd: number = 1,
     typeToAdd: SetType = 'normal',
     config: SetLimitsConfig = {}

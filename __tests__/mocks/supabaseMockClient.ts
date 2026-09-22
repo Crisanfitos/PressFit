@@ -145,7 +145,7 @@ class StatefulQueryBuilder {
     private operation: 'SELECT' | 'INSERT' | 'UPDATE' | 'UPSERT' | 'DELETE' = 'SELECT';
     private payload: any = null;
     private upsertOptions: any = null;
-    private filters: Array<(item: any) => boolean> = [];
+    private filters: ((item: any) => boolean)[] = [];
     private sortFn: ((a: any, b: any) => number) | null = null;
     private limitValue: number | null = null;
     private singleMode: 'SINGLE' | 'MAYBE_SINGLE' | 'LIST' = 'LIST';

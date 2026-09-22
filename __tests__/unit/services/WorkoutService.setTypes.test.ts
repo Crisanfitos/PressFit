@@ -8,6 +8,10 @@
 import { mockChain, resetMocks } from '../../helpers/mockSupabase';
 import { createMockSerie } from '../../helpers/testHelpers';
 
+import { WorkoutService } from '../../../src/services/WorkoutService';
+import { NetworkService } from '../../../src/services/NetworkService';
+import { SetType } from '../../../src/types/setTypes';
+
 jest.mock('../../../src/lib/supabase', () => ({
   supabase: require('../../helpers/mockSupabase').mockSupabase,
 }));
@@ -30,10 +34,6 @@ jest.mock('../../../src/services/SyncService', () => ({
     enqueueOperation: jest.fn().mockResolvedValue({ error: null }),
   },
 }));
-
-import { WorkoutService } from '../../../src/services/WorkoutService';
-import { NetworkService } from '../../../src/services/NetworkService';
-import { SetType } from '../../../src/types/setTypes';
 
 describe('WorkoutService — Set Types Persistence (PF-313)', () => {
   beforeEach(() => {

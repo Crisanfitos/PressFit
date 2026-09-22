@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import StrengthProgressChart from '../../src/components/charts/StrengthProgressChart';
-import { OneRMDataPoint, TimeRange } from '../../src/components/charts/StrengthProgressChart';
+import StrengthProgressChart, { OneRMDataPoint, TimeRange } from '../../src/components/charts/StrengthProgressChart';
 
 const MOCK_DATA: OneRMDataPoint[] = [
     { fecha: '2026-01-10', estimated1RM: 90.0, peso_utilizado: 77.5, repeticiones: 8 },

@@ -47,7 +47,7 @@ export interface ExerciseWithSeriesForVolume {
         grupo_muscular_principal: string;
         grupos_musculares_secundarios?: string[] | null;
     };
-    series: Array<{
+    series: {
         id?: string;
         numero_serie?: number;
         peso_utilizado?: number | null;
@@ -56,7 +56,7 @@ export interface ExerciseWithSeriesForVolume {
         tipo_serie?: SetType | string | null;
         is_warmup?: boolean | null;
         [key: string]: any;
-    }>;
+    }[];
 }
 
 export interface AggregateOptions {
@@ -233,7 +233,7 @@ export function calculate1RM(
  * @returns The highest 1RM found across all sets, or 0 if empty/invalid.
  */
 export function calculateMax1RM(
-    series: Array<{ peso_utilizado?: number | null; repeticiones?: number | null }>,
+    series: { peso_utilizado?: number | null; repeticiones?: number | null }[],
     formula: OneRMFormula = 'auto'
 ): number {
     if (!Array.isArray(series) || series.length === 0) {
@@ -383,13 +383,13 @@ export function aggregateEffectiveSetsByMuscle(
  * @returns Structured fatigue assessment with RPE metrics, status label, color and recommendation.
  */
 export function calculateWeeklyFatigue(
-    series: Array<{
+    series: {
         rpe?: number | null;
         peso_utilizado?: number | null;
         repeticiones?: number | null;
         is_warmup?: boolean | null;
         tipo_serie?: string | null;
-    }>
+    }[]
 ): FatigueAnalysisResult {
     if (!Array.isArray(series) || series.length === 0) {
         return {
@@ -503,14 +503,14 @@ export function calculateSetTonnage(set: {
  * @returns Object with effectiveTonnage, totalTonnage, warmupTonnage, and set counts.
  */
 export function calculateWorkoutTonnage(
-    series: Array<{
+    series: {
         peso_utilizado?: number | null;
         repeticiones?: number | null;
         rpe?: number | null;
         tipo_serie?: SetType | string | null;
         is_warmup?: boolean | null;
         [key: string]: any;
-    }>
+    }[]
 ): WorkoutTonnageSummary {
     if (!Array.isArray(series) || series.length === 0) {
         return {

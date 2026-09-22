@@ -10,12 +10,12 @@
 import { mockChain, resetMocks } from '../helpers/mockSupabase';
 import { createMockSerie, createMockEjercicioProgramado } from '../helpers/testHelpers';
 
+import { RoutineService } from '../../src/services/RoutineService';
+import { WorkoutService } from '../../src/services/WorkoutService';
+
 jest.mock('../../src/lib/supabase', () => ({
     supabase: require('../helpers/mockSupabase').mockSupabase,
 }));
-
-import { RoutineService } from '../../src/services/RoutineService';
-import { WorkoutService } from '../../src/services/WorkoutService';
 
 describe('Weekly Workout Progression', () => {
     beforeEach(() => { resetMocks(); });

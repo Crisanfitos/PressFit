@@ -1,4 +1,6 @@
 // Ensure Supabase environment variables exist in CI environments (where .env is gitignored)
+import i18n from '../../src/i18n';
+
 process.env.EXPO_PUBLIC_SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co';
 process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'mock-anon-key-for-jest-tests';
 
@@ -92,8 +94,6 @@ jest.mock('@sentry/react-native', () => ({
     setUser: jest.fn(),
     addBreadcrumb: jest.fn(),
 }));
-
-import i18n from '../../src/i18n';
 
 // Reset i18n language to Spanish before each test to guarantee deterministic UI text across environments
 beforeEach(() => {

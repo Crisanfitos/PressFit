@@ -137,7 +137,7 @@ export const PersonalRecordService = {
             let maxVolume = 0;
             let max1RM = 0;
 
-            for (const row of (data as Array<{ peso_utilizado?: number | null; repeticiones?: number | null }>) || []) {
+            for (const row of (data as { peso_utilizado?: number | null; repeticiones?: number | null }[]) || []) {
                 const w = Number(row.peso_utilizado) || 0;
                 const r = Number(row.repeticiones) || 0;
                 if (w > 0 && r > 0) {

@@ -6,6 +6,9 @@
 
 import { mockChain, resetMocks } from '../helpers/mockSupabase';
 
+import { TipoPeso, TIPO_PESO_LABELS, TIPO_PESO_SHORT_LABELS, TIPO_PESO_ICONS } from '../../src/types/setTypes';
+import { WorkoutService } from '../../src/services/WorkoutService';
+
 jest.mock('../../src/lib/supabase', () => ({
     supabase: require('../helpers/mockSupabase').mockSupabase,
 }));
@@ -17,9 +20,6 @@ jest.mock('../../src/services/NetworkService', () => ({
         addNetworkListener: jest.fn(() => jest.fn()),
     },
 }));
-
-import { TipoPeso, TIPO_PESO_LABELS, TIPO_PESO_SHORT_LABELS, TIPO_PESO_ICONS } from '../../src/types/setTypes';
-import { WorkoutService } from '../../src/services/WorkoutService';
 
 describe('Weight Types (tipo_peso)', () => {
     beforeEach(() => { resetMocks(); });

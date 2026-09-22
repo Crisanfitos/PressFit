@@ -62,7 +62,7 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
   const scrollTopOpacity = useRef(new Animated.Value(0)).current;
 
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 10 }).current;
-  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: Array<{ index: number | null }> }) => {
+  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: { index: number | null }[] }) => {
     if (viewableItems.length === 0) return;
     const minIndex = Math.min(...viewableItems.map((v) => v.index ?? 0));
     setShowScrollTop(minIndex >= SCROLL_TOP_THRESHOLD);
