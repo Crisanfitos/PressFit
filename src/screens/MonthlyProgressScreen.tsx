@@ -146,7 +146,12 @@ const MonthlyProgressScreen: React.FC<MonthlyProgressScreenProps> = ({ navigatio
                                     <Text style={styles.barValue}>{data.durationMinutes}m</Text>
                                     {activeWeekBubble === index && data.startDate && data.endDate && (
                                         <Animated.View style={[styles.speechBubble, { opacity: bubbleOpacity }]}>
-                                            <Text style={styles.speechBubbleText}>del {formatDate(data.startDate)} al {formatDate(data.endDate)}</Text>
+                                            <Text style={styles.speechBubbleText}>
+                                                {t('progress.dateRangeFromTo', 'del {{start}} al {{end}}', {
+                                                    start: formatDate(data.startDate),
+                                                    end: formatDate(data.endDate),
+                                                })}
+                                            </Text>
                                         </Animated.View>
                                     )}
                                 </TouchableOpacity>
