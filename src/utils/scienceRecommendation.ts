@@ -11,6 +11,10 @@ export interface ScienceRecommendation {
     message: string;
     targetMuscle: string | null;
     ctaLabel: string;
+    titleKey?: string;
+    messageKey?: string;
+    messageParams?: Record<string, string | number>;
+    ctaLabelKey?: string;
 }
 
 /**
@@ -31,6 +35,9 @@ export function buildScienceRecommendation(
                 'Registra tus entrenamientos esta semana para recibir una recomendación personalizada de volumen.',
             targetMuscle: null,
             ctaLabel,
+            titleKey: 'scienceRec.title',
+            messageKey: 'scienceRec.noData',
+            ctaLabelKey: 'scienceRec.ctaLabel',
         };
     }
 
@@ -57,6 +64,13 @@ export function buildScienceRecommendation(
             message: `Tu volumen en ${target.grupo_muscular} supera el MRV (${target.series_efectivas} series). Considera una semana de deload o reducir 3-4 series para recuperar adaptación.`,
             targetMuscle: target.grupo_muscular,
             ctaLabel,
+            titleKey: 'scienceRec.title',
+            messageKey: 'scienceRec.overtraining',
+            messageParams: {
+                muscle: target.grupo_muscular,
+                sets: target.series_efectivas,
+            },
+            ctaLabelKey: 'scienceRec.ctaLabel',
         };
     }
 
@@ -69,6 +83,13 @@ export function buildScienceRecommendation(
             message: `Tu volumen en ${optimalRef} está en rango óptimo de adaptación (MAV). Considera añadir 2 series en ${target.grupo_muscular} la próxima semana.`,
             targetMuscle: target.grupo_muscular,
             ctaLabel,
+            titleKey: 'scienceRec.title',
+            messageKey: 'scienceRec.low',
+            messageParams: {
+                optimalRef,
+                muscle: target.grupo_muscular,
+            },
+            ctaLabelKey: 'scienceRec.ctaLabel',
         };
     }
 
@@ -80,15 +101,29 @@ export function buildScienceRecommendation(
             message: `Tu volumen en ${target.grupo_muscular} está cerca del límite recuperable (MRV). Mantén la carga actual y evita añadir series extra esta semana.`,
             targetMuscle: target.grupo_muscular,
             ctaLabel,
+            titleKey: 'scienceRec.title',
+            messageKey: 'scienceRec.warning',
+            messageParams: {
+                muscle: target.grupo_muscular,
+            },
+            ctaLabelKey: 'scienceRec.ctaLabel',
         };
     }
 
+    const musclesStr =
+        optimal.map((o) => o.grupo_muscular).slice(0, 2).join(' y ') || 'los grupos principales';
     return {
         kind: 'optimal_maintain',
         title: 'Sobrecarga Progresiva & Deload',
-        message: `Tu volumen en ${optimal.map((o) => o.grupo_muscular).slice(0, 2).join(' y ') || 'los grupos principales'} está en rango óptimo de adaptación (MAV). Mantén la sobrecarga progresiva actual.`,
+        message: `Tu volumen en ${musclesStr} está en rango óptimo de adaptación (MAV). Mantén la sobrecarga progresiva actual.`,
         targetMuscle: null,
         ctaLabel,
+        titleKey: 'scienceRec.title',
+        messageKey: 'scienceRec.optimalMaintain',
+        messageParams: {
+            muscles: musclesStr,
+        },
+        ctaLabelKey: 'scienceRec.ctaLabel',
     };
 }
 

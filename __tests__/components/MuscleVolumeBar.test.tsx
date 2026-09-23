@@ -84,4 +84,24 @@ describe('MuscleVolumeBar Component', () => {
         expect(getByTestId('custom-muscle-bar')).toBeTruthy();
         expect(getByTestId('custom-muscle-bar-badge')).toBeTruthy();
     });
+
+    it('renders translated muscle name and status in English', async () => {
+        const i18n = require('../../src/i18n').default;
+        await i18n.changeLanguage('en');
+
+        try {
+            const { getByTestId, getByText } = await render(
+                <ThemeProvider>
+                    <MuscleVolumeBar muscle="pecho" effectiveSets={16} />
+                </ThemeProvider>
+            );
+
+            expect(getByTestId('muscle-volume-bar-pecho')).toBeTruthy();
+            expect(getByText('Chest')).toBeTruthy();
+            expect(getByText(/Optimal \(MAV\)/i)).toBeTruthy();
+        } finally {
+            cleanup();
+            await i18n.changeLanguage('es');
+        }
+    });
 });

@@ -200,6 +200,10 @@
     "hypertrophyMEVDesc": "MEV (Minimum Effective Volume): Minimum volume needed to ignite muscle growth.",
     "hypertrophyMAVDesc": "MAV (Maximum Adaptive Volume): Sweet spot where greatest gains occur.",
     "hypertrophyMRVDesc": "MRV (Maximum Recoverable Volume): Upper ceiling of recovery. Exceeding it yields excessive fatigue.",
+    "hypertrophyMVTerm": "MV - Maintenance Volume",
+    "hypertrophyMEVTerm": "MEV - Minimum Effective Volume",
+    "hypertrophyMAVTerm": "MAV - Maximum Adaptive Volume",
+    "hypertrophyMRVTerm": "MRV - Maximum Recoverable Volume",
     "weeklyLoad": "Weekly Load",
     "weeklyLoadSubtitle": "Tonnage moved per day (kg)",
     "weeklyAverage": "Average: {{avg}} kg/day",
@@ -483,5 +487,26 @@
     "cuerpo_completo": "Full Body",
     "general": "General",
     "otros": "Other"
+  },
+  "hypertrophy": {
+    "statusBelowMV": "Below Maintenance (< MV)",
+    "statusMaintenance": "Maintenance (MV)",
+    "statusOptimal": "Optimal (MAV)",
+    "statusWarning": "Near MRV",
+    "statusOvertraining": "Overtraining (> MRV)",
+    "descBelowMV": "Insufficient volume to maintain muscle mass.",
+    "descMaintenance": "Adequate volume to maintain muscle mass.",
+    "descOptimal": "Optimal range to maximize muscle growth.",
+    "descWarning": "Very high volume. Close to recovery limit.",
+    "descOvertraining": "You have exceeded maximum recoverable volume."
+  },
+  "scienceRec": {
+    "title": "Progressive Overload & Deload",
+    "ctaLabel": "Adjust Volume in Routines",
+    "noData": "Log your workouts this week to receive a personalized volume recommendation.",
+    "overtraining": "Your volume in {{muscle}} exceeds MRV ({{sets}} sets). Consider a deload week or reducing 3-4 sets to recover adaptation.",
+    "low": "Your volume in {{optimalRef}} is in the optimal adaptive range (MAV). Consider adding 2 sets in {{muscle}} next week.",
+    "warning": "Your volume in {{muscle}} is close to the recoverable limit (MRV). Maintain current load and avoid adding extra sets this week.",
+    "optimalMaintain": "Your volume in {{muscles}} is in the optimal adaptive range (MAV). Maintain current progressive overload."
   }
 }
