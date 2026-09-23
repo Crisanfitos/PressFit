@@ -8,8 +8,6 @@ import { useTheme } from '../context/ThemeContext';
 import { useProgressController } from '../controllers/useProgressController';
 import FatigueLevelCard from '../components/FatigueLevelCard';
 import { SessionTimeline } from '../components/history/SessionTimeline';
-import { ShareService } from '../services/ShareService';
-import { LogService } from '../services/LogService';
 
 type WeeklyProgressScreenProps = { navigation: any };
 
@@ -50,21 +48,6 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
     const totalDuration = weekData.reduce((acc, d) => acc + d.duration, 0);
     const maxDuration = Math.max(...weekData.map((d) => d.duration), 1);
 
-    const handleExportReport = async () => {
-        try {
-            const message = t(
-                'progress.weeklyReportMessage',
-                `Mi semana en PressFit: ${totalWorkouts} entrenamientos, ${totalDuration} minutos.`
-            );
-            await ShareService.share({
-                title: t('progress.weeklyReportTitle', 'Informe de Progreso Semanal'),
-                message,
-            });
-        } catch (error) {
-            LogService.error('Error exporting weekly progress report:', error);
-        }
-    };
-
     const styles = useMemo(() => StyleSheet.create({
         container: { flex: 1, backgroundColor: colors.background },
         header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: colors.border },
@@ -87,11 +70,6 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
         barWrapper: { width: '100%', height: 160, justifyContent: 'flex-end', alignItems: 'center', marginBottom: 8 },
         bar: { width: '70%', borderRadius: 4, minHeight: 4 },
         dayLabel: { fontSize: 12, color: colors.textSecondary, marginTop: 4 },
-        detailCard: { padding: 16, borderRadius: 12, backgroundColor: colors.surface, marginBottom: 12 },
-        detailHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-        detailDay: { fontSize: 16, fontWeight: '600', color: colors.text },
-        detailVolume: { fontSize: 16, fontWeight: 'bold', color: colors.primary },
-        detailWorkouts: { fontSize: 14, color: colors.textSecondary },
     }), [colors]);
 
     return (
@@ -148,23 +126,9 @@ const WeeklyProgressScreen: React.FC<WeeklyProgressScreenProps> = ({ navigation 
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>{t('progress.details', 'Detalles')}</Text>
-                        {weekData.filter((d) => d.workouts > 0).map((data, index) => (
-                            <View key={index} style={styles.detailCard}>
-                                <View style={styles.detailHeader}>
-                                    <Text style={styles.detailDay}>{data.day}</Text>
-                                    <Text style={styles.detailVolume}>{data.duration} min</Text>
-                                </View>
-                                <Text style={styles.detailWorkouts}>{data.workouts} {t('workout.sessionSummary', 'entrenamiento(s)')}</Text>
-                            </View>
-                        ))}
-                    </View>
-
-                    <View style={styles.section}>
                         <Text style={styles.sectionTitle}>{t('progress.sessionHistory', 'Historial de sesiones')}</Text>
                         <SessionTimeline
                             sessions={weeklyStats || []}
-                            onPressExport={handleExportReport}
                         />
                     </View>
                 </ScrollView>

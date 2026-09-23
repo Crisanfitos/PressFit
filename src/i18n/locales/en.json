@@ -214,7 +214,13 @@
     "sessionDetail": "{{exercises}} exercises · {{sets}} sets · {{tonnage}} kg total",
     "exportReport": "Export / Share Progress Report",
     "monthlyProgress": "Monthly Progress",
-    "dateRangeFromTo": "from {{start}} to {{end}}"
+    "dateRangeFromTo": "from {{start}} to {{end}}",
+    "weeklyProgress": "Weekly Progress",
+    "totalDurationMinutes": "Total Minutes",
+    "durationByDay": "Duration by Day",
+    "sessionHistory": "Session History",
+    "startWeekStrong": "Start your week strong!",
+    "trainThisWeek": "Train this week to see your progress reflected here"
   },
   "physicalProgress": {
     "title": "Physical Progress",

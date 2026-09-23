@@ -214,7 +214,13 @@
     "sessionDetail": "{{exercises}} ejercicios · {{sets}} series · {{tonnage}} kg totales",
     "exportReport": "Exportar / Compartir Informe de Progreso",
     "monthlyProgress": "Progreso Mensual",
-    "dateRangeFromTo": "del {{start}} al {{end}}"
+    "dateRangeFromTo": "del {{start}} al {{end}}",
+    "weeklyProgress": "Progreso Semanal",
+    "totalDurationMinutes": "Minutos Totales",
+    "durationByDay": "Duración por Día",
+    "sessionHistory": "Historial de sesiones",
+    "startWeekStrong": "¡Empieza tu semana fuerte!",
+    "trainThisWeek": "Entrena esta semana y verás tu progreso reflejado aquí"
   },
   "physicalProgress": {
     "title": "Cambio Físico",
