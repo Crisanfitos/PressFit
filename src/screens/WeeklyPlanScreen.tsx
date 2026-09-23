@@ -1,17 +1,19 @@
 import React from 'react';
 import { Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 
 const WeeklyPlanScreen: React.FC<any> = ({ navigation, route }) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-            <Text style={[styles.title, { color: colors.text }]}>Plan Semanal</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('weeklyPlan.title', 'Plan Semanal')}</Text>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                Esta pantalla será rediseñada
+                {t('weeklyPlan.placeholderSubtitle', 'Esta pantalla será rediseñada')}
             </Text>
         </SafeAreaView>
     );

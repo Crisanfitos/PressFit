@@ -159,14 +159,14 @@ export const WeeklyRoutinesScreen: React.FC<any> = ({ navigation }) => {
     const heroMetrics = useMemo(() => {
         if (!todayRoutineDay) {
             return {
-                title: 'Descanso Activo / Recuperación',
-                description: 'Día de descanso programado. Realiza movilidad o estiramientos ligeros.',
+                title: t('calendar.activeRestRecovery', 'Descanso Activo / Recuperación'),
+                description: t('calendar.restDayScheduledDesc', 'Día de descanso programado. Realiza movilidad o estiramientos ligeros.'),
                 estimatedMinutes: 30,
                 exerciseCount: 0,
                 totalSets: 0,
                 estimatedLoad: '0 kg',
                 targetRpe: '5 / 10',
-                muscles: ['Recuperación', 'Movilidad'],
+                muscles: [t('calendar.recovery', 'Recuperación'), t('calendar.mobility', 'Movilidad')],
                 status: 'rest' as const,
             };
         }
@@ -187,8 +187,8 @@ export const WeeklyRoutinesScreen: React.FC<any> = ({ navigation }) => {
         const status = isCompleted ? 'completed' : isInProgress ? 'in_progress' : todayRoutineDay.es_descanso ? 'rest' : 'scheduled';
 
         return {
-            title: todayRoutineDay.nombre_dia || 'Entrenamiento de Hoy',
-            description: todayRoutineDay.descripcion || 'Enfoque de sobrecarga progresiva y estímulo hipertrófico.',
+            title: todayRoutineDay.nombre_dia || t('calendar.todayWorkout', 'Entrenamiento de Hoy'),
+            description: todayRoutineDay.descripcion || t('calendar.progressiveOverloadDesc', 'Enfoque de sobrecarga progresiva y estímulo hipertrófico.'),
             estimatedMinutes: todayRoutineDay.duracion_estimada || 55,
             exerciseCount: exerciseCount || 5,
             totalSets: totalSets || 15,
@@ -197,7 +197,7 @@ export const WeeklyRoutinesScreen: React.FC<any> = ({ navigation }) => {
             muscles: Array.from(muscleSet).slice(0, 3),
             status: status as any,
         };
-    }, [todayRoutineDay, completedDays, inProgressDays, todayKey]);
+    }, [todayRoutineDay, completedDays, inProgressDays, todayKey, t]);
 
     const handleStartWorkout = () => {
         if (todayRoutineDay?.id) {
@@ -279,12 +279,12 @@ export const WeeklyRoutinesScreen: React.FC<any> = ({ navigation }) => {
                                             { color: colors.primary || colors.text },
                                         ]}
                                     >
-                                        Semana Activa • {selectedRoutine?.nombre || 'Rutina Principal'}
+                                        {t('calendar.activeWeek', 'Semana Activa')} • {selectedRoutine?.nombre || t('calendar.mainRoutine', 'Rutina Principal')}
                                     </Text>
                                 </View>
                             </View>
                             <Text style={[styles.screenTitle, { color: colors.onSurface || colors.text }]}>
-                                Mis Rutinas
+                                {t('calendar.myRoutines', 'Mis Rutinas')}
                             </Text>
                         </View>
 
@@ -301,7 +301,7 @@ export const WeeklyRoutinesScreen: React.FC<any> = ({ navigation }) => {
                         >
                             <MaterialIcons name="add" size={18} color={colors.primary} />
                             <Text style={[styles.newRoutineBtnText, { color: colors.primary }]}>
-                                Nueva Rutina
+                                {t('calendar.newRoutine', 'Nueva Rutina')}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -316,7 +316,7 @@ export const WeeklyRoutinesScreen: React.FC<any> = ({ navigation }) => {
 
                 {/* Bento Hero Card 'Rutina de Hoy' */}
                 <TodayRoutineHeroCard
-                    dayName={`HOY • ${todayDayName}`}
+                    dayName={`${t('calendar.todayUpper', 'HOY')} • ${todayDayName}`}
                     routineTitle={heroMetrics.title}
                     description={heroMetrics.description}
                     estimatedMinutes={heroMetrics.estimatedMinutes}
@@ -334,10 +334,10 @@ export const WeeklyRoutinesScreen: React.FC<any> = ({ navigation }) => {
                 <View style={styles.listSection}>
                     <View style={styles.listHeaderRow}>
                         <Text style={[styles.listSectionTitle, { color: colors.onSurface || colors.text }]}>
-                            Rutinas de la Semana
+                            {t('calendar.weeklyRoutinesSection', 'Rutinas de la Semana')}
                         </Text>
                         <Text style={[styles.listCounter, { color: colors.onSurfaceVariant || colors.textSecondary }]}>
-                            {completedCount} de 5 completadas
+                            {t('calendar.completedCountOfFive', '{{count}} de 5 completadas', { count: completedCount })}
                         </Text>
                     </View>
 
