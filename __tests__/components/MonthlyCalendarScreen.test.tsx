@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import MonthlyCalendarScreen from '../../src/screens/MonthlyCalendarScreen';
 import { RoutineService } from '../../src/services/RoutineService';
 import { WorkoutService } from '../../src/services/WorkoutService';
@@ -32,14 +32,32 @@ describe('MonthlyCalendarScreen Component (RNTL)', () => {
         });
     });
 
-    it('renders monthly calendar screen header and legend items', async () => {
-        const { findByText } = await render(
+    it('renders CalendarLegend only in monthly viewMode and hides it in weekly viewMode (PF-400)', async () => {
+        const { findByTestId, queryByTestId, findByText } = await render(
             <AuthContext.Provider value={{ user: { id: 'user-1' } } as any}>
                 <MonthlyCalendarScreen navigation={mockNavigation} />
             </AuthContext.Provider>
         );
 
+        // Initially in weekly viewMode: legend should NOT be present
+        expect(queryByTestId('status-legend')).toBeNull();
+
+        // Switch to monthly viewMode
+        const monthlyToggle = await findByTestId('toggle-monthly-view');
+        fireEvent.press(monthlyToggle);
+
+        // Now in monthly viewMode: legend should be present
+        expect(await findByTestId('status-legend')).toBeTruthy();
         expect(await findByText('Hoy')).toBeTruthy();
         expect(await findByText('Completado')).toBeTruthy();
+
+        // Switch back to weekly viewMode
+        const weeklyToggle = await findByTestId('toggle-weekly-view');
+        fireEvent.press(weeklyToggle);
+
+        // Legend should be hidden again
+        await waitFor(() => {
+            expect(queryByTestId('status-legend')).toBeNull();
+        });
     });
 });

@@ -54,6 +54,9 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "monthly-calendar-screen"
 
+- tapOn:
+    id: "toggle-monthly-view"
+
 # 4. Desplazarse hacia abajo para verificar la Leyenda de Estados
 - scroll
 

@@ -607,21 +607,21 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                             isInCurrentWeekFn={isInCurrentWeek}
                             onDayPress={handleDayPress}
                         />
+
+                        {/* Calendar Legend (Only rendered on monthly view) */}
+                        <View style={styles.legendContainer}>
+                            <CalendarLegend
+                                colors={colors}
+                                labels={{
+                                    today: t('calendar.today', 'Hoy'),
+                                    completed: t('calendar.completed', 'Completado'),
+                                    inProgress: t('calendar.inProgress', 'En Progreso'),
+                                    missed: t('calendar.missed', 'Sin Hacer'),
+                                }}
+                            />
+                        </View>
                     </View>
                 )}
-
-                {/* Calendar Legend (Rendered on both views for quick color reference and test compatibility) */}
-                <View style={styles.legendContainer}>
-                    <CalendarLegend
-                        colors={colors}
-                        labels={{
-                            today: t('calendar.today', 'Hoy'),
-                            completed: t('calendar.completed', 'Completado'),
-                            inProgress: t('calendar.inProgress', 'En Progreso'),
-                            missed: t('calendar.missed', 'Sin Hacer'),
-                        }}
-                    />
-                </View>
             </ScrollView>
 
             <CalendarFab
