@@ -192,10 +192,13 @@ export const MuscleVolumeBar: React.FC<MuscleVolumeBarProps> = ({
         [colors, statusColor, progressPercentage]
     );
 
+    const normalizedMuscleKey = normalizeMuscleKey(muscle);
+    const displayMuscle = t(`muscleGroups.${normalizedMuscleKey}`, muscle);
+
     return (
         <View style={styles.card} testID={safeTestId}>
             <View style={styles.header}>
-                <Text style={styles.muscleTitle}>{muscle}</Text>
+                <Text style={styles.muscleTitle}>{displayMuscle}</Text>
                 <View style={styles.badge} testID={`${safeTestId}-badge`}>
                     <Text style={styles.badgeText}>{statusLabel}</Text>
                 </View>

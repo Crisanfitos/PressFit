@@ -200,6 +200,10 @@
     "hypertrophyMEVDesc": "MEV (Mínimo Efectivo): Volumen mínimo para estimular hipertrofia.",
     "hypertrophyMAVDesc": "MAV (Máximo Adaptativo): Rango óptimo donde se logran las mayores ganancias musculares.",
     "hypertrophyMRVDesc": "MRV (Máximo Recuperable): Límite superior de recuperación. Superarlo genera fatiga excesiva.",
+    "hypertrophyMVTerm": "MV - Volumen de Mantenimiento",
+    "hypertrophyMEVTerm": "MEV - Volumen Mínimo Efectivo",
+    "hypertrophyMAVTerm": "MAV - Volumen Máximo Adaptativo",
+    "hypertrophyMRVTerm": "MRV - Volumen Máximo Recuperable",
     "weeklyLoad": "Carga semanal",
     "weeklyLoadSubtitle": "Tonelaje movido por día (kg)",
     "weeklyAverage": "Promedio: {{avg}} kg/día",
@@ -483,5 +487,26 @@
     "cuerpo_completo": "Cuerpo Completo",
     "general": "General",
     "otros": "Otros"
+  },
+  "hypertrophy": {
+    "statusBelowMV": "Bajo Mantenimiento (< MV)",
+    "statusMaintenance": "Mantenimiento (MV)",
+    "statusOptimal": "Óptimo (MAV)",
+    "statusWarning": "Cerca de MRV",
+    "statusOvertraining": "Sobreentrenamiento (> MRV)",
+    "descBelowMV": "Volumen insuficiente para mantener masa muscular.",
+    "descMaintenance": "Volumen adecuado para mantener masa muscular.",
+    "descOptimal": "Rango óptimo para maximizar crecimiento muscular.",
+    "descWarning": "Volumen muy alto. Cerca del límite de recuperación.",
+    "descOvertraining": "Has superado el volumen máximo recuperable."
+  },
+  "scienceRec": {
+    "title": "Sobrecarga Progresiva & Deload",
+    "ctaLabel": "Ajustar Volumen en Rutinas",
+    "noData": "Registra tus entrenamientos esta semana para recibir una recomendación personalizada de volumen.",
+    "overtraining": "Tu volumen en {{muscle}} supera el MRV ({{sets}} series). Considera una semana de deload o reducir 3-4 series para recuperar adaptación.",
+    "low": "Tu volumen en {{optimalRef}} está en rango óptimo de adaptación (MAV). Considera añadir 2 series en {{muscle}} la próxima semana.",
+    "warning": "Tu volumen en {{muscle}} está cerca del límite recuperable (MRV). Mantén la carga actual y evita añadir series extra esta semana.",
+    "optimalMaintain": "Tu volumen en {{muscles}} está en rango óptimo de adaptación (MAV). Mantén la sobrecarga progresiva actual."
   }
 }

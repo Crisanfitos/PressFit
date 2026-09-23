@@ -25,6 +25,7 @@ import {
 } from '../utils/dateUtils';
 import {
     assessMuscleHypertrophy,
+    normalizeMuscleKey,
 } from '../utils/hypertrophyLandmarks';
 import { EffectiveSetsSummary } from '../utils/analyticsUtils';
 
@@ -531,6 +532,32 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
                         title={recommendation.title}
                         message={recommendation.message}
                         ctaLabel={recommendation.ctaLabel}
+                        titleKey={recommendation.titleKey}
+                        messageKey={recommendation.messageKey}
+                        messageParams={
+                            recommendation.messageParams
+                                ? {
+                                      ...recommendation.messageParams,
+                                      ...(recommendation.messageParams.muscle
+                                          ? {
+                                                muscle: t(
+                                                    `muscleGroups.${normalizeMuscleKey(String(recommendation.messageParams.muscle))}`,
+                                                    String(recommendation.messageParams.muscle)
+                                                ),
+                                            }
+                                          : {}),
+                                      ...(recommendation.messageParams.optimalRef
+                                          ? {
+                                                optimalRef: t(
+                                                    `muscleGroups.${normalizeMuscleKey(String(recommendation.messageParams.optimalRef))}`,
+                                                    String(recommendation.messageParams.optimalRef)
+                                                ),
+                                            }
+                                          : {}),
+                                  }
+                                : undefined
+                        }
+                        ctaLabelKey={recommendation.ctaLabelKey}
                         onPressCta={handleAdjustVolume}
                     />
                 )}
@@ -541,7 +568,12 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
                         <View style={styles.legendRow}>
                             <View style={[styles.legendDot, { backgroundColor: '#64748B' }]} />
                             <View style={styles.legendTextContainer}>
-                                <Text style={styles.legendTerm}>MV - Volumen de Mantenimiento</Text>
+                                <Text style={styles.legendTerm}>
+                                    {t(
+                                        'progress.hypertrophyMVTerm',
+                                        'MV - Volumen de Mantenimiento'
+                                    )}
+                                </Text>
                                 <Text style={styles.legendDesc}>
                                     {t(
                                         'progress.hypertrophyMVDesc',
@@ -554,7 +586,12 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
                         <View style={styles.legendRow}>
                             <View style={[styles.legendDot, { backgroundColor: '#3B82F6' }]} />
                             <View style={styles.legendTextContainer}>
-                                <Text style={styles.legendTerm}>MEV - Volumen Mínimo Efectivo</Text>
+                                <Text style={styles.legendTerm}>
+                                    {t(
+                                        'progress.hypertrophyMEVTerm',
+                                        'MEV - Volumen Mínimo Efectivo'
+                                    )}
+                                </Text>
                                 <Text style={styles.legendDesc}>
                                     {t(
                                         'progress.hypertrophyMEVDesc',
@@ -567,7 +604,12 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
                         <View style={styles.legendRow}>
                             <View style={[styles.legendDot, { backgroundColor: '#10B981' }]} />
                             <View style={styles.legendTextContainer}>
-                                <Text style={styles.legendTerm}>MAV - Volumen Máximo Adaptativo</Text>
+                                <Text style={styles.legendTerm}>
+                                    {t(
+                                        'progress.hypertrophyMAVTerm',
+                                        'MAV - Volumen Máximo Adaptativo'
+                                    )}
+                                </Text>
                                 <Text style={styles.legendDesc}>
                                     {t(
                                         'progress.hypertrophyMAVDesc',
@@ -580,7 +622,12 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
                         <View style={styles.legendRow}>
                             <View style={[styles.legendDot, { backgroundColor: '#EF4444' }]} />
                             <View style={styles.legendTextContainer}>
-                                <Text style={styles.legendTerm}>MRV - Volumen Máximo Recuperable</Text>
+                                <Text style={styles.legendTerm}>
+                                    {t(
+                                        'progress.hypertrophyMRVTerm',
+                                        'MRV - Volumen Máximo Recuperable'
+                                    )}
+                                </Text>
                                 <Text style={styles.legendDesc}>
                                     {t(
                                         'progress.hypertrophyMRVDesc',

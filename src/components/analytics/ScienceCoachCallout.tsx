@@ -8,6 +8,10 @@ export interface ScienceCoachCalloutProps {
     title: string;
     message: string;
     ctaLabel: string;
+    titleKey?: string;
+    messageKey?: string;
+    messageParams?: Record<string, string | number>;
+    ctaLabelKey?: string;
     onPressCta?: () => void;
     testID?: string;
 }
@@ -16,12 +20,27 @@ export const ScienceCoachCallout: React.FC<ScienceCoachCalloutProps> = ({
     title,
     message,
     ctaLabel,
+    titleKey,
+    messageKey,
+    messageParams,
+    ctaLabelKey,
     onPressCta,
     testID = 'hypertrophy-coach-callout',
 }) => {
     const { t } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
+
+    const displayTitle = titleKey ? t(titleKey, title) : title;
+    const displayMessage = messageKey
+        ? t(messageKey, {
+              ...(messageParams || {}),
+              defaultValue: message,
+          })
+        : message;
+    const displayCta = ctaLabelKey
+        ? t(ctaLabelKey, ctaLabel)
+        : t('progress.hypertrophyAdjustVolume', ctaLabel);
 
     const styles = useMemo(
         () =>
@@ -85,20 +104,20 @@ export const ScienceCoachCallout: React.FC<ScienceCoachCalloutProps> = ({
                 <View style={styles.iconBadge}>
                     <MaterialIcons name="military-tech" size={18} color={colors.primary} />
                 </View>
-                <Text style={styles.title}>{title}</Text>
+                <Text style={styles.title}>{displayTitle}</Text>
             </View>
             <Text style={styles.message} testID={`${testID}-message`}>
-                {message}
+                {displayMessage}
             </Text>
             <TouchableOpacity
                 style={styles.cta}
                 onPress={onPressCta}
                 testID={`${testID}-cta`}
                 accessibilityRole="button"
-                accessibilityLabel={t('progress.hypertrophyAdjustVolume', ctaLabel)}
+                accessibilityLabel={displayCta}
             >
                 <Text style={styles.ctaText}>
-                    {t('progress.hypertrophyAdjustVolume', ctaLabel)}
+                    {displayCta}
                 </Text>
             </TouchableOpacity>
         </View>
