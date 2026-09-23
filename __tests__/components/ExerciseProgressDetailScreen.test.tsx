@@ -5,6 +5,7 @@ import { ExerciseService } from '../../src/services/ExerciseService';
 import { WorkoutService } from '../../src/services/WorkoutService';
 import { AnalyticsService } from '../../src/services/AnalyticsService';
 import { AuthContext } from '../../src/context/AuthContext';
+import i18n from '../../src/i18n';
 
 jest.mock('../../src/services/ExerciseService', () => ({
     ExerciseService: {
@@ -67,8 +68,9 @@ describe('ExerciseProgressDetailScreen Component - PF-394 M3 Bento Redesign', ()
             </AuthContext.Provider>
         );
 
-    beforeEach(() => {
+    beforeEach(async () => {
         jest.clearAllMocks();
+        await i18n.changeLanguage('es');
         (ExerciseService.getExerciseById as jest.Mock).mockResolvedValue({
             data: { id: 'ex-101', titulo: 'Press de Banca' },
             error: null,
@@ -81,6 +83,10 @@ describe('ExerciseProgressDetailScreen Component - PF-394 M3 Bento Redesign', ()
             data: MOCK_1RM_HISTORY,
             error: null,
         });
+    });
+
+    afterEach(async () => {
+        await i18n.changeLanguage('es');
     });
 
     it('renders the exercise progress detail screen container', async () => {
@@ -204,4 +210,34 @@ describe('ExerciseProgressDetailScreen Component - PF-394 M3 Bento Redesign', ()
             expect(getByTestId('exercise-progress-recommendation')).toBeTruthy();
         });
     });
+
+    it('renders all metrics and cards translated in Spanish (PF-406)', async () => {
+        const { getByText } = await renderScreen();
+        await waitFor(() => {
+            expect(getByText('1RM Estimado Actual')).toBeTruthy();
+            expect(getByText('Fórmula Brzycki')).toBeTruthy();
+            expect(getByText('Volumen de Sesión')).toBeTruthy();
+            expect(getByText('Récord histórico')).toBeTruthy();
+            expect(getByText('Mejor Serie')).toBeTruthy();
+            expect(getByText('Evolución de Carga')).toBeTruthy();
+            expect(getByText('Historial de Sesiones')).toBeTruthy();
+        });
+    });
+
+    it('switches to English and translates 1RM, mini-cards, and history (PF-406)', async () => {
+        await act(async () => {
+            await i18n.changeLanguage('en');
+        });
+        const { getByText } = await renderScreen();
+        await waitFor(() => {
+            expect(getByText('Current Estimated 1RM')).toBeTruthy();
+            expect(getByText('Brzycki Formula')).toBeTruthy();
+            expect(getByText('Session Volume')).toBeTruthy();
+            expect(getByText('All-time record')).toBeTruthy();
+            expect(getByText('Best Set')).toBeTruthy();
+            expect(getByText('Load Evolution')).toBeTruthy();
+            expect(getByText('Session History')).toBeTruthy();
+        });
+    });
 });
+

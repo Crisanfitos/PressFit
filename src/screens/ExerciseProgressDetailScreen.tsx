@@ -218,16 +218,6 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                     borderColor: colors.outlineVariant,
                     overflow: 'hidden',
                 },
-                oneRMAmbient: {
-                    position: 'absolute',
-                    top: -30,
-                    right: -30,
-                    width: 100,
-                    height: 100,
-                    borderRadius: 50,
-                    backgroundColor: colors.primary,
-                    opacity: 0.08,
-                },
                 oneRMTopRow: {
                     flexDirection: 'row',
                     alignItems: 'flex-start',
@@ -541,7 +531,7 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                     <MaterialIcons name="arrow-back" size={24} color={colors.onSurface} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle} numberOfLines={1}>
-                    {exerciseDetails?.titulo || 'Progreso'}
+                    {exerciseDetails?.titulo || t('progress.exerciseProgress', 'Progreso')}
                 </Text>
                 <View style={{ width: 40 }} />
             </View>
@@ -552,10 +542,9 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
             >
                 {/* ─── 1RM Hero Card ───────────────────────────────── */}
                 <View style={styles.oneRMCard} testID="exercise-progress-1rm-card">
-                    <View style={styles.oneRMAmbient} />
                     <View style={styles.oneRMTopRow}>
                         <View style={styles.oneRMLeft}>
-                            <Text style={styles.oneRMLabel}>1RM Estimado Actual</Text>
+                            <Text style={styles.oneRMLabel}>{t('progress.currentEstimated1RM', '1RM Estimado Actual')}</Text>
                             <View style={styles.oneRMValueRow}>
                                 <Text style={styles.oneRMValue} testID="exercise-progress-1rm-value">
                                     {current1RM !== null ? Math.round(current1RM) : '—'}
@@ -596,12 +585,12 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                                 size={14}
                                 color={colors.primary}
                             />
-                            <Text style={styles.oneRMFormula}>Fórmula Brzycki</Text>
+                            <Text style={styles.oneRMFormula}>{t('progress.brzyckiFormula', 'Fórmula Brzycki')}</Text>
                         </View>
                         {trendPct !== null && (
                             <Text style={styles.oneRMTrendPct}>
                                 {trendPct >= 0 ? '+' : ''}
-                                {trendPct.toFixed(1)}% vs sesión anterior
+                                {trendPct.toFixed(1)}% {t('progress.vsPreviousSession', 'vs sesión anterior')}
                             </Text>
                         )}
                     </View>
@@ -617,7 +606,7 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                                 size={13}
                                 color={colors.primaryContainer}
                             />
-                            <Text style={styles.miniCardLabel}>Volumen de Sesión</Text>
+                            <Text style={styles.miniCardLabel}>{t('progress.sessionVolume', 'Volumen de Sesión')}</Text>
                         </View>
                         <View>
                             <Text style={styles.miniCardValue} testID="exercise-progress-max-volume-value">
@@ -628,7 +617,7 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                             </Text>
                             <View style={styles.miniCardSub}>
                                 <MaterialIcons name="star" size={10} color={colors.primary} />
-                                <Text style={styles.miniCardSubText}>Récord histórico</Text>
+                                <Text style={styles.miniCardSubText}>{t('progress.historicalRecord', 'Récord histórico')}</Text>
                             </View>
                         </View>
                     </View>
@@ -641,7 +630,7 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                                 size={13}
                                 color={colors.tertiaryContainer}
                             />
-                            <Text style={styles.miniCardLabel}>Mejor Serie</Text>
+                            <Text style={styles.miniCardLabel}>{t('progress.bestSet', 'Mejor Serie')}</Text>
                         </View>
                         <View>
                             {bestSet ? (
@@ -677,9 +666,9 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                     <View style={styles.chartCard} testID="exercise-progress-chart-card">
                         <View style={styles.chartCardHeaderRow}>
                             <View>
-                                <Text style={styles.chartCardTitle}>Evolución de Carga</Text>
+                                <Text style={styles.chartCardTitle}>{t('progress.loadEvolution', 'Evolución de Carga')}</Text>
                                 <Text style={styles.chartCardSubtitle}>
-                                    Progreso del 1RM estimado por sesión
+                                    {t('progress.loadEvolutionSubtitle', 'Progreso del 1RM estimado por sesión')}
                                 </Text>
                             </View>
                             <View style={styles.toggleRow}>
@@ -716,10 +705,10 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                             <View style={styles.insightBar} testID="exercise-progress-insight-bar">
                                 <View style={styles.insightLeft}>
                                     <MaterialIcons name="insights" size={16} color={colors.primary} />
-                                    <Text style={styles.insightText}>Ritmo de sobrecarga progresiva</Text>
+                                    <Text style={styles.insightText}>{t('progress.progressiveOverloadRate', 'Ritmo de sobrecarga progresiva')}</Text>
                                 </View>
                                 <View style={styles.insightBadge}>
-                                    <Text style={styles.insightBadgeText}>Consistente</Text>
+                                    <Text style={styles.insightBadgeText}>{t('progress.consistent', 'Consistente')}</Text>
                                 </View>
                             </View>
                         )}
@@ -743,7 +732,9 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                         {t('progress.setsHistory', 'Historial de Sesiones')}
                     </Text>
                     <Text style={{ fontSize: 12, color: colors.onSurfaceVariant }}>
-                        {sortedDates.length} sesiones
+                        {sortedDates.length === 1
+                            ? t('progress.sessionCountSingular', '1 sesión')
+                            : t('progress.sessionCountPlural', '{{count}} sesiones', { count: sortedDates.length })}
                     </Text>
                 </View>
 
@@ -772,7 +763,7 @@ const ExerciseProgressDetailScreen: React.FC<ExerciseProgressDetailScreenProps> 
                                     </View>
                                     <View style={styles.sessionVolBadge}>
                                         <Text style={styles.sessionVolText}>
-                                            Vol: {sessionVolume.toLocaleString()} kg
+                                            {t('progress.volAbbrev', 'Vol')}: {sessionVolume.toLocaleString()} kg
                                         </Text>
                                     </View>
                                 </View>
