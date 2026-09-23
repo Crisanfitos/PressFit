@@ -73,7 +73,7 @@ const DailyProgressScreen: React.FC<DailyProgressScreenProps> = ({ navigation })
                         <View style={styles.statCard}>
                             <MaterialIcons name="timer" size={28} color={colors.primary} />
                             <Text style={styles.statValue}>{dailyStats.duration}</Text>
-                            <Text style={styles.statLabel}>{t('common.minutes', 'Minutos')}</Text>
+                            <Text style={styles.statLabel}>{t('workout.totalMinutes', 'Minutos')}</Text>
                         </View>
                         <View style={styles.statCard}>
                             <MaterialIcons name="speed" size={28} color={colors.primary} />
