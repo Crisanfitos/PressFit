@@ -167,7 +167,16 @@
     "enterValidNumericValues": "Please enter valid numeric values",
     "valuesGreaterThanZero": "Values must be greater than 0",
     "saveDataError": "An error occurred while saving data",
-    "calculatedBmi": "Calculated BMI:"
+    "calculatedBmi": "Calculated BMI:",
+    "gymPrefs": "Gym Preferences",
+    "weightUnit": "Weight Unit",
+    "defaultRest": "Default Rest Time",
+    "restSound": "Sound when rest finishes",
+    "restVibration": "Haptic vibration",
+    "plateSettings": "Plates & Barbells",
+    "plateSettingsDesc": "Configure your bar and plate inventory",
+    "loadingPhotos": "Loading photos...",
+    "noPhotosYet": "No progress photos yet"
   },
   "progress": {
     "title": "Progress",

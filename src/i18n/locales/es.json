@@ -167,7 +167,16 @@
     "enterValidNumericValues": "Por favor ingresa valores numéricos válidos",
     "valuesGreaterThanZero": "Los valores deben ser mayores a 0",
     "saveDataError": "Ocurrió un error al guardar los datos",
-    "calculatedBmi": "IMC calculado:"
+    "calculatedBmi": "IMC calculado:",
+    "gymPrefs": "Preferencias de gimnasio",
+    "weightUnit": "Unidad de peso",
+    "defaultRest": "Descanso por defecto",
+    "restSound": "Sonido al finalizar descanso",
+    "restVibration": "Vibración táctil",
+    "plateSettings": "Discos y Barras",
+    "plateSettingsDesc": "Configura tu barra e inventario de discos",
+    "loadingPhotos": "Cargando fotos...",
+    "noPhotosYet": "No hay fotos de progreso aún"
   },
   "progress": {
     "title": "Progreso",
