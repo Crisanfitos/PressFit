@@ -223,7 +223,15 @@
     "durationByDay": "Duración por Día",
     "sessionHistory": "Historial de sesiones",
     "startWeekStrong": "¡Empieza tu semana fuerte!",
-    "trainThisWeek": "Entrena esta semana y verás tu progreso reflejado aquí"
+    "trainThisWeek": "Entrena esta semana y verás tu progreso reflejado aquí",
+    "exerciseProgress": "Progreso por Ejercicio",
+    "searchExercise": "Buscar ejercicio...",
+    "exerciseCountSingular": "1 ejercicio",
+    "exerciseCountPlural": "{{count}} ejercicios",
+    "noExercisesTracked": "Sin ejercicios registrados",
+    "noSearchResults": "Sin resultados",
+    "tryAnotherSearch": "Prueba con otro término de búsqueda",
+    "logSetsPrompt": "Registra series en un entrenamiento para ver tu progreso aquí"
   },
   "physicalProgress": {
     "title": "Cambio Físico",
@@ -426,5 +434,34 @@
   "weeklyPlan": {
     "title": "Plan Semanal",
     "placeholderSubtitle": "Esta pantalla será rediseñada"
+  },
+  "muscleGroups": {
+    "pecho": "Pecho",
+    "pectoral": "Pectoral",
+    "espalda": "Espalda",
+    "dorsal": "Dorsal",
+    "dorsales": "Dorsales",
+    "trapecio": "Trapecio",
+    "piernas": "Piernas",
+    "cuadriceps": "Cuádriceps",
+    "isquiotibiales": "Isquiotibiales",
+    "femoral": "Femoral",
+    "gluteos": "Glúteos",
+    "gluteo": "Glúteo",
+    "gemelos": "Gemelos",
+    "pantorrillas": "Pantorrillas",
+    "hombros": "Hombros",
+    "deltoides": "Deltoides",
+    "brazos": "Brazos",
+    "biceps": "Bíceps",
+    "triceps": "Tríceps",
+    "antebrazo": "Antebrazo",
+    "antebrazos": "Antebrazos",
+    "abdomen": "Abdomen",
+    "core": "Core",
+    "fullbody": "Cuerpo Completo",
+    "cuerpo_completo": "Cuerpo Completo",
+    "general": "General",
+    "otros": "Otros"
   }
 }

@@ -223,7 +223,15 @@
     "durationByDay": "Duration by Day",
     "sessionHistory": "Session History",
     "startWeekStrong": "Start your week strong!",
-    "trainThisWeek": "Train this week to see your progress reflected here"
+    "trainThisWeek": "Train this week to see your progress reflected here",
+    "exerciseProgress": "Exercise Progress",
+    "searchExercise": "Search exercise...",
+    "exerciseCountSingular": "1 exercise",
+    "exerciseCountPlural": "{{count}} exercises",
+    "noExercisesTracked": "No tracked exercises",
+    "noSearchResults": "No results",
+    "tryAnotherSearch": "Try another search term",
+    "logSetsPrompt": "Log sets in a workout to see your progress here"
   },
   "physicalProgress": {
     "title": "Physical Progress",
@@ -426,5 +434,34 @@
   "weeklyPlan": {
     "title": "Weekly Plan",
     "placeholderSubtitle": "This screen will be redesigned"
+  },
+  "muscleGroups": {
+    "pecho": "Chest",
+    "pectoral": "Chest",
+    "espalda": "Back",
+    "dorsal": "Lats",
+    "dorsales": "Lats",
+    "trapecio": "Traps",
+    "piernas": "Legs",
+    "cuadriceps": "Quadriceps",
+    "isquiotibiales": "Hamstrings",
+    "femoral": "Hamstrings",
+    "gluteos": "Glutes",
+    "gluteo": "Glutes",
+    "gemelos": "Calves",
+    "pantorrillas": "Calves",
+    "hombros": "Shoulders",
+    "deltoides": "Deltoids",
+    "brazos": "Arms",
+    "biceps": "Biceps",
+    "triceps": "Triceps",
+    "antebrazo": "Forearms",
+    "antebrazos": "Forearms",
+    "abdomen": "Abs",
+    "core": "Core",
+    "fullbody": "Full Body",
+    "cuerpo_completo": "Full Body",
+    "general": "General",
+    "otros": "Other"
   }
 }
