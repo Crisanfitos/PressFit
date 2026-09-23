@@ -171,6 +171,16 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
         [colors]
     );
 
+    const formatMuscle = (muscles: any): string => {
+        if (!muscles) return '';
+        const raw = Array.isArray(muscles)
+            ? muscles[0]
+            : (typeof muscles === 'string' ? muscles.split(',')[0].trim() : String(muscles));
+        if (!raw) return '';
+        const key = String(raw).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_').trim();
+        return String(t(`muscleGroups.${key}`, raw));
+    };
+
     const renderItem = ({ item, index }: { item: any; index: number }) => (
         <TouchableOpacity
             style={styles.exerciseCard}
@@ -187,9 +197,7 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
                 </Text>
                 {item.musculos_primarios && (
                     <Text style={styles.exerciseMuscle} numberOfLines={1}>
-                        {Array.isArray(item.musculos_primarios)
-                            ? item.musculos_primarios[0]
-                            : item.musculos_primarios}
+                        {formatMuscle(item.musculos_primarios)}
                     </Text>
                 )}
             </View>
@@ -209,13 +217,13 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
             </View>
             <Text style={styles.emptyTitle}>
                 {searchQuery
-                    ? 'Sin resultados'
+                    ? t('progress.noSearchResults', 'Sin resultados')
                     : t('progress.noExercisesTracked', 'Sin ejercicios registrados')}
             </Text>
             <Text style={styles.emptySubtitle}>
                 {searchQuery
-                    ? 'Prueba con otro término de búsqueda'
-                    : 'Registra series en un entrenamiento para ver tu progreso aquí'}
+                    ? t('progress.tryAnotherSearch', 'Prueba con otro término de búsqueda')
+                    : t('progress.logSetsPrompt', 'Registra series en un entrenamiento para ver tu progreso aquí')}
             </Text>
         </View>
     );
@@ -259,8 +267,9 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
             {!loading && (
                 <View style={styles.counterRow}>
                     <Text style={styles.counterText}>
-                        {filteredExercises.length}{' '}
-                        {filteredExercises.length === 1 ? 'ejercicio' : 'ejercicios'}
+                        {filteredExercises.length === 1
+                            ? t('progress.exerciseCountSingular', '1 ejercicio')
+                            : t('progress.exerciseCountPlural', '{{count}} ejercicios', { count: filteredExercises.length })}
                     </Text>
                 </View>
             )}

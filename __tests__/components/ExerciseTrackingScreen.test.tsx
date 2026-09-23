@@ -3,6 +3,7 @@ import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import ExerciseTrackingScreen from '../../src/screens/ExerciseTrackingScreen';
 import { ExerciseService } from '../../src/services/ExerciseService';
 import { AuthContext } from '../../src/context/AuthContext';
+import i18n from '../../src/i18n';
 
 jest.mock('../../src/services/ExerciseService');
 
@@ -26,12 +27,17 @@ describe('ExerciseTrackingScreen Component - PF-394 M3 Redesign', () => {
             </AuthContext.Provider>
         );
 
-    beforeEach(() => {
+    beforeEach(async () => {
         jest.clearAllMocks();
+        await i18n.changeLanguage('es');
         (ExerciseService.getUserExercisesWithProgress as jest.Mock).mockResolvedValue({
             data: MOCK_EXERCISES,
             error: null,
         });
+    });
+
+    afterEach(async () => {
+        await i18n.changeLanguage('es');
     });
 
     it('renders the exercise tracking screen container', async () => {
@@ -136,4 +142,18 @@ describe('ExerciseTrackingScreen Component - PF-394 M3 Redesign', () => {
             expect(getByTestId('exercise-tracking-empty')).toBeTruthy();
         });
     });
+
+    it('switches to English and translates title, counter, search placeholder, and muscle groups (PF-405)', async () => {
+        await i18n.changeLanguage('en');
+        const { getByText, getByPlaceholderText } = await renderScreen();
+        await waitFor(() => {
+            expect(getByText('Exercise Progress')).toBeTruthy();
+            expect(getByText('3 exercises')).toBeTruthy();
+            expect(getByPlaceholderText('Search exercise...')).toBeTruthy();
+            expect(getByText('Chest')).toBeTruthy();
+            expect(getByText('Quadriceps')).toBeTruthy();
+            expect(getByText('Deltoids')).toBeTruthy();
+        });
+    });
 });
+
