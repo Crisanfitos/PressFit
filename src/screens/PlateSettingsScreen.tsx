@@ -28,6 +28,19 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
     handleTogglePlate, handleAdjustPairs, handleSetUnlimited, handleResetDefaults, handleSave,
   } = usePlateSettingsController(userId);
 
+  const getPresetDesc = (preset: { value: number; desc: string }) => {
+    if (preset.value === 20 || preset.value === 45) {
+      return t('plateSettings.presets.standardOlympic', preset.desc);
+    }
+    if (preset.value === 15 || preset.value === 35) {
+      return t('plateSettings.presets.technicalOlympic', preset.desc);
+    }
+    if (preset.value === 10 || preset.value === 25) {
+      return t('plateSettings.presets.smithMachine', preset.desc);
+    }
+    return preset.desc;
+  };
+
   if (loading || !settings) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} testID="plate-settings-screen">
@@ -92,7 +105,7 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
                   { color: currentUnit === 'kg' ? colors.textOnPrimary : colors.textSecondary },
                 ]}
               >
-                Kilogramos (kg)
+                {t('plateSettings.kilograms', 'Kilogramos (kg)')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -109,7 +122,7 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
                   { color: currentUnit === 'lb' ? colors.textOnPrimary : colors.textSecondary },
                 ]}
               >
-                Libras (lb)
+                {t('plateSettings.pounds', 'Libras (lb)')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -145,7 +158,7 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
                     {preset.label}
                   </Text>
                   <Text style={[styles.presetDesc, { color: colors.textSecondary }]}>
-                    {preset.desc}
+                    {getPresetDesc(preset)}
                   </Text>
                 </TouchableOpacity>
               );
@@ -213,7 +226,14 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
               </Text>
             </View>
             <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>
-              Ejemplo de carga con tus discos activos ({previewCalculation.totalWeight} {currentUnit})
+              {t(
+                'plateSettings.previewSubtitle',
+                'Ejemplo de carga con tus discos activos ({{weight}} {{unit}})',
+                {
+                  weight: previewCalculation.totalWeight,
+                  unit: currentUnit,
+                }
+              )}
             </Text>
 
             <View style={styles.visualizerWrapper}>
@@ -284,7 +304,11 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
                         {isUnlimited
                           ? t('plateSettings.unlimited', 'Pares ilimitados')
                           : isEnabled
-                          ? `${plate.availablePairs} ${plate.availablePairs === 1 ? 'par' : 'pares'}`
+                          ? plate.availablePairs === 1
+                            ? t('plateSettings.singlePair', '1 par')
+                            : t('plateSettings.pairCount', '{{count}} pares', {
+                                count: plate.availablePairs,
+                              })
                           : t('plateSettings.disabled', 'Desactivado')}
                       </Text>
                     </View>
@@ -348,7 +372,12 @@ export const PlateSettingsScreen: React.FC<PlateSettingsScreenProps> = ({ naviga
         <TouchableOpacity
           testID="save-settings-button"
           style={[styles.saveButton, { backgroundColor: colors.primary }]}
-          onPress={handleSave}
+          onPress={() =>
+            handleSave(
+              t('common.error', 'Error'),
+              t('plateSettings.saveError', 'No se pudieron guardar los ajustes.')
+            )
+          }
           disabled={saving}
         >
           {saving ? (

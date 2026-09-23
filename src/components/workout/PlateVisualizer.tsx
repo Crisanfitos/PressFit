@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PlateItem, WeightUnit, getPlateColor } from '../../utils/plateCalculator';
 import { ThemeColors } from '../../types/theme';
 
@@ -55,6 +56,7 @@ export const PlateVisualizer: React.FC<PlateVisualizerProps> = ({
   colors,
   testID = 'plate-visualizer',
 }) => {
+  const { t } = useTranslation();
   const isDark = colors?.background ? colors.background === '#121212' || colors.background.includes('1e') : true;
   const sleeveBg = isDark ? '#334155' : '#94A3B8';
   const stopperBg = isDark ? '#475569' : '#64748B';
@@ -147,8 +149,8 @@ export const PlateVisualizer: React.FC<PlateVisualizerProps> = ({
             <View style={styles.emptyContainer} testID="plate-visualizer-empty">
               <Text style={[styles.emptyText, { color: textColor }]}>
                 {barWeight !== undefined
-                  ? `Solo barra (${barWeight} ${unit})`
-                  : 'Barra sin discos'}
+                  ? t('plateVisualizer.barOnly', 'Solo barra ({{barWeight}} {{unit}})', { barWeight, unit })
+                  : t('plateVisualizer.emptyBar', 'Barra sin discos')}
               </Text>
             </View>
           )}
@@ -159,7 +161,7 @@ export const PlateVisualizer: React.FC<PlateVisualizerProps> = ({
       </ScrollView>
 
       <Text style={[styles.captionText, { color: textColor }]}>
-        Manga de la barra (un lado)
+        {t('plateVisualizer.sleeveCaption', 'Manga de la barra (un lado)')}
       </Text>
     </View>
   );

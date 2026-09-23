@@ -3,6 +3,7 @@ import { render, fireEvent, waitFor, act, cleanup } from '@testing-library/react
 import { Alert } from 'react-native';
 import PlateSettingsScreen from '../../src/screens/PlateSettingsScreen';
 import { PlateSettingsService } from '../../src/services/PlateSettingsService';
+import i18n from '../../src/i18n';
 
 jest.mock('../../src/services/HapticService', () => ({
   HapticService: {
@@ -21,11 +22,15 @@ describe('PlateSettingsScreen Component Tests (PF-320)', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    PlateSettingsService._clearMemoryCache();
     await PlateSettingsService.resetToDefaults();
+    await i18n.changeLanguage('es');
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     cleanup();
+    PlateSettingsService._clearMemoryCache();
+    await i18n.changeLanguage('es');
   });
 
   it('renders correctly with default settings (20 kg bar and kg unit)', async () => {
@@ -45,6 +50,30 @@ describe('PlateSettingsScreen Component Tests (PF-320)', () => {
     expect(getByTestId('bar-preset-10')).toBeTruthy();
     expect(getByTestId('plate-switch-25')).toBeTruthy();
     expect(getByTestId('plate-switch-20')).toBeTruthy();
+  });
+
+  it('renders all section titles, unit buttons, presets and inventory in English', async () => {
+    await act(async () => {
+      await i18n.changeLanguage('en');
+    });
+
+    const { getByTestId, getByText } = await render(
+      <PlateSettingsScreen navigation={mockNavigation as any} />
+    );
+
+    await waitFor(() => {
+      expect(getByTestId('unit-selector-kg')).toBeTruthy();
+    });
+
+    expect(getByText('Plates & Barbells')).toBeTruthy();
+    expect(getByText('Kilograms (kg)')).toBeTruthy();
+    expect(getByText('Pounds (lb)')).toBeTruthy();
+    expect(getByText('Default Barbell Weight')).toBeTruthy();
+    expect(getByText('Standard Olympic')).toBeTruthy();
+    expect(getByText('Technical Olympic')).toBeTruthy();
+    expect(getByText('Multipower / Smith')).toBeTruthy();
+    expect(getByText('Plate Inventory')).toBeTruthy();
+    expect(getByText('Save Changes')).toBeTruthy();
   });
 
   it('navigates back when header back button is pressed', async () => {
@@ -243,7 +272,10 @@ describe('PlateSettingsScreen Component Tests (PF-320)', () => {
       fireEvent.press(getByTestId('save-settings-button'));
     });
 
-    expect(saveSpy).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(saveSpy).toHaveBeenCalled();
+    });
     saveSpy.mockRestore();
   });
 });
+

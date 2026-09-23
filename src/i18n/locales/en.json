@@ -517,5 +517,51 @@
     "low": "Your volume in {{optimalRef}} is in the optimal adaptive range (MAV). Consider adding 2 sets in {{muscle}} next week.",
     "warning": "Your volume in {{muscle}} is close to the recoverable limit (MRV). Maintain current load and avoid adding extra sets this week.",
     "optimalMaintain": "Your volume in {{muscles}} is in the optimal adaptive range (MAV). Maintain current progressive overload."
+  },
+  "plateSettings": {
+    "title": "Plates & Barbells",
+    "resetConfirmTitle": "Reset Settings",
+    "resetConfirmMsg": "Do you want to restore all plate denominations and bar weights to default?",
+    "unitTitle": "Unit of Measurement",
+    "kilograms": "Kilograms (kg)",
+    "pounds": "Pounds (lb)",
+    "barWeightTitle": "Default Barbell Weight",
+    "barWeightSubtitle": "Select your standard barbell weight or enter an exact value.",
+    "customDesc": "Any weight",
+    "customBarWeight": "Exact barbell weight",
+    "previewTitle": "Barbell Preview",
+    "previewSubtitle": "Loading example with your active plates ({{weight}} {{unit}})",
+    "inventoryTitle": "Plate Inventory",
+    "inventorySubtitle": "Enable plates available in your gym and set pair limits if not unlimited.",
+    "unlimited": "Unlimited pairs",
+    "disabled": "Disabled",
+    "singlePair": "1 pair",
+    "pairCount": "{{count}} pairs",
+    "saveError": "Failed to save settings.",
+    "presets": {
+      "standardOlympic": "Standard Olympic",
+      "technicalOlympic": "Technical Olympic",
+      "smithMachine": "Multipower / Smith"
+    }
+  },
+  "plateCalculator": {
+    "title": "Plate Calculator",
+    "targetWeight": "TARGET TOTAL WEIGHT ({{unit}})",
+    "barWeight": "BARBELL WEIGHT",
+    "standard": "Standard",
+    "technical": "Technical",
+    "bar": "Barbell",
+    "perSide": "Per side",
+    "plates": "Plates",
+    "total": "Total",
+    "applyWeight": "Apply {{weight}} {{unit}}",
+    "warnBelowBar": "Target weight ({{target}} {{unit}}) is less than the bar ({{bar}} {{unit}}).",
+    "warnInsufficient": "Not enough plates in inventory to reach this weight.",
+    "warnRemainder": "Inexact weight. A remainder of {{remainder}} {{unit}} cannot be covered."
+  },
+  "plateVisualizer": {
+    "barOnly": "Bar only ({{barWeight}} {{unit}})",
+    "emptyBar": "Bar without plates",
+    "sleeveCaption": "Barbell sleeve (one side)"
   }
 }

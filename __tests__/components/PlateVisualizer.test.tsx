@@ -2,6 +2,7 @@ import React from 'react';
 import { render, cleanup } from '@testing-library/react-native';
 import PlateVisualizer from '../../src/components/workout/PlateVisualizer';
 import { PLATE_COLORS_KG, PLATE_COLORS_LB } from '../../src/utils/plateCalculator';
+import i18n from '../../src/i18n';
 
 describe('PlateVisualizer Component (RNTL)', () => {
   const mockColors = {
@@ -14,8 +15,13 @@ describe('PlateVisualizer Component (RNTL)', () => {
     border: '#333333',
   };
 
-  afterEach(() => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('es');
+  });
+
+  afterEach(async () => {
     cleanup();
+    await i18n.changeLanguage('es');
   });
 
   it('renders barbell sleeve and collar correctly', async () => {
@@ -127,4 +133,21 @@ describe('PlateVisualizer Component (RNTL)', () => {
     expect(getByText('45')).toBeTruthy();
     expect(getByText('25')).toBeTruthy();
   });
+
+  it('renders caption and empty state in English when language is en', async () => {
+    await i18n.changeLanguage('en');
+
+    const { getByTestId, getByText } = await render(
+      <PlateVisualizer
+        platesPerSide={[]}
+        barWeight={20}
+        unit="kg"
+        colors={mockColors}
+      />
+    );
+
+    expect(getByText('Bar only (20 kg)')).toBeTruthy();
+    expect(getByText('Barbell sleeve (one side)')).toBeTruthy();
+  });
 });
+

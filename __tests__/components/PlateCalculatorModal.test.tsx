@@ -3,6 +3,7 @@ import { render, fireEvent, cleanup, waitFor } from '@testing-library/react-nati
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PlateCalculatorModal from '../../src/components/workout/PlateCalculatorModal';
 import { PlateSettingsService } from '../../src/services/PlateSettingsService';
+import i18n from '../../src/i18n';
 
 jest.mock('../../src/services/HapticService', () => ({
   HapticService: {
@@ -62,12 +63,14 @@ describe('PlateCalculatorModal Component (RNTL)', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    await i18n.changeLanguage('es');
     PlateSettingsService._clearMemoryCache();
     await AsyncStorage.clear();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     cleanup();
+    await i18n.changeLanguage('es');
   });
 
   it('renders modal content correctly when visible is true', async () => {
@@ -255,4 +258,30 @@ describe('PlateCalculatorModal Component (RNTL)', () => {
 
     expect(queryByTestId('plate-calculator-modal')).toBeNull();
   });
+
+  it('renders modal in English when language is en', async () => {
+    await i18n.changeLanguage('en');
+
+    const { getByTestId, getByText } = await render(
+      <PlateCalculatorModal
+        visible={true}
+        onClose={mockOnClose}
+        initialWeight={100}
+        unit="kg"
+        colors={mockColors}
+        onApplyWeight={mockOnApplyWeight}
+      />
+    );
+
+    expect(getByText('Plate Calculator')).toBeTruthy();
+    expect(getByText('TARGET TOTAL WEIGHT (KG)')).toBeTruthy();
+    expect(getByText('BARBELL WEIGHT')).toBeTruthy();
+    expect(getByText('Barbell')).toBeTruthy();
+    expect(getByText('Per side')).toBeTruthy();
+    expect(getByText('Plates')).toBeTruthy();
+    expect(getByText('Total')).toBeTruthy();
+    expect(getByText('Close')).toBeTruthy();
+    expect(getByText('Apply 100 kg')).toBeTruthy();
+  });
 });
+
