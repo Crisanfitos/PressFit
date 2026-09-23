@@ -1,7 +1,5 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 
 export interface AthleteHeroCardProps {
@@ -36,7 +34,6 @@ export const AthleteHeroCard: React.FC<AthleteHeroCardProps> = ({
     avatarActionIcon,
     testID = 'profile-athlete-hero',
 }) => {
-    const { t } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
 
@@ -78,13 +75,6 @@ export const AthleteHeroCard: React.FC<AthleteHeroCardProps> = ({
                 nameBlock: { flex: 1 },
                 name: { fontSize: 19, fontWeight: '800', color: colors.text },
                 email: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
-                badgeRow: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginTop: 6,
-                    gap: 4,
-                },
-                badgeText: { fontSize: 12, fontWeight: '700', color: colors.primary },
                 metricsRow: { flexDirection: 'row', marginTop: 14, gap: 10 },
                 metricCard: {
                     flex: 1,
@@ -123,12 +113,6 @@ export const AthleteHeroCard: React.FC<AthleteHeroCardProps> = ({
                 <View style={styles.nameBlock}>
                     <Text style={styles.name}>{displayName}</Text>
                     {!!email && <Text style={styles.email}>{email}</Text>}
-                    <View style={styles.badgeRow}>
-                        <MaterialIcons name="verified" size={15} color={colors.primary} />
-                        <Text style={styles.badgeText}>
-                            {t('profile.cloudAthlete', 'Atleta PressFit Cloud')}
-                        </Text>
-                    </View>
                 </View>
             </View>
             <View style={styles.metricsRow}>

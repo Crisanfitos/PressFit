@@ -10,9 +10,7 @@ import { useProfileController } from '../controllers/useProfileController';
 import EditProfileModal from '../components/EditProfileModal';
 import LogoutConfirmationModal from '../components/LogoutConfirmationModal';
 import { AthleteHeroCard } from '../components/profile/AthleteHeroCard';
-import { SyncStatusCard } from '../components/profile/SyncStatusCard';
 import { GymPreferencesCard } from '../components/profile/GymPreferencesCard';
-import { DataManagementCard } from '../components/profile/DataManagementCard';
 import { HistoryService } from '../services/HistoryService';
 import {
     loadGymPreferences,
@@ -213,24 +211,41 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         cameraIconContainer: { position: 'absolute', bottom: 0, right: 0, backgroundColor: colors.primary, borderRadius: 16, width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: colors.background },
         userName: { fontSize: 24, fontWeight: 'bold', color: colors.text },
         userEmail: { fontSize: 14, color: colors.textSecondary },
-        section: { marginTop: 24 },
-        sectionTitle: { fontSize: 16, fontWeight: 'bold', color: colors.textSecondary, marginBottom: 16 },
+        card: {
+            backgroundColor: colors.surface,
+            borderRadius: 16,
+            padding: 16,
+            borderWidth: 1,
+            borderColor: colors.border,
+            marginBottom: 16,
+        },
+        cardHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 12,
+        },
+        cardTitle: {
+            fontSize: 15,
+            fontWeight: '700',
+            color: colors.text,
+            marginBottom: 12,
+        },
         dataGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-        dataCard: { width: '47%', borderRadius: 12, backgroundColor: colors.surface, padding: 16, borderWidth: 1, borderColor: colors.border },
-        dataLabel: { fontSize: 14, color: colors.textSecondary },
+        dataCard: { width: '48%', borderRadius: 12, backgroundColor: colors.background, padding: 14, borderWidth: 1, borderColor: colors.border },
+        dataLabel: { fontSize: 13, color: colors.textSecondary },
         dataValue: { fontSize: 20, fontWeight: 'bold', color: colors.text, marginTop: 4 },
         estimatedText: { fontSize: 10, color: '#f59e0b', marginTop: 2 },
-        settingCard: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: colors.border },
         settingRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
         settingTextContainer: { flex: 1 },
-        settingLabel: { fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 2 },
-        settingDescription: { fontSize: 14, color: colors.textSecondary },
+        settingLabel: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: 2 },
+        settingDescription: { fontSize: 13, color: colors.textSecondary },
         photosContainer: { flexDirection: 'row', gap: 8, marginBottom: 16 },
         photoWrapper: { width: '23%', aspectRatio: 1, borderRadius: 8, overflow: 'hidden' },
         progressPhoto: { width: '100%', height: '100%' },
-        viewProgressButton: { width: '100%', alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, padding: 16, flexDirection: 'row', gap: 8 },
+        viewProgressButton: { width: '100%', alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border, padding: 14, flexDirection: 'row', gap: 8 },
         viewProgressButtonText: { fontWeight: 'bold', color: colors.primary },
-        logoutSection: { marginTop: 32, marginBottom: 24 },
+        logoutSection: { marginTop: 16, marginBottom: 24 },
         logoutButton: { width: '100%', alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#ef4444', padding: 16, flexDirection: 'row', gap: 8 },
         logoutButtonText: { fontWeight: 'bold', color: '#ef4444' },
         noPhotosText: { color: colors.textSecondary, fontSize: 14, textAlign: 'center', paddingVertical: 20, flex: 1 },
@@ -265,28 +280,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                             )
                         }
                     />
-
-                    <SyncStatusCard />
-
                     <GymPreferencesCard
                         prefs={gymPrefs}
                         onChange={handleGymPrefsChange}
                         onOpenPlates={() => navigation.navigate('PlateSettings')}
                     />
 
-                    <DataManagementCard
-                        prefs={gymPrefs}
-                        profileSnapshot={{
-                            email: user?.email || null,
-                            monthSessions,
-                            monthMinutes,
-                        }}
-                        onRestorePrefs={handleGymPrefsChange}
-                    />
-
-                    <View style={styles.section}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                            <Text style={styles.sectionTitle}>{t('profile.physicalData')}</Text>
+                    <View style={styles.card} testID="profile-physical-data-card">
+                        <View style={styles.cardHeader}>
+                            <Text style={[styles.cardTitle, { marginBottom: 0 }]}>{t('profile.physicalData')}</Text>
                             <TouchableOpacity testID="edit-profile-button" onPress={() => setShowEditModal(true)} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}>
                                 <MaterialIcons name="edit" size={20} color={colors.primary} />
                             </TouchableOpacity>
@@ -302,84 +304,82 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         </View>
                     </View>
 
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>{t('profile.appearanceSettings')}</Text>
-                        <View style={styles.settingCard}>
-                            <View style={styles.settingRow}>
-                                <MaterialIcons name={themeMode === 'dark' ? 'dark-mode' : 'light-mode'} size={24} color={colors.textSecondary} />
-                                <View style={styles.settingTextContainer}>
-                                    <Text style={styles.settingLabel}>{t('profile.darkMode')}</Text>
-                                    <Text style={styles.settingDescription} testID="theme-toggle-status">{themeMode === 'dark' ? 'Activado' : 'Desactivado'}</Text>
-                                </View>
-                                <Switch
-                                    testID="theme-toggle-switch"
-                                    value={themeMode === 'dark'}
-                                    onValueChange={toggleTheme}
-                                    trackColor={{ false: colors.border, true: `${colors.primary}50` }}
-                                    thumbColor={themeMode === 'dark' ? colors.primary : colors.textSecondary}
-                                />
+                    <View style={styles.card} testID="profile-appearance-card">
+                        <Text style={styles.cardTitle}>{t('profile.appearanceSettings')}</Text>
+                        <View style={styles.settingRow}>
+                            <MaterialIcons name={themeMode === 'dark' ? 'dark-mode' : 'light-mode'} size={24} color={colors.textSecondary} />
+                            <View style={styles.settingTextContainer}>
+                                <Text style={styles.settingLabel}>{t('profile.darkMode')}</Text>
+                                <Text style={styles.settingDescription} testID="theme-toggle-status">{themeMode === 'dark' ? 'Activado' : 'Desactivado'}</Text>
                             </View>
-                            <View style={[styles.settingRow, { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border }]}>
-                                <MaterialIcons name="language" size={24} color={colors.textSecondary} />
-                                <View style={styles.settingTextContainer}>
-                                    <Text style={styles.settingLabel}>{t('profile.language')}</Text>
-                                    <Text style={styles.settingDescription} testID="language-status">{currentLang === 'es' ? 'Español' : 'English'}</Text>
-                                </View>
-                                <View style={{ flexDirection: 'row', gap: 6 }}>
-                                    <TouchableOpacity
-                                        testID="language-select-es"
-                                        onPress={() => handleLanguageChange('es')}
-                                        style={{
-                                            paddingHorizontal: 12,
-                                            paddingVertical: 6,
-                                            borderRadius: 8,
-                                            backgroundColor: currentLang === 'es' ? colors.primary : colors.background,
-                                            borderWidth: 1,
-                                            borderColor: colors.border,
-                                        }}
-                                    >
-                                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: currentLang === 'es' ? colors.textOnPrimary : colors.text }}>ES</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        testID="language-select-en"
-                                        onPress={() => handleLanguageChange('en')}
-                                        style={{
-                                            paddingHorizontal: 12,
-                                            paddingVertical: 6,
-                                            borderRadius: 8,
-                                            backgroundColor: currentLang === 'en' ? colors.primary : colors.background,
-                                            borderWidth: 1,
-                                            borderColor: colors.border,
-                                        }}
-                                    >
-                                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: currentLang === 'en' ? colors.textOnPrimary : colors.text }}>EN</Text>
-                                    </TouchableOpacity>
-                                </View>
+                            <Switch
+                                testID="theme-toggle-switch"
+                                value={themeMode === 'dark'}
+                                onValueChange={toggleTheme}
+                                trackColor={{ false: colors.border, true: `${colors.primary}50` }}
+                                thumbColor={themeMode === 'dark' ? colors.primary : colors.textSecondary}
+                            />
+                        </View>
+                        <View style={[styles.settingRow, { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border }]}>
+                            <MaterialIcons name="language" size={24} color={colors.textSecondary} />
+                            <View style={styles.settingTextContainer}>
+                                <Text style={styles.settingLabel}>{t('profile.language')}</Text>
+                                <Text style={styles.settingDescription} testID="language-status">{currentLang === 'es' ? 'Español' : 'English'}</Text>
                             </View>
-                            <View style={[styles.settingRow, { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border }]}>
-                                <MaterialIcons name="notifications-active" size={24} color={colors.textSecondary} />
-                                <View style={styles.settingTextContainer}>
-                                    <Text style={styles.settingLabel}>{t('timer.notification.preferenceLabel', 'Notificación de descanso')}</Text>
-                                    <Text style={styles.settingDescription} testID="timer-notification-toggle-status">
-                                        {timerNotifEnabled ? t('profile.activated', 'Activado') : t('profile.deactivated', 'Desactivado')}
-                                    </Text>
-                                </View>
-                                <Switch
-                                    testID="timer-notification-toggle-switch"
-                                    value={timerNotifEnabled}
-                                    onValueChange={handleTimerNotifToggle}
-                                    trackColor={{ false: colors.border, true: `${colors.primary}50` }}
-                                    thumbColor={timerNotifEnabled ? colors.primary : colors.textSecondary}
-                                />
+                            <View style={{ flexDirection: 'row', gap: 6 }}>
+                                <TouchableOpacity
+                                    testID="language-select-es"
+                                    onPress={() => handleLanguageChange('es')}
+                                    style={{
+                                        paddingHorizontal: 12,
+                                        paddingVertical: 6,
+                                        borderRadius: 8,
+                                        backgroundColor: currentLang === 'es' ? colors.primary : colors.background,
+                                        borderWidth: 1,
+                                        borderColor: colors.border,
+                                    }}
+                                >
+                                    <Text style={{ fontSize: 12, fontWeight: 'bold', color: currentLang === 'es' ? colors.textOnPrimary : colors.text }}>ES</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    testID="language-select-en"
+                                    onPress={() => handleLanguageChange('en')}
+                                    style={{
+                                        paddingHorizontal: 12,
+                                        paddingVertical: 6,
+                                        borderRadius: 8,
+                                        backgroundColor: currentLang === 'en' ? colors.primary : colors.background,
+                                        borderWidth: 1,
+                                        borderColor: colors.border,
+                                    }}
+                                >
+                                    <Text style={{ fontSize: 12, fontWeight: 'bold', color: currentLang === 'en' ? colors.textOnPrimary : colors.text }}>EN</Text>
+                                </TouchableOpacity>
                             </View>
+                        </View>
+                        <View style={[styles.settingRow, { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border }]}>
+                            <MaterialIcons name="notifications-active" size={24} color={colors.textSecondary} />
+                            <View style={styles.settingTextContainer}>
+                                <Text style={styles.settingLabel}>{t('timer.notification.preferenceLabel', 'Notificación de descanso')}</Text>
+                                <Text style={styles.settingDescription} testID="timer-notification-toggle-status">
+                                    {timerNotifEnabled ? t('profile.activated', 'Activado') : t('profile.deactivated', 'Desactivado')}
+                                </Text>
+                            </View>
+                            <Switch
+                                testID="timer-notification-toggle-switch"
+                                value={timerNotifEnabled}
+                                onValueChange={handleTimerNotifToggle}
+                                trackColor={{ false: colors.border, true: `${colors.primary}50` }}
+                                thumbColor={timerNotifEnabled ? colors.primary : colors.textSecondary}
+                            />
                         </View>
                     </View>
 
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>{t('profile.progressPhotos')}</Text>
+                    <View style={styles.card} testID="profile-progress-photos-card">
+                        <Text style={styles.cardTitle}>{t('profile.progressPhotos')}</Text>
                         <View style={styles.photosContainer}>
                             {loadingPhotos ? (
-                                <Text style={styles.noPhotosText}>Cargando fotos...</Text>
+                                <Text style={styles.noPhotosText}>{t('profile.loadingPhotos', 'Cargando fotos...')}</Text>
                             ) : progressPhotos.length > 0 ? (
                                 progressPhotos.slice(0, 4).map((photo, index) => (
                                     <View key={index} style={styles.photoWrapper}>
@@ -387,7 +387,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                     </View>
                                 ))
                             ) : (
-                                <Text style={styles.noPhotosText}>No hay fotos de progreso aún</Text>
+                                <Text style={styles.noPhotosText}>{t('profile.noPhotosYet', 'No hay fotos de progreso aún')}</Text>
                             )}
                         </View>
                         <TouchableOpacity style={styles.viewProgressButton} onPress={() => navigation.navigate('PhysicalProgress')} testID="view-physical-progress-button">
