@@ -174,7 +174,7 @@ export const WorkoutDayExerciseList: React.FC<WorkoutDayExerciseListProps> = ({
                                         {exercise.ejercicio?.titulo || t('workout.exercise', 'Ejercicio')}
                                     </Text>
                                     <Text style={styles.exerciseMuscle}>
-                                        {exercise.ejercicio?.grupo_muscular || 'Sin grupo'}
+                                        {exercise.ejercicio?.grupo_muscular || t('workout.noMuscleGroup', 'Sin grupo')}
                                     </Text>
                                 </View>
                             </View>
@@ -215,7 +215,7 @@ export const WorkoutDayExerciseList: React.FC<WorkoutDayExerciseListProps> = ({
                                         { fontSize: 14, marginTop: 4, marginBottom: 8 },
                                     ]}
                                 >
-                                    No se registraron series.
+                                    {t('workout.noSetsRecorded', 'No se registraron series.')}
                                 </Text>
                             )}
                         </View>
@@ -232,7 +232,7 @@ export const WorkoutDayExerciseList: React.FC<WorkoutDayExerciseListProps> = ({
                                 {exercise.ejercicio?.titulo || t('workout.exercise', 'Ejercicio')}
                             </Text>
                             <Text style={styles.exerciseMuscle}>
-                                {exercise.ejercicio?.grupo_muscular || 'Sin grupo'}
+                                {exercise.ejercicio?.grupo_muscular || t('workout.noMuscleGroup', 'Sin grupo')}
                             </Text>
                         </View>
                         <View style={styles.exerciseSets}>

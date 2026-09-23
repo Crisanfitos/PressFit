@@ -150,7 +150,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                         setShareCardData(cardData);
                         setShareModalVisible(true);
                     } else {
-                        Alert.alert(t('common.error', 'Error'), 'No se pudo finalizar el entrenamiento');
+                        Alert.alert(t('common.error', 'Error'), t('workout.finishError', 'No se pudo finalizar el entrenamiento'));
                     }
                 },
             },

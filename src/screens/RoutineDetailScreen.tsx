@@ -109,7 +109,7 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
             editDescription.trim()
         );
         if (error) {
-            Alert.alert(t('common.error', 'Error'), 'No se pudo guardar la descripción');
+            Alert.alert(t('common.error', 'Error'), t('routine.errorSaveDescription', 'No se pudo guardar la descripción'));
         } else {
             await loadRoutine();
         }
@@ -148,10 +148,10 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
                 <View style={styles.headerContent}>
                     <View style={styles.protocolBadge}>
                         <View style={styles.protocolBadgeBar} />
-                        <Text style={styles.protocolBadgeText}>MICROCICLO SEMANAL</Text>
+                        <Text style={styles.protocolBadgeText}>{t('routine.weeklyMicrocycle', 'MICROCICLO SEMANAL')}</Text>
                     </View>
                     <Text style={styles.headerTitle} numberOfLines={1}>
-                        {routine?.nombre || 'Rutina'}
+                        {routine?.nombre || t('routine.defaultRoutineName', 'Rutina')}
                     </Text>
                     {routine?.objetivo && (
                         <View style={styles.objectivePill}>
@@ -169,29 +169,29 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
                 <View style={styles.bentoSummaryCard}>
                     <View style={styles.bentoMetricItem}>
                         <Text style={styles.bentoMetricVal}>{activeDaysCount}</Text>
-                        <Text style={styles.bentoMetricLbl}>Días Activos</Text>
+                        <Text style={styles.bentoMetricLbl}>{t('routine.activeDays', 'Días Activos')}</Text>
                     </View>
                     <View style={styles.bentoDivider} />
                     <View style={styles.bentoMetricItem}>
                         <Text style={styles.bentoMetricVal}>{totalExercisesCount}</Text>
-                        <Text style={styles.bentoMetricLbl}>Ejercicios</Text>
+                        <Text style={styles.bentoMetricLbl}>{t('routine.exercises', 'Ejercicios')}</Text>
                     </View>
                     <View style={styles.bentoDivider} />
                     <View style={styles.bentoMetricItem}>
                         <View style={[styles.activeStatusPill, { backgroundColor: routine?.activa ? '#10B98120' : `${colors.border}40` }]}>
                             <View style={[styles.statusDot, { backgroundColor: routine?.activa ? '#10B981' : colors.textSecondary }]} />
                             <Text style={[styles.statusText, { color: routine?.activa ? '#10B981' : colors.textSecondary }]}>
-                                {routine?.activa ? 'Activa' : 'Guardada'}
+                                {routine?.activa ? t('routine.statusActive', 'Activa') : t('routine.statusSaved', 'Guardada')}
                             </Text>
                         </View>
-                        <Text style={styles.bentoMetricLbl}>Estado</Text>
+                        <Text style={styles.bentoMetricLbl}>{t('routine.status', 'Estado')}</Text>
                     </View>
                 </View>
 
                 {/* Section Title */}
                 <View style={styles.sectionHeaderRow}>
                     <Text style={styles.sectionTitle}>{t('routine.daysOfWeek', 'Días de la Semana')}</Text>
-                    <Text style={styles.sectionSubtitle}>7 días programables</Text>
+                    <Text style={styles.sectionSubtitle}>{t('routine.programmableDays', '7 días programables')}</Text>
                 </View>
 
                 {DAY_NAMES.map((dayName, idx) => {
@@ -302,14 +302,14 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
                             <MaterialIcons name="edit-note" size={22} color={colors.primary} />
-                            <Text style={styles.modalTitle}>Descripción del día</Text>
+                            <Text style={styles.modalTitle}>{t('routine.dayDescriptionTitle', 'Descripción del día')}</Text>
                         </View>
                         <TextInput
                             testID="edit-day-desc-input"
                             style={styles.modalInput}
                             value={editDescription}
                             onChangeText={setEditDescription}
-                            placeholder="Ej: Día de Piernas - Enfoque cuádriceps"
+                            placeholder={t('routine.dayDescriptionPlaceholder', 'Ej: Día de Piernas - Enfoque cuádriceps')}
                             placeholderTextColor={colors.textSecondary}
                             autoFocus
                         />

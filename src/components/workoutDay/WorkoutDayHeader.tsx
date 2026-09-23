@@ -147,7 +147,7 @@ export const WorkoutDayHeader: React.FC<WorkoutDayHeaderProps> = ({
             </View>
 
             <Text style={styles.dayTitle}>
-                {dayData?.nombre_dia || 'Sin entrenar'}
+                {dayData?.nombre_dia || t('workout.noWorkoutDay', 'Sin entrenar')}
             </Text>
 
             {dayData?.descripcion ? (

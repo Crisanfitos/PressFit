@@ -112,14 +112,31 @@
     "startedAt": "Hora de inicio",
     "selectEndTime": "Hora de finalización",
     "saveAndComplete": "Guardar y Finalizar",
-    "invalidEndTimeMinDuration": "La hora final debe ser como mínimo un minuto posterior a la hora inicial."
+    "invalidEndTimeMinDuration": "La hora final debe ser como mínimo un minuto posterior a la hora inicial.",
+    "noWorkoutDay": "Sin entrenar",
+    "noMuscleGroup": "Sin grupo",
+    "noSetsRecorded": "No se registraron series.",
+    "finishError": "No se pudo finalizar el entrenamiento"
   },
   "calendar": {
     "today": "Hoy",
     "completed": "Completado",
     "inProgress": "En Progreso",
     "missed": "Sin Hacer",
-    "selectRoutine": "Seleccionar Rutina"
+    "selectRoutine": "Seleccionar Rutina",
+    "activeWeek": "Semana Activa",
+    "mainRoutine": "Rutina Principal",
+    "myRoutines": "Mis Rutinas",
+    "newRoutine": "Nueva Rutina",
+    "todayUpper": "HOY",
+    "weeklyRoutinesSection": "Rutinas de la Semana",
+    "completedCountOfFive": "{{count}} de 5 completadas",
+    "activeRestRecovery": "Descanso Activo / Recuperación",
+    "restDayScheduledDesc": "Día de descanso programado. Realiza movilidad o estiramientos ligeros.",
+    "recovery": "Recuperación",
+    "mobility": "Movilidad",
+    "todayWorkout": "Entrenamiento de Hoy",
+    "progressiveOverloadDesc": "Enfoque de sobrecarga progresiva y estímulo hipertrófico."
   },
   "profile": {
     "title": "Perfil",
@@ -259,7 +276,18 @@
     "restDayDescription": "Descanso / Recuperación",
     "noExercises": "Sin ejercicios - Toca para añadir",
     "exercisesCount_one": "{{count}} ejercicio",
-    "exercisesCount_other": "{{count}} ejercicios"
+    "exercisesCount_other": "{{count}} ejercicios",
+    "errorSaveDescription": "No se pudo guardar la descripción",
+    "weeklyMicrocycle": "MICROCICLO SEMANAL",
+    "defaultRoutineName": "Rutina",
+    "activeDays": "Días Activos",
+    "exercises": "Ejercicios",
+    "status": "Estado",
+    "statusActive": "Activa",
+    "statusSaved": "Guardada",
+    "programmableDays": "7 días programables",
+    "dayDescriptionTitle": "Descripción del día",
+    "dayDescriptionPlaceholder": "Ej: Día de Piernas - Enfoque cuádriceps"
   },
   "exerciseDetail": {
     "notFound": "Ejercicio no encontrado",
@@ -368,5 +396,9 @@
     "sets": "Series",
     "volume": "Volumen",
     "personalRecordsTitle": "🏆 Récords Personales"
+  },
+  "weeklyPlan": {
+    "title": "Plan Semanal",
+    "placeholderSubtitle": "Esta pantalla será rediseñada"
   }
 }

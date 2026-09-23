@@ -13,6 +13,10 @@ describe('i18n Configuration & Persistence (PF-168 & PF-170)', () => {
     expect(i18n.t('auth.login')).toBe('Iniciar Sesión');
     expect(i18n.t('navigation.calendar')).toBe('Calendario');
     expect(i18n.t('workout.startWorkout')).toBe('Iniciar Entrenamiento');
+    expect(i18n.t('weeklyPlan.title')).toBe('Plan Semanal');
+    expect(i18n.t('calendar.activeWeek')).toBe('Semana Activa');
+    expect(i18n.t('routine.weeklyMicrocycle')).toBe('MICROCICLO SEMANAL');
+    expect(i18n.t('workout.noWorkoutDay')).toBe('Sin entrenar');
   });
 
   it('should switch to English and translate keys correctly', async () => {
@@ -22,6 +26,10 @@ describe('i18n Configuration & Persistence (PF-168 & PF-170)', () => {
     expect(i18n.t('auth.login')).toBe('Log In');
     expect(i18n.t('navigation.calendar')).toBe('Calendar');
     expect(i18n.t('workout.startWorkout')).toBe('Start Workout');
+    expect(i18n.t('weeklyPlan.title')).toBe('Weekly Plan');
+    expect(i18n.t('calendar.activeWeek')).toBe('Active Week');
+    expect(i18n.t('routine.weeklyMicrocycle')).toBe('WEEKLY MICROCYCLE');
+    expect(i18n.t('workout.noWorkoutDay')).toBe('Not trained');
   });
 
   it('should fallback to Spanish for missing keys or unsupported language', async () => {

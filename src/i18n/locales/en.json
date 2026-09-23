@@ -112,14 +112,31 @@
     "startedAt": "Start time",
     "selectEndTime": "End time",
     "saveAndComplete": "Save & Complete",
-    "invalidEndTimeMinDuration": "End time must be at least one minute after start time."
+    "invalidEndTimeMinDuration": "End time must be at least one minute after start time.",
+    "noWorkoutDay": "Not trained",
+    "noMuscleGroup": "No group",
+    "noSetsRecorded": "No sets recorded.",
+    "finishError": "Could not finish workout"
   },
   "calendar": {
     "today": "Today",
     "completed": "Completed",
     "inProgress": "In Progress",
     "missed": "Missed",
-    "selectRoutine": "Select Routine"
+    "selectRoutine": "Select Routine",
+    "activeWeek": "Active Week",
+    "mainRoutine": "Main Routine",
+    "myRoutines": "My Routines",
+    "newRoutine": "New Routine",
+    "todayUpper": "TODAY",
+    "weeklyRoutinesSection": "Weekly Routines",
+    "completedCountOfFive": "{{count}} of 5 completed",
+    "activeRestRecovery": "Active Rest / Recovery",
+    "restDayScheduledDesc": "Scheduled rest day. Perform light mobility or stretching.",
+    "recovery": "Recovery",
+    "mobility": "Mobility",
+    "todayWorkout": "Today's Workout",
+    "progressiveOverloadDesc": "Progressive overload focus and hypertrophic stimulus."
   },
   "profile": {
     "title": "Profile",
@@ -259,7 +276,18 @@
     "restDayDescription": "Rest / Recovery",
     "noExercises": "No exercises - Tap to add",
     "exercisesCount_one": "{{count}} exercise",
-    "exercisesCount_other": "{{count}} exercises"
+    "exercisesCount_other": "{{count}} exercises",
+    "errorSaveDescription": "Could not save description",
+    "weeklyMicrocycle": "WEEKLY MICROCYCLE",
+    "defaultRoutineName": "Routine",
+    "activeDays": "Active Days",
+    "exercises": "Exercises",
+    "status": "Status",
+    "statusActive": "Active",
+    "statusSaved": "Saved",
+    "programmableDays": "7 programmable days",
+    "dayDescriptionTitle": "Day Description",
+    "dayDescriptionPlaceholder": "e.g. Leg Day - Quad Focus"
   },
   "exerciseDetail": {
     "notFound": "Exercise not found",
@@ -368,5 +396,9 @@
     "sets": "Sets",
     "volume": "Volume",
     "personalRecordsTitle": "🏆 Personal Records"
+  },
+  "weeklyPlan": {
+    "title": "Weekly Plan",
+    "placeholderSubtitle": "This screen will be redesigned"
   }
 }
