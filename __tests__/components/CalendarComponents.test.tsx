@@ -63,6 +63,38 @@ describe('Calendar Sub-components (PF-269)', () => {
             const days = getCalendarDays(2023, 1); // Feb 2023
             const validDays = days.filter((d) => d.dayNumber !== null);
             expect(validDays).toHaveLength(28);
+            expect(days.length % 7).toBe(0);
+        });
+
+        it('aligns weekdays correctly for September 2026 (PF-399)', () => {
+            // September 2026: Month 8 (0-indexed). Sep 1 is Tuesday (col 1, L=0, M=1)
+            const days = getCalendarDays(2026, 8);
+            expect(days.length % 7).toBe(0); // Full weeks
+            expect(days[0].dayNumber).toBeNull(); // Monday is empty
+            expect(days[1].dayNumber).toBe(1); // Tuesday is Day 1
+            expect(days[1].date?.getDay()).toBe(2); // Tuesday
+            // Sep 22, 2026 must be in column 1 (Tuesday) in week 4 (index 22)
+            expect(days[22].dayNumber).toBe(22);
+            expect(days[22 % 7].dayNumber).toBe(1); // Col 1 (M)
+            expect(days[22].date?.getDay()).toBe(2); // Tuesday
+            // Sep 30 is Wednesday (col 2), followed by 4 trailing nulls to complete week
+            const sep30Index = days.findIndex((d) => d.dayNumber === 30);
+            expect(sep30Index % 7).toBe(2); // Col 2 (Wednesday)
+            expect(days).toHaveLength(35); // 5 complete weeks
+        });
+
+        it('handles months starting on Sunday and Monday correctly', () => {
+            // March 2026 starts on Sunday (col 6)
+            const marDays = getCalendarDays(2026, 2);
+            expect(marDays.length % 7).toBe(0);
+            expect(marDays[6].dayNumber).toBe(1);
+            expect(marDays[6].date?.getDay()).toBe(0); // Sunday
+
+            // February 2021 starts on Monday (col 0, 28 days, no leading or trailing slots)
+            const febDays = getCalendarDays(2021, 1);
+            expect(febDays).toHaveLength(28);
+            expect(febDays[0].dayNumber).toBe(1);
+            expect(febDays[0].date?.getDay()).toBe(1); // Monday
         });
 
         it('identifies if date is in current week', () => {

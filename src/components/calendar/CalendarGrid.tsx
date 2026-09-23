@@ -28,6 +28,14 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
     isInCurrentWeekFn,
     onDayPress,
 }) => {
+    const weeks = React.useMemo(() => {
+        const result: CalendarDay[][] = [];
+        for (let i = 0; i < calendarDays.length; i += 7) {
+            result.push(calendarDays.slice(i, i + 7));
+        }
+        return result;
+    }, [calendarDays]);
+
     return (
         <View style={styles.calendarContainer} testID="calendar-grid-container">
             <WeekHeader
@@ -37,24 +45,29 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
             />
 
             <View style={styles.calendarGrid}>
-                {calendarDays.map((day, index) => {
-                    const dayStyle: DayStyleInfo | null = day.date
-                        ? calculateDayStyle(day.date, completedDays, inProgressDays, isInCurrentWeekFn)
-                        : null;
+                {weeks.map((week, weekIndex) => (
+                    <View key={weekIndex} style={styles.weekRow}>
+                        {week.map((day, dayIndex) => {
+                            const index = weekIndex * 7 + dayIndex;
+                            const dayStyle: DayStyleInfo | null = day.date
+                                ? calculateDayStyle(day.date, completedDays, inProgressDays, isInCurrentWeekFn)
+                                : null;
 
-                    return (
-                        <DayCell
-                            key={index}
-                            day={day}
-                            index={index}
-                            dayStyle={dayStyle}
-                            isCurrentMonth={isCurrentMonth}
-                            daySize={daySize}
-                            colors={colors}
-                            onPress={onDayPress}
-                        />
-                    );
-                })}
+                            return (
+                                <DayCell
+                                    key={index}
+                                    day={day}
+                                    index={index}
+                                    dayStyle={dayStyle}
+                                    isCurrentMonth={isCurrentMonth}
+                                    daySize={daySize}
+                                    colors={colors}
+                                    onPress={onDayPress}
+                                />
+                            );
+                        })}
+                    </View>
+                ))}
             </View>
         </View>
     );
@@ -62,10 +75,13 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
 
 const styles = StyleSheet.create({
     calendarContainer: {
-        paddingHorizontal: 20,
+        width: '100%',
     },
     calendarGrid: {
+        width: '100%',
+    },
+    weekRow: {
         flexDirection: 'row',
-        flexWrap: 'wrap',
+        width: '100%',
     },
 });

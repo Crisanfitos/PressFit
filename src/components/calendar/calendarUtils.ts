@@ -37,6 +37,12 @@ export const getCalendarDays = (year: number, month: number): CalendarDay[] => {
         days.push({ date: new Date(year, month, day), dayNumber: day });
     }
 
+    // Add empty slots to complete the final week (multiple of 7)
+    const trailingSlots = (7 - (days.length % 7)) % 7;
+    for (let i = 0; i < trailingSlots; i++) {
+        days.push({ date: null, dayNumber: null });
+    }
+
     return days;
 };
 

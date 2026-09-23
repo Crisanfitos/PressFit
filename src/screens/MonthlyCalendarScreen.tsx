@@ -36,7 +36,7 @@ import {
 } from '../components/calendar';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const DAY_SIZE = (SCREEN_WIDTH - 48) / 7;
+const DAY_SIZE = Math.floor((SCREEN_WIDTH - 32) / 7);
 
 const DAY_NAMES_ES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const DAY_LETTERS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
