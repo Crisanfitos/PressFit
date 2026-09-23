@@ -212,7 +212,9 @@
     "showLess": "Show less",
     "showMore": "Show breakdown",
     "sessionDetail": "{{exercises}} exercises · {{sets}} sets · {{tonnage}} kg total",
-    "exportReport": "Export / Share Progress Report"
+    "exportReport": "Export / Share Progress Report",
+    "monthlyProgress": "Monthly Progress",
+    "dateRangeFromTo": "from {{start}} to {{end}}"
   },
   "physicalProgress": {
     "title": "Physical Progress",

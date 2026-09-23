@@ -212,7 +212,9 @@
     "showLess": "Ver menos",
     "showMore": "Ver desglose",
     "sessionDetail": "{{exercises}} ejercicios · {{sets}} series · {{tonnage}} kg totales",
-    "exportReport": "Exportar / Compartir Informe de Progreso"
+    "exportReport": "Exportar / Compartir Informe de Progreso",
+    "monthlyProgress": "Progreso Mensual",
+    "dateRangeFromTo": "del {{start}} al {{end}}"
   },
   "physicalProgress": {
     "title": "Cambio Físico",

@@ -25,7 +25,15 @@ describe('MonthlyProgressScreen Component (RNTL)', () => {
         } as any);
     });
 
-    it('renders monthly progress screen title and stats', async () => {
+    afterEach(async () => {
+        const { act } = require('@testing-library/react-native');
+        const i18n = require('../../src/i18n').default;
+        await act(async () => {
+            await i18n.changeLanguage('es');
+        });
+    });
+
+    it('renders monthly progress screen title and stats in Spanish', async () => {
         const { getByText } = await render(
             <AuthContext.Provider value={{ user: { id: 'u1' } } as any}>
                 <MonthlyProgressScreen navigation={mockNavigation} />
@@ -34,5 +42,22 @@ describe('MonthlyProgressScreen Component (RNTL)', () => {
 
         expect(getByText('Progreso Mensual')).toBeTruthy();
         expect(getByText('Entrenamientos')).toBeTruthy();
+    });
+
+    it('renders translated title in English', async () => {
+        const { act } = require('@testing-library/react-native');
+        const i18n = require('../../src/i18n').default;
+        await act(async () => {
+            await i18n.changeLanguage('en');
+        });
+
+        const { getByText } = await render(
+            <AuthContext.Provider value={{ user: { id: 'u1' } } as any}>
+                <MonthlyProgressScreen navigation={mockNavigation} />
+            </AuthContext.Provider>
+        );
+
+        expect(getByText('Monthly Progress')).toBeTruthy();
+        expect(getByText('Total Workouts')).toBeTruthy();
     });
 });
