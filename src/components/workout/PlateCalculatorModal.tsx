@@ -11,6 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import {
   calculatePlates,
   PlateCalculationResult,
@@ -54,6 +55,7 @@ export const PlateCalculatorModal: React.FC<PlateCalculatorModalProps> = ({
   customPlates,
   defaultBarWeight: customDefaultBar,
 }) => {
+  const { t } = useTranslation();
   const auth = useContext(AuthContext);
   const effectiveUserId = userId || auth?.user?.id;
   const [userSettings, setUserSettings] = useState<UserPlateSettings | null>(null);
@@ -151,11 +153,22 @@ export const PlateCalculatorModal: React.FC<PlateCalculatorModalProps> = ({
     if (!result.warning) return null;
     switch (result.warning) {
       case 'TARGET_BELOW_BAR':
-        return `El peso objetivo (${result.targetWeight} ${unit}) es menor que la barra (${result.barWeight} ${unit}).`;
+        return t(
+          'plateCalculator.warnBelowBar',
+          'El peso objetivo ({{target}} {{unit}}) es menor que la barra ({{bar}} {{unit}}).',
+          { target: result.targetWeight, bar: result.barWeight, unit }
+        );
       case 'INSUFFICIENT_PLATES':
-        return 'No hay suficientes discos en el inventario para alcanzar este peso.';
+        return t(
+          'plateCalculator.warnInsufficient',
+          'No hay suficientes discos en el inventario para alcanzar este peso.'
+        );
       case 'FRACTIONAL_REMAINDER':
-        return `Peso inexacto. Queda un resto de ${result.remainder} ${unit} sin cubrir.`;
+        return t(
+          'plateCalculator.warnRemainder',
+          'Peso inexacto. Queda un resto de {{remainder}} {{unit}} sin cubrir.',
+          { remainder: result.remainder, unit }
+        );
       default:
         return null;
     }
@@ -190,7 +203,7 @@ export const PlateCalculatorModal: React.FC<PlateCalculatorModalProps> = ({
             <View style={styles.headerTitleContainer}>
               <MaterialIcons name="fitness-center" size={22} color={colors.primary} style={{ marginRight: 8 }} />
               <Text style={[styles.title, { color: colors.text }]}>
-                Calculadora de Discos
+                {t('plateCalculator.title', 'Calculadora de Discos')}
               </Text>
             </View>
             <TouchableOpacity
@@ -209,7 +222,9 @@ export const PlateCalculatorModal: React.FC<PlateCalculatorModalProps> = ({
             {/* Target Weight Section */}
             <View style={styles.section}>
               <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
-                PESO TOTAL OBJETIVO ({unit.toUpperCase()})
+                {t('plateCalculator.targetWeight', 'PESO TOTAL OBJETIVO ({{unit}})', {
+                  unit: unit.toUpperCase(),
+                })}
               </Text>
               <View style={styles.weightControlRow}>
                 <TouchableOpacity
@@ -260,7 +275,7 @@ export const PlateCalculatorModal: React.FC<PlateCalculatorModalProps> = ({
             {/* Bar Weight Selector */}
             <View style={styles.section}>
               <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
-                PESO DE LA BARRA
+                {t('plateCalculator.barWeight', 'PESO DE LA BARRA')}
               </Text>
               <View style={styles.barPresetsRow}>
                 {barPresets.map((preset) => {
@@ -287,7 +302,12 @@ export const PlateCalculatorModal: React.FC<PlateCalculatorModalProps> = ({
                           },
                         ]}
                       >
-                        {preset} {unit} {preset === 20 ? '(Estándar)' : preset === 15 ? '(Técnica)' : ''}
+                        {preset} {unit}
+                        {preset === 20
+                          ? ` (${t('plateCalculator.standard', 'Estándar')})`
+                          : preset === 15
+                          ? ` (${t('plateCalculator.technical', 'Técnica')})`
+                          : ''}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -314,19 +334,27 @@ export const PlateCalculatorModal: React.FC<PlateCalculatorModalProps> = ({
               {/* Metrics Grid */}
               <View style={styles.metricsGrid}>
                 <View style={styles.metricItem}>
-                  <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Barra</Text>
+                  <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
+                    {t('plateCalculator.bar', 'Barra')}
+                  </Text>
                   <Text style={[styles.metricValue, { color: colors.text }]}>{result.barWeight} {unit}</Text>
                 </View>
                 <View style={styles.metricItem}>
-                  <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Por lado</Text>
+                  <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
+                    {t('plateCalculator.perSide', 'Por lado')}
+                  </Text>
                   <Text style={[styles.metricValue, { color: colors.primary }]}>{result.weightPerSide} {unit}</Text>
                 </View>
                 <View style={styles.metricItem}>
-                  <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Discos</Text>
+                  <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
+                    {t('plateCalculator.plates', 'Discos')}
+                  </Text>
                   <Text style={[styles.metricValue, { color: colors.text }]}>{result.totalPlateWeight} {unit}</Text>
                 </View>
                 <View style={styles.metricItem}>
-                  <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Total</Text>
+                  <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
+                    {t('plateCalculator.total', 'Total')}
+                  </Text>
                   <Text style={[styles.metricValue, { color: colors.text }]}>{result.totalWeight} {unit}</Text>
                 </View>
               </View>
@@ -348,7 +376,9 @@ export const PlateCalculatorModal: React.FC<PlateCalculatorModalProps> = ({
               style={[styles.cancelBtn, { borderColor: colors.border }]}
               onPress={onClose}
             >
-              <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>Cerrar</Text>
+              <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>
+                {t('common.close', 'Cerrar')}
+              </Text>
             </TouchableOpacity>
 
             {onApplyWeight && (
@@ -359,7 +389,10 @@ export const PlateCalculatorModal: React.FC<PlateCalculatorModalProps> = ({
               >
                 <MaterialIcons name="check" size={18} color="#FFFFFF" style={{ marginRight: 4 }} />
                 <Text style={styles.applyBtnText}>
-                  Aplicar {result.totalWeight} {unit}
+                  {t('plateCalculator.applyWeight', 'Aplicar {{weight}} {{unit}}', {
+                    weight: result.totalWeight,
+                    unit,
+                  })}
                 </Text>
               </TouchableOpacity>
             )}

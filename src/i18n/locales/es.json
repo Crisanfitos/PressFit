@@ -517,5 +517,51 @@
     "low": "Tu volumen en {{optimalRef}} está en rango óptimo de adaptación (MAV). Considera añadir 2 series en {{muscle}} la próxima semana.",
     "warning": "Tu volumen en {{muscle}} está cerca del límite recuperable (MRV). Mantén la carga actual y evita añadir series extra esta semana.",
     "optimalMaintain": "Tu volumen en {{muscles}} está en rango óptimo de adaptación (MAV). Mantén la sobrecarga progresiva actual."
+  },
+  "plateSettings": {
+    "title": "Discos y Barras",
+    "resetConfirmTitle": "Restablecer Ajustes",
+    "resetConfirmMsg": "¿Deseas restaurar todas las denominaciones de discos y pesos de barra por defecto?",
+    "unitTitle": "Unidad de Medida",
+    "kilograms": "Kilogramos (kg)",
+    "pounds": "Libras (lb)",
+    "barWeightTitle": "Peso de Barra por Defecto",
+    "barWeightSubtitle": "Selecciona el peso de tu barra habitual o ingresa un valor exacto.",
+    "customDesc": "Cualquier peso",
+    "customBarWeight": "Peso exacto de la barra",
+    "previewTitle": "Vista Previa en Barra",
+    "previewSubtitle": "Ejemplo de carga con tus discos activos ({{weight}} {{unit}})",
+    "inventoryTitle": "Inventario de Discos",
+    "inventorySubtitle": "Activa los discos disponibles en tu gimnasio y fija el límite de pares si no son infinitos.",
+    "unlimited": "Pares ilimitados",
+    "disabled": "Desactivado",
+    "singlePair": "1 par",
+    "pairCount": "{{count}} pares",
+    "saveError": "No se pudieron guardar los ajustes.",
+    "presets": {
+      "standardOlympic": "Olímpica estándar",
+      "technicalOlympic": "Olímpica técnica",
+      "smithMachine": "Multipower / Smith"
+    }
+  },
+  "plateCalculator": {
+    "title": "Calculadora de Discos",
+    "targetWeight": "PESO TOTAL OBJETIVO ({{unit}})",
+    "barWeight": "PESO DE LA BARRA",
+    "standard": "Estándar",
+    "technical": "Técnica",
+    "bar": "Barra",
+    "perSide": "Por lado",
+    "plates": "Discos",
+    "total": "Total",
+    "applyWeight": "Aplicar {{weight}} {{unit}}",
+    "warnBelowBar": "El peso objetivo ({{target}} {{unit}}) es menor que la barra ({{bar}} {{unit}}).",
+    "warnInsufficient": "No hay suficientes discos en el inventario para alcanzar este peso.",
+    "warnRemainder": "Peso inexacto. Queda un resto de {{remainder}} {{unit}} sin cubrir."
+  },
+  "plateVisualizer": {
+    "barOnly": "Solo barra ({{barWeight}} {{unit}})",
+    "emptyBar": "Barra sin discos",
+    "sleeveCaption": "Manga de la barra (un lado)"
   }
 }
