@@ -130,7 +130,7 @@ export const WeeklyLoadChart: React.FC<WeeklyLoadChartProps> = ({
             <View style={styles.averageRow} testID={`${testID}-average`}>
                 <View style={styles.averageDot} />
                 <Text style={styles.averageText}>
-                    {t('progress.weeklyAverage', `Promedio: ${Math.round(average)} kg/día`)}
+                    {t('progress.weeklyAverage', 'Promedio: {{avg}} kg/día', { avg: Math.round(average) })}
                 </Text>
             </View>
         </View>

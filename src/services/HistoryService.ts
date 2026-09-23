@@ -53,10 +53,16 @@ export const HistoryService = {
                 .from('rutinas_diarias')
                 .select(`
           id,
+          nombre_dia,
           hora_inicio,
           hora_fin,
           fecha_dia,
-          rutina_semanal:rutinas_semanales!inner(usuario_id)
+          rutina_semanal:rutinas_semanales!inner(usuario_id),
+          ejercicios_programados (
+            *,
+            ejercicio:ejercicios (*),
+            series (*)
+          )
         `)
                 .eq('rutina_semanal.usuario_id', userId)
                 .gte('fecha_dia', startOfWeekStr)

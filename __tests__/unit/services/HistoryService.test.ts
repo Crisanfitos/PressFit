@@ -73,6 +73,7 @@ describe('HistoryService', () => {
             const result = await HistoryService.getWeeklyProgress('user-1');
 
             expect(supabase.from).toHaveBeenCalledWith('rutinas_diarias');
+            expect(mockQuery.select).toHaveBeenCalledWith(expect.stringContaining('ejercicios_programados'));
             expect(result.data).toEqual(mockData);
             expect(result.error).toBeNull();
         });

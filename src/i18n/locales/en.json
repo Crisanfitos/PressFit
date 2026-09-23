@@ -197,7 +197,22 @@
     "hypertrophyMVDesc": "MV (Maintenance Volume): Minimum volume needed to retain muscle mass.",
     "hypertrophyMEVDesc": "MEV (Minimum Effective Volume): Minimum volume needed to ignite muscle growth.",
     "hypertrophyMAVDesc": "MAV (Maximum Adaptive Volume): Sweet spot where greatest gains occur.",
-    "hypertrophyMRVDesc": "MRV (Maximum Recoverable Volume): Upper ceiling of recovery. Exceeding it yields excessive fatigue."
+    "hypertrophyMRVDesc": "MRV (Maximum Recoverable Volume): Upper ceiling of recovery. Exceeding it yields excessive fatigue.",
+    "weeklyLoad": "Weekly Load",
+    "weeklyLoadSubtitle": "Tonnage moved per day (kg)",
+    "weeklyAverage": "Average: {{avg}} kg/day",
+    "newPR": "NEW PERSONAL RECORD (PR)",
+    "prOfficial": "Official record logged in your history.",
+    "prWeeklyBest": "Your best mark of the week.",
+    "thisWeek": "This week",
+    "shareAchievement": "Share achievement",
+    "sharePRTitle": "New personal record in PressFit",
+    "sharePRMessage": "New PR! {{exercise}}: {{weight}} kg × {{reps}} reps 💪",
+    "sessionSets": "{{count}} sets",
+    "showLess": "Show less",
+    "showMore": "Show breakdown",
+    "sessionDetail": "{{exercises}} exercises · {{sets}} sets · {{tonnage}} kg total",
+    "exportReport": "Export / Share Progress Report"
   },
   "physicalProgress": {
     "title": "Physical Progress",
