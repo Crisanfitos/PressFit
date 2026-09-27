@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { PresetRoutine } from '../../types/models';
 import { ThemeColors } from '../../types/theme';
 
@@ -19,6 +20,7 @@ export const PresetHeroCard: React.FC<PresetHeroCardProps> = ({
     colors,
     testID = 'preset-hero-card',
 }) => {
+    const { t } = useTranslation();
     const [isExpanded, setIsExpanded] = useState(false);
     const displayedDays = isExpanded ? preset.rutinas_diarias : preset.rutinas_diarias.slice(0, 3);
     const hasMoreDays = preset.rutinas_diarias.length > 3;
@@ -53,12 +55,12 @@ export const PresetHeroCard: React.FC<PresetHeroCardProps> = ({
                             style={{ marginRight: 4 }}
                         />
                         <Text style={[styles.popularText, { color: colors.textOnPrimary || '#FFFFFF' }]}>
-                            MÁS POPULAR
+                            {t('presetRoutines.mostPopular', 'MÁS POPULAR')}
                         </Text>
                     </View>
                     <View style={[styles.levelBadge, { backgroundColor: `${colors.border}60` }]}>
                         <Text style={[styles.levelText, { color: colors.textSecondary }]}>
-                            {preset.nivel}
+                            {t(`presetRoutines.levels.${preset.nivel.toLowerCase()}`, preset.nivel)}
                         </Text>
                     </View>
                 </View>
@@ -91,9 +93,11 @@ export const PresetHeroCard: React.FC<PresetHeroCardProps> = ({
                 ]}
             >
                 <View style={styles.specColumn}>
-                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>FRECUENCIA</Text>
+                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>
+                        {t('presetRoutines.frequencyUpper', 'FRECUENCIA')}
+                    </Text>
                     <Text style={[styles.specValue, { color: colors.text }]}>
-                        {preset.dias_por_semana} días/sem
+                        {preset.dias_por_semana} {t('presetRoutines.daysPerWeek', 'días/sem')}
                     </Text>
                 </View>
                 <View
@@ -103,13 +107,17 @@ export const PresetHeroCard: React.FC<PresetHeroCardProps> = ({
                         { borderColor: `${colors.border}60` },
                     ]}
                 >
-                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>DURACIÓN</Text>
+                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>
+                        {t('presetRoutines.durationUpper', 'DURACIÓN')}
+                    </Text>
                     <Text style={[styles.specValue, { color: colors.primary }]}>55-65 min</Text>
                 </View>
                 <View style={styles.specColumn}>
-                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>VOLUMEN</Text>
+                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>
+                        {t('presetRoutines.volumeUpper', 'VOLUMEN')}
+                    </Text>
                     <Text style={[styles.specValue, { color: colors.text }]}>
-                        {preset.rutinas_diarias.length} sesiones
+                        {preset.rutinas_diarias.length} {t('presetRoutines.sessions', 'sesiones')}
                     </Text>
                 </View>
             </View>
@@ -118,10 +126,13 @@ export const PresetHeroCard: React.FC<PresetHeroCardProps> = ({
             <View style={styles.microcycleSection}>
                 <View style={styles.microcycleHeader}>
                     <Text style={[styles.microcycleTitle, { color: colors.textSecondary }]}>
-                        MICRO-CICLO ESTRUCTURADO
+                        {t('presetRoutines.structuredMicrocycle', 'MICRO-CICLO ESTRUCTURADO')}
                     </Text>
                     <Text style={[styles.microcycleSplit, { color: colors.primary }]}>
-                        Split {preset.dias_por_semana}x1
+                        {t('presetRoutines.splitPattern', {
+                            count: preset.dias_por_semana,
+                            defaultValue: `Split ${preset.dias_por_semana}x1`,
+                        })}
                     </Text>
                 </View>
 
@@ -163,7 +174,7 @@ export const PresetHeroCard: React.FC<PresetHeroCardProps> = ({
                                 </View>
                             </View>
                             <Text style={[styles.dayCount, { color: colors.textSecondary }]}>
-                                {day.ejercicios?.length || 0} ejer
+                                {day.ejercicios?.length || 0} {t('presetRoutines.exercisesShort', 'ejer')}
                             </Text>
                         </View>
                     ))}
@@ -176,8 +187,11 @@ export const PresetHeroCard: React.FC<PresetHeroCardProps> = ({
                         >
                             <Text style={[styles.expandDaysText, { color: colors.primary }]}>
                                 {isExpanded
-                                    ? 'Ocultar días adicionales'
-                                    : `+ Ver ${preset.rutinas_diarias.length - 3} días más...`}
+                                    ? t('presetRoutines.hideExtraDays', 'Ocultar días adicionales')
+                                    : t('presetRoutines.seeMoreDays', {
+                                          count: preset.rutinas_diarias.length - 3,
+                                          defaultValue: `+ Ver ${preset.rutinas_diarias.length - 3} días más...`,
+                                      })}
                             </Text>
                             <MaterialIcons
                                 name={isExpanded ? 'expand-less' : 'expand-more'}
@@ -198,7 +212,7 @@ export const PresetHeroCard: React.FC<PresetHeroCardProps> = ({
                     testID="preset-hero-import-button"
                 >
                     <Text style={[styles.primaryButtonText, { color: colors.textOnPrimary || '#FFFFFF' }]}>
-                        Usar Plantilla
+                        {t('presetRoutines.useTemplate', 'Usar Plantilla')}
                     </Text>
                     <MaterialIcons
                         name="bolt"
@@ -227,7 +241,7 @@ export const PresetHeroCard: React.FC<PresetHeroCardProps> = ({
                         style={{ marginRight: 6 }}
                     />
                     <Text style={[styles.secondaryButtonText, { color: colors.text }]}>
-                        Previsualizar
+                        {t('presetRoutines.preview', 'Previsualizar')}
                     </Text>
                 </TouchableOpacity>
             </View>

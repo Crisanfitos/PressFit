@@ -17,7 +17,7 @@ import { RoutineService } from '../services/RoutineService';
 import { PresetRoutine } from '../types/models';
 import { PresetRoutineCard } from '../components/PresetRoutineCard';
 import { PresetRoutineDetailModal } from '../components/PresetRoutineDetailModal';
-import { PresetHeroCard, PresetMetricHighlightBar } from '../components/routine';
+import { PresetHeroCard } from '../components/routine';
 
 const CATEGORY_FILTERS = ['Todas', 'Hipertrofia', 'Fuerza', 'Estética', 'Principiante'];
 const DAYS_FILTERS = [0, 3, 4, 6];
@@ -129,7 +129,7 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                 >
                     <MaterialIcons name="add" size={16} color={colors.primary} />
                     <Text style={[styles.createFromScratchText, { color: colors.primary }]}>
-                        Crear
+                        {t('common.create', 'Crear')}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -140,24 +140,18 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                 showsVerticalScrollIndicator={false}
                 testID="preset-routines-list"
             >
-                {/* Intro Title & Description */}
+                {/* Intro Title */}
                 <View style={styles.introBlock}>
                     <View style={styles.engineeringBadge}>
                         <View style={[styles.badgeAccentBar, { backgroundColor: colors.primary }]} />
                         <Text style={[styles.engineeringTag, { color: colors.textSecondary }]}>
-                            ENGINEERING PROTOCOLS
+                            {t('presetRoutines.engineeringProtocols', 'ENGINEERING PROTOCOLS')}
                         </Text>
                     </View>
                     <Text style={[styles.mainHeading, { color: colors.text }]}>
                         {t('presetRoutines.libraryTitle', 'Biblioteca de Rutinas')}
                     </Text>
-                    <Text style={[styles.subHeading, { color: colors.textSecondary }]}>
-                        {t('presetRoutines.subtitle', 'Selecciona un programa probado científicamente para tus objetivos.')}
-                    </Text>
                 </View>
-
-                {/* Metric Highlight Strip */}
-                <PresetMetricHighlightBar totalPresets={filteredPresets.length || 24} colors={colors} />
 
                 {/* Category Chips (Horizontal Scroll) */}
                 <ScrollView
@@ -196,7 +190,9 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                                         },
                                     ]}
                                 >
-                                    {cat === 'Todas' ? t('common.allFem', 'Todas') : cat}
+                                    {cat === 'Todas'
+                                        ? t('common.allFem', 'Todas')
+                                        : t(`presetRoutines.categories.${cat.toLowerCase()}`, cat)}
                                 </Text>
                             </TouchableOpacity>
                         );
@@ -206,7 +202,7 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                 {/* Days Filter Chips */}
                 <View style={styles.daysRow}>
                     <Text style={[styles.daysLabel, { color: colors.textSecondary }]}>
-                        Frecuencia:
+                        {t('presetRoutines.frequency', 'Frecuencia:')}
                     </Text>
                     <View style={styles.daysChipsContainer}>
                         {DAYS_FILTERS.map((days) => {
@@ -239,7 +235,12 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                                             },
                                         ]}
                                     >
-                                        {days === 0 ? t('common.all', 'Todos') : `${days} días`}
+                                        {days === 0
+                                            ? t('common.all', 'Todos')
+                                            : t('presetRoutines.daysCount', {
+                                                  count: days,
+                                                  defaultValue: `${days} días`,
+                                              })}
                                     </Text>
                                 </TouchableOpacity>
                             );
@@ -279,7 +280,7 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                     >
                         <MaterialIcons name="fitness-center" size={40} color={colors.textSecondary} />
                         <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                            No hay plantillas con estos filtros
+                            {t('presetRoutines.noTemplatesFound', 'No hay plantillas con estos filtros')}
                         </Text>
                     </View>
                 ) : null}
@@ -303,10 +304,13 @@ export const PresetRoutinesScreen: React.FC<{ navigation: any }> = ({ navigation
                         </View>
                         <View style={{ flex: 1 }}>
                             <Text style={[styles.createBlankTitle, { color: colors.text }]}>
-                                Crear Plantilla en Blanco
+                                {t('presetRoutines.createBlankTitle', 'Crear Plantilla en Blanco')}
                             </Text>
                             <Text style={[styles.createBlankSubtitle, { color: colors.textSecondary }]}>
-                                Diseña tu propio microciclo biomecánico
+                                {t(
+                                    'presetRoutines.createBlankSubtitle',
+                                    'Diseña tu propio microciclo biomecánico'
+                                )}
                             </Text>
                         </View>
                     </View>

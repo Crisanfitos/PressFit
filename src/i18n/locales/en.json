@@ -318,7 +318,41 @@
     "routineAssignedSuccess": "The routine \"{{name}}\" has been set as your active weekly routine.",
     "goToMyRoutines": "Go to My Routines",
     "loginRequiredTitle": "Log In",
-    "loginRequiredMsg": "You must be logged in to assign a routine."
+    "loginRequiredMsg": "You must be logged in to assign a routine.",
+    "engineeringProtocols": "ENGINEERING PROTOCOLS",
+    "frequency": "Frequency:",
+    "daysCount_one": "{{count}} day",
+    "daysCount_other": "{{count}} days",
+    "noTemplatesFound": "No templates found with these filters",
+    "createBlankTitle": "Create Blank Template",
+    "createBlankSubtitle": "Design your own biomechanical microcycle",
+    "daysPerWeek": "days/wk",
+    "frequencyUpper": "FREQUENCY",
+    "daysLabel": "Days",
+    "durationUpper": "DURATION",
+    "volumeUpper": "VOLUME",
+    "sessions": "sessions",
+    "useTemplate": "Use Template",
+    "mostPopular": "MOST POPULAR",
+    "structuredMicrocycle": "STRUCTURED MICROCYCLE",
+    "splitPattern": "Split {{count}}x1",
+    "exercisesShort": "ex",
+    "hideExtraDays": "Hide extra days",
+    "seeMoreDays": "+ See {{count}} more days...",
+    "preview": "Preview",
+    "repsShort": "reps",
+    "categories": {
+      "hipertrofia": "Hypertrophy",
+      "fuerza": "Strength",
+      "estética": "Aesthetics",
+      "estetica": "Aesthetics",
+      "principiante": "Beginner"
+    },
+    "levels": {
+      "principiante": "Beginner",
+      "intermedio": "Intermediate",
+      "avanzado": "Advanced"
+    }
   },
   "exerciseCatalog": {
     "title": "Exercise Catalog",

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { PresetRoutine } from '../types/models';
 import { useTheme } from '../context/ThemeContext';
 
@@ -15,6 +16,7 @@ export const PresetRoutineCard: React.FC<PresetRoutineCardProps> = ({
     index,
     onPressSelect,
 }) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const { colors } = theme;
 
@@ -60,21 +62,21 @@ export const PresetRoutineCard: React.FC<PresetRoutineCardProps> = ({
                         ]}
                     >
                         <Text style={[styles.categoryText, { color: categoryBadgeStyle.text }]}>
-                            {preset.categoria}
+                            {t(`presetRoutines.categories.${preset.categoria.toLowerCase()}`, preset.categoria)}
                         </Text>
                     </View>
 
                     <View style={[styles.metaBadge, { backgroundColor: `${colors.border}40` }]}>
                         <MaterialIcons name="date-range" size={13} color={colors.textSecondary} />
                         <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-                            {preset.dias_por_semana} días/sem
+                            {preset.dias_por_semana} {t('presetRoutines.daysPerWeek', 'días/sem')}
                         </Text>
                     </View>
 
                     <View style={[styles.metaBadge, { backgroundColor: `${colors.border}40` }]}>
                         <MaterialIcons name="fitness-center" size={13} color={colors.textSecondary} />
                         <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-                            {preset.nivel}
+                            {t(`presetRoutines.levels.${preset.nivel.toLowerCase()}`, preset.nivel)}
                         </Text>
                     </View>
                 </View>
@@ -101,9 +103,11 @@ export const PresetRoutineCard: React.FC<PresetRoutineCardProps> = ({
                 ]}
             >
                 <View style={styles.specColumn}>
-                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>FRECUENCIA</Text>
+                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>
+                        {t('presetRoutines.frequencyUpper', 'FRECUENCIA')}
+                    </Text>
                     <Text style={[styles.specValue, { color: colors.text }]}>
-                        {preset.dias_por_semana} Días
+                        {preset.dias_por_semana} {t('presetRoutines.daysLabel', 'Días')}
                     </Text>
                 </View>
                 <View
@@ -113,13 +117,17 @@ export const PresetRoutineCard: React.FC<PresetRoutineCardProps> = ({
                         { borderColor: `${colors.border}50` },
                     ]}
                 >
-                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>DURACIÓN</Text>
+                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>
+                        {t('presetRoutines.durationUpper', 'DURACIÓN')}
+                    </Text>
                     <Text style={[styles.specValue, { color: colors.text }]}>50-60 min</Text>
                 </View>
                 <View style={styles.specColumn}>
-                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>VOLUMEN</Text>
+                    <Text style={[styles.specLabel, { color: colors.textSecondary }]}>
+                        {t('presetRoutines.volumeUpper', 'VOLUMEN')}
+                    </Text>
                     <Text style={[styles.specValue, { color: colors.text }]}>
-                        {preset.rutinas_diarias.length} sesiones
+                        {preset.rutinas_diarias.length} {t('presetRoutines.sessions', 'sesiones')}
                     </Text>
                 </View>
             </View>
@@ -136,7 +144,7 @@ export const PresetRoutineCard: React.FC<PresetRoutineCardProps> = ({
                     ]}
                 >
                     <Text style={[styles.useButtonText, { color: colors.primary }]}>
-                        Usar Plantilla
+                        {t('presetRoutines.useTemplate', 'Usar Plantilla')}
                     </Text>
                     <MaterialIcons name="add-circle" size={16} color={colors.primary} style={{ marginLeft: 4 }} />
                 </View>

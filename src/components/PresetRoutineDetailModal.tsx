@@ -58,7 +58,7 @@ export const PresetRoutineDetailModal: React.FC<PresetRoutineDetailModalProps> =
                                 {preset.nombre}
                             </Text>
                             <Text style={[styles.subTitle, { color: colors.primary || '#10B981' }]}>
-                                {preset.categoria} • {preset.dias_por_semana} {t('presetRoutines.day', 'Días')}/Semana • {preset.nivel}
+                                {t(`presetRoutines.categories.${preset.categoria.toLowerCase()}`, preset.categoria)} • {preset.dias_por_semana} {t('presetRoutines.daysPerWeek', 'días/sem')} • {t(`presetRoutines.levels.${preset.nivel.toLowerCase()}`, preset.nivel)}
                             </Text>
                         </View>
                         <TouchableOpacity
@@ -130,7 +130,7 @@ export const PresetRoutineDetailModal: React.FC<PresetRoutineDetailModalProps> =
 
                                         <View style={[styles.repsBadge, { backgroundColor: '#10B98120' }]}>
                                             <Text style={[styles.repsText, { color: colors.primary || '#10B981' }]}>
-                                                {ex.series[0]?.repeticiones_objetivo || 10} reps
+                                                {ex.series[0]?.repeticiones_objetivo || 10} {t('presetRoutines.repsShort', 'reps')}
                                             </Text>
                                         </View>
                                     </View>
