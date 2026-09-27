@@ -335,7 +335,26 @@
     "libraryTitle": "Exercise Library",
     "selectedCount_one": "{{count}} Selected",
     "selectedCount_other": "{{count}} Selected",
-    "addExercisesError": "Could not add exercises"
+    "addExercisesError": "Could not add exercises",
+    "totalMetric": "TOTAL",
+    "totalMetricSubtitle": "Exercises",
+    "prsMetric": "RECORDS",
+    "prsMetricSubtitle": "Recorded",
+    "groupsMetric": "GROUPS",
+    "groupsMetricSubtitle": "Guided",
+    "zones": "Zones",
+    "difficulties": {
+      "principiante": "Beginner",
+      "intermedio": "Intermediate",
+      "avanzado": "Advanced"
+    },
+    "categories": {
+      "fuerza": "Strength",
+      "hipertrofia": "Hypertrophy",
+      "calistenia": "Calisthenics",
+      "cardio": "Cardio",
+      "resistencia": "Endurance"
+    }
   },
   "timer": {
     "rest": "Rest",
