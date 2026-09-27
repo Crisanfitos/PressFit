@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import ImageViewing from 'react-native-image-viewing';
+import { useTranslation } from 'react-i18next';
 
 export interface PhotoViewerModalProps {
     visible: boolean;
@@ -22,6 +23,9 @@ export const PhotoViewerModal: React.FC<PhotoViewerModalProps> = ({
     onClose,
     onEditPhoto,
 }) => {
+    const { i18n } = useTranslation();
+    const dateLocale = i18n.language?.startsWith('en') ? 'en-US' : 'es-ES';
+
     const formattedImages = useMemo(
         () => images.map((img) => ({ uri: img.uri || img.url || '' })),
         [images]
@@ -44,7 +48,7 @@ export const PhotoViewerModal: React.FC<PhotoViewerModalProps> = ({
             <View style={styles.viewerFooter}>
                 <Text style={styles.viewerDateText}>
                     {currentPhoto?.created_at
-                        ? new Date(currentPhoto.created_at).toLocaleDateString()
+                        ? new Date(currentPhoto.created_at).toLocaleDateString(dateLocale)
                         : ''}
                 </Text>
                 {currentPhoto?.comentario ? (

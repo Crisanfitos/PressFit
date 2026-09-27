@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { format, parseISO } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import { ThemeColors } from '../../types/theme';
 
 export interface PhotoGridProps {
@@ -21,16 +22,20 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({
     colors,
     locale,
 }) => {
+    const { t, i18n } = useTranslation();
+    const isEnglish = locale?.code?.startsWith('en') || i18n.language?.startsWith('en');
+    const dayMonthFormat = isEnglish ? 'MMMM d' : "d 'de' MMMM";
+
     const grouped = useMemo(() => {
         return photos.reduce((acc, photo) => {
             const dateKey = photo.created_at
                 ? format(parseISO(photo.created_at), 'MMMM yyyy', { locale })
-                : 'Desconocido';
+                : t('common.unknown', 'Desconocido');
             if (!acc[dateKey]) acc[dateKey] = [];
             acc[dateKey].push(photo);
             return acc;
         }, {} as Record<string, any[]>);
-    }, [photos, locale]);
+    }, [photos, locale, t]);
 
     return (
         <View>
@@ -67,7 +72,7 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({
                                         <View style={styles.photoOverlay}>
                                             <Text style={styles.photoDate}>
                                                 {photo.created_at
-                                                    ? format(parseISO(photo.created_at), "d 'de' MMMM", { locale })
+                                                    ? format(parseISO(photo.created_at), dayMonthFormat, { locale })
                                                     : ''}
                                             </Text>
                                         </View>

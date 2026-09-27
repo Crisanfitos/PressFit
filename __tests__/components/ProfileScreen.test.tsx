@@ -126,5 +126,27 @@ describe('ProfileScreen Component (RNTL)', () => {
         fireEvent.press(plateSettingsBtn);
         expect(mockNavigation.navigate).toHaveBeenCalledWith('PlateSettings');
     });
+
+    it('renders translated theme toggle status in ES and EN (PF-410)', async () => {
+        const { getByTestId } = await renderProfileScreen();
+
+        // En español inicialmente
+        const statusEl = getByTestId('theme-toggle-status');
+        expect(statusEl.props.children).toMatch(/Activado|Desactivado/);
+
+        // Cambiar a inglés
+        await act(async () => {
+            fireEvent.press(getByTestId('language-select-en'));
+        });
+
+        await waitFor(() => {
+            expect(getByTestId('theme-toggle-status').props.children).toMatch(/Enabled|Disabled/);
+        });
+
+        // Restaurar español
+        await act(async () => {
+            fireEvent.press(getByTestId('language-select-es'));
+        });
+    });
 });
 
