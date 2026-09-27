@@ -12,7 +12,8 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import KeyboardAwareContainer from '../KeyboardAwareContainer';
 import { ThemeColors } from '../../types/theme';
 
@@ -47,6 +48,10 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
     onClose,
     onConfirmUpload,
 }) => {
+    const { t, i18n } = useTranslation();
+    const currentLocale = i18n.language?.startsWith('en') ? enUS : es;
+    const dateFormatStr = i18n.language?.startsWith('en') ? 'MMMM d, yyyy' : "d 'de' MMMM, yyyy";
+
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
             <KeyboardAwareContainer
@@ -61,11 +66,13 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                     ]}
                 >
                     <Text style={[styles.modalTitle, { color: colors.text }]}>
-                        Nueva Foto de Progreso
+                        {t('physicalProgress.newPhotoTitle', 'Nueva Foto de Progreso')}
                     </Text>
                     {imageUri && <Image source={{ uri: imageUri }} style={styles.previewImage} />}
 
-                    <Text style={[styles.label, { color: colors.textSecondary }]}>Fecha de la foto</Text>
+                    <Text style={[styles.label, { color: colors.textSecondary }]}>
+                        {t('physicalProgress.photoDateLabel', 'Fecha de la foto')}
+                    </Text>
                     <TouchableOpacity
                         style={[
                             styles.input,
@@ -80,7 +87,7 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                         onPress={() => setShowDatePicker(true)}
                     >
                         <Text style={{ color: colors.text }}>
-                            {format(selectedDate, "d 'de' MMMM, yyyy", { locale: es })}
+                            {format(selectedDate, dateFormatStr, { locale: currentLocale })}
                         </Text>
                         <MaterialIcons name="calendar-today" size={20} color={colors.textSecondary} />
                     </TouchableOpacity>
@@ -103,7 +110,9 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                         />
                     )}
 
-                    <Text style={[styles.label, { color: colors.textSecondary }]}>Comentario (opcional)</Text>
+                    <Text style={[styles.label, { color: colors.textSecondary }]}>
+                        {t('physicalProgress.commentLabel', 'Comentario (opcional)')}
+                    </Text>
                     <TextInput
                         style={[
                             styles.input,
@@ -113,7 +122,7 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                                 color: colors.text,
                             },
                         ]}
-                        placeholder="Añade un comentario..."
+                        placeholder={t('physicalProgress.commentPlaceholder', 'Añade un comentario...')}
                         placeholderTextColor={colors.textSecondary}
                         value={comment}
                         onChangeText={setComment}
@@ -127,7 +136,9 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                             ]}
                             onPress={onClose}
                         >
-                            <Text style={[styles.buttonText, { color: colors.text }]}>Cancelar</Text>
+                            <Text style={[styles.buttonText, { color: colors.text }]}>
+                                {t('common.cancel', 'Cancelar')}
+                            </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.modalButton, { backgroundColor: colors.primary }]}
@@ -137,7 +148,9 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                             {uploading ? (
                                 <ActivityIndicator color={colors.background} />
                             ) : (
-                                <Text style={[styles.buttonText, { color: colors.background }]}>Guardar</Text>
+                                <Text style={[styles.buttonText, { color: colors.background }]}>
+                                    {t('common.save', 'Guardar')}
+                                </Text>
                             )}
                         </TouchableOpacity>
                     </View>

@@ -10,6 +10,7 @@ import {
     StyleSheet,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import KeyboardAwareContainer from '../KeyboardAwareContainer';
 import { ThemeColors } from '../../types/theme';
 
@@ -36,6 +37,9 @@ export const PhotoEditModal: React.FC<PhotoEditModalProps> = ({
     onClose,
     onSave,
 }) => {
+    const { t, i18n } = useTranslation();
+    const dateLocale = i18n.language?.startsWith('en') ? 'en-US' : 'es-ES';
+
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
             <KeyboardAwareContainer
@@ -50,10 +54,12 @@ export const PhotoEditModal: React.FC<PhotoEditModalProps> = ({
                     ]}
                 >
                     <Text style={[styles.modalTitle, { color: colors.text }]}>
-                        Editar Detalles de Foto
+                        {t('physicalProgress.editPhotoTitle', 'Editar Detalles de Foto')}
                     </Text>
 
-                    <Text style={[styles.label, { color: colors.textSecondary }]}>Fecha</Text>
+                    <Text style={[styles.label, { color: colors.textSecondary }]}>
+                        {t('physicalProgress.date', 'Fecha')}
+                    </Text>
                     <TouchableOpacity
                         style={[
                             styles.input,
@@ -66,33 +72,39 @@ export const PhotoEditModal: React.FC<PhotoEditModalProps> = ({
                             },
                         ]}
                         onPress={() => {
-                            Alert.alert('Cambiar Fecha', 'Selecciona una opción', [
-                                { text: 'Hoy', onPress: () => setEditDate(new Date()) },
-                                {
-                                    text: 'Ayer',
-                                    onPress: () => {
-                                        const d = new Date();
-                                        d.setDate(d.getDate() - 1);
-                                        setEditDate(d);
+                            Alert.alert(
+                                t('physicalProgress.changeDate', 'Cambiar Fecha'),
+                                t('physicalProgress.selectOption', 'Selecciona una opción'),
+                                [
+                                    { text: t('physicalProgress.today', 'Hoy'), onPress: () => setEditDate(new Date()) },
+                                    {
+                                        text: t('physicalProgress.yesterday', 'Ayer'),
+                                        onPress: () => {
+                                            const d = new Date();
+                                            d.setDate(d.getDate() - 1);
+                                            setEditDate(d);
+                                        },
                                     },
-                                },
-                                {
-                                    text: 'Hace 1 semana',
-                                    onPress: () => {
-                                        const d = new Date();
-                                        d.setDate(d.getDate() - 7);
-                                        setEditDate(d);
+                                    {
+                                        text: t('physicalProgress.oneWeekAgo', 'Hace 1 semana'),
+                                        onPress: () => {
+                                            const d = new Date();
+                                            d.setDate(d.getDate() - 7);
+                                            setEditDate(d);
+                                        },
                                     },
-                                },
-                                { text: 'Cancelar', style: 'cancel' },
-                            ]);
+                                    { text: t('common.cancel', 'Cancelar'), style: 'cancel' },
+                                ]
+                            );
                         }}
                     >
-                        <Text style={{ color: colors.text }}>{editDate.toLocaleDateString()}</Text>
+                        <Text style={{ color: colors.text }}>{editDate.toLocaleDateString(dateLocale)}</Text>
                         <MaterialIcons name="calendar-today" size={20} color={colors.textSecondary} />
                     </TouchableOpacity>
 
-                    <Text style={[styles.label, { color: colors.textSecondary }]}>Comentario</Text>
+                    <Text style={[styles.label, { color: colors.textSecondary }]}>
+                        {t('physicalProgress.comment', 'Comentario')}
+                    </Text>
                     <TextInput
                         style={[
                             styles.input,
@@ -102,7 +114,7 @@ export const PhotoEditModal: React.FC<PhotoEditModalProps> = ({
                                 color: colors.text,
                             },
                         ]}
-                        placeholder="Añade un comentario..."
+                        placeholder={t('physicalProgress.commentPlaceholder', 'Añade un comentario...')}
                         placeholderTextColor={colors.textSecondary}
                         value={editComment}
                         onChangeText={setEditComment}
@@ -116,7 +128,9 @@ export const PhotoEditModal: React.FC<PhotoEditModalProps> = ({
                             ]}
                             onPress={onClose}
                         >
-                            <Text style={[styles.buttonText, { color: colors.text }]}>Cancelar</Text>
+                            <Text style={[styles.buttonText, { color: colors.text }]}>
+                                {t('common.cancel', 'Cancelar')}
+                            </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.modalButton, { backgroundColor: colors.primary }]}
@@ -126,7 +140,9 @@ export const PhotoEditModal: React.FC<PhotoEditModalProps> = ({
                             {saving ? (
                                 <ActivityIndicator color={colors.background} />
                             ) : (
-                                <Text style={[styles.buttonText, { color: colors.background }]}>Guardar</Text>
+                                <Text style={[styles.buttonText, { color: colors.background }]}>
+                                    {t('common.save', 'Guardar')}
+                                </Text>
                             )}
                         </TouchableOpacity>
                     </View>

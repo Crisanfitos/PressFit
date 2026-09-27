@@ -310,7 +310,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                             <MaterialIcons name={themeMode === 'dark' ? 'dark-mode' : 'light-mode'} size={24} color={colors.textSecondary} />
                             <View style={styles.settingTextContainer}>
                                 <Text style={styles.settingLabel}>{t('profile.darkMode')}</Text>
-                                <Text style={styles.settingDescription} testID="theme-toggle-status">{themeMode === 'dark' ? 'Activado' : 'Desactivado'}</Text>
+                                <Text style={styles.settingDescription} testID="theme-toggle-status">
+                                    {themeMode === 'dark' ? t('profile.activated') : t('profile.deactivated')}
+                                </Text>
                             </View>
                             <Switch
                                 testID="theme-toggle-switch"

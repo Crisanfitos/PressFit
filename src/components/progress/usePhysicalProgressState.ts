@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import * as ImagePicker from 'expo-image-picker';
+import { useTranslation } from 'react-i18next';
 import { UserService } from '../../services/UserService';
 import { ProgressCustomAlertData } from './ProgressCustomAlertModal';
 
@@ -10,6 +11,7 @@ export const usePhysicalProgressState = (
     deletePhotos: (ids: string[]) => Promise<boolean>,
     updatePhoto: (id: string, updates: any) => Promise<boolean>
 ) => {
+    const { t } = useTranslation();
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
     const [comment, setComment] = useState('');
@@ -78,8 +80,8 @@ export const usePhysicalProgressState = (
             setCustomAlert({
                 visible: true,
                 type: 'error',
-                title: 'Permiso denegado',
-                message: 'Se necesita acceso a la cámara para tomar fotos de progreso.',
+                title: t('physicalProgress.permissionDeniedTitle', 'Permiso denegado'),
+                message: t('physicalProgress.cameraPermissionMessage', 'Se necesita acceso a la cámara para tomar fotos de progreso.'),
                 onConfirm: closeCustomAlert,
             });
             return;
@@ -108,16 +110,16 @@ export const usePhysicalProgressState = (
             setCustomAlert({
                 visible: true,
                 type: 'success',
-                title: 'Éxito',
-                message: 'La foto ha sido añadida correctamente.',
+                title: t('common.success', 'Éxito'),
+                message: t('physicalProgress.photoAddedSuccess', 'La foto ha sido añadida correctamente.'),
                 onConfirm: closeCustomAlert,
             });
         } else {
             setCustomAlert({
                 visible: true,
                 type: 'error',
-                title: 'Error',
-                message: 'Hubo un problema al añadir la foto.',
+                title: t('common.error', 'Error'),
+                message: t('physicalProgress.photoAddError', 'Hubo un problema al añadir la foto.'),
                 onConfirm: closeCustomAlert,
             });
         }
@@ -142,8 +144,11 @@ export const usePhysicalProgressState = (
         setCustomAlert({
             visible: true,
             type: 'warning',
-            title: 'Eliminar fotos',
-            message: `¿Estás seguro de que quieres eliminar ${selectedIds.size} foto(s) seleccionada(s)?`,
+            title: t('physicalProgress.deletePhotosTitle', 'Eliminar fotos'),
+            message: t('physicalProgress.deletePhotosConfirm', {
+                count: selectedIds.size,
+                defaultValue: `¿Estás seguro de que quieres eliminar ${selectedIds.size} foto(s) seleccionada(s)?`,
+            }),
             onCancel: closeCustomAlert,
             onConfirm: async () => {
                 closeCustomAlert();
@@ -155,16 +160,16 @@ export const usePhysicalProgressState = (
                     setCustomAlert({
                         visible: true,
                         type: 'success',
-                        title: 'Eliminado',
-                        message: 'Las fotos seleccionadas han sido eliminadas.',
+                        title: t('physicalProgress.deletedTitle', 'Eliminado'),
+                        message: t('physicalProgress.photosDeletedSuccess', 'Las fotos seleccionadas han sido eliminadas.'),
                         onConfirm: closeCustomAlert,
                     });
                 } else {
                     setCustomAlert({
                         visible: true,
                         type: 'error',
-                        title: 'Error',
-                        message: 'Hubo un problema al eliminar las fotos.',
+                        title: t('common.error', 'Error'),
+                        message: t('physicalProgress.photosDeleteError', 'Hubo un problema al eliminar las fotos.'),
                         onConfirm: closeCustomAlert,
                     });
                 }
@@ -205,16 +210,16 @@ export const usePhysicalProgressState = (
             setCustomAlert({
                 visible: true,
                 type: 'success',
-                title: 'Éxito',
-                message: 'La foto ha sido actualizada correctamente.',
+                title: t('common.success', 'Éxito'),
+                message: t('physicalProgress.photoUpdatedSuccess', 'La foto ha sido actualizada correctamente.'),
                 onConfirm: closeCustomAlert,
             });
         } else {
             setCustomAlert({
                 visible: true,
                 type: 'error',
-                title: 'Error',
-                message: 'No se pudo actualizar la foto. Inténtalo de nuevo.',
+                title: t('common.error', 'Error'),
+                message: t('physicalProgress.photoUpdateError', 'No se pudo actualizar la foto. Inténtalo de nuevo.'),
                 onConfirm: closeCustomAlert,
             });
         }

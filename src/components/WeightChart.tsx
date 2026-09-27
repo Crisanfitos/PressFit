@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
+import { useTranslation } from 'react-i18next';
 
 interface WeightEntry {
     id: string;
@@ -24,6 +25,7 @@ interface SelectedPoint {
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
+    const { t, i18n } = useTranslation();
     const [selectedPoint, setSelectedPoint] = useState<SelectedPoint | null>(null);
 
     const chartDataResult = useMemo(() => {
@@ -51,10 +53,12 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
         const diffFromStart = currentWeight - firstWeight;
         const diffFromLast = currentWeight - lastWeight;
 
+        const dateLocale = i18n.language?.startsWith('en') ? 'en-US' : 'es-ES';
+
         const chartPoints = sortedData.map((d, index) => {
             const date = new Date(d.created_at);
             const label = `${date.getDate()}/${date.getMonth() + 1}`;
-            const dateStr = date.toLocaleDateString('es-ES', {
+            const dateStr = date.toLocaleDateString(dateLocale, {
                 day: 'numeric',
                 month: 'short',
                 year: 'numeric'
@@ -80,15 +84,15 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
             stepValue,
             chartPoints,
         };
-    }, [data]);
+    }, [data, i18n.language]);
 
     if (!chartDataResult || data.length === 0) {
         return (
             <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]} testID="weight-chart-empty-state">
-                <Text style={[styles.title, { color: colors.text }]}>Evolución de Peso</Text>
+                <Text style={[styles.title, { color: colors.text }]}>{t('physicalProgress.weightEvolution', 'Evolución de Peso')}</Text>
                 <View style={styles.emptyState}>
                     <Text style={{ color: colors.textSecondary, fontSize: 14 }}>
-                        Aún no hay datos de peso registrados
+                        {t('physicalProgress.noWeightData', 'Aún no hay datos de peso registrados')}
                     </Text>
                 </View>
             </View>
@@ -101,7 +105,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
     return (
         <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]} testID="weight-chart-container">
             <View style={styles.headerRow}>
-                <Text style={[styles.title, { color: colors.text }]}>Evolución de Peso</Text>
+                <Text style={[styles.title, { color: colors.text }]}>{t('physicalProgress.weightEvolution', 'Evolución de Peso')}</Text>
                 <Text style={[styles.currentWeight, { color: colors.primary }]}>
                     {currentWeight} kg
                 </Text>
@@ -118,7 +122,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
                 >
                     <View style={styles.tooltipContent}>
                         <Text style={[styles.tooltipDate, { color: colors.textSecondary }]}>
-                            {selectedPoint.dateStr} (Punto {selectedPoint.index + 1} de {data.length})
+                            {selectedPoint.dateStr} ({t('physicalProgress.pointOf', { point: selectedPoint.index + 1, total: data.length, defaultValue: `Punto ${selectedPoint.index + 1} de ${data.length}` })})
                         </Text>
                         <Text style={[styles.tooltipValue, { color: colors.primary }]}>
                             {selectedPoint.peso} kg
@@ -129,7 +133,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
                         style={styles.tooltipCloseBtn}
                         testID="weight-chart-tooltip-close"
                         accessibilityRole="button"
-                        accessibilityLabel="Cerrar detalle"
+                        accessibilityLabel={t('common.close', 'Cerrar')}
                     >
                         <Text style={[styles.tooltipCloseText, { color: colors.textSecondary }]}>✕</Text>
                     </TouchableOpacity>
@@ -195,10 +199,10 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
             {data.length >= 2 && (
                 <View style={styles.trendRow}>
                     <Text style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 4 }}>
-                        {diffFromStart > 0 ? '+' : ''}{diffFromStart.toFixed(1)} kg desde el primer registro
+                        {diffFromStart > 0 ? '+' : ''}{diffFromStart.toFixed(1)} kg {t('physicalProgress.sinceFirstRecord', 'desde el primer registro')}
                     </Text>
                     <Text style={{ fontSize: 12, color: colors.textSecondary }}>
-                        {diffFromLast > 0 ? '+' : ''}{diffFromLast.toFixed(1)} kg desde el último registro
+                        {diffFromLast > 0 ? '+' : ''}{diffFromLast.toFixed(1)} kg {t('physicalProgress.sinceLastRecord', 'desde el último registro')}
                     </Text>
                 </View>
             )}
