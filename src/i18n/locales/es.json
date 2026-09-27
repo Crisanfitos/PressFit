@@ -318,7 +318,41 @@
     "routineAssignedSuccess": "La rutina \"{{name}}\" ha sido configurada como tu rutina semanal activa.",
     "goToMyRoutines": "Ir a Mis Rutinas",
     "loginRequiredTitle": "Inicia sesión",
-    "loginRequiredMsg": "Debes iniciar sesión para asignar una rutina."
+    "loginRequiredMsg": "Debes iniciar sesión para asignar una rutina.",
+    "engineeringProtocols": "ENGINEERING PROTOCOLS",
+    "frequency": "Frecuencia:",
+    "daysCount_one": "{{count}} día",
+    "daysCount_other": "{{count}} días",
+    "noTemplatesFound": "No hay plantillas con estos filtros",
+    "createBlankTitle": "Crear Plantilla en Blanco",
+    "createBlankSubtitle": "Diseña tu propio microciclo biomecánico",
+    "daysPerWeek": "días/sem",
+    "frequencyUpper": "FRECUENCIA",
+    "daysLabel": "Días",
+    "durationUpper": "DURACIÓN",
+    "volumeUpper": "VOLUMEN",
+    "sessions": "sesiones",
+    "useTemplate": "Usar Plantilla",
+    "mostPopular": "MÁS POPULAR",
+    "structuredMicrocycle": "MICRO-CICLO ESTRUCTURADO",
+    "splitPattern": "Split {{count}}x1",
+    "exercisesShort": "ejer",
+    "hideExtraDays": "Ocultar días adicionales",
+    "seeMoreDays": "+ Ver {{count}} días más...",
+    "preview": "Previsualizar",
+    "repsShort": "reps",
+    "categories": {
+      "hipertrofia": "Hipertrofia",
+      "fuerza": "Fuerza",
+      "estética": "Estética",
+      "estetica": "Estética",
+      "principiante": "Principiante"
+    },
+    "levels": {
+      "principiante": "Principiante",
+      "intermedio": "Intermedio",
+      "avanzado": "Avanzado"
+    }
   },
   "exerciseCatalog": {
     "title": "Catálogo de Ejercicios",
