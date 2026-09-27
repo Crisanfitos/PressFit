@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { ThemeColors } from '../../types/theme';
 
 export interface ExerciseCatalogBentoBarProps {
@@ -18,6 +19,8 @@ export const ExerciseCatalogBentoBar: React.FC<ExerciseCatalogBentoBarProps> = (
     colors,
     testID = 'exercise-catalog-bento-bar',
 }) => {
+    const { t } = useTranslation();
+
     return (
         <View
             style={[
@@ -32,14 +35,16 @@ export const ExerciseCatalogBentoBar: React.FC<ExerciseCatalogBentoBarProps> = (
             {/* Metric 1: Total Ejercicios */}
             <View style={styles.metricItem}>
                 <View style={styles.metricHeader}>
-                    <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>TOTAL</Text>
+                    <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
+                        {t('exerciseCatalog.totalMetric', 'TOTAL')}
+                    </Text>
                     <MaterialIcons name="fitness-center" size={14} color={colors.primary} />
                 </View>
                 <Text style={[styles.metricValue, { color: colors.text }]}>
                     {totalExercises}
                 </Text>
                 <Text style={[styles.metricSubtitle, { color: colors.textSecondary }]}>
-                    Ejercicios
+                    {t('exerciseCatalog.totalMetricSubtitle', 'Ejercicios')}
                 </Text>
             </View>
 
@@ -52,28 +57,32 @@ export const ExerciseCatalogBentoBar: React.FC<ExerciseCatalogBentoBarProps> = (
                 ]}
             >
                 <View style={styles.metricHeader}>
-                    <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>RÉCORDS</Text>
+                    <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
+                        {t('exerciseCatalog.prsMetric', 'RÉCORDS')}
+                    </Text>
                     <MaterialIcons name="emoji-events" size={14} color={colors.statusWarning || '#f59e0b'} />
                 </View>
                 <Text style={[styles.metricValue, { color: colors.statusWarning || '#f59e0b' }]}>
                     {totalPRs > 0 ? `${totalPRs} PRs` : '0 PRs'}
                 </Text>
                 <Text style={[styles.metricSubtitle, { color: colors.textSecondary }]}>
-                    Registrados
+                    {t('exerciseCatalog.prsMetricSubtitle', 'Registrados')}
                 </Text>
             </View>
 
             {/* Metric 3: Grupos Guiados */}
             <View style={styles.metricItem}>
                 <View style={styles.metricHeader}>
-                    <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>GRUPOS</Text>
+                    <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
+                        {t('exerciseCatalog.groupsMetric', 'GRUPOS')}
+                    </Text>
                     <MaterialIcons name="category" size={14} color={colors.statusInfo || '#38bdf8'} />
                 </View>
                 <Text style={[styles.metricValue, { color: colors.text }]}>
-                    {totalGroups} Zonas
+                    {totalGroups} {t('exerciseCatalog.zones', 'Zonas')}
                 </Text>
                 <Text style={[styles.metricSubtitle, { color: colors.textSecondary }]}>
-                    Guiadas
+                    {t('exerciseCatalog.groupsMetricSubtitle', 'Guiadas')}
                 </Text>
             </View>
         </View>
@@ -98,7 +107,6 @@ const styles = StyleSheet.create({
     metricItem: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
         paddingVertical: 2,
     },
     metricBorder: {
@@ -114,7 +122,7 @@ const styles = StyleSheet.create({
     metricLabel: {
         fontSize: 10,
         fontWeight: '700',
-        letterSpacing: 0.5,
+        letterSpacing: 0.8,
     },
     metricValue: {
         fontSize: 18,

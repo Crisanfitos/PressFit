@@ -335,7 +335,26 @@
     "libraryTitle": "Biblioteca de Ejercicios",
     "selectedCount_one": "{{count}} Seleccionado",
     "selectedCount_other": "{{count}} Seleccionados",
-    "addExercisesError": "No se pudieron añadir los ejercicios"
+    "addExercisesError": "No se pudieron añadir los ejercicios",
+    "totalMetric": "TOTAL",
+    "totalMetricSubtitle": "Ejercicios",
+    "prsMetric": "RÉCORDS",
+    "prsMetricSubtitle": "Registrados",
+    "groupsMetric": "GRUPOS",
+    "groupsMetricSubtitle": "Guiadas",
+    "zones": "Zonas",
+    "difficulties": {
+      "principiante": "Principiante",
+      "intermedio": "Intermedio",
+      "avanzado": "Avanzado"
+    },
+    "categories": {
+      "fuerza": "Fuerza",
+      "hipertrofia": "Hipertrofia",
+      "calistenia": "Calistenia",
+      "cardio": "Cardio",
+      "resistencia": "Resistencia"
+    }
   },
   "timer": {
     "rest": "Descanso",

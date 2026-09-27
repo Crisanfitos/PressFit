@@ -128,7 +128,7 @@ describe('Exercise Sub-components (PF-267)', () => {
                 },
             ];
 
-            const { getByText } = await render(
+            const { getByText, queryByText } = await render(
                 <ExerciseFilterSection
                     showFilters={true}
                     setShowFilters={jest.fn()}
@@ -142,7 +142,7 @@ describe('Exercise Sub-components (PF-267)', () => {
                 />
             );
 
-            expect(getByText('Ocultar filtros')).toBeTruthy();
+            expect(queryByText('Ocultar filtros')).toBeNull();
             expect(getByText('Músculo Principal')).toBeTruthy();
             const optionBtn = getByText('Pecho');
             fireEvent.press(optionBtn);

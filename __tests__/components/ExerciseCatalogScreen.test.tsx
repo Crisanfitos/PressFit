@@ -1,7 +1,8 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, fireEvent, act } from '@testing-library/react-native';
 import ExerciseCatalogScreen from '../../src/screens/ExerciseCatalogScreen';
 import { useExerciseController } from '../../src/controllers/useExerciseController';
+import i18n from '../../src/i18n';
 
 jest.mock('../../src/controllers/useExerciseController');
 
@@ -10,29 +11,110 @@ const mockUseExerciseController = useExerciseController as jest.MockedFunction<t
 describe('ExerciseCatalogScreen Component (RNTL)', () => {
     const mockNavigation = { navigate: jest.fn(), goBack: jest.fn() } as any;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         jest.clearAllMocks();
+        await act(async () => {
+            await i18n.changeLanguage('es');
+        });
         mockUseExerciseController.mockReturnValue({
             exercises: [],
             loading: false,
             searchQuery: '',
             filters: {},
-            filterOptions: { primaryMuscles: [], secondaryMuscles: [], categories: [], difficulties: [] },
+            filterOptions: {
+                primaryMuscles: ['Pecho', 'Espalda'],
+                secondaryMuscles: ['Tríceps'],
+                categories: ['Fuerza'],
+                difficulties: ['Intermedio'],
+            },
             setSearchQuery: jest.fn(),
             setFilter: jest.fn(),
-            clearFilters: jest.fn(),
+            clearFilter: jest.fn(),
+            clearAllFilters: jest.fn(),
             loadExercises: jest.fn(),
+            hasActiveFilters: false,
         } as any);
     });
 
-    it('renders exercise catalog header and exercise items', async () => {
-        const { getByText, getByTestId } = await render(
+    afterEach(async () => {
+        await act(async () => {
+            await i18n.changeLanguage('es');
+        });
+    });
+
+    it('renders header, search bar, and DOES NOT render redundant Show filters button (PF-411)', async () => {
+        const { getByText, queryByText, getByTestId } = await render(
             <ExerciseCatalogScreen navigation={mockNavigation} />
         );
 
         expect(getByText('Catálogo de Ejercicios')).toBeTruthy();
-        expect(getByText('Ocultar filtros')).toBeTruthy();
+        // El botón independiente Show filters / Ocultar filtros ya no debe existir
+        expect(queryByText('Ocultar filtros')).toBeNull();
+        expect(queryByText('Mostrar filtros')).toBeNull();
+        expect(queryByText('Show filters')).toBeNull();
+        expect(queryByText('Hide filters')).toBeNull();
+
+        // El botón de filtro en la barra de búsqueda sí existe
+        expect(getByTestId('exercise-search-tune-button')).toBeTruthy();
         expect(getByTestId('exercise-catalog-list')).toBeTruthy();
+    });
+
+    it('toggles filters visibility when pressing the search bar tune button (PF-411)', async () => {
+        const { getByTestId, queryByText } = await render(
+            <ExerciseCatalogScreen navigation={mockNavigation} />
+        );
+
+        // Inicialmente los filtros están visibles (showFilters = true)
+        expect(queryByText('Músculo Principal')).toBeTruthy();
+
+        // Presionar tune button para ocultar filtros
+        const tuneBtn = getByTestId('exercise-search-tune-button');
+        await act(async () => {
+            fireEvent.press(tuneBtn);
+        });
+
+        // Ahora los filtros están ocultos
+        expect(queryByText('Músculo Principal')).toBeNull();
+
+        // Presionar de nuevo para volver a mostrar
+        await act(async () => {
+            fireEvent.press(tuneBtn);
+        });
+        expect(queryByText('Músculo Principal')).toBeTruthy();
+    });
+
+    it('renders translated BentoBar metrics and filter chips in ES and EN (PF-411)', async () => {
+        // En español
+        const { getByText, rerender } = await render(
+            <ExerciseCatalogScreen navigation={mockNavigation} />
+        );
+
+        expect(getByText('TOTAL')).toBeTruthy();
+        expect(getByText('Ejercicios')).toBeTruthy();
+        expect(getByText('RÉCORDS')).toBeTruthy();
+        expect(getByText('Registrados')).toBeTruthy();
+        expect(getByText('GRUPOS')).toBeTruthy();
+        expect(getByText('Guiadas')).toBeTruthy();
+        expect(getByText('Músculo Principal')).toBeTruthy();
+        expect(getByText('Pecho')).toBeTruthy();
+        expect(getByText('Espalda')).toBeTruthy();
+
+        // Cambiar a inglés
+        await act(async () => {
+            await i18n.changeLanguage('en');
+        });
+
+        await rerender(<ExerciseCatalogScreen navigation={mockNavigation} />);
+
+        expect(getByText('TOTAL')).toBeTruthy();
+        expect(getByText('Exercises')).toBeTruthy();
+        expect(getByText('RECORDS')).toBeTruthy();
+        expect(getByText('Recorded')).toBeTruthy();
+        expect(getByText('GROUPS')).toBeTruthy();
+        expect(getByText('Guided')).toBeTruthy();
+        expect(getByText('Primary Muscle')).toBeTruthy();
+        expect(getByText('Chest')).toBeTruthy();
+        expect(getByText('Back')).toBeTruthy();
     });
 
     it('renders exercise list items when data is present in FlashList', async () => {
@@ -65,7 +147,8 @@ describe('ExerciseCatalogScreen Component (RNTL)', () => {
             filterOptions: { primaryMuscles: [], secondaryMuscles: [], categories: [], difficulties: [] },
             setSearchQuery: jest.fn(),
             setFilter: jest.fn(),
-            clearFilters: jest.fn(),
+            clearFilter: jest.fn(),
+            clearAllFilters: jest.fn(),
             loadExercises: jest.fn(),
             hasActiveFilters: false,
         } as any);
@@ -88,7 +171,8 @@ describe('ExerciseCatalogScreen Component (RNTL)', () => {
             filterOptions: { primaryMuscles: [], secondaryMuscles: [], categories: [], difficulties: [] },
             setSearchQuery: jest.fn(),
             setFilter: jest.fn(),
-            clearFilters: jest.fn(),
+            clearFilter: jest.fn(),
+            clearAllFilters: jest.fn(),
             loadExercises: jest.fn(),
             hasActiveFilters: true,
         } as any);
@@ -100,4 +184,3 @@ describe('ExerciseCatalogScreen Component (RNTL)', () => {
         expect(getByText('No se encontraron ejercicios con los filtros actuales')).toBeTruthy();
     });
 });
-
