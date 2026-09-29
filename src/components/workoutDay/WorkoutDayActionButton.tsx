@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
@@ -76,7 +76,15 @@ export const WorkoutDayActionButton: React.FC<WorkoutDayActionButtonProps> = ({
             style={styles.bottomButton}
             onPress={onPress}
             testID={isPendingPreviousWorkout ? 'manual-finish-workout-button' : 'start-workout-button'}
+            accessibilityLabel={isPendingPreviousWorkout ? 'manual-finish-workout-button' : 'start-workout-action-button'}
         >
+            {!isPendingPreviousWorkout && (
+                <View
+                    testID="start-workout-action-button"
+                    pointerEvents="none"
+                    style={StyleSheet.absoluteFillObject}
+                />
+            )}
             <LinearGradient
                 colors={
                     isPendingPreviousWorkout

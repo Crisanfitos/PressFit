@@ -81,7 +81,13 @@ export const ExerciseSearchBar: React.FC<ExerciseSearchBarProps> = ({
                         },
                     ]}
                     testID="exercise-search-tune-button"
+                    accessibilityLabel="filter-toggle-button"
                 >
+                    <View
+                        testID="filter-toggle-button"
+                        pointerEvents="none"
+                        style={StyleSheet.absoluteFillObject}
+                    />
                     <MaterialIcons
                         name="tune"
                         size={18}

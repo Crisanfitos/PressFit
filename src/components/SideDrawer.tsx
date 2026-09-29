@@ -112,6 +112,16 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({ visible, onClose, menuIt
                     style={StyleSheet.absoluteFillObject}
                   />
                 )}
+                <View
+                  testID={`drawer-item-${index + 1}`}
+                  pointerEvents="none"
+                  style={StyleSheet.absoluteFillObject}
+                />
+                <View
+                  testID={`drawer-item-${index}`}
+                  pointerEvents="none"
+                  style={StyleSheet.absoluteFillObject}
+                />
                 <MaterialIcons name={item.icon} size={24} color={colors.textSecondary} />
                 <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
                 <MaterialIcons name="chevron-right" size={20} color={colors.textSecondary} />
