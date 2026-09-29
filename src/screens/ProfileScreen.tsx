@@ -377,6 +377,29 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         </View>
                     </View>
 
+                    <View style={styles.card} testID="profile-data-management-card">
+                        <Text style={styles.cardTitle}>{t('dataManagement.title', 'Gestión de Datos')}</Text>
+                        <TouchableOpacity
+                            style={styles.settingRow}
+                            onPress={() => navigation.navigate('DataManagement')}
+                            testID="open-data-management-button"
+                        >
+                            <MaterialIcons name="storage" size={24} color={colors.primary} />
+                            <View style={styles.settingTextContainer}>
+                                <Text style={styles.settingLabel}>
+                                    {t('dataManagement.exportImportLabel', 'Copias de Seguridad y Exportación')}
+                                </Text>
+                                <Text style={styles.settingDescription}>
+                                    {t(
+                                        'dataManagement.exportImportDesc',
+                                        'Exportar CSV, copias de seguridad JSON y purga de caché'
+                                    )}
+                                </Text>
+                            </View>
+                            <MaterialIcons name="chevron-right" size={24} color={colors.textSecondary} />
+                        </TouchableOpacity>
+                    </View>
+
                     <View style={styles.card} testID="profile-progress-photos-card">
                         <Text style={styles.cardTitle}>{t('profile.progressPhotos')}</Text>
                         <View style={styles.photosContainer}>
