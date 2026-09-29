@@ -69,8 +69,8 @@
     "test:e2e:us041": "node e2e/run-maestro.js e2e/maestro/us_041_create_custom_exercise.yaml",
     "test:e2e:us042": "node e2e/run-maestro.js e2e/maestro/us_042_progress_screen_navigation.yaml",
     "test:e2e:us043": "node e2e/run-maestro.js e2e/maestro/us_043_weekly_volume_chart.yaml",
-    "test:e2e:us043:language": "node e2e/run-maestro.js e2e/maestro/us_043_language_switch.yaml",
-    "test:e2e:PF-254": "npm run test:e2e:us043:language",
+    "test:e2e:us043:language": "npm run test:e2e:us077",
+    "test:e2e:PF-254": "npm run test:e2e:us077",
     "test:e2e:us044": "node e2e/run-maestro.js e2e/maestro/us_044_monthly_progress_summary.yaml",
     "test:e2e:us045": "node e2e/run-maestro.js e2e/maestro/us_045_daily_progress_breakdown.yaml",
     "test:e2e:us046": "node e2e/run-maestro.js e2e/maestro/us_046_physical_progress_gallery.yaml",
@@ -127,6 +127,8 @@
     "test:e2e:PF-354": "npm run test:e2e:us074",
     "test:e2e:us075": "node e2e/run-maestro.js e2e/maestro/us_075_workout_recovery_crash.yaml",
     "test:e2e:PF-355": "npm run test:e2e:us075",
+    "test:e2e:us076": "node e2e/run-maestro.js e2e/maestro/us_076_toggle_exercise_weight_type.yaml",
+    "test:e2e:us077": "node e2e/run-maestro.js e2e/maestro/us_077_language_switch.yaml",
     "test:e2e:all": "node e2e/run-maestro.js e2e/maestro/"
   },
   "dependencies": {
