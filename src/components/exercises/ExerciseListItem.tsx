@@ -127,27 +127,37 @@ export const ExerciseListItem: React.FC<ExerciseListItemProps> = React.memo(
                         </View>
 
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            {item.is_custom && onEdit && (
-                                <TouchableOpacity
-                                    onPress={() => onEdit(item)}
-                                    style={{ padding: 6 }}
-                                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                                    testID="edit-custom-exercise-button"
-                                >
-                                    <MaterialIcons name="edit" size={20} color={colors.primary} />
-                                </TouchableOpacity>
-                            )}
+                            {(() => {
+                                const isOwner = item?.es_propietario !== undefined
+                                    ? Boolean(item.es_propietario)
+                                    : (Boolean(item?.is_custom) && !item?.es_oficial);
 
-                            {item.is_custom && onDelete && (
-                                <TouchableOpacity
-                                    onPress={() => onDelete(item)}
-                                    style={{ padding: 6 }}
-                                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                                    testID="delete-custom-exercise-button"
-                                >
-                                    <MaterialIcons name="delete-outline" size={20} color={colors.error || '#ef4444'} />
-                                </TouchableOpacity>
-                            )}
+                                return (
+                                    <>
+                                        {isOwner && onEdit && (
+                                            <TouchableOpacity
+                                                onPress={() => onEdit(item)}
+                                                style={{ padding: 6 }}
+                                                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                                testID="edit-custom-exercise-button"
+                                            >
+                                                <MaterialIcons name="edit" size={20} color={colors.primary} />
+                                            </TouchableOpacity>
+                                        )}
+
+                                        {isOwner && onDelete && (
+                                            <TouchableOpacity
+                                                onPress={() => onDelete(item)}
+                                                style={{ padding: 6 }}
+                                                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                                testID="delete-custom-exercise-button"
+                                            >
+                                                <MaterialIcons name="delete-outline" size={20} color={colors.error || '#ef4444'} />
+                                            </TouchableOpacity>
+                                        )}
+                                    </>
+                                );
+                            })()}
 
                             <TouchableOpacity
                                 onPress={() => setIsExpanded(!isExpanded)}

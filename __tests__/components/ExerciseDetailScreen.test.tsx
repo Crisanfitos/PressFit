@@ -74,4 +74,60 @@ describe('ExerciseDetailScreen Component (RNTL)', () => {
 
         expect(Linking.openURL).toHaveBeenCalledWith('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
     });
+
+    it('renders edit-custom-exercise-button when es_propietario is true and opens modal (PF-249)', async () => {
+        const { fireEvent } = require('@testing-library/react-native');
+
+        mockUseExerciseDetailController.mockReturnValue({
+            exercise: {
+                id: 'ex-custom-owner',
+                titulo: 'Remo Gironda Custom',
+                grupo_muscular: 'espalda',
+                es_propietario: true,
+                is_custom: true,
+                es_oficial: false,
+            },
+            loading: false,
+            refetch: jest.fn(),
+        } as any);
+
+        const { getByTestId } = await render(
+            <ExerciseDetailScreen navigation={mockNavigation} route={mockRoute} />
+        );
+
+        const editBtn = getByTestId('edit-custom-exercise-button');
+        expect(editBtn).toBeTruthy();
+
+        const { act, waitFor } = require('@testing-library/react-native');
+        await act(async () => {
+            fireEvent.press(editBtn);
+        });
+
+        await waitFor(() => {
+            expect(getByTestId('edit-custom-exercise-modal')).toBeTruthy();
+        });
+    });
+
+
+    it('does NOT render edit-custom-exercise-button when exercise is official or not owned (PF-249)', async () => {
+        mockUseExerciseDetailController.mockReturnValue({
+            exercise: {
+                id: 'ex-official',
+                titulo: 'Dominadas Oficiales',
+                grupo_muscular: 'espalda',
+                es_propietario: false,
+                is_custom: false,
+                es_oficial: true,
+            },
+            loading: false,
+            refetch: jest.fn(),
+        } as any);
+
+        const { queryByTestId } = await render(
+            <ExerciseDetailScreen navigation={mockNavigation} route={mockRoute} />
+        );
+
+        expect(queryByTestId('edit-custom-exercise-button')).toBeNull();
+    });
 });
+

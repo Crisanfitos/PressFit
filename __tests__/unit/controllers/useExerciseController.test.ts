@@ -476,5 +476,13 @@ describe('useExerciseController & useExerciseDetailController (PF-262)', () => {
             expect(hook.result.current.exercise).toBeNull();
             expect(hook.result.current.loading).toBe(false);
         });
+
+        it('allows refetching exercise details via refetch callback (PF-249)', async () => {
+            const hook = await renderHook(() => useExerciseDetailController('ex-1'));
+            expect(ExerciseService.getExerciseById).toHaveBeenCalledTimes(1);
+
+            await hook.result.current.refetch();
+            expect(ExerciseService.getExerciseById).toHaveBeenCalledTimes(2);
+        });
     });
 });
