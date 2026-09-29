@@ -61,6 +61,7 @@
     "test:e2e:us033": "node e2e/run-maestro.js e2e/maestro/us_033_modify_target_sets_reps.yaml",
     "test:e2e:us034": "node e2e/run-maestro.js e2e/maestro/us_034_save_edited_routine.yaml",
     "test:e2e:us035": "node e2e/run-maestro.js e2e/maestro/us_035_explore_exercise_catalog.yaml",
+    "test:e2e:PF-419": "npm run test:e2e:us035",
     "test:e2e:us036": "node e2e/run-maestro.js e2e/maestro/us_036_search_exercises_realtime.yaml",
     "test:e2e:us037": "node e2e/run-maestro.js e2e/maestro/us_037_filter_exercise_muscle_group.yaml",
     "test:e2e:us038": "node e2e/run-maestro.js e2e/maestro/us_038_exercise_detail_screen.yaml",
