@@ -20,6 +20,8 @@ describe('ExerciseCatalogScreen Component (RNTL)', () => {
             exercises: [],
             loading: false,
             searchQuery: '',
+            catalogTab: 'all',
+            setCatalogTab: jest.fn(),
             filters: {},
             filterOptions: {
                 primaryMuscles: ['Pecho', 'Espalda'],
@@ -182,5 +184,62 @@ describe('ExerciseCatalogScreen Component (RNTL)', () => {
         );
 
         expect(getByText('No se encontraron ejercicios con los filtros actuales')).toBeTruthy();
+    });
+
+    it('renders segmented catalog tabs and toggles between all, officials, and community (PF-251)', async () => {
+        const mockSetCatalogTab = jest.fn();
+        mockUseExerciseController.mockReturnValue({
+            exercises: [],
+            loading: false,
+            searchQuery: '',
+            catalogTab: 'all',
+            setCatalogTab: mockSetCatalogTab,
+            filters: {},
+            filterOptions: { primaryMuscles: [], secondaryMuscles: [], categories: [], difficulties: [] },
+            setSearchQuery: jest.fn(),
+            setFilter: jest.fn(),
+            clearFilter: jest.fn(),
+            clearAllFilters: jest.fn(),
+            loadExercises: jest.fn(),
+            hasActiveFilters: false,
+        } as any);
+
+        const { getByTestId, getByText } = await render(
+            <ExerciseCatalogScreen navigation={mockNavigation} />
+        );
+
+        // Verify tabs container exists
+        expect(getByTestId('exercise-catalog-tabs')).toBeTruthy();
+
+        // Verify tab buttons exist with labels
+        const allTab = getByTestId('catalog-tab-all');
+        const officialsTab = getByTestId('catalog-tab-officials');
+        const communityTab = getByTestId('catalog-tab-community');
+
+        expect(allTab).toBeTruthy();
+        expect(officialsTab).toBeTruthy();
+        expect(communityTab).toBeTruthy();
+
+        expect(getByText('Todos')).toBeTruthy();
+        expect(getByText('Oficiales')).toBeTruthy();
+        expect(getByText('Mis Ejercicios / Comunidad')).toBeTruthy();
+
+        // Press officials tab
+        await act(async () => {
+            fireEvent.press(officialsTab);
+        });
+        expect(mockSetCatalogTab).toHaveBeenCalledWith('officials');
+
+        // Press community tab
+        await act(async () => {
+            fireEvent.press(communityTab);
+        });
+        expect(mockSetCatalogTab).toHaveBeenCalledWith('community');
+
+        // Press all tab
+        await act(async () => {
+            fireEvent.press(allTab);
+        });
+        expect(mockSetCatalogTab).toHaveBeenCalledWith('all');
     });
 });

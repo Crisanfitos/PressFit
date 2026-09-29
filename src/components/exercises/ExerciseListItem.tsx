@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Animated, StyleSheet } from 'react-native';
 import Reanimated from 'react-native-reanimated';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { ThemeColors } from '../../types/theme';
 
 export interface ExerciseListItemProps {
@@ -38,6 +39,7 @@ export const ExerciseListItem: React.FC<ExerciseListItemProps> = React.memo(
         onEdit,
         onDelete,
     }) => {
+        const { t } = useTranslation();
         const fadeAnim = useRef(new Animated.Value(0)).current;
         const [isExpanded, setIsExpanded] = useState(false);
 
@@ -105,24 +107,90 @@ export const ExerciseListItem: React.FC<ExerciseListItemProps> = React.memo(
                                 <Text style={[styles.exerciseText, { color: colors.primary }]}>
                                     {item.musculos_primarios}
                                 </Text>
-                                {item.is_custom && (
-                                    <View
-                                        testID="custom-exercise-badge"
-                                        style={[
-                                            styles.badge,
-                                            {
-                                                backgroundColor: `${colors.primary}25`,
-                                                marginLeft: 6,
-                                                paddingVertical: 2,
-                                                paddingHorizontal: 6,
-                                            },
-                                        ]}
-                                    >
-                                        <Text style={[styles.badgeText, { color: colors.primary, fontSize: 10, fontWeight: '700' }]}>
-                                            Personalizado
-                                        </Text>
-                                    </View>
-                                )}
+                                {(() => {
+                                    const isCustom = Boolean(item?.is_custom || item?.es_custom);
+                                    const isOficial = Boolean(item?.es_oficial);
+                                    const isOwner = item?.es_propietario !== undefined
+                                        ? Boolean(item.es_propietario)
+                                        : (isCustom && !item?.es_oficial);
+
+                                    if (isOficial) {
+                                        return (
+                                            <View
+                                                testID="official-exercise-badge"
+                                                style={[
+                                                    styles.badge,
+                                                    {
+                                                        backgroundColor: `${colors.statusInfo || '#0ea5e9'}20`,
+                                                        borderColor: `${colors.statusInfo || '#0ea5e9'}40`,
+                                                        borderWidth: 1,
+                                                        marginLeft: 6,
+                                                        paddingVertical: 2,
+                                                        paddingHorizontal: 6,
+                                                    },
+                                                ]}
+                                            >
+                                                <Text style={[styles.badgeText, { color: colors.statusInfo || '#0ea5e9', fontSize: 10, fontWeight: '700' }]}>
+                                                    {t('exerciseCatalog.badges.official', 'Oficial')}
+                                                </Text>
+                                            </View>
+                                        );
+                                    }
+
+                                    if (isCustom && isOwner) {
+                                        return (
+                                            <View
+                                                testID="my-exercise-badge"
+                                                style={[
+                                                    styles.badge,
+                                                    {
+                                                        backgroundColor: `${colors.primary}25`,
+                                                        borderColor: `${colors.primary}50`,
+                                                        borderWidth: 1,
+                                                        marginLeft: 6,
+                                                        paddingVertical: 2,
+                                                        paddingHorizontal: 6,
+                                                    },
+                                                ]}
+                                            >
+                                                <Text
+                                                    testID="custom-exercise-badge"
+                                                    style={[styles.badgeText, { color: colors.primary, fontSize: 10, fontWeight: '700' }]}
+                                                >
+                                                    {t('exerciseCatalog.badges.myExercise', 'Mi Ejercicio')}
+                                                </Text>
+                                            </View>
+                                        );
+                                    }
+
+                                    if (isCustom) {
+                                        return (
+                                            <View
+                                                testID="community-exercise-badge"
+                                                style={[
+                                                    styles.badge,
+                                                    {
+                                                        backgroundColor: '#a855f725',
+                                                        borderColor: '#a855f750',
+                                                        borderWidth: 1,
+                                                        marginLeft: 6,
+                                                        paddingVertical: 2,
+                                                        paddingHorizontal: 6,
+                                                    },
+                                                ]}
+                                            >
+                                                <Text
+                                                    testID="custom-exercise-badge"
+                                                    style={[styles.badgeText, { color: '#c084fc', fontSize: 10, fontWeight: '700' }]}
+                                                >
+                                                    {t('exerciseCatalog.badges.community', 'Comunidad')}
+                                                </Text>
+                                            </View>
+                                        );
+                                    }
+
+                                    return null;
+                                })()}
                             </View>
                         </View>
 

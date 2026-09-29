@@ -356,6 +356,16 @@
   },
   "exerciseCatalog": {
     "title": "Catálogo de Ejercicios",
+    "tabs": {
+      "all": "Todos",
+      "officials": "Oficiales",
+      "community": "Mis Ejercicios / Comunidad"
+    },
+    "badges": {
+      "official": "Oficial",
+      "myExercise": "Mi Ejercicio",
+      "community": "Comunidad"
+    },
     "searchPlaceholder": "Buscar ejercicio...",
     "showFilters": "Mostrar filtros",
     "hideFilters": "Ocultar filtros",

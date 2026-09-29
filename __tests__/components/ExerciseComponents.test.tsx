@@ -296,6 +296,83 @@ describe('Exercise Sub-components (PF-267)', () => {
 
             expect(queryByTestId('delete-custom-exercise-button')).toBeNull();
         });
+
+        it('renders official badge for official exercises (PF-251)', async () => {
+            const exercise = {
+                id: 'ex-off-badge',
+                titulo: 'Press de Banca Oficial',
+                musculos_primarios: 'Pecho',
+                is_custom: false,
+                es_oficial: true,
+            };
+
+            const { getByTestId, queryByTestId } = await render(
+                <ExerciseListItem
+                    item={exercise}
+                    isSelected={false}
+                    onSelect={jest.fn()}
+                    onThumbnailPress={jest.fn()}
+                    colors={mockColors}
+                    navigation={{ navigate: jest.fn() }}
+                />
+            );
+
+            expect(getByTestId('official-exercise-badge')).toBeTruthy();
+            expect(queryByTestId('my-exercise-badge')).toBeNull();
+            expect(queryByTestId('community-exercise-badge')).toBeNull();
+        });
+
+        it('renders my-exercise-badge for custom exercises owned by user (PF-251)', async () => {
+            const exercise = {
+                id: 'ex-my-badge',
+                titulo: 'Mi Ejercicio Propio',
+                musculos_primarios: 'Espalda',
+                is_custom: true,
+                es_oficial: false,
+                es_propietario: true,
+            };
+
+            const { getByTestId, queryByTestId } = await render(
+                <ExerciseListItem
+                    item={exercise}
+                    isSelected={false}
+                    onSelect={jest.fn()}
+                    onThumbnailPress={jest.fn()}
+                    colors={mockColors}
+                    navigation={{ navigate: jest.fn() }}
+                />
+            );
+
+            expect(getByTestId('my-exercise-badge')).toBeTruthy();
+            expect(queryByTestId('official-exercise-badge')).toBeNull();
+            expect(queryByTestId('community-exercise-badge')).toBeNull();
+        });
+
+        it('renders community-exercise-badge for custom exercises from community (PF-251)', async () => {
+            const exercise = {
+                id: 'ex-com-badge',
+                titulo: 'Ejercicio de la Comunidad',
+                musculos_primarios: 'Piernas',
+                is_custom: true,
+                es_oficial: false,
+                es_propietario: false,
+            };
+
+            const { getByTestId, queryByTestId } = await render(
+                <ExerciseListItem
+                    item={exercise}
+                    isSelected={false}
+                    onSelect={jest.fn()}
+                    onThumbnailPress={jest.fn()}
+                    colors={mockColors}
+                    navigation={{ navigate: jest.fn() }}
+                />
+            );
+
+            expect(getByTestId('community-exercise-badge')).toBeTruthy();
+            expect(queryByTestId('official-exercise-badge')).toBeNull();
+            expect(queryByTestId('my-exercise-badge')).toBeNull();
+        });
     });
 
 
