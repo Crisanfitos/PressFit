@@ -1,52 +1,76 @@
 import { supabase } from '../lib/supabase';
 import { isE2EMockEnabled, mockStore, e2eFixtures } from '../lib/e2eMockAdapter';
-import { ServiceResponse } from '../types/models';
+import { ServiceResponse, Exercise, CustomExerciseInput } from '../types/models';
 import { LogService } from './LogService';
 
-export interface CustomExerciseInput {
-    titulo: string;
-    descripcion?: string;
-    grupo_muscular: string;
-    musculos_primarios?: string;
-    musculos_secundarios?: string[];
-    equipamiento?: string;
-    dificultad?: string;
-    instrucciones?: string[];
-    url_video?: string;
-}
-
-interface Exercise {
-    id: string;
-    titulo: string;
-    descripcion?: string;
-    grupo_muscular?: string;
-    url_video?: string;
-    imagen_url?: string;
-    [key: string]: unknown;
-}
+export { CustomExerciseInput, Exercise };
 
 interface CatalogExerciseItem {
     id: string;
     nombre?: string;
     titulo?: string;
     grupo_muscular?: string;
+    categoria?: string;
     musculos_primarios?: string;
     is_custom?: boolean;
     es_personalizado?: boolean;
+    created_by?: string | null;
+    user_id?: string | null;
+    url_video?: string;
+    video_url?: string;
     [key: string]: unknown;
 }
 
+export const enrichExerciseOwnership = (
+    ex: Record<string, any>,
+    currentUserId: string | null = null
+): Exercise => {
+    const creatorId = (ex.created_by || ex.user_id || null) as string | null;
+    const isCustom = Boolean(
+        ex.is_custom === true ||
+        ex.es_custom === true ||
+        ex.es_personalizado === true ||
+        (creatorId !== null && creatorId !== '')
+    );
+    const isOficial = !isCustom;
+    const isOwner = Boolean(currentUserId && creatorId && currentUserId === creatorId);
+    const videoUrl = (ex.url_video || ex.video_url || '') as string;
+    const name = (ex.nombre || ex.titulo || '') as string;
+    const mainGroup = (ex.grupo_muscular || ex.categoria || ex.grupo_muscular_principal || 'General') as string;
+
+    return {
+        ...ex,
+        id: ex.id,
+        nombre: name,
+        titulo: ex.titulo || name,
+        grupo_muscular: mainGroup,
+        grupo_muscular_principal: ex.grupo_muscular_principal || mainGroup,
+        user_id: creatorId,
+        created_by: creatorId,
+        es_custom: isCustom,
+        is_custom: isCustom,
+        es_oficial: isOficial,
+        es_propietario: isOwner,
+        url_video: videoUrl,
+        video_url: videoUrl,
+    };
+};
+
 export const ExerciseService = {
     async getExercises(): Promise<ServiceResponse<Exercise[]>> {
+        let currentUserId: string | null = null;
+        try {
+            const { data: authData } = await supabase.auth.getUser();
+            currentUserId = authData?.user?.id || null;
+        } catch {
+            currentUserId = null;
+        }
+
         if (isE2EMockEnabled()) {
             return {
-                data: (mockStore.getCatalogExercises() as CatalogExerciseItem[]).map((ex) => ({
-                    ...ex,
-                    titulo: ex.nombre || ex.titulo || '',
-                    grupo_muscular: ex.grupo_muscular || 'General',
-                    musculos_primarios: ex.musculos_primarios || ex.grupo_muscular || 'General',
-                    is_custom: !!(ex.is_custom || ex.es_personalizado),
-                })),
+                data: (mockStore.getCatalogExercises() as CatalogExerciseItem[]).map((ex) =>
+                    enrichExerciseOwnership(ex, currentUserId)
+                ),
                 error: null,
             };
         }
@@ -57,7 +81,10 @@ export const ExerciseService = {
                 .order('titulo');
 
             if (error) throw error;
-            return { data, error: null };
+            return {
+                data: (data || []).map((ex) => enrichExerciseOwnership(ex, currentUserId)),
+                error: null,
+            };
         } catch (error) {
             LogService.error('Error fetching exercises:', error);
             return { data: null, error };
@@ -65,21 +92,31 @@ export const ExerciseService = {
     },
 
     async createCustomExercise(exerciseData: CustomExerciseInput): Promise<ServiceResponse<Exercise>> {
+        let currentUserId: string | null = null;
+        try {
+            const { data: authData } = await supabase.auth.getUser();
+            currentUserId = authData?.user?.id || null;
+        } catch {
+            currentUserId = null;
+        }
+
         if (isE2EMockEnabled()) {
             const newEx = mockStore.addCustomExercise(exerciseData);
             return {
-                data: {
-                    ...newEx,
-                    titulo: newEx.nombre || newEx.titulo,
-                    grupo_muscular: newEx.grupo_muscular || 'General',
-                    musculos_primarios: newEx.musculos_primarios || newEx.grupo_muscular || 'General',
-                    is_custom: true,
-                },
+                data: enrichExerciseOwnership(
+                    {
+                        ...newEx,
+                        created_by: currentUserId || 'mock-user-id',
+                        user_id: currentUserId || 'mock-user-id',
+                        is_custom: true,
+                    },
+                    currentUserId || 'mock-user-id'
+                ),
                 error: null,
             };
         }
         try {
-            const { data: { user } } = await supabase.auth.getUser();
+            const videoUrl = exerciseData.url_video || exerciseData.video_url || '';
             const { data, error } = await supabase
                 .from('ejercicios')
                 .insert({
@@ -88,17 +125,21 @@ export const ExerciseService = {
                     categoria: exerciseData.grupo_muscular,
                     musculos_primarios: [exerciseData.musculos_primarios || exerciseData.grupo_muscular],
                     musculos_secundarios: exerciseData.musculos_secundarios || [],
-                    dificultad: 'intermediate',
-                    url_video: exerciseData.url_video || '',
+                    dificultad: exerciseData.dificultad || 'intermediate',
+                    url_video: videoUrl,
+                    video_url: videoUrl,
                     is_custom: true,
-                    created_by: user?.id || null,
+                    created_by: currentUserId,
+                    user_id: currentUserId,
                 })
                 .select()
                 .single();
 
-
             if (error) throw error;
-            return { data, error: null };
+            return {
+                data: data ? enrichExerciseOwnership(data, currentUserId) : null,
+                error: null,
+            };
         } catch (error) {
             LogService.error('Error creating custom exercise:', error);
             return { data: null, error };
@@ -109,22 +150,43 @@ export const ExerciseService = {
         id: string,
         exerciseData: Partial<CustomExerciseInput>
     ): Promise<ServiceResponse<Exercise>> {
+        let currentUserId: string | null = null;
+        try {
+            const { data: authData } = await supabase.auth.getUser();
+            currentUserId = authData?.user?.id || null;
+        } catch {
+            currentUserId = null;
+        }
+
         if (isE2EMockEnabled()) {
             const updated = mockStore.updateCustomExercise(id, exerciseData);
             return {
-                data: updated
-                    ? {
-                        ...updated,
-                        titulo: updated.nombre || updated.titulo,
-                        grupo_muscular: updated.grupo_muscular || 'General',
-                        musculos_primarios: updated.musculos_primarios || updated.grupo_muscular || 'General',
-                        is_custom: true,
-                    }
-                    : null,
+                data: updated ? enrichExerciseOwnership(updated, currentUserId) : null,
                 error: updated ? null : new Error('Exercise not found'),
             };
         }
         try {
+            // Check ownership and official status
+            const { data: existing, error: checkError } = await supabase
+                .from('ejercicios')
+                .select('id, is_custom, created_by, user_id')
+                .eq('id', id)
+                .single();
+
+            if (checkError || !existing) {
+                return { data: null, error: checkError || new Error('Exercise not found') };
+            }
+
+            const isCustom = Boolean(existing.is_custom === true || existing.created_by || existing.user_id);
+            if (!isCustom) {
+                return { data: null, error: new Error('No se pueden modificar ejercicios oficiales de la aplicación') };
+            }
+
+            const creatorId = existing.created_by || existing.user_id;
+            if (currentUserId && creatorId && creatorId !== currentUserId) {
+                return { data: null, error: new Error('No tienes permisos para modificar este ejercicio') };
+            }
+
             const updatePayload: Record<string, unknown> = {};
             if (exerciseData.titulo) updatePayload.titulo = exerciseData.titulo;
             if (exerciseData.descripcion !== undefined) updatePayload.description = exerciseData.descripcion;
@@ -134,7 +196,11 @@ export const ExerciseService = {
             }
             if (exerciseData.musculos_secundarios) updatePayload.musculos_secundarios = exerciseData.musculos_secundarios;
             if (exerciseData.dificultad) updatePayload.dificultad = exerciseData.dificultad;
-            if (exerciseData.url_video !== undefined) updatePayload.url_video = exerciseData.url_video;
+            const videoUrl = exerciseData.url_video !== undefined ? exerciseData.url_video : exerciseData.video_url;
+            if (videoUrl !== undefined) {
+                updatePayload.url_video = videoUrl;
+                updatePayload.video_url = videoUrl;
+            }
 
             const { data, error } = await supabase
                 .from('ejercicios')
@@ -144,7 +210,10 @@ export const ExerciseService = {
                 .single();
 
             if (error) throw error;
-            return { data, error: null };
+            return {
+                data: data ? enrichExerciseOwnership(data, currentUserId) : null,
+                error: null,
+            };
         } catch (error) {
             LogService.error('Error updating custom exercise:', error);
             return { data: null, error };
@@ -152,11 +221,40 @@ export const ExerciseService = {
     },
 
     async deleteCustomExercise(id: string): Promise<ServiceResponse<boolean>> {
+        let currentUserId: string | null = null;
+        try {
+            const { data: authData } = await supabase.auth.getUser();
+            currentUserId = authData?.user?.id || null;
+        } catch {
+            currentUserId = null;
+        }
+
         if (isE2EMockEnabled()) {
             const deleted = mockStore.deleteCustomExercise(id);
             return { data: deleted, error: null };
         }
         try {
+            // Check ownership and official status
+            const { data: existing, error: checkError } = await supabase
+                .from('ejercicios')
+                .select('id, is_custom, created_by, user_id')
+                .eq('id', id)
+                .single();
+
+            if (checkError || !existing) {
+                return { data: false, error: checkError || new Error('Exercise not found') };
+            }
+
+            const isCustom = Boolean(existing.is_custom === true || existing.created_by || existing.user_id);
+            if (!isCustom) {
+                return { data: false, error: new Error('No se pueden eliminar ejercicios oficiales de la aplicación') };
+            }
+
+            const creatorId = existing.created_by || existing.user_id;
+            if (currentUserId && creatorId && creatorId !== currentUserId) {
+                return { data: false, error: new Error('No tienes permisos para eliminar este ejercicio') };
+            }
+
             const { error } = await supabase
                 .from('ejercicios')
                 .delete()
@@ -171,6 +269,14 @@ export const ExerciseService = {
     },
 
     async getExerciseById(id: string): Promise<ServiceResponse<Exercise>> {
+        let currentUserId: string | null = null;
+        try {
+            const { data: authData } = await supabase.auth.getUser();
+            currentUserId = authData?.user?.id || null;
+        } catch {
+            currentUserId = null;
+        }
+
         try {
             const { data, error } = await supabase
                 .from('ejercicios')
@@ -179,7 +285,10 @@ export const ExerciseService = {
                 .single();
 
             if (error) throw error;
-            return { data, error: null };
+            return {
+                data: data ? enrichExerciseOwnership(data, currentUserId) : null,
+                error: null,
+            };
         } catch (error) {
             LogService.error('Error fetching exercise details:', error);
             return { data: null, error };

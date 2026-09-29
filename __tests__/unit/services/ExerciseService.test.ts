@@ -27,13 +27,39 @@ describe('ExerciseService Unit Tests (PF-245)', () => {
   });
 
   describe('getExercises', () => {
-    it('should return exercises from supabase when online', async () => {
-      const mockData = [{ id: 'ex-1', titulo: 'Press de Banca', grupo_muscular: 'Pecho' }];
+    it('should return exercises from supabase when online with ownership flags', async () => {
+      jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
+        data: { user: { id: 'u-123' } },
+        error: null,
+      } as any);
+
+      const mockData = [
+        { id: 'ex-1', titulo: 'Press de Banca', grupo_muscular: 'Pecho', is_custom: false },
+        { id: 'ex-2', titulo: 'Mi Press Especial', grupo_muscular: 'Pecho', is_custom: true, created_by: 'u-123', url_video: 'https://youtu.be/123' },
+        { id: 'ex-3', titulo: 'Press Comunidad', grupo_muscular: 'Pecho', is_custom: true, created_by: 'u-999' },
+      ];
       mockChain.order.mockResolvedValueOnce({ data: mockData, error: null });
 
       const res = await ExerciseService.getExercises();
       expect(res.error).toBeNull();
-      expect(res.data).toEqual(mockData);
+      expect(res.data).toHaveLength(3);
+
+      // ex-1: Oficial
+      expect(res.data?.[0].es_oficial).toBe(true);
+      expect(res.data?.[0].es_custom).toBe(false);
+      expect(res.data?.[0].es_propietario).toBe(false);
+
+      // ex-2: Propio
+      expect(res.data?.[1].es_oficial).toBe(false);
+      expect(res.data?.[1].es_custom).toBe(true);
+      expect(res.data?.[1].es_propietario).toBe(true);
+      expect(res.data?.[1].video_url).toBe('https://youtu.be/123');
+      expect(res.data?.[1].user_id).toBe('u-123');
+
+      // ex-3: Comunidad (otro usuario)
+      expect(res.data?.[2].es_oficial).toBe(false);
+      expect(res.data?.[2].es_custom).toBe(true);
+      expect(res.data?.[2].es_propietario).toBe(false);
     });
 
     it('should handle error when supabase fails', async () => {
@@ -59,7 +85,12 @@ describe('ExerciseService Unit Tests (PF-245)', () => {
         error: null,
       } as any);
 
-      const insertedEx = { id: 'custom-1', titulo: 'Sentadilla Bulgara' };
+      const insertedEx = {
+        id: 'custom-1',
+        titulo: 'Sentadilla Bulgara',
+        is_custom: true,
+        created_by: 'u-123',
+      };
       mockChain.single.mockResolvedValueOnce({ data: insertedEx, error: null });
 
       const res = await ExerciseService.createCustomExercise({
@@ -69,7 +100,10 @@ describe('ExerciseService Unit Tests (PF-245)', () => {
       });
 
       expect(res.error).toBeNull();
-      expect(res.data).toEqual(insertedEx);
+      expect(res.data?.id).toEqual('custom-1');
+      expect(res.data?.es_propietario).toBe(true);
+      expect(res.data?.es_custom).toBe(true);
+      expect(res.data?.es_oficial).toBe(false);
     });
 
     it('should handle error when creation fails', async () => {
@@ -102,13 +136,21 @@ describe('ExerciseService Unit Tests (PF-245)', () => {
   });
 
   describe('getExerciseById', () => {
-    it('should fetch exercise by ID successfully', async () => {
-      const mockEx = { id: 'e-1', titulo: 'Dominadas' };
+    it('should fetch exercise by ID successfully and enrich ownership', async () => {
+      jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
+        data: { user: { id: 'u-123' } },
+        error: null,
+      } as any);
+
+      const mockEx = { id: 'e-1', titulo: 'Dominadas', is_custom: true, created_by: 'u-123' };
       mockChain.single.mockResolvedValueOnce({ data: mockEx, error: null });
 
       const res = await ExerciseService.getExerciseById('e-1');
       expect(res.error).toBeNull();
-      expect(res.data).toEqual(mockEx);
+      expect(res.data?.id).toEqual('e-1');
+      expect(res.data?.es_propietario).toBe(true);
+      expect(res.data?.es_custom).toBe(true);
+      expect(res.data?.es_oficial).toBe(false);
     });
 
     it('should handle error when exercise not found', async () => {
@@ -278,9 +320,55 @@ describe('ExerciseService Unit Tests (PF-245)', () => {
     });
   });
 
-  describe('updateCustomExercise (PF-289)', () => {
-    it('should update custom exercise in Supabase', async () => {
-      const updatedEx = { id: 'custom-1', titulo: 'Sentadilla Editada' };
+  describe('updateCustomExercise (PF-247, PF-289)', () => {
+    it('should reject updating an official exercise (PF-247)', async () => {
+      mockChain.single.mockResolvedValueOnce({
+        data: { id: 'official-1', is_custom: false, created_by: null, user_id: null },
+        error: null,
+      });
+
+      const res = await ExerciseService.updateCustomExercise('official-1', {
+        titulo: 'Intento Hack',
+      });
+
+      expect(res.data).toBeNull();
+      expect(res.error).toBeDefined();
+      expect((res.error as Error).message).toMatch(/oficial/i);
+    });
+
+    it('should reject updating an exercise owned by another user (PF-247)', async () => {
+      jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
+        data: { user: { id: 'user-me' } },
+        error: null,
+      } as any);
+
+      mockChain.single.mockResolvedValueOnce({
+        data: { id: 'custom-other', is_custom: true, created_by: 'user-other' },
+        error: null,
+      });
+
+      const res = await ExerciseService.updateCustomExercise('custom-other', {
+        titulo: 'Intento Hack',
+      });
+
+      expect(res.data).toBeNull();
+      expect(res.error).toBeDefined();
+      expect((res.error as Error).message).toMatch(/permisos/i);
+    });
+
+    it('should update custom exercise when user is the owner (PF-247)', async () => {
+      jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
+        data: { user: { id: 'user-me' } },
+        error: null,
+      } as any);
+
+      // Check query returns user's custom exercise
+      mockChain.single.mockResolvedValueOnce({
+        data: { id: 'custom-1', is_custom: true, created_by: 'user-me' },
+        error: null,
+      });
+      // Update query returns updated exercise
+      const updatedEx = { id: 'custom-1', titulo: 'Sentadilla Editada', is_custom: true, created_by: 'user-me' };
       mockChain.single.mockResolvedValueOnce({ data: updatedEx, error: null });
 
       const res = await ExerciseService.updateCustomExercise('custom-1', {
@@ -288,10 +376,22 @@ describe('ExerciseService Unit Tests (PF-245)', () => {
       });
 
       expect(res.error).toBeNull();
-      expect(res.data).toEqual(updatedEx);
+      expect(res.data?.titulo).toEqual('Sentadilla Editada');
+      expect(res.data?.es_propietario).toBe(true);
     });
 
     it('should handle error when update fails', async () => {
+      jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
+        data: { user: { id: 'user-me' } },
+        error: null,
+      } as any);
+
+      // Check query succeeds
+      mockChain.single.mockResolvedValueOnce({
+        data: { id: 'custom-1', is_custom: true, created_by: 'user-me' },
+        error: null,
+      });
+      // Update query fails
       mockChain.single.mockResolvedValueOnce({ data: null, error: new Error('Update error') });
 
       const res = await ExerciseService.updateCustomExercise('custom-1', {
@@ -313,9 +413,47 @@ describe('ExerciseService Unit Tests (PF-245)', () => {
     });
   });
 
-  describe('deleteCustomExercise (PF-289)', () => {
-    it('should delete custom exercise from Supabase', async () => {
-      mockChain.eq.mockReturnValueOnce(Promise.resolve({ error: null }));
+  describe('deleteCustomExercise (PF-247, PF-289)', () => {
+    it('should reject deleting an official exercise (PF-247)', async () => {
+      mockChain.single.mockResolvedValueOnce({
+        data: { id: 'official-1', is_custom: false, created_by: null },
+        error: null,
+      });
+
+      const res = await ExerciseService.deleteCustomExercise('official-1');
+      expect(res.data).toBe(false);
+      expect(res.error).toBeDefined();
+      expect((res.error as Error).message).toMatch(/oficial/i);
+    });
+
+    it('should reject deleting an exercise owned by another user (PF-247)', async () => {
+      jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
+        data: { user: { id: 'user-me' } },
+        error: null,
+      } as any);
+
+      mockChain.single.mockResolvedValueOnce({
+        data: { id: 'custom-other', is_custom: true, created_by: 'user-other' },
+        error: null,
+      });
+
+      const res = await ExerciseService.deleteCustomExercise('custom-other');
+      expect(res.data).toBe(false);
+      expect(res.error).toBeDefined();
+      expect((res.error as Error).message).toMatch(/permisos/i);
+    });
+
+    it('should delete custom exercise from Supabase when user is the owner (PF-247)', async () => {
+      jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
+        data: { user: { id: 'user-me' } },
+        error: null,
+      } as any);
+
+      // Check query returns user's custom exercise
+      mockChain.single.mockResolvedValueOnce({
+        data: { id: 'custom-1', is_custom: true, created_by: 'user-me' },
+        error: null,
+      });
 
       const res = await ExerciseService.deleteCustomExercise('custom-1');
       expect(res.error).toBeNull();
@@ -323,7 +461,18 @@ describe('ExerciseService Unit Tests (PF-245)', () => {
     });
 
     it('should handle error when deletion fails', async () => {
-      mockChain.eq.mockReturnValueOnce(Promise.resolve({ error: new Error('Delete error') }));
+      jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
+        data: { user: { id: 'user-me' } },
+        error: null,
+      } as any);
+
+      // Check query succeeds
+      mockChain.single.mockResolvedValueOnce({
+        data: { id: 'custom-1', is_custom: true, created_by: 'user-me' },
+        error: null,
+      });
+      // Delete query fails
+      mockChain.then.mockImplementationOnce((resolve: any) => Promise.resolve({ error: new Error('Delete error') }).then(resolve));
 
       const res = await ExerciseService.deleteCustomExercise('custom-1');
       expect(res.data).toBe(false);
