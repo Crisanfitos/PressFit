@@ -135,7 +135,8 @@ appId: com.crisanfitos.PressFit_Expo
     id: "monthly-calendar-screen"
 
 # 10. Limpieza y Cierre de Sesión (Navegación a Perfil -> Logout)
-- tapOn: "Perfil"
+- tapOn:
+    id: "tab-perfil"
 
 - scroll
 - scrollUntilVisible:

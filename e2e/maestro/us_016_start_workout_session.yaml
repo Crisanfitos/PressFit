@@ -54,23 +54,19 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "monthly-calendar-screen"
 
-# 4. Seleccionar el día de hoy para ir a WorkoutDayScreen
+# 4. Iniciar sesión desde la tarjeta Hero de la pantalla de inicio
 - tapOn:
-    id: "calendar-day-today"
+    id: "hero-start-workout-button"
 
-- extendedWaitUntil:
-    visible:
-      id: "workout-day-screen"
-    timeout: 15000
+- runFlow:
+    when:
+      visible:
+        id: "workout-day-screen"
+    commands:
+      - tapOn:
+          id: "start-workout-button"
 
-- assertVisible:
-    id: "workout-day-screen"
-
-# 5. Tocar el botón de Iniciar/Continuar Entrenamiento
-- tapOn:
-    id: "start-workout-button"
-
-# 6. Verificar la transición y carga de WorkoutScreen
+# 5. Verificar la transición y carga de WorkoutScreen
 - extendedWaitUntil:
     visible:
       id: "workout-screen"
@@ -79,24 +75,31 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "workout-screen"
 
-# 7. Volver atrás a WorkoutDayScreen y al Calendario
+# 6. Volver atrás al Calendario
 - back
 
 - extendedWaitUntil:
     visible:
-      id: "workout-day-screen"
+      id: "monthly-calendar-screen"
     timeout: 10000
+    optional: true
 
-- tapOn:
-    id: "workout-day-back-button"
+- runFlow:
+    when:
+      visible:
+        id: "workout-day-screen"
+    commands:
+      - tapOn:
+          id: "workout-day-back-button"
 
 - extendedWaitUntil:
     visible:
       id: "monthly-calendar-screen"
     timeout: 10000
 
-# 8. Limpieza (Navegar a Perfil y Cierre de Sesión final)
-- tapOn: "Perfil"
+# 7. Limpieza (Navegar a Perfil y Cierre de Sesión final)
+- tapOn:
+    id: "tab-perfil"
 
 - scroll
 - scrollUntilVisible:

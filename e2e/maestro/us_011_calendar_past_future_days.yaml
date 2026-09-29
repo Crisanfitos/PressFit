@@ -54,6 +54,9 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "monthly-calendar-screen"
 
+- tapOn:
+    id: "toggle-monthly-view"
+
 # 4. Probar día futuro (deshabilitado): debe permanecer en el calendario sin navegar
 - runFlow:
     when:
@@ -87,7 +90,8 @@ appId: com.crisanfitos.PressFit_Expo
           timeout: 10000
 
 # 6. Limpieza (Logout final)
-- tapOn: "Perfil"
+- tapOn:
+    id: "tab-perfil"
 
 - scroll
 - scrollUntilVisible:

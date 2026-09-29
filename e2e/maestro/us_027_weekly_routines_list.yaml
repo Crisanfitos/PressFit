@@ -75,7 +75,7 @@ appId: com.crisanfitos.PressFit_Expo
 
 # 4. Flujo de Cierre de Sesión (Logout)
 - tapOn:
-    text: "Perfil"
+    id: "tab-perfil"
 
 - scrollUntilVisible:
     element:

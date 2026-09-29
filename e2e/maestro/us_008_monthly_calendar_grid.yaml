@@ -54,6 +54,14 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "monthly-calendar-screen"
 
+- tapOn:
+    id: "toggle-monthly-view"
+
+- extendedWaitUntil:
+    visible:
+      id: "month-title"
+    timeout: 5000
+
 - assertVisible:
     id: "month-title"
 
@@ -78,7 +86,8 @@ appId: com.crisanfitos.PressFit_Expo
     id: "calendar-day-today"
 
 # 6. Limpieza (Logout final)
-- tapOn: "Perfil"
+- tapOn:
+    id: "tab-perfil"
 
 - scroll
 - scrollUntilVisible:

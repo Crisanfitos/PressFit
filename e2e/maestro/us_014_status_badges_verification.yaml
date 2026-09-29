@@ -109,7 +109,8 @@ appId: com.crisanfitos.PressFit_Expo
     timeout: 10000
 
 # 7. Limpieza (Navegar a Perfil y Cierre de Sesión final)
-- tapOn: "Perfil"
+- tapOn:
+    id: "tab-perfil"
 
 - scroll
 - scrollUntilVisible:
