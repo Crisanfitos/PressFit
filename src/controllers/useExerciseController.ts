@@ -4,6 +4,8 @@ import { LogService } from '../services/LogService';
 
 export { Exercise };
 
+export type CatalogTab = 'all' | 'officials' | 'community';
+
 export type FilterKey = 'primaryMuscle' | 'secondaryMuscle' | 'category' | 'difficulty';
 
 export interface FilterState {
@@ -46,6 +48,7 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [catalogTab, setCatalogTab] = useState<CatalogTab>('all');
     const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
     const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
 
@@ -115,12 +118,19 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
             filtered = filtered.filter((ex) => ex.dificultad?.trim() === filters.difficulty);
         }
 
+        // Apply catalog tab filtering (PF-251)
+        if (catalogTab === 'officials') {
+            filtered = filtered.filter((ex) => Boolean(ex.es_oficial) || (!ex.is_custom && !ex.es_custom));
+        } else if (catalogTab === 'community') {
+            filtered = filtered.filter((ex) => Boolean(ex.is_custom || ex.es_custom) && !ex.es_oficial);
+        }
+
         return [...filtered].sort((a, b) => {
             const titleA = a.titulo || a.nombre || '';
             const titleB = b.titulo || b.nombre || '';
             return titleA.localeCompare(titleB);
         });
-    }, [exercises, searchQuery, filters]);
+    }, [exercises, searchQuery, filters, catalogTab]);
 
     const setFilter = useCallback((key: FilterKey, value: string | null) => {
         setFilters((prev) => ({ ...prev, [key]: value }));
@@ -181,6 +191,8 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
         saving,
         searchQuery,
         setSearchQuery,
+        catalogTab,
+        setCatalogTab,
         filters,
         setFilter,
         clearFilter,

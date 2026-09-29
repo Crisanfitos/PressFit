@@ -152,7 +152,8 @@ describe('ExerciseItem Component (RNTL)', () => {
         );
 
         expect(getByTestId('custom-exercise-badge')).toBeTruthy();
-        expect(getByText('Personalizado')).toBeTruthy();
+        expect(getByTestId('my-exercise-badge')).toBeTruthy();
+        expect(getByText(/Mi Ejercicio|Personalizado/)).toBeTruthy();
 
         const editBtn = getByTestId('edit-custom-exercise-button');
         fireEvent.press(editBtn);
@@ -185,6 +186,8 @@ describe('ExerciseItem Component (RNTL)', () => {
         );
 
         expect(queryByTestId('custom-exercise-badge')).toBeNull();
+        expect(queryByTestId('my-exercise-badge')).toBeNull();
+        expect(queryByTestId('community-exercise-badge')).toBeNull();
         expect(queryByTestId('edit-custom-exercise-button')).toBeNull();
         expect(queryByTestId('delete-custom-exercise-button')).toBeNull();
     });

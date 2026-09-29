@@ -39,6 +39,8 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
     loading,
     searchQuery,
     setSearchQuery,
+    catalogTab,
+    setCatalogTab,
     filters,
     setFilter,
     clearFilter,
@@ -220,6 +222,91 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
         testID="exercise-catalog-search-input"
         clearButtonTestID="exercise-catalog-clear-search-button"
       />
+
+      {/* Segmented Tab Bar (PF-251) */}
+      <View
+        style={{
+          flexDirection: 'row',
+          marginHorizontal: 16,
+          marginBottom: 12,
+          backgroundColor: colors.surface,
+          borderRadius: 12,
+          padding: 4,
+          borderWidth: 1,
+          borderColor: `${colors.border}60`,
+        }}
+        testID="exercise-catalog-tabs"
+      >
+        <TouchableOpacity
+          onPress={() => setCatalogTab('all')}
+          style={{
+            flex: 1,
+            paddingVertical: 8,
+            borderRadius: 8,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: catalogTab === 'all' ? colors.primary : 'transparent',
+          }}
+          testID="catalog-tab-all"
+        >
+          <Text
+            style={{
+              fontSize: 13,
+              fontWeight: '700',
+              color: catalogTab === 'all' ? (colors.textOnPrimary || '#fff') : colors.textSecondary,
+            }}
+          >
+            {t('exerciseCatalog.tabs.all', 'Todos')}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setCatalogTab('officials')}
+          style={{
+            flex: 1,
+            paddingVertical: 8,
+            borderRadius: 8,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: catalogTab === 'officials' ? colors.primary : 'transparent',
+          }}
+          testID="catalog-tab-officials"
+        >
+          <Text
+            style={{
+              fontSize: 13,
+              fontWeight: '700',
+              color: catalogTab === 'officials' ? (colors.textOnPrimary || '#fff') : colors.textSecondary,
+            }}
+          >
+            {t('exerciseCatalog.tabs.officials', 'Oficiales')}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setCatalogTab('community')}
+          style={{
+            flex: 1.4,
+            paddingVertical: 8,
+            borderRadius: 8,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: catalogTab === 'community' ? colors.primary : 'transparent',
+          }}
+          testID="catalog-tab-community"
+        >
+          <Text
+            numberOfLines={1}
+            style={{
+              fontSize: 13,
+              fontWeight: '700',
+              color: catalogTab === 'community' ? (colors.textOnPrimary || '#fff') : colors.textSecondary,
+            }}
+          >
+            {t('exerciseCatalog.tabs.community', 'Mis Ejercicios / Comunidad')}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {!isSearchFocused && searchQuery.length === 0 && (
         <ExerciseCatalogBentoBar

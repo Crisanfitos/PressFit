@@ -247,6 +247,88 @@ describe('useExerciseController & useExerciseDetailController (PF-262)', () => {
         });
     });
 
+    describe('useExerciseController - Catalog Tab Filtering (PF-251)', () => {
+        const tabExercises: Exercise[] = [
+            {
+                id: 'ex-off-1',
+                titulo: 'Press Militar Oficial',
+                es_oficial: true,
+                is_custom: false,
+            },
+            {
+                id: 'ex-off-2',
+                titulo: 'Sentadilla Oficial',
+                es_oficial: true,
+                is_custom: false,
+            },
+            {
+                id: 'ex-my-1',
+                titulo: 'Mi Elevación Lateral',
+                es_oficial: false,
+                is_custom: true,
+                es_propietario: true,
+            },
+            {
+                id: 'ex-com-1',
+                titulo: 'Remo Comunidad',
+                es_oficial: false,
+                is_custom: true,
+                es_propietario: false,
+            },
+        ];
+
+        beforeEach(() => {
+            (ExerciseService.getExercises as jest.Mock).mockResolvedValue({
+                data: tabExercises,
+                error: null,
+            });
+        });
+
+        it('initializes with catalogTab as all and shows all exercises', async () => {
+            const hook = await renderHook(() => useExerciseController(mockRoutineDayId, mockUserId));
+            expect(hook.result.current.catalogTab).toBe('all');
+            expect(hook.result.current.exercises.length).toBe(4);
+        });
+
+        it('filters to only official exercises when catalogTab is set to officials', async () => {
+            const hook = await renderHook(() => useExerciseController(mockRoutineDayId, mockUserId));
+
+            await act(async () => {
+                hook.result.current.setCatalogTab('officials');
+            });
+
+            expect(hook.result.current.catalogTab).toBe('officials');
+            expect(hook.result.current.exercises.length).toBe(2);
+            expect(hook.result.current.exercises.map((e) => e.id)).toEqual(['ex-off-1', 'ex-off-2']);
+        });
+
+        it('filters to only community / custom exercises when catalogTab is set to community', async () => {
+            const hook = await renderHook(() => useExerciseController(mockRoutineDayId, mockUserId));
+
+            await act(async () => {
+                hook.result.current.setCatalogTab('community');
+            });
+
+            expect(hook.result.current.catalogTab).toBe('community');
+            expect(hook.result.current.exercises.length).toBe(2);
+            expect(hook.result.current.exercises.map((e) => e.id)).toEqual(['ex-my-1', 'ex-com-1']);
+        });
+
+        it('switches back to all exercises when catalogTab is reset to all', async () => {
+            const hook = await renderHook(() => useExerciseController(mockRoutineDayId, mockUserId));
+
+            await act(async () => {
+                hook.result.current.setCatalogTab('officials');
+            });
+            expect(hook.result.current.exercises.length).toBe(2);
+
+            await act(async () => {
+                hook.result.current.setCatalogTab('all');
+            });
+            expect(hook.result.current.exercises.length).toBe(4);
+        });
+    });
+
     describe('useExerciseController - Filter Manipulation & State Helpers', () => {
         it('manages filter state with setFilter, clearFilter, and clearAllFilters', async () => {
             const hook = await renderHook(() => useExerciseController(mockRoutineDayId, mockUserId));
