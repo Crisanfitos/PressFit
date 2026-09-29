@@ -5,6 +5,11 @@ import { useExerciseDetailController } from '../../src/controllers/useExerciseDe
 import { PersonalRecordService } from '../../src/services/PersonalRecordService';
 
 jest.mock('../../src/controllers/useExerciseDetailController');
+jest.mock('../../src/services/ExerciseService', () => ({
+    ExerciseService: {
+        deleteCustomExercise: jest.fn().mockResolvedValue({ data: true, error: null }),
+    },
+}));
 jest.mock('../../src/services/PersonalRecordService', () => ({
     PersonalRecordService: {
         getPersonalRecord: jest.fn().mockResolvedValue({ data: null, error: null }),
@@ -128,6 +133,68 @@ describe('ExerciseDetailScreen Component (RNTL)', () => {
         );
 
         expect(queryByTestId('edit-custom-exercise-button')).toBeNull();
+    });
+
+    it('renders delete-custom-exercise-button when es_propietario is true, opens modal, and confirms deletion (PF-250)', async () => {
+        const { fireEvent, act, waitFor } = require('@testing-library/react-native');
+        const { ExerciseService } = require('../../src/services/ExerciseService');
+
+        mockUseExerciseDetailController.mockReturnValue({
+            exercise: {
+                id: 'ex-custom-del',
+                titulo: 'Press Personalizado a Borrar',
+                grupo_muscular: 'pecho',
+                es_propietario: true,
+                is_custom: true,
+                es_oficial: false,
+            },
+            loading: false,
+            refetch: jest.fn(),
+        } as any);
+
+        const { getByTestId } = await render(
+            <ExerciseDetailScreen navigation={mockNavigation} route={mockRoute} />
+        );
+
+        const deleteBtn = getByTestId('delete-custom-exercise-button');
+        expect(deleteBtn).toBeTruthy();
+
+        await act(async () => {
+            fireEvent.press(deleteBtn);
+        });
+
+        await waitFor(() => {
+            expect(getByTestId('delete-custom-exercise-modal')).toBeTruthy();
+        });
+
+        const confirmBtn = getByTestId('delete-custom-exercise-confirm-button');
+        await act(async () => {
+            fireEvent.press(confirmBtn);
+        });
+
+        expect(ExerciseService.deleteCustomExercise).toHaveBeenCalledWith('ex-custom-del');
+        expect(mockNavigation.goBack).toHaveBeenCalled();
+    });
+
+    it('does NOT render delete-custom-exercise-button when exercise is official or not owned (PF-250)', async () => {
+        mockUseExerciseDetailController.mockReturnValue({
+            exercise: {
+                id: 'ex-official-del',
+                titulo: 'Press Oficial',
+                grupo_muscular: 'pecho',
+                es_propietario: false,
+                is_custom: false,
+                es_oficial: true,
+            },
+            loading: false,
+            refetch: jest.fn(),
+        } as any);
+
+        const { queryByTestId } = await render(
+            <ExerciseDetailScreen navigation={mockNavigation} route={mockRoute} />
+        );
+
+        expect(queryByTestId('delete-custom-exercise-button')).toBeNull();
     });
 });
 

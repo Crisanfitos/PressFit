@@ -9,6 +9,7 @@ import {
     Dimensions,
     ActivityIndicator,
     Linking,
+    Modal,
 } from 'react-native';
 import {
     SafeAreaView,
@@ -20,6 +21,8 @@ import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { useExerciseDetailController } from '../controllers/useExerciseDetailController';
 import { PersonalRecordService } from '../services/PersonalRecordService';
+import { ExerciseService } from '../services/ExerciseService';
+import { LogService } from '../services/LogService';
 
 const { width } = Dimensions.get('window');
 
@@ -42,8 +45,28 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
     const userId = authContext?.user?.id;
     const [currentSlide, setCurrentSlide] = useState(0);
     const [editModalVisible, setEditModalVisible] = useState(false);
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [deleting, setDeleting] = useState(false);
     const [personalRecord, setPersonalRecord] = useState<any>(null);
     const [exerciseHistory, setExerciseHistory] = useState<any[]>([]);
+
+    const confirmDelete = async () => {
+        if (!exercise?.id) return;
+        setDeleting(true);
+        try {
+            const { error } = await ExerciseService.deleteCustomExercise(exercise.id);
+            if (error) {
+                LogService.error('Error deleting custom exercise in detail:', error);
+            } else {
+                setDeleteModalVisible(false);
+                navigation.goBack();
+            }
+        } catch (err) {
+            LogService.error('Unexpected error in confirmDelete:', err);
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     useEffect(() => {
         if (userId && exerciseId) {
@@ -219,14 +242,24 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                         ? exercise.es_propietario
                         : (Boolean(exercise.is_custom) && !exercise.es_oficial)
                 ) ? (
-                    <TouchableOpacity
-                        onPress={() => setEditModalVisible(true)}
-                        style={{ padding: 6 }}
-                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                        testID="edit-custom-exercise-button"
-                    >
-                        <MaterialIcons name="edit" size={24} color={colors.primary} />
-                    </TouchableOpacity>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <TouchableOpacity
+                            onPress={() => setEditModalVisible(true)}
+                            style={{ padding: 6 }}
+                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            testID="edit-custom-exercise-button"
+                        >
+                            <MaterialIcons name="edit" size={24} color={colors.primary} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => setDeleteModalVisible(true)}
+                            style={{ padding: 6, marginLeft: 4 }}
+                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            testID="delete-custom-exercise-button"
+                        >
+                            <MaterialIcons name="delete-outline" size={24} color={colors.error || '#ef4444'} />
+                        </TouchableOpacity>
+                    </View>
                 ) : (
                     <View style={{ width: 24 }} />
                 )}
@@ -394,6 +427,47 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                     refetch();
                 }}
             />
+
+            {/* Modal de confirmación de borrado */}
+            <Modal
+                visible={deleteModalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setDeleteModalVisible(false)}
+                testID="delete-custom-exercise-modal"
+            >
+                <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+                    <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 24, width: '100%', maxWidth: 360, elevation: 5 }}>
+                        <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: `${colors.error || '#ef4444'}20`, justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginBottom: 16 }}>
+                            <MaterialIcons name="delete-outline" size={28} color={colors.error || '#ef4444'} />
+                        </View>
+                        <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.text, textAlign: 'center', marginBottom: 8 }}>
+                            {t('customExercise.deleteTitle', 'Eliminar Ejercicio')}
+                        </Text>
+                        <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginBottom: 24 }}>
+                            {t('customExercise.deleteConfirmMessage', '¿Estás seguro de que deseas eliminar este ejercicio? Esta acción lo retirará del catálogo.')}
+                        </Text>
+                        <View style={{ flexDirection: 'row', gap: 12 }}>
+                            <TouchableOpacity
+                                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1, borderColor: colors.border, alignItems: 'center' }}
+                                onPress={() => setDeleteModalVisible(false)}
+                                disabled={deleting}
+                                testID="delete-custom-exercise-cancel-button"
+                            >
+                                <Text style={{ color: colors.textSecondary, fontWeight: '600' }}>{t('common.cancel', 'Cancelar')}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: colors.error || '#ef4444', alignItems: 'center' }}
+                                onPress={confirmDelete}
+                                disabled={deleting}
+                                testID="delete-custom-exercise-confirm-button"
+                            >
+                                <Text style={{ color: '#fff', fontWeight: 'bold' }}>{t('common.delete', 'Eliminar')}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 };

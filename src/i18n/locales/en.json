@@ -522,7 +522,9 @@
     "saveExercise": "Save Exercise",
     "fillNameError": "Exercise title is required.",
     "createError": "Could not create exercise. Please try again.",
-    "updateError": "Could not update exercise. Please try again."
+    "updateError": "Could not update exercise. Please try again.",
+    "deleteTitle": "Delete Exercise",
+    "deleteConfirmMessage": "Are you sure you want to delete this exercise? This action will remove it from the catalog."
   },
   "prCelebration": {
     "title": "NEW PERSONAL RECORD!",
