@@ -81,8 +81,11 @@ export const ExerciseService = {
                 .order('titulo');
 
             if (error) throw error;
+            const activeData = (data || []).filter(
+                (ex: any) => !ex.deleted_at && ex.activo !== false
+            );
             return {
-                data: (data || []).map((ex) => enrichExerciseOwnership(ex, currentUserId)),
+                data: activeData.map((ex) => enrichExerciseOwnership(ex, currentUserId)),
                 error: null,
             };
         } catch (error) {
@@ -260,7 +263,19 @@ export const ExerciseService = {
                 .delete()
                 .eq('id', id);
 
-            if (error) throw error;
+            if (error) {
+                // Preservación de integridad: fallback a soft delete si el borrado físico falla
+                LogService.warn('Direct deletion failed (possible foreign key constraint), applying soft-delete fallback:', error);
+                const { error: softDeleteError } = await supabase
+                    .from('ejercicios')
+                    .update({
+                        activo: false,
+                        deleted_at: new Date().toISOString(),
+                    })
+                    .eq('id', id);
+
+                if (softDeleteError) throw softDeleteError;
+            }
             return { data: true, error: null };
         } catch (error) {
             LogService.error('Error deleting custom exercise:', error);

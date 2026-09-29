@@ -76,6 +76,20 @@ describe('ExerciseService Unit Tests (PF-245)', () => {
       expect(res.error).toBeNull();
       expect(res.data).toBeDefined();
     });
+
+    it('should filter out soft-deleted exercises (PF-250)', async () => {
+      const mockData = [
+        { id: 'ex-1', titulo: 'Ejercicio Activo', is_custom: false, activo: true },
+        { id: 'ex-2', titulo: 'Ejercicio Eliminado', is_custom: true, deleted_at: '2026-09-29T10:00:00.000Z' },
+        { id: 'ex-3', titulo: 'Ejercicio Inactivo', is_custom: true, activo: false },
+      ];
+      mockChain.order.mockResolvedValueOnce({ data: mockData, error: null });
+
+      const res = await ExerciseService.getExercises();
+      expect(res.error).toBeNull();
+      expect(res.data).toHaveLength(1);
+      expect(res.data?.[0].id).toBe('ex-1');
+    });
   });
 
   describe('createCustomExercise', () => {
@@ -460,7 +474,28 @@ describe('ExerciseService Unit Tests (PF-245)', () => {
       expect(res.data).toBe(true);
     });
 
-    it('should handle error when deletion fails', async () => {
+    it('should fallback to soft-delete when direct physical delete fails due to constraints (PF-250)', async () => {
+      jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
+        data: { user: { id: 'user-me' } },
+        error: null,
+      } as any);
+
+      mockChain.single.mockResolvedValueOnce({
+        data: { id: 'custom-1', is_custom: true, created_by: 'user-me' },
+        error: null,
+      });
+
+      // Direct delete returns error, soft-delete update succeeds (default mock returns { data: [], error: null })
+      mockChain.then.mockImplementationOnce((resolve: any) =>
+        Promise.resolve({ error: new Error('Foreign key constraint') }).then(resolve)
+      );
+
+      const res = await ExerciseService.deleteCustomExercise('custom-1');
+      expect(res.error).toBeNull();
+      expect(res.data).toBe(true);
+    });
+
+    it('should handle error when both direct deletion and soft-delete fail (PF-250)', async () => {
       jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
         data: { user: { id: 'user-me' } },
         error: null,
@@ -472,7 +507,10 @@ describe('ExerciseService Unit Tests (PF-245)', () => {
         error: null,
       });
       // Delete query fails
-      mockChain.then.mockImplementationOnce((resolve: any) => Promise.resolve({ error: new Error('Delete error') }).then(resolve));
+      mockChain.then
+        .mockImplementationOnce((resolve: any) => Promise.resolve({ error: new Error('Delete error') }).then(resolve))
+        // Soft delete update also fails
+        .mockImplementationOnce((resolve: any) => Promise.resolve({ error: new Error('Soft delete error') }).then(resolve));
 
       const res = await ExerciseService.deleteCustomExercise('custom-1');
       expect(res.data).toBe(false);

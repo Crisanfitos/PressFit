@@ -241,6 +241,61 @@ describe('Exercise Sub-components (PF-267)', () => {
 
             expect(queryByTestId('edit-custom-exercise-button')).toBeNull();
         });
+
+        it('renders delete button when user is owner and onDelete is passed (PF-250)', async () => {
+            const mockDelete = jest.fn();
+            const exercise = {
+                id: 'ex-custom-del-item',
+                titulo: 'Mi Ejercicio Custom',
+                musculos_primarios: 'Pecho',
+                is_custom: true,
+                es_propietario: true,
+                es_oficial: false,
+            };
+
+            const { getByTestId } = await render(
+                <ExerciseListItem
+                    item={exercise}
+                    isSelected={false}
+                    onSelect={jest.fn()}
+                    onThumbnailPress={jest.fn()}
+                    colors={mockColors}
+                    navigation={{ navigate: jest.fn() }}
+                    onDelete={mockDelete}
+                />
+            );
+
+            const deleteBtn = getByTestId('delete-custom-exercise-button');
+            expect(deleteBtn).toBeTruthy();
+            fireEvent.press(deleteBtn);
+            expect(mockDelete).toHaveBeenCalledWith(exercise);
+        });
+
+        it('does NOT render delete button when user is not owner or exercise is official (PF-250)', async () => {
+            const mockDelete = jest.fn();
+            const officialExercise = {
+                id: 'ex-official-del-item',
+                titulo: 'Press Militar Oficial',
+                musculos_primarios: 'Hombros',
+                is_custom: false,
+                es_propietario: false,
+                es_oficial: true,
+            };
+
+            const { queryByTestId } = await render(
+                <ExerciseListItem
+                    item={officialExercise}
+                    isSelected={false}
+                    onSelect={jest.fn()}
+                    onThumbnailPress={jest.fn()}
+                    colors={mockColors}
+                    navigation={{ navigate: jest.fn() }}
+                    onDelete={mockDelete}
+                />
+            );
+
+            expect(queryByTestId('delete-custom-exercise-button')).toBeNull();
+        });
     });
 
 

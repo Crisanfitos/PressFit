@@ -522,7 +522,9 @@
     "saveExercise": "Guardar Ejercicio",
     "fillNameError": "El título del ejercicio es obligatorio.",
     "createError": "No se pudo crear el ejercicio. Inténtalo de nuevo.",
-    "updateError": "No se pudo actualizar el ejercicio. Inténtalo de nuevo."
+    "updateError": "No se pudo actualizar el ejercicio. Inténtalo de nuevo.",
+    "deleteTitle": "Eliminar Ejercicio",
+    "deleteConfirmMessage": "¿Estás seguro de que deseas eliminar este ejercicio? Esta acción lo retirará del catálogo."
   },
   "prCelebration": {
     "title": "¡NUEVO RÉCORD PERSONAL!",
