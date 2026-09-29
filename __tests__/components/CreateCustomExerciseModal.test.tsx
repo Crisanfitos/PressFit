@@ -142,4 +142,83 @@ describe('CreateCustomExerciseModal', () => {
 
     expect(defaultProps.onSuccess).toHaveBeenCalled();
   });
+
+  it('renders custom-exercise-video-url-input', async () => {
+    const { getByTestId } = await renderModal();
+    expect(getByTestId('custom-exercise-video-url-input')).toBeTruthy();
+  });
+
+  it('shows error if an invalid YouTube URL is entered', async () => {
+    const { getByTestId, getByText } = await renderModal();
+
+    const nameInput = getByTestId('custom-exercise-name-input');
+    const videoInput = getByTestId('custom-exercise-video-url-input');
+
+    await act(async () => {
+      fireEvent.changeText(nameInput, 'Press Militar');
+      fireEvent.changeText(videoInput, 'https://notyoutube.com/video123');
+    });
+
+    const submitBtn = getByTestId('custom-exercise-submit-button');
+    await act(async () => {
+      fireEvent.press(submitBtn);
+    });
+
+    await waitFor(() => {
+      expect(
+        getByText(
+          'Por favor introduce una URL de YouTube válida (ej: https://www.youtube.com/watch?v=... o https://youtu.be/...)'
+        )
+      ).toBeTruthy();
+    });
+    expect(ExerciseService.createCustomExercise).not.toHaveBeenCalled();
+  });
+
+  it('submits valid YouTube video_url in payload', async () => {
+    (ExerciseService.createCustomExercise as jest.Mock).mockResolvedValueOnce({
+      data: { id: 'custom-ex-321', titulo: 'Sentadilla Búlgara' },
+      error: null,
+    });
+
+    const { getByTestId } = await renderModal();
+
+    const nameInput = getByTestId('custom-exercise-name-input');
+    const videoInput = getByTestId('custom-exercise-video-url-input');
+
+    await act(async () => {
+      fireEvent.changeText(nameInput, 'Sentadilla Búlgara');
+      fireEvent.changeText(videoInput, 'https://youtu.be/dQw4w9WgXcQ');
+    });
+
+    const submitBtn = getByTestId('custom-exercise-submit-button');
+    await act(async () => {
+      fireEvent.press(submitBtn);
+    });
+
+    await waitFor(() => {
+      expect(ExerciseService.createCustomExercise).toHaveBeenCalledWith(
+        expect.objectContaining({
+          titulo: 'Sentadilla Búlgara',
+          video_url: 'https://youtu.be/dQw4w9WgXcQ',
+          url_video: 'https://youtu.be/dQw4w9WgXcQ',
+        })
+      );
+    });
+  });
+
+  it('prefills video_url in edit mode', async () => {
+    const editProps = {
+      ...defaultProps,
+      initialExercise: {
+        id: 'custom-ex-999',
+        titulo: 'Dominadas Original',
+        video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      },
+    };
+
+    const { getByTestId } = await renderModal(editProps);
+    expect(getByTestId('custom-exercise-video-url-input').props.value).toBe(
+      'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    );
+  });
 });

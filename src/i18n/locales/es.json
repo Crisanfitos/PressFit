@@ -518,6 +518,7 @@
     "instructionsPlaceholder": "Paso 1: Agarrar la barra\nPaso 2: Subir con fuerza",
     "videoUrlLabel": "URL de Vídeo de YouTube (opcional)",
     "videoUrlPlaceholder": "https://www.youtube.com/watch?v=...",
+    "invalidVideoUrl": "Por favor introduce una URL de YouTube válida (ej: https://www.youtube.com/watch?v=... o https://youtu.be/...)",
     "saveExercise": "Guardar Ejercicio",
     "fillNameError": "El título del ejercicio es obligatorio.",
     "createError": "No se pudo crear el ejercicio. Inténtalo de nuevo.",

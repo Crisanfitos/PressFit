@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { ExerciseService, CustomExerciseInput } from '../services/ExerciseService';
 import { LogService } from '../services/LogService';
+import { isValidYouTubeUrl } from '../utils/youtubeUtils';
 
 interface CreateCustomExerciseModalProps {
   visible: boolean;
@@ -46,6 +47,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
   const [dificultad, setDificultad] = useState('Intermedio');
   const [descripcion, setDescripcion] = useState('');
   const [instrucciones, setInstrucciones] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -61,6 +63,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
       } else {
         setInstrucciones(initialExercise.instrucciones || '');
       }
+      setVideoUrl(initialExercise.video_url || initialExercise.url_video || '');
       setErrorMsg(null);
     } else if (visible && !initialExercise) {
       resetForm();
@@ -74,6 +77,7 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
     setDificultad('Intermedio');
     setDescripcion('');
     setInstrucciones('');
+    setVideoUrl('');
     setErrorMsg(null);
   };
 
@@ -85,6 +89,17 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
   const handleSubmit = async () => {
     if (!titulo.trim()) {
       setErrorMsg(t('customExercise.fillNameError', 'El título del ejercicio es obligatorio.'));
+      return;
+    }
+
+    const trimmedVideoUrl = videoUrl.trim();
+    if (trimmedVideoUrl && !isValidYouTubeUrl(trimmedVideoUrl)) {
+      setErrorMsg(
+        t(
+          'customExercise.invalidVideoUrl',
+          'Por favor introduce una URL de YouTube válida (ej: https://www.youtube.com/watch?v=... o https://youtu.be/...)'
+        )
+      );
       return;
     }
 
@@ -100,6 +115,8 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
         dificultad,
         descripcion: descripcion.trim(),
         instrucciones: instrucciones.trim() ? instrucciones.trim().split('\n').filter(Boolean) : [],
+        video_url: trimmedVideoUrl || undefined,
+        url_video: trimmedVideoUrl || undefined,
       };
 
       let result;
@@ -340,6 +357,31 @@ export const CreateCustomExerciseModal: React.FC<CreateCustomExerciseModalProps>
                 multiline
                 numberOfLines={3}
                 testID="custom-exercise-instructions-input"
+              />
+            </View>
+
+            {/* Video URL */}
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                {t('customExercise.videoUrlLabel', 'URL de Vídeo de YouTube (opcional)')}
+              </Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: colors.background,
+                    color: colors.text,
+                    borderColor: colors.border,
+                  },
+                ]}
+                placeholder={t('customExercise.videoUrlPlaceholder', 'https://www.youtube.com/watch?v=...')}
+                placeholderTextColor={colors.textSecondary}
+                value={videoUrl}
+                onChangeText={setVideoUrl}
+                autoCapitalize="none"
+                keyboardType="url"
+                autoCorrect={false}
+                testID="custom-exercise-video-url-input"
               />
             </View>
           </ScrollView>

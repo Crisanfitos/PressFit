@@ -16,11 +16,10 @@ export interface ExerciseListItemProps {
     onDelete?: (item: any) => void;
 }
 
+import { extractYouTubeVideoId } from '../../utils/youtubeUtils';
+
 export const getVideoId = (url: string | undefined): string | null => {
-    if (!url) return null;
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return match && match[2].length === 11 ? match[2] : null;
+    return extractYouTubeVideoId(url);
 };
 
 export const getThumbnailUrl = (videoId: string | null): string | null => {
@@ -50,7 +49,7 @@ export const ExerciseListItem: React.FC<ExerciseListItemProps> = React.memo(
             }).start();
         }, [fadeAnim]);
 
-        const videoId = getVideoId(item?.url_video);
+        const videoId = getVideoId(item?.video_url || item?.url_video);
         const thumbnailUrl = getThumbnailUrl(videoId);
 
         return (

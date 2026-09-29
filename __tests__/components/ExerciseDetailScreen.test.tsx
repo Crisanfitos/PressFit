@@ -47,4 +47,31 @@ describe('ExerciseDetailScreen Component (RNTL)', () => {
 
         expect(getByText('Press de Banca')).toBeTruthy();
     });
+
+    it('renders YouTube button and opens YouTube when exercise has video_url (PF-248)', async () => {
+        const { Linking } = require('react-native');
+        jest.spyOn(Linking, 'openURL').mockImplementation(() => Promise.resolve());
+
+        mockUseExerciseDetailController.mockReturnValue({
+            exercise: {
+                id: 'ex-custom-1',
+                titulo: 'Elevaciones Laterales Pesadas',
+                grupo_muscular: 'hombros',
+                video_url: 'https://youtu.be/dQw4w9WgXcQ',
+            },
+            loading: false,
+        } as any);
+
+        const { getByText } = await render(
+            <ExerciseDetailScreen navigation={mockNavigation} route={mockRoute} />
+        );
+
+        const youtubeBtn = getByText('Ver Video en YouTube');
+        expect(youtubeBtn).toBeTruthy();
+
+        const { fireEvent } = require('@testing-library/react-native');
+        fireEvent.press(youtubeBtn);
+
+        expect(Linking.openURL).toHaveBeenCalledWith('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+    });
 });

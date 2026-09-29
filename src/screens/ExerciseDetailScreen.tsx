@@ -23,16 +23,11 @@ import { PersonalRecordService } from '../services/PersonalRecordService';
 
 const { width } = Dimensions.get('window');
 
+import { extractYouTubeVideoId } from '../utils/youtubeUtils';
+
 type ExerciseDetailScreenProps = {
     route: any;
     navigation: any;
-};
-
-const getVideoId = (url: string | undefined): string | null => {
-    if (!url) return null;
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return match && match[2].length === 11 ? match[2] : null;
 };
 
 const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navigation }) => {
@@ -199,7 +194,7 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
     const primaryMuscles = exercise.musculos_primarios || 'N/A';
     const secondaryMuscles = exercise.musculos_secundarios || '';
     const instructions = exercise.descripcion || exercise.description || t('exerciseDetail.noInstructions', 'No hay instrucciones disponibles.');
-    const videoId = getVideoId(exercise.url_video);
+    const videoId = extractYouTubeVideoId(exercise.video_url || exercise.url_video);
     const imageUrl = exercise.url_foto || exercise.url_imagen;
 
     const openYouTube = () => {
