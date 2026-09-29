@@ -31,12 +31,53 @@ export interface ServiceResponse<T> {
  */
 export interface Exercise {
     id: string;
-    nombre: string;
-    grupo_muscular_principal: string;
+    nombre?: string;
+    titulo?: string;
+    grupo_muscular_principal?: string;
     grupos_musculares_secundarios?: string[];
+    grupo_muscular?: string;
+    categoria?: string;
+    dificultad?: string;
+    musculos_primarios?: string | string[];
+    musculos_secundarios?: string | string[];
     descripcion?: string;
+    description?: string;
     imagen_url?: string;
+    url_foto?: string;
+    url_imagen?: string;
+    video_url?: string;
+    url_video?: string;
+    instrucciones?: string[];
+    equipamiento?: string;
+    user_id?: string | null;
+    created_by?: string | null;
+    es_custom?: boolean;
+    is_custom?: boolean;
+    es_oficial?: boolean;
+    es_propietario?: boolean;
     created_at?: string;
+}
+
+/**
+ * Input data for creating or updating a custom exercise.
+ */
+export interface CustomExerciseInput {
+    titulo: string;
+    descripcion?: string;
+    grupo_muscular: string;
+    musculos_primarios?: string;
+    musculos_secundarios?: string[];
+    equipamiento?: string;
+    dificultad?: string;
+    instrucciones?: string[];
+    url_video?: string;
+    video_url?: string;
+    user_id?: string | null;
+    created_by?: string | null;
+    es_custom?: boolean;
+    is_custom?: boolean;
+    es_oficial?: boolean;
+    es_propietario?: boolean;
 }
 
 /**

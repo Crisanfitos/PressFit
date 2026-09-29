@@ -1,18 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { ExerciseService, CustomExerciseInput } from '../services/ExerciseService';
+import { ExerciseService, CustomExerciseInput, Exercise } from '../services/ExerciseService';
 import { LogService } from '../services/LogService';
 
-export interface Exercise {
-    id: string;
-    titulo: string;
-    musculos_primarios?: string | string[];
-    musculos_secundarios?: string | string[];
-    descripcion?: string;
-    url_video?: string;
-    imagen_url?: string;
-    dificultad?: string;
-    categoria?: string;
-}
+export { Exercise };
 
 export type FilterKey = 'primaryMuscle' | 'secondaryMuscle' | 'category' | 'difficulty';
 
@@ -108,7 +98,7 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
         // Text search
         if (searchQuery) {
             const lowerQuery = searchQuery.toLowerCase();
-            filtered = filtered.filter((ex) => ex.titulo.toLowerCase().includes(lowerQuery));
+            filtered = filtered.filter((ex) => (ex.titulo || ex.nombre || '').toLowerCase().includes(lowerQuery));
         }
 
         // Apply filter dimensions with AND logic
@@ -125,7 +115,11 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
             filtered = filtered.filter((ex) => ex.dificultad?.trim() === filters.difficulty);
         }
 
-        return [...filtered].sort((a, b) => a.titulo.localeCompare(b.titulo));
+        return [...filtered].sort((a, b) => {
+            const titleA = a.titulo || a.nombre || '';
+            const titleB = b.titulo || b.nombre || '';
+            return titleA.localeCompare(titleB);
+        });
     }, [exercises, searchQuery, filters]);
 
     const setFilter = useCallback((key: FilterKey, value: string | null) => {
