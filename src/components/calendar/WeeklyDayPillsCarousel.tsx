@@ -69,8 +69,14 @@ export const WeeklyDayPillsCarousel: React.FC<WeeklyDayPillsCarouselProps> = ({
                             ]}
                             onPress={() => onSelectDay(day)}
                             activeOpacity={0.8}
-                            testID={`weekly-pill-${day.dayKey}`}
+                            testID={day.isToday ? 'calendar-day-today' : `weekly-pill-${day.dayKey}`}
+                            accessibilityLabel={`weekly-pill-${day.dayKey}`}
                         >
+                            <View
+                                testID={`weekly-pill-${day.dayKey}`}
+                                pointerEvents="none"
+                                style={StyleSheet.absoluteFillObject}
+                            />
                             <Text
                                 style={[
                                     styles.letterText,

@@ -73,9 +73,17 @@ appId: com.crisanfitos.PressFit_Expo
     id: "monthly-calendar-screen"
 
 # 3. Navegar al día actual de entrenamiento
+- runFlow:
+    when:
+      notVisible:
+        id: "calendar-day-today"
+    commands:
+      - tapOn:
+          id: "toggle-monthly-view"
+          optional: true
+
 - tapOn:
     id: "calendar-day-today"
-    optional: true
 
 - extendedWaitUntil:
     visible:
