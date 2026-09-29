@@ -126,6 +126,8 @@ const MainNavigator: React.FC = () => {
                     options={({ route }) => ({
                         swipeEnabled: getSwipeEnabled(route),
                         tabBarLabel: t('navigation.routines', 'Rutinas'),
+                        tabBarButtonTestID: 'tab-semana',
+                        tabBarAccessibilityLabel: 'tab-semana',
                         tabBarIcon: ({ color }) => (
                             <MaterialIcons name="calendar-today" size={22} color={color} />
                         ),
@@ -136,6 +138,8 @@ const MainNavigator: React.FC = () => {
                     component={ProgressNavigatorWithBoundary}
                     options={{
                         tabBarLabel: t('navigation.progreso', 'Progreso'),
+                        tabBarButtonTestID: 'tab-progreso',
+                        tabBarAccessibilityLabel: 'tab-progreso',
                         tabBarIcon: ({ color }) => (
                             <MaterialIcons name="trending-up" size={24} color={color} />
                         ),
@@ -146,6 +150,8 @@ const MainNavigator: React.FC = () => {
                     component={ProfileNavigatorWithBoundary}
                     options={{
                         tabBarLabel: t('navigation.perfil', 'Perfil'),
+                        tabBarButtonTestID: 'tab-perfil',
+                        tabBarAccessibilityLabel: 'tab-perfil',
                         tabBarIcon: ({ color }) => (
                             <MaterialIcons name="person" size={24} color={color} />
                         ),

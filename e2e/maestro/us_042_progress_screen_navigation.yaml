@@ -54,7 +54,8 @@ appId: com.crisanfitos.PressFit_Expo
     id: "monthly-calendar-screen"
 
 # Navegar a la pestaña Progreso en la barra inferior
-- tapOn: "Progreso"
+- tapOn:
+    id: "tab-progreso"
 
 - assertVisible:
     id: "progress-screen"
@@ -112,7 +113,8 @@ appId: com.crisanfitos.PressFit_Expo
     id: "progress-screen"
 
 # Cierre de sesión limpio
-- tapOn: "Perfil"
+- tapOn:
+    id: "tab-perfil"
 
 - scrollUntilVisible:
     element:
