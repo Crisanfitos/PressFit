@@ -49,6 +49,15 @@ appId: com.crisanfitos.PressFit_Expo
     timeout: 15000
 
 # 1. Seleccionar hoy en el calendario
+- runFlow:
+    when:
+      notVisible:
+        id: "calendar-day-today"
+    commands:
+      - tapOn:
+          id: "toggle-monthly-view"
+          optional: true
+
 - tapOn:
     id: "calendar-day-today"
 
