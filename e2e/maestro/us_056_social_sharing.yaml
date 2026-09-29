@@ -1,0 +1,95 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+# us_056_social_sharing.yaml — US-056 / PF-290: Automatización E2E para Compartir Entrenamientos y Progreso en Redes Sociales (Social Sharing)
+# TDD Reference: Define la especificación E2E en Maestro para validación del flujo de compartir tarjeta gráfica y disparar el Share Sheet del sistema.
+
+- launchApp:
+    clearState: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible modal de Expo / Dev Menu
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# 1. Flujo de Autenticación
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 20000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# Si aparece modal de sesión previa residual, descartarla
+- runFlow:
+    when:
+      visible:
+        id: "resume-workout-modal"
+    commands:
+      - tapOn:
+          id: "resume-workout-discard-button"
+      - tapOn: "Descartar"
+
+# 2. Esperar pantalla del Calendario Mensual
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 20000
+
+# 3. Navegar a la pestaña de Progreso o finalizar sesión
+- tapOn:
+    id: "tab-progress"
+    optional: true
+
+# 4. Validar visualización de botón de compartir
+- extendedWaitUntil:
+    visible:
+      id: "social-share-button"
+    timeout: 15000
+
+# 5. Pulsar en Compartir Entrenamiento / Progreso
+- tapOn:
+    id: "social-share-button"
+
+# 6. Validar renderizado de la tarjeta gráfica con branding PressFit
+- extendedWaitUntil:
+    visible:
+      id: "shareable-workout-card"
+    timeout: 10000
+
+# 7. Disparar el Share Sheet del sistema nativo
+- tapOn:
+    id: "confirm-share-button"
+
+# 8. Comprobar que no hay crash en el diálogo del sistema
+- runFlow:
+    when:
+      visible: ".*(Share|Compartir).*"
+    commands:
+      - back
