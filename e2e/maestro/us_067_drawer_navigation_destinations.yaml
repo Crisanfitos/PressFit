@@ -94,7 +94,8 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "preset-routines-screen"
 
-- assertVisible: "Plantillas Prémium"
+- assertVisible:
+    id: "preset-routines-list"
 
 # 6. Regresar al calendario mensual mediante back-button
 - tapOn:
@@ -145,7 +146,8 @@ appId: com.crisanfitos.PressFit_Expo
     id: "monthly-calendar-screen"
 
 # 10. Limpieza (Logout final para dejar estado limpio)
-- tapOn: "Perfil"
+- tapOn:
+    id: "tab-perfil"
 
 - scroll
 - scrollUntilVisible:

@@ -69,6 +69,12 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "drawer-title"
 
+- assertVisible:
+    id: "drawer-item-preset-routines"
+
+- assertVisible:
+    id: "drawer-item-exercise-catalog"
+
 # 5. Cerrar menú lateral mediante botón de retroceso (Modal dismiss)
 - back
 
@@ -78,7 +84,8 @@ appId: com.crisanfitos.PressFit_Expo
     timeout: 5000
 
 # 6. Limpieza (Logout final)
-- tapOn: "Perfil"
+- tapOn:
+    id: "tab-perfil"
 
 - scroll
 - scrollUntilVisible:
