@@ -14,7 +14,8 @@
       "backgroundColor": "#102218"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.crisanfitos.PressFit-Expo"
     },
     "android": {
       "adaptiveIcon": {
