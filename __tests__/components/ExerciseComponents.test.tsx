@@ -186,7 +186,63 @@ describe('Exercise Sub-components (PF-267)', () => {
             fireEvent.press(card);
             expect(mockSelect).toHaveBeenCalled();
         });
+
+        it('renders edit button when user is owner and onEdit is passed (PF-249)', async () => {
+            const mockEdit = jest.fn();
+            const exercise = {
+                id: 'ex-custom-1',
+                titulo: 'Mi Ejercicio Custom',
+                musculos_primarios: 'Pecho',
+                is_custom: true,
+                es_propietario: true,
+                es_oficial: false,
+            };
+
+            const { getByTestId } = await render(
+                <ExerciseListItem
+                    item={exercise}
+                    isSelected={false}
+                    onSelect={jest.fn()}
+                    onThumbnailPress={jest.fn()}
+                    colors={mockColors}
+                    navigation={{ navigate: jest.fn() }}
+                    onEdit={mockEdit}
+                />
+            );
+
+            const editBtn = getByTestId('edit-custom-exercise-button');
+            expect(editBtn).toBeTruthy();
+            fireEvent.press(editBtn);
+            expect(mockEdit).toHaveBeenCalledWith(exercise);
+        });
+
+        it('does NOT render edit button when user is not owner or exercise is official (PF-249)', async () => {
+            const mockEdit = jest.fn();
+            const officialExercise = {
+                id: 'ex-official-1',
+                titulo: 'Press Militar Oficial',
+                musculos_primarios: 'Hombros',
+                is_custom: false,
+                es_propietario: false,
+                es_oficial: true,
+            };
+
+            const { queryByTestId } = await render(
+                <ExerciseListItem
+                    item={officialExercise}
+                    isSelected={false}
+                    onSelect={jest.fn()}
+                    onThumbnailPress={jest.fn()}
+                    colors={mockColors}
+                    navigation={{ navigate: jest.fn() }}
+                    onEdit={mockEdit}
+                />
+            );
+
+            expect(queryByTestId('edit-custom-exercise-button')).toBeNull();
+        });
     });
+
 
     describe('ScrollToTopFab', () => {
         it('renders fab button and calls onScrollToTop', async () => {

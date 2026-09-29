@@ -24,6 +24,7 @@ import { PersonalRecordService } from '../services/PersonalRecordService';
 const { width } = Dimensions.get('window');
 
 import { extractYouTubeVideoId } from '../utils/youtubeUtils';
+import { CreateCustomExerciseModal } from '../components/CreateCustomExerciseModal';
 
 type ExerciseDetailScreenProps = {
     route: any;
@@ -36,10 +37,11 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
     const { colors } = theme;
     const { exerciseId } = route.params || {};
 
-    const { exercise, loading } = useExerciseDetailController(exerciseId);
+    const { exercise, loading, refetch } = useExerciseDetailController(exerciseId);
     const authContext = useContext(AuthContext);
     const userId = authContext?.user?.id;
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [editModalVisible, setEditModalVisible] = useState(false);
     const [personalRecord, setPersonalRecord] = useState<any>(null);
     const [exerciseHistory, setExerciseHistory] = useState<any[]>([]);
 
@@ -212,7 +214,22 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                 <Text style={styles.headerText} numberOfLines={1}>
                     {exerciseName}
                 </Text>
-                <View style={{ width: 24 }} />
+                {Boolean(
+                    exercise.es_propietario !== undefined
+                        ? exercise.es_propietario
+                        : (Boolean(exercise.is_custom) && !exercise.es_oficial)
+                ) ? (
+                    <TouchableOpacity
+                        onPress={() => setEditModalVisible(true)}
+                        style={{ padding: 6 }}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        testID="edit-custom-exercise-button"
+                    >
+                        <MaterialIcons name="edit" size={24} color={colors.primary} />
+                    </TouchableOpacity>
+                ) : (
+                    <View style={{ width: 24 }} />
+                )}
             </View>
 
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -367,6 +384,16 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
 
                 <View style={{ height: 40 }} />
             </ScrollView>
+
+            <CreateCustomExerciseModal
+                visible={editModalVisible}
+                initialExercise={exercise}
+                onClose={() => setEditModalVisible(false)}
+                onSuccess={() => {
+                    setEditModalVisible(false);
+                    refetch();
+                }}
+            />
         </SafeAreaView>
     );
 };
