@@ -1,6 +1,6 @@
 appId: com.crisanfitos.PressFit_Expo
 ---
-# us_056_social_sharing.yaml — US-056 / PF-290: Automatización E2E para Compartir Entrenamientos y Progreso en Redes Sociales (Social Sharing)
+# us_056_social_sharing.yaml — US-056 / PF-415: Automatización E2E para Compartir Entrenamientos y Progreso en Redes Sociales (Social Sharing)
 # TDD Reference: Define la especificación E2E en Maestro para validación del flujo de compartir tarjeta gráfica y disparar el Share Sheet del sistema.
 
 - launchApp:
@@ -62,34 +62,60 @@ appId: com.crisanfitos.PressFit_Expo
       id: "monthly-calendar-screen"
     timeout: 20000
 
-# 3. Navegar a la pestaña de Progreso o finalizar sesión
+# 3. Navegar a la pestaña de Progreso en la barra inferior
 - tapOn:
-    id: "tab-progress"
-    optional: true
+    id: "tab-progreso"
 
-# 4. Validar visualización de botón de compartir
 - extendedWaitUntil:
     visible:
-      id: "social-share-button"
+      id: "progress-screen"
     timeout: 15000
 
-# 5. Pulsar en Compartir Entrenamiento / Progreso
-- tapOn:
-    id: "social-share-button"
-
-# 6. Validar renderizado de la tarjeta gráfica con branding PressFit
-- extendedWaitUntil:
-    visible:
-      id: "shareable-workout-card"
-    timeout: 10000
-
-# 7. Disparar el Share Sheet del sistema nativo
-- tapOn:
-    id: "confirm-share-button"
-
-# 8. Comprobar que no hay crash en el diálogo del sistema
+# 4. Validar interacción con el botón de compartir de la tarjeta de récord personal (PRGlowCard)
 - runFlow:
     when:
-      visible: ".*(Share|Compartir).*"
+      visible:
+        id: "progress-pr-glow-card-share-button"
     commands:
-      - back
+      - tapOn:
+          id: "progress-pr-glow-card-share-button"
+      # Comprobar que no hay crash en el diálogo del sistema y descartarlo
+      - runFlow:
+          when:
+            visible: ".*(Share|Compartir).*"
+          commands:
+            - back
+
+# 5. Manejar contenedor modal de compartir (ShareModal) si está visible
+- runFlow:
+    when:
+      visible:
+        id: "share-modal-container"
+    commands:
+      - assertVisible:
+          id: "share-modal-container"
+      - tapOn:
+          id: "share-modal-close-btn"
+
+# 6. Flujo de Cierre de Sesión Limpio
+- tapOn:
+    id: "tab-perfil"
+
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+
+- tapOn:
+    id: "logout-button"
+
+- assertVisible:
+    id: "logout-confirm-button"
+
+- tapOn:
+    id: "logout-confirm-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 15000

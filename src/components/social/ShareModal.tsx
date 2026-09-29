@@ -67,6 +67,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             styles.modalContainer,
             { backgroundColor: colors.surface, borderColor: colors.border },
           ]}
+          testID="share-modal-container"
         >
           {/* ── Header ── */}
           <View style={styles.header}>

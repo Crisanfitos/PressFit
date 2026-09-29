@@ -89,6 +89,7 @@
     "test:e2e:PF-289": "npm run test:e2e:us055",
     "test:e2e:us056": "node e2e/run-maestro.js e2e/maestro/us_056_social_sharing.yaml",
     "test:e2e:PF-290": "npm run test:e2e:us056",
+    "test:e2e:PF-415": "npm run test:e2e:us056",
     "test:e2e:us057": "node e2e/run-maestro.js e2e/maestro/us_057_onboarding_flow.yaml",
     "test:e2e:PF-291": "node e2e/run-maestro.js e2e/maestro/us_057_onboarding_flow.yaml",
     "test:e2e:us058": "node e2e/run-maestro.js e2e/maestro/us_058_advanced_metrics_fatigue_rpe.yaml",
