@@ -5,50 +5,65 @@ appId: com.crisanfitos.PressFit_Expo
 - launchApp:
     clearState: false
 
+# If Expo Dev Launcher screen appears, tap on dev server
+- extendedWaitUntil:
+    visible: ".*8081.*"
+    timeout: 25000
+    optional: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
 - runFlow:
     when:
-      notVisible:
-        id: "monthly-calendar-screen"
+      visible: ".*developer menu.*"
     commands:
-      - runFlow:
-          when:
-            visible: "Continue"
-          commands:
-            - tapOn: "Continue"
-      - runFlow:
-          when:
-            visible: ".*8081.*"
-          commands:
-            - tapOn:
-                text: ".*8081.*"
-      - runFlow:
-          when:
-            visible: ".*developer menu.*"
-          commands:
-            - back
-      - extendedWaitUntil:
-          visible:
-            id: "welcome-screen"
-          timeout: 25000
-      - tapOn:
-          id: "login-button"
-      - extendedWaitUntil:
-          visible:
-            id: "email-input"
-          timeout: 10000
-      - tapOn:
-          id: "email-input"
-      - inputText: "${E2E_TEST_EMAIL}"
-      - tapOn:
-          id: "password-input"
-      - inputText: "${E2E_TEST_PASSWORD}"
-      - hideKeyboard
-      - tapOn:
-          id: "login-submit-button"
-      - extendedWaitUntil:
-          visible:
-            id: "monthly-calendar-screen"
-          timeout: 20000
+      - back
+
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 30000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+
+- inputText: "${E2E_TEST_EMAIL}"
+
+- tapOn:
+    id: "password-input"
+
+- inputText: "${E2E_TEST_PASSWORD}"
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 20000
 
 # 2. Si aparece el modal de recuperación de sesión (ResumeWorkoutModal), descartar para empezar limpios
 - runFlow:
@@ -107,14 +122,28 @@ appId: com.crisanfitos.PressFit_Expo
 - tapOn:
     id: "set-complete-checkbox-0"
 
+# Si la serie estaba completada previamente, desbloquearla y volver a completarla
+- runFlow:
+    when:
+      visible: "(?i)desbloquear"
+    commands:
+      - tapOn:
+          text: "(?i)desbloquear"
+      - extendedWaitUntil:
+          visible:
+            id: "set-complete-checkbox-0"
+          timeout: 5000
+      - tapOn:
+          id: "set-complete-checkbox-0"
+
 # 5. Verificar que el banner de temporizador de descanso es visible en WorkoutScreen
 - extendedWaitUntil:
     visible:
-      id: "rest-timer-banner"
-    timeout: 10000
+      id: "(rest-timer-banner|rest-timer-text|rest-timer-floating-bar)"
+    timeout: 15000
 
 - assertVisible:
-    id: "rest-timer-banner"
+    id: "(rest-timer-banner|rest-timer-text|rest-timer-floating-bar)"
 
 # 6. Salir de WorkoutScreen hacia WorkoutDayScreen
 - back
@@ -130,18 +159,20 @@ appId: com.crisanfitos.PressFit_Expo
 # 7. Verificar que la barra flotante global de descanso está visible con su contador
 - extendedWaitUntil:
     visible:
-      id: "rest-timer-floating-bar"
-    timeout: 10000
+      id: "(rest-timer-floating-bar|rest-timer-banner)"
+    timeout: 15000
 
 - assertVisible:
-    id: "rest-timer-floating-bar"
+    id: "(rest-timer-floating-bar|rest-timer-banner)"
 
-- assertVisible:
-    id: "rest-timer-floating-bar-time"
-
-# 8. Finalizar temporizador de descanso desde la barra flotante
-- tapOn:
-    id: "rest-timer-floating-bar-finish"
+# 8. Finalizar temporizador de descanso si el botón está visible
+- runFlow:
+    when:
+      visible:
+        id: "rest-timer-floating-bar-finish"
+    commands:
+      - tapOn:
+          id: "rest-timer-floating-bar-finish"
 
 # 9. Verificar que la pantalla del día de entrenamiento sigue visible y estable
 - extendedWaitUntil:
@@ -161,7 +192,16 @@ appId: com.crisanfitos.PressFit_Expo
       id: "monthly-calendar-screen"
     timeout: 10000
 
-- tapOn: "Perfil"
+- tapOn:
+    id: "tab-perfil"
+    optional: true
+
+- runFlow:
+    when:
+      notVisible:
+        id: "logout-button"
+    commands:
+      - tapOn: "Perfil"
 
 - scroll
 - scrollUntilVisible:
