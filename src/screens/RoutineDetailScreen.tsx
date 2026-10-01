@@ -98,7 +98,7 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
     const handleEditDescription = async (dayName: string) => {
         let dayId = getDayId(dayName);
         if (!dayId && userId) {
-            const dayIndex = DAY_NAMES.indexOf(dayName);
+            const dayIndex = (DAY_NAMES as readonly string[]).indexOf(dayName);
             const dayOfWeek = dayIndex === 6 ? 0 : dayIndex + 1;
             const { data } = await RoutineService.getOrCreateRoutineDay(userId, dayOfWeek);
             if (data) {
