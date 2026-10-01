@@ -6,6 +6,11 @@ appId: com.crisanfitos.PressFit_Expo
     clearState: true
 
 # If Expo Dev Launcher screen appears, tap on dev server
+- extendedWaitUntil:
+    visible: ".*8081.*"
+    timeout: 25000
+    optional: true
+
 - tapOn:
     text: ".*8081.*"
     optional: true
@@ -17,11 +22,21 @@ appId: com.crisanfitos.PressFit_Expo
     commands:
       - back
 
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
 # 1. Esperar bienvenida y navegar a Login
 - extendedWaitUntil:
     visible:
       id: "welcome-screen"
-    timeout: 20000
+    timeout: 30000
 
 - tapOn:
     id: "login-button"
@@ -100,7 +115,11 @@ appId: com.crisanfitos.PressFit_Expo
 
 - hideKeyboard
 
-# Verificar visualmente que se clampeó a 10
+# Verificar visualmente que se clampeó a 10 con espera extendida
+- extendedWaitUntil:
+    visible: "10"
+    timeout: 10000
+
 - assertVisible:
     text: "10"
 
@@ -116,7 +135,11 @@ appId: com.crisanfitos.PressFit_Expo
 
 - hideKeyboard
 
-# Verificar visualmente que se clampeó a 1
+# Verificar visualmente que se clampeó a 1 con espera extendida
+- extendedWaitUntil:
+    visible: "1"
+    timeout: 10000
+
 - assertVisible:
     text: "1"
 
@@ -132,7 +155,11 @@ appId: com.crisanfitos.PressFit_Expo
 
 - hideKeyboard
 
-# Verificar visualmente que el valor 7.5 fue aceptado
+# Verificar visualmente que el valor 7.5 fue aceptado con espera extendida
+- extendedWaitUntil:
+    visible: "7.5"
+    timeout: 10000
+
 - assertVisible:
     text: "7.5"
 
@@ -153,7 +180,16 @@ appId: com.crisanfitos.PressFit_Expo
     timeout: 10000
 
 # 9. Limpieza: Navegar a Perfil y Cerrar Sesión
-- tapOn: "Perfil"
+- tapOn:
+    id: "tab-perfil"
+    optional: true
+
+- runFlow:
+    when:
+      notVisible:
+        id: "logout-button"
+    commands:
+      - tapOn: "Perfil"
 
 - scrollUntilVisible:
     element:
