@@ -5,28 +5,31 @@ appId: com.crisanfitos.PressFit_Expo
 - launchApp:
     clearState: false
 
-# If Expo Dev Launcher screen appears, tap on dev server
-- tapOn:
-    text: ".*8081.*"
-    optional: true
-
-# If Expo Developer Menu onboarding modal appears, dismiss it with Continue or back
-- tapOn:
-    text: "Continue"
-    optional: true
-
 - runFlow:
     when:
-      visible: ".*developer menu.*"
+      notVisible:
+        id: "monthly-calendar-screen"
     commands:
-      - back
-
-# 1. Autenticación condicional si el usuario no tiene sesión activa
-- runFlow:
-    when:
-      visible:
-        id: "welcome-screen"
-    commands:
+      - runFlow:
+          when:
+            visible: "Continue"
+          commands:
+            - tapOn: "Continue"
+      - runFlow:
+          when:
+            visible: ".*8081.*"
+          commands:
+            - tapOn:
+                text: ".*8081.*"
+      - runFlow:
+          when:
+            visible: ".*developer menu.*"
+          commands:
+            - back
+      - extendedWaitUntil:
+          visible:
+            id: "welcome-screen"
+          timeout: 25000
       - tapOn:
           id: "login-button"
       - extendedWaitUntil:
@@ -39,8 +42,13 @@ appId: com.crisanfitos.PressFit_Expo
       - tapOn:
           id: "password-input"
       - inputText: "${E2E_TEST_PASSWORD}"
+      - hideKeyboard
       - tapOn:
           id: "login-submit-button"
+      - extendedWaitUntil:
+          visible:
+            id: "monthly-calendar-screen"
+          timeout: 20000
 
 # 2. Si aparece el modal de recuperación de sesión (ResumeWorkoutModal), descartar para empezar limpios
 - runFlow:
@@ -62,6 +70,15 @@ appId: com.crisanfitos.PressFit_Expo
     id: "monthly-calendar-screen"
 
 # 3. Navegar al día actual y cargar la sesión de entrenamiento
+- runFlow:
+    when:
+      notVisible:
+        id: "calendar-day-today"
+    commands:
+      - tapOn:
+          id: "toggle-monthly-view"
+          optional: true
+
 - tapOn:
     id: "calendar-day-today"
 
