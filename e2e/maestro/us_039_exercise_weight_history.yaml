@@ -114,23 +114,23 @@ appId: com.crisanfitos.PressFit_Expo
     id: "exercise-progress-detail-screen"
 
 - assertVisible:
-    text: "Max Peso"
+    id: "exercise-progress-toggle-weight"
 
 - assertVisible:
-    text: "Volumen Total"
+    id: "exercise-progress-toggle-volume"
 
 - assertVisible:
-    text: "Análisis de IA"
+    id: "exercise-progress-recommendation"
 
 - assertVisible:
-    text: "Historial de Series"
+    id: "exercise-progress-history-list"
 
 # 5. Alternar pestaña de gráfica a Volumen Total
 - tapOn:
-    text: "Volumen Total"
+    id: "exercise-progress-toggle-volume"
 
 - assertVisible:
-    text: "Volumen Total"
+    id: "exercise-progress-toggle-volume"
 
 # 6. Regresar a Progreso por Ejercicio
 - tapOn:
@@ -152,7 +152,7 @@ appId: com.crisanfitos.PressFit_Expo
 
 # 8. Cierre de sesión limpio en pestaña Perfil
 - tapOn:
-    text: "Perfil"
+    id: "tab-perfil"
 
 - scrollUntilVisible:
     element:

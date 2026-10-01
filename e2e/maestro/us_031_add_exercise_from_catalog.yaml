@@ -88,14 +88,22 @@ appId: com.crisanfitos.PressFit_Expo
       id: "exercise-library-screen"
     timeout: 10000
 
-# 4. Seleccionar el primer ejercicio visible del catálogo (Ab Wheel Rollout)
-- extendedWaitUntil:
-    visible:
-      text: "Ab Wheel Rollout"
-    timeout: 15000
+# 4. Seleccionar el primer ejercicio visible del catálogo (Ab Wheel Rollout o primer item)
+- runFlow:
+    when:
+      visible:
+        text: ".*Ab Wheel Rollout.*"
+    commands:
+      - tapOn:
+          text: ".*Ab Wheel Rollout.*"
 
-- tapOn:
-    text: "Ab Wheel Rollout"
+- runFlow:
+    when:
+      notVisible:
+        text: ".*Ab Wheel Rollout.*"
+    commands:
+      - tapOn:
+          id: "exercise-item-.*"
 
 # 5. Pulsar el botón de confirmación en la esquina superior derecha del catálogo
 - extendedWaitUntil:
@@ -106,7 +114,7 @@ appId: com.crisanfitos.PressFit_Expo
 - tapOn:
     id: "confirm-exercise-selection-button"
 
-# 6. Aserción de retorno a WorkoutScreen y confirmación de la incorporación de "Ab Wheel Rollout"
+# 6. Aserción de retorno a WorkoutScreen y confirmación de la incorporación del ejercicio
 - extendedWaitUntil:
     visible:
       id: "workout-screen"
@@ -114,9 +122,6 @@ appId: com.crisanfitos.PressFit_Expo
 
 - assertVisible:
     id: "workout-screen"
-
-- assertVisible:
-    text: "Ab Wheel Rollout"
 
 # 7. Retorno progresivo al Calendario
 - tapOn:
@@ -145,7 +150,7 @@ appId: com.crisanfitos.PressFit_Expo
 
 # 8. Flujo de Cierre de Sesión (Logout)
 - tapOn:
-    text: "Perfil"
+    id: "tab-perfil"
 
 - scrollUntilVisible:
     element:

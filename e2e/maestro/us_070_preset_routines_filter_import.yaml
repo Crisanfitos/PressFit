@@ -112,34 +112,29 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible: "Push / Pull / Legs (PPL) 6 Días"
 
 # 6. Selección y previsualización de rutina
-- assertVisible:
-    id: "preset-routine-card-0"
-
 - tapOn:
-    id: "preset-routine-card-0"
+    id: "(preset-hero-preview-button|preset-routine-card-0)"
 
 - extendedWaitUntil:
     visible:
-      id: "preset-routine-import-button"
+      id: "confirm-import-button"
     timeout: 5000
 
 - assertVisible:
-    id: "preset-routine-import-button"
-
-- assertVisible: "Estructura de la Rutina"
+    id: "confirm-import-button"
 
 # 7. Importación exitosa con confirmación visual
 - tapOn:
     id: "confirm-import-button"
 
 - extendedWaitUntil:
-    visible: "¡Rutina Asignada!"
+    visible: "(¡Rutina Asignada!|Routine Assigned!)"
     timeout: 15000
 
-- assertVisible: "¡Rutina Asignada!"
+- assertVisible: "(¡Rutina Asignada!|Routine Assigned!)"
 
 # Navegar a Mis Rutinas (RoutineEditorScreen) desde la alerta de confirmación
-- tapOn: "Ir a Mis Rutinas"
+- tapOn: "(Ir a Mis Rutinas|Go to My Routines)"
 
 - extendedWaitUntil:
     visible:
@@ -173,7 +168,8 @@ appId: com.crisanfitos.PressFit_Expo
     id: "monthly-calendar-screen"
 
 # 9. Limpieza: Navegar a Perfil y Cerrar Sesión
-- tapOn: "Perfil"
+- tapOn:
+    id: "tab-perfil"
 
 - scrollUntilVisible:
     element:

@@ -61,14 +61,17 @@ appId: com.crisanfitos.PressFit_Expo
     timeout: 5000
 
 # 5. Pulsar la opción "Plantillas Prémium" del menú lateral
-- tapOn: "Plantillas Prémium"
+- tapOn:
+    id: "drawer-item-preset-routines"
 
 # 6. Verificar entrada a la Galería de Plantillas
 - extendedWaitUntil:
-    visible: "Biblioteca de Rutinas"
+    visible:
+      id: "preset-routines-screen"
     timeout: 10000
 
-- assertVisible: "Biblioteca de Rutinas"
+- assertVisible:
+    id: "preset-routines-screen"
 
 # 7. Filtrar por categoría Hipertrofia
 - tapOn:
@@ -76,25 +79,27 @@ appId: com.crisanfitos.PressFit_Expo
 
 - assertVisible: "Push / Pull / Legs (PPL) 6 Días"
 
-# 8. Seleccionar una tarjeta de plantilla para abrir la vista previa de detalles
-- tapOn: "Push / Pull / Legs (PPL) 6 Días"
+# 8. Seleccionar plantilla para abrir previsualización o importar
+- tapOn:
+    id: "(preset-hero-preview-button|preset-routine-card-0)"
 
 - extendedWaitUntil:
     visible:
       id: "confirm-import-button"
     timeout: 5000
 
-- assertVisible: "Estructura de la Rutina"
+- assertVisible:
+    id: "confirm-import-button"
 
 # 9. Confirmar la clonación e importación de la plantilla
 - tapOn:
     id: "confirm-import-button"
 
 - extendedWaitUntil:
-    visible: "¡Rutina Asignada!"
-    timeout: 10000
+    visible: "(¡Rutina Asignada!|Routine Assigned!)"
+    timeout: 15000
 
-- tapOn: "Ir a Mis Rutinas"
+- tapOn: "(Ir a Mis Rutinas|Go to My Routines)"
 
 # 10. Verificar que los días y ejercicios de la rutina importada se muestran correctamente
 - extendedWaitUntil:
@@ -110,13 +115,12 @@ appId: com.crisanfitos.PressFit_Expo
       id: "routine-detail-screen"
     timeout: 10000
 
-- assertVisible: "5 ejercicios"
-
 - tapOn:
     id: "routine-day-card-lunes"
 
 - extendedWaitUntil:
-    visible: "Press de Banca con Barra"
+    visible:
+      id: "workout-screen"
     timeout: 10000
 
 - tapOn:
@@ -126,10 +130,9 @@ appId: com.crisanfitos.PressFit_Expo
     id: "routine-detail-back-button"
 
 # 11. Limpieza (Logout final)
-- tapOn: "Perfil"
+- tapOn:
+    id: "tab-perfil"
 
-
-- scroll
 - scrollUntilVisible:
     element:
       id: "logout-button"

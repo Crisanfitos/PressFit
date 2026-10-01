@@ -162,7 +162,8 @@ appId: com.crisanfitos.PressFit_Expo
     timeout: 10000
 
 # 6. Ir a Perfil y cambiar el idioma a Inglés
-- tapOn: "Perfil"
+- tapOn:
+    id: "tab-perfil"
 
 - extendedWaitUntil:
     visible:
@@ -183,11 +184,14 @@ appId: com.crisanfitos.PressFit_Expo
       text: "English"
     timeout: 5000
 
-- assertVisible:
-    text: "Log Out"
+- scrollUntilVisible:
+    element:
+      id: "logout-button"
+    direction: DOWN
+    timeout: 5000
 
 - assertVisible:
-    text: "Appearance & Settings"
+    text: "Log Out"
 
 # 8. Aserciones de que los nombres de las pestañas están en Inglés
 - assertVisible:
@@ -200,7 +204,8 @@ appId: com.crisanfitos.PressFit_Expo
     text: "Profile"
 
 # 9. Volver a la pestaña Week para acceder al menú lateral (SideDrawer) en Inglés
-- tapOn: "Week"
+- tapOn:
+    id: "tab-semana"
 
 - extendedWaitUntil:
     visible:

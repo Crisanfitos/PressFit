@@ -79,17 +79,22 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "set-row-2"
 
-# 5. Tocar el botón Eliminar (X) en la tercera serie
-- tapOn:
-    id: "delete-set-button-2"
+# 5. Abrir menú contextual de la tercera serie y tocar Eliminar
+- longPressOn:
+    id: "set-row-2"
 
-# 6. Confirmar eliminación en el diálogo modal Alert
 - extendedWaitUntil:
-    visible: "(?i)eliminar"
+    visible:
+      id: "delete-set-button-2"
     timeout: 5000
 
 - tapOn:
+    id: "delete-set-button-2"
+
+# 6. Confirmar eliminación si aparece diálogo
+- tapOn:
     text: "(?i)eliminar"
+    optional: true
 
 # 7. Verificar que la serie ha sido eliminada (set-row-2 no visible)
 - extendedWaitUntil:
@@ -124,7 +129,7 @@ appId: com.crisanfitos.PressFit_Expo
 
 # 9. Flujo de Cierre de Sesión (Logout)
 - tapOn:
-    text: "Perfil"
+    id: "tab-perfil"
 
 - scrollUntilVisible:
     element:

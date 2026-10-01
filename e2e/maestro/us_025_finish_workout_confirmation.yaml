@@ -71,8 +71,26 @@ appId: com.crisanfitos.PressFit_Expo
     timeout: 15000
 
 # 2. Pulsar "Finalizar Entrenamiento"
-- tapOn:
-    id: "finish-workout-button"
+- runFlow:
+    when:
+      visible:
+        id: "header-finish-button"
+    commands:
+      - tapOn:
+          id: "header-finish-button"
+
+- runFlow:
+    when:
+      notVisible:
+        id: "header-finish-button"
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "finish-workout-button"
+          direction: DOWN
+          timeout: 10000
+      - tapOn:
+          id: "finish-workout-button"
 
 # 3. Confirmar en el modal de alerta ("Finalizar")
 - extendedWaitUntil:

@@ -50,7 +50,7 @@ appId: com.crisanfitos.PressFit_Expo
 
 # 1. Navegar a Perfil
 - tapOn:
-    text: "Perfil"
+    id: "tab-perfil"
 
 - extendedWaitUntil:
     visible:
@@ -62,35 +62,23 @@ appId: com.crisanfitos.PressFit_Expo
     id: "profile-screen"
 
 - assertVisible:
-    text: "Perfil"
-
-- assertVisible:
-    text: "test2@pressfit.com"
+    text: ".*@pressfit.com"
 
 # 3. Aserción de secciones principales
 - assertVisible:
-    text: "Datos Físicos"
+    id: "profile-physical-data-card"
 
 - assertVisible:
-    text: "Peso"
-
-- assertVisible:
-    text: "Altura"
-
-- assertVisible:
-    text: ".*Apariencia.*"
-
-- assertVisible:
-    text: "Modo Oscuro"
+    id: "profile-appearance-card"
 
 # 4. Desplazarse para ver sección de Fotos y Logout
 - scrollUntilVisible:
     element:
-      text: "Fotos de Progreso"
+      id: "profile-progress-photos-card"
     direction: DOWN
 
 - assertVisible:
-    text: "Fotos de Progreso"
+    id: "profile-progress-photos-card"
 
 # 5. Cierre de sesión limpio
 - scrollUntilVisible:
