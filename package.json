@@ -134,6 +134,14 @@
     "test:e2e:PF-420": "npm run test:e2e:us017",
     "test:e2e:PF-421": "npm run test:e2e:us001",
     "test:e2e:PF-422": "npm run test:e2e:us024",
+    "test:e2e:PF-423": "npm run test:e2e:us006",
+    "test:e2e:PF-424": "npm run test:e2e:us016",
+    "test:e2e:PF-425": "npm run test:e2e:us020",
+    "test:e2e:PF-426": "npm run test:e2e:us032",
+    "test:e2e:PF-427": "npm run test:e2e:us033",
+    "test:e2e:PF-428": "npm run test:e2e:us044",
+    "test:e2e:PF-429": "npm run test:e2e:us063",
+    "test:e2e:PF-430": "npm run test:e2e:us069",
     "test:e2e:all": "node e2e/run-maestro.js e2e/maestro/"
   },
   "dependencies": {
