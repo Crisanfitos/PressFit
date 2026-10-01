@@ -4,11 +4,27 @@ appId: com.crisanfitos.PressFit_Expo
 - launchApp:
     clearState: true
 
+# If Expo Dev Launcher screen appears, tap on dev server
+- extendedWaitUntil:
+    visible: ".*8081.*"
+    timeout: 25000
+    optional: true
+
 - tapOn:
     text: ".*8081.*"
     optional: true
 
-# Manejar posible modal de Expo / Dev Menu
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- tapOn:
+    text: "Continue"
+    optional: true
+
 - runFlow:
     when:
       visible: ".*developer menu.*"
@@ -18,7 +34,7 @@ appId: com.crisanfitos.PressFit_Expo
 - extendedWaitUntil:
     visible:
       id: "welcome-screen"
-    timeout: 20000
+    timeout: 30000
 
 - tapOn:
     id: "login-button"
@@ -50,7 +66,16 @@ appId: com.crisanfitos.PressFit_Expo
 
 # 1. Navegar a la pestaña Progreso
 - tapOn:
-    text: "Progreso"
+    id: "tab-progreso"
+    optional: true
+
+- runFlow:
+    when:
+      notVisible:
+        id: "progress-screen"
+    commands:
+      - tapOn:
+          text: "Progreso"
 
 - extendedWaitUntil:
     visible:
@@ -98,7 +123,15 @@ appId: com.crisanfitos.PressFit_Expo
 
 # 7. Cierre de sesión limpio
 - tapOn:
-    text: "Perfil"
+    id: "tab-perfil"
+    optional: true
+
+- runFlow:
+    when:
+      notVisible:
+        id: "logout-button"
+    commands:
+      - tapOn: "Perfil"
 
 - scrollUntilVisible:
     element:
