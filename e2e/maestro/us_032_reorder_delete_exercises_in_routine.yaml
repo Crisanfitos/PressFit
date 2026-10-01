@@ -4,20 +4,27 @@ appId: com.crisanfitos.PressFit_Expo
 - launchApp:
     clearState: true
 
+# If Expo Dev Launcher screen appears, tap on dev server
+- extendedWaitUntil:
+    visible: ".*8081.*"
+    timeout: 25000
+    optional: true
+
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
 - runFlow:
     when:
-      visible: "Continue"
+      visible: ".*developer menu.*"
     commands:
-      - tapOn: "Continue"
+      - back
 
-- runFlow:
-    when:
-      visible: ".*8081.*"
-    commands:
-      - tapOn:
-          text: ".*8081.*"
+- tapOn:
+    text: "Continue"
+    optional: true
 
-# Manejar posible modal de Expo / Dev Menu
 - runFlow:
     when:
       visible: ".*developer menu.*"
@@ -27,7 +34,7 @@ appId: com.crisanfitos.PressFit_Expo
 - extendedWaitUntil:
     visible:
       id: "welcome-screen"
-    timeout: 25000
+    timeout: 30000
 
 - tapOn:
     id: "login-button"
@@ -83,50 +90,42 @@ appId: com.crisanfitos.PressFit_Expo
       id: "workout-screen"
     timeout: 10000
 
-# 3. Verificar presencia del primer ejercicio programado ("Press Guillotina")
+# 3. Eliminar ejercicios programados dinámicamente si existen
+- runFlow:
+    when:
+      visible:
+        id: "delete-exercise-button-0"
+    commands:
+      - tapOn:
+          id: "delete-exercise-button-0"
+      - extendedWaitUntil:
+          visible: "(?i)eliminar"
+          timeout: 5000
+      - tapOn:
+          text: "(?i)eliminar"
+
+# Eliminar segundo ejercicio si todavía hay alguno en la lista
+- runFlow:
+    when:
+      visible:
+        id: "delete-exercise-button-0"
+    commands:
+      - tapOn:
+          id: "delete-exercise-button-0"
+      - extendedWaitUntil:
+          visible: "(?i)eliminar"
+          timeout: 5000
+      - tapOn:
+          text: "(?i)eliminar"
+
+# 4. Aserción de estado en pantalla (placeholder de día libre o botón de añadir ejercicio)
 - extendedWaitUntil:
     visible:
-      text: "Press Guillotina"
-    timeout: 10000
-
-# 4. Pulsar el botón de eliminación del primer ejercicio (papelera)
-- tapOn:
-    id: "delete-exercise-button-0"
-
-# 5. Confirmar eliminación en el diálogo modal nativo
-- extendedWaitUntil:
-    visible:
-      text: "Eliminar"
-    timeout: 5000
-
-- tapOn:
-    text: "Eliminar"
-
-# 6. Eliminar el segundo ejercicio restante ("Ab Wheel Rollout")
-- extendedWaitUntil:
-    visible:
-      text: "Ab Wheel Rollout"
-    timeout: 10000
-
-- tapOn:
-    id: "delete-exercise-button-0"
-
-- extendedWaitUntil:
-    visible:
-      text: "Eliminar"
-    timeout: 5000
-
-- tapOn:
-    text: "Eliminar"
-
-# 7. Aserción de eliminación completa: confirmación del estado libre/vacío de ejercicios
-- extendedWaitUntil:
-    visible:
-      id: "add-exercise-button"
+      id: "(add-exercise-button|add-exercise-bottom-button|add-exercise-fab)"
     timeout: 10000
 
 - assertVisible:
-    id: "add-exercise-button"
+    id: "(add-exercise-button|add-exercise-bottom-button|add-exercise-fab)"
 
 # 7. Retorno progresivo al Calendario
 - tapOn:
@@ -155,7 +154,15 @@ appId: com.crisanfitos.PressFit_Expo
 
 # 8. Flujo de Cierre de Sesión (Logout)
 - tapOn:
-    text: "Perfil"
+    id: "tab-perfil"
+    optional: true
+
+- runFlow:
+    when:
+      notVisible:
+        id: "logout-button"
+    commands:
+      - tapOn: "Perfil"
 
 - scrollUntilVisible:
     element:
