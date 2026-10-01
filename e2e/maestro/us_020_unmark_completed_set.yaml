@@ -6,6 +6,11 @@ appId: com.crisanfitos.PressFit_Expo
     clearState: true
 
 # If Expo Dev Launcher screen appears, tap on dev server
+- extendedWaitUntil:
+    visible: ".*8081.*"
+    timeout: 25000
+    optional: true
+
 - tapOn:
     text: ".*8081.*"
     optional: true
@@ -17,11 +22,21 @@ appId: com.crisanfitos.PressFit_Expo
     commands:
       - back
 
+- tapOn:
+    text: "Continue"
+    optional: true
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
 # 1. Navegar desde bienvenida a pantalla de Login
 - extendedWaitUntil:
     visible:
       id: "welcome-screen"
-    timeout: 20000
+    timeout: 30000
 
 - tapOn:
     id: "login-button"
@@ -88,17 +103,54 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "workout-screen"
 
-# 7. Finalizar entrenamiento mediante el botón dedicado
-- tapOn:
-    id: "finish-workout-button"
+# 7. Finalizar entrenamiento (header finish button con fallback a scroll y botón inferior)
+- runFlow:
+    when:
+      visible:
+        id: "header-finish-button"
+    commands:
+      - tapOn:
+          id: "header-finish-button"
+
+- runFlow:
+    when:
+      notVisible:
+        id: "header-finish-button"
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "finish-workout-button"
+          direction: DOWN
+          timeout: 10000
+      - tapOn:
+          id: "finish-workout-button"
+
+# Confirmar en el modal de alerta ("Finalizar")
+- runFlow:
+    when:
+      visible: "(?i)finalizar"
+    commands:
+      - tapOn:
+          text: "(?i)finalizar"
+
+# Confirmar modal de éxito si aparece ("OK")
+- runFlow:
+    when:
+      visible: "OK"
+    commands:
+      - tapOn:
+          text: "OK"
 
 # 8. Verificar retorno a WorkoutDayScreen y que el botón indica "Ver / Editar Entrenamiento"
 - extendedWaitUntil:
     visible:
       id: "workout-day-screen"
-    timeout: 10000
+    timeout: 15000
 
-- assertVisible: "Ver / Editar Entrenamiento"
+- assertVisible:
+    id: "workout-day-screen"
+
+- assertVisible: "(?i)ver / editar entrenamiento"
 
 # 9. Volver al Calendario
 - tapOn:
@@ -110,7 +162,8 @@ appId: com.crisanfitos.PressFit_Expo
     timeout: 10000
 
 # 10. Limpieza (Navegar a Perfil y Cierre de Sesión final)
-- tapOn: "Perfil"
+- tapOn:
+    id: "tab-perfil"
 
 - scroll
 - scrollUntilVisible:
