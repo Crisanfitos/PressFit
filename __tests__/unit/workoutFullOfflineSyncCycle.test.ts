@@ -33,6 +33,7 @@ describe('Workout Full Offline & Sync Cycle Integration (PF-431)', () => {
                 rutina_diaria_id: 'workout-full-cycle-1',
                 ejercicio_id: 'ex-press-banca',
                 orden_ejecucion: 1,
+                tipo_peso: 'total',
                 series: [
                     {
                         id: 'set-1',
