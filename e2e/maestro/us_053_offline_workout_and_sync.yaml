@@ -5,10 +5,18 @@ appId: com.crisanfitos.PressFit_Expo
 - launchApp:
     clearState: true
 
-# If Expo Dev Launcher screen appears, tap on dev server
-- tapOn:
-    text: ".*8081.*"
-    optional: true
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+
+- runFlow:
+    when:
+      visible: ".*8081.*"
+    commands:
+      - tapOn:
+          text: ".*8081.*"
 
 # Manejar posible modal de Expo / Dev Menu
 - runFlow:
@@ -17,23 +25,11 @@ appId: com.crisanfitos.PressFit_Expo
     commands:
       - back
 
-- tapOn:
-    text: "Continue"
-    optional: true
-
-- tapOn:
-    text: "Continue"
-    optional: true
-
 # 1. Navegar desde bienvenida a pantalla de Login
 - extendedWaitUntil:
     visible:
       id: "welcome-screen"
-    timeout: 60000
-
-- tapOn:
-    text: "Continue"
-    optional: true
+    timeout: 30000
 
 - tapOn:
     id: "login-button"

@@ -2,12 +2,21 @@ appId: com.crisanfitos.PressFit_Expo
 ---
 # us_001_welcome_screen.yaml — US-001: Verificación visual de pantalla de Bienvenida (WelcomeScreen)
 
-- launchApp
+- launchApp:
+    clearState: true
 
-# If Expo Dev Launcher screen appears, tap on dev server
-- tapOn:
-    text: ".*8081.*"
-    optional: true
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+
+- runFlow:
+    when:
+      visible: ".*8081.*"
+    commands:
+      - tapOn:
+          text: ".*8081.*"
 
 # If Expo Developer Menu onboarding modal appears, dismiss it with back button
 - runFlow:
@@ -20,7 +29,7 @@ appId: com.crisanfitos.PressFit_Expo
 - extendedWaitUntil:
     visible:
       id: "welcome-screen"
-    timeout: 15000
+    timeout: 25000
 
 # Verificación de elementos visuales principales
 - assertVisible:
