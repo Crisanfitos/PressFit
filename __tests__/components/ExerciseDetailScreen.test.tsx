@@ -3,11 +3,14 @@ import { render } from '@testing-library/react-native';
 import ExerciseDetailScreen from '../../src/screens/ExerciseDetailScreen';
 import { useExerciseDetailController } from '../../src/controllers/useExerciseDetailController';
 import { PersonalRecordService } from '../../src/services/PersonalRecordService';
+import { AuthContext } from '../../src/context/AuthContext';
 
 jest.mock('../../src/controllers/useExerciseDetailController');
 jest.mock('../../src/services/ExerciseService', () => ({
     ExerciseService: {
         deleteCustomExercise: jest.fn().mockResolvedValue({ data: true, error: null }),
+        getPersonalNote: jest.fn().mockResolvedValue({ data: null, error: null }),
+        savePersonalNote: jest.fn().mockResolvedValue({ error: null }),
     },
 }));
 jest.mock('../../src/services/PersonalRecordService', () => ({
@@ -195,6 +198,39 @@ describe('ExerciseDetailScreen Component (RNTL)', () => {
         );
 
         expect(queryByTestId('delete-custom-exercise-button')).toBeNull();
+    });
+
+    it('renders personal note button in exercise detail (PF-444)', async () => {
+        const { getByTestId } = await render(
+            <ExerciseDetailScreen navigation={mockNavigation} route={mockRoute} />
+        );
+
+        expect(getByTestId('exercise-detail-notes-section')).toBeTruthy();
+        expect(getByTestId('add-note-button')).toBeTruthy();
+    });
+
+    it('renders sparkline progression mini-chart when exercise history has 2 or more sessions (PF-444)', async () => {
+        const mockHistory = [
+            { fecha_dia: '2026-10-01', peso_sesion: 80, reps_totales: 30, volumen_sesion: 2400 },
+            { fecha_dia: '2026-10-08', peso_sesion: 82.5, reps_totales: 28, volumen_sesion: 2310 },
+            { fecha_dia: '2026-10-15', peso_sesion: 85, reps_totales: 32, volumen_sesion: 2720 },
+        ];
+        (PersonalRecordService.getExerciseHistory as jest.Mock).mockResolvedValue({
+            data: mockHistory,
+            error: null,
+        });
+
+        const { getByTestId, findByTestId } = await render(
+            <AuthContext.Provider value={{ user: { id: 'test-user-123' } } as any}>
+                <ExerciseDetailScreen navigation={mockNavigation} route={mockRoute} />
+            </AuthContext.Provider>
+        );
+
+        expect(await findByTestId('exercise-detail-sparkline-section')).toBeTruthy();
+        expect(getByTestId('exercise-sparkline-container')).toBeTruthy();
+        expect(getByTestId('sparkline-col-0')).toBeTruthy();
+        expect(getByTestId('sparkline-col-1')).toBeTruthy();
+        expect(getByTestId('sparkline-col-2')).toBeTruthy();
     });
 });
 

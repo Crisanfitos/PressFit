@@ -28,6 +28,7 @@ const { width } = Dimensions.get('window');
 
 import { extractYouTubeVideoId } from '../utils/youtubeUtils';
 import { CreateCustomExerciseModal } from '../components/CreateCustomExerciseModal';
+import { PersonalNoteButton } from '../components/PersonalNoteButton';
 
 type ExerciseDetailScreenProps = {
     route: any;
@@ -187,6 +188,46 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                     textAlign: 'center',
                     textTransform: 'uppercase',
                     letterSpacing: 0.5,
+                },
+                sparklineContainer: {
+                    backgroundColor: colors.surface,
+                    borderRadius: 12,
+                    padding: 16,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    marginTop: 8,
+                },
+                sparklineRow: {
+                    flexDirection: 'row',
+                    alignItems: 'flex-end',
+                    justifyContent: 'space-between',
+                    height: 100,
+                    paddingTop: 12,
+                },
+                sparklineCol: {
+                    flex: 1,
+                    alignItems: 'center',
+                    height: '100%',
+                    justifyContent: 'flex-end',
+                },
+                sparklineValText: {
+                    fontSize: 11,
+                    fontWeight: 'bold',
+                    marginBottom: 4,
+                },
+                sparklineBarWrapper: {
+                    width: 14,
+                    flex: 1,
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                },
+                sparklineBar: {
+                    width: 12,
+                    borderRadius: 6,
+                },
+                sparklineDateText: {
+                    fontSize: 10,
+                    marginTop: 6,
                 },
             }),
         [colors]
@@ -358,6 +399,12 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                     </View>
                 </View>
 
+                {/* Technical / Personal Notes (PF-444) */}
+                <View style={styles.infoSection} testID="exercise-detail-notes-section">
+                    <Text style={styles.sectionTitle}>📝 {t('exerciseDetail.notes', 'Notas de Ejecución')}</Text>
+                    <PersonalNoteButton exerciseId={exercise.id} />
+                </View>
+
                 {/* Instructions */}
                 <View style={styles.infoSection}>
                     <Text style={styles.sectionTitle}>{t('exerciseDetail.instructions', 'Instrucciones')}</Text>
@@ -388,6 +435,58 @@ const ExerciseDetailScreen: React.FC<ExerciseDetailScreenProps> = ({ route, navi
                                     {new Date(personalRecord.fecha_dia).toLocaleDateString(i18n.language)}
                                 </Text>
                             </View>
+                        </View>
+                    </View>
+                )}
+
+                {/* Mini-Gráfico de Evolución de Carga (PF-444) */}
+                {exerciseHistory.length > 1 && (
+                    <View style={styles.infoSection} testID="exercise-detail-sparkline-section">
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                            <Text style={styles.sectionTitle}>📈 {t('exerciseDetail.progression', 'Evolución de Cargas')}</Text>
+                            <Text style={{ fontSize: 12, color: colors.textSecondary }}>
+                                {t('exerciseDetail.lastSessions', 'Últimas 5 sesiones')}
+                            </Text>
+                        </View>
+                        <View style={styles.sparklineContainer} testID="exercise-sparkline-container">
+                            {(() => {
+                                const last5 = exerciseHistory.slice(0, 5).reverse();
+                                const maxWeight = Math.max(...last5.map((s) => s.peso_sesion || 0), 1);
+                                const minWeight = Math.min(...last5.map((s) => s.peso_sesion || 0), 0);
+                                const range = maxWeight - minWeight || 1;
+
+                                return (
+                                    <View style={styles.sparklineRow}>
+                                        {last5.map((entry, idx) => {
+                                            const weight = entry.peso_sesion || 0;
+                                            const heightPct = Math.max(20, Math.min(100, Math.round(((weight - minWeight) / range) * 80 + 20)));
+                                            const isLatest = idx === last5.length - 1;
+
+                                            return (
+                                                <View key={idx} style={styles.sparklineCol} testID={`sparkline-col-${idx}`}>
+                                                    <Text style={[styles.sparklineValText, { color: isLatest ? colors.primary : colors.textSecondary }]}>
+                                                        {weight}
+                                                    </Text>
+                                                    <View style={styles.sparklineBarWrapper}>
+                                                        <View
+                                                            style={[
+                                                                styles.sparklineBar,
+                                                                {
+                                                                    height: `${heightPct}%`,
+                                                                    backgroundColor: isLatest ? colors.primary : (colors.surfaceHighlight || colors.border),
+                                                                },
+                                                            ]}
+                                                        />
+                                                    </View>
+                                                    <Text style={[styles.sparklineDateText, { color: colors.textSecondary }]}>
+                                                        {new Date(entry.fecha_dia).toLocaleDateString(i18n.language, { day: 'numeric', month: 'numeric' })}
+                                                    </Text>
+                                                </View>
+                                            );
+                                        })}
+                                    </View>
+                                );
+                            })()}
                         </View>
                     </View>
                 )}
