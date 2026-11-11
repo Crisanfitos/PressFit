@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import { NetworkService, NetworkState } from './NetworkService';
 import { ServiceResponse } from '../types/models';
+import { supabase } from '../lib/supabase';
 
 export type SyncOperationType =
     | 'WORKOUT_START'
@@ -43,6 +44,38 @@ export interface TimestampedEntity {
     timestamp?: number | null;
     [key: string]: unknown;
 }
+
+export const defaultSyncExecutor = async (op: PendingSyncOperation): Promise<boolean> => {
+    try {
+        if (op.type === 'SET_UPSERT') {
+            const payload = op.payload as { setId: string; dbUpdates: any };
+            const { error } = await supabase
+                .from('series')
+                .update(payload.dbUpdates)
+                .eq('id', payload.setId);
+            return !error;
+        }
+        if (op.type === 'WORKOUT_COMPLETE') {
+            const payload = op.payload as { workoutId: string; customEndTime?: string; durationMinutes?: number };
+            const { error } = await supabase
+                .from('rutinas_diarias')
+                .update({ completada: true, hora_fin: payload.customEndTime })
+                .eq('id', payload.workoutId);
+            return !error;
+        }
+        if (op.type === 'SET_DELETE') {
+            const payload = op.payload as { setId: string };
+            const { error } = await supabase
+                .from('series')
+                .delete()
+                .eq('id', payload.setId);
+            return !error;
+        }
+        return true;
+    } catch {
+        return false;
+    }
+};
 
 export const SYNC_QUEUE_STORAGE_KEY = '@pressfit_sync_queue';
 export const DEAD_LETTER_QUEUE_STORAGE_KEY = '@pressfit_dead_letter_queue';
@@ -338,7 +371,7 @@ export const SyncService = {
      * Listen to NetworkService status changes and trigger processQueue when internet becomes reachable
      */
     initNetworkListener(
-        executorFn?: (op: PendingSyncOperation) => Promise<boolean>
+        executorFn: (op: PendingSyncOperation) => Promise<boolean> = defaultSyncExecutor
     ): () => void {
         const unsubscribe = NetworkService.addNetworkListener((state: NetworkState) => {
             if (state.isConnected && !state.isOffline) {
