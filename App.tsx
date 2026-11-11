@@ -10,6 +10,7 @@ import { SentryService } from './src/services/SentryService';
 import { OfflineBanner } from './src/components/OfflineBanner';
 import { checkActiveRestTimer, cancelTimerNotification } from './src/services/TimerNotificationService';
 import { OfflineStorageService } from './src/services/OfflineStorageService';
+import { SyncService } from './src/services/SyncService';
 
 SentryService.init();
 
@@ -22,6 +23,11 @@ function App() {
         cancelTimerNotification().catch(() => { });
       }
     }).catch(() => { });
+
+    const unsubscribeSync = SyncService.initNetworkListener();
+    return () => {
+      unsubscribeSync();
+    };
   }, []);
 
   return (
