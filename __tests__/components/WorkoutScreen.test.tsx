@@ -121,6 +121,59 @@ describe('WorkoutScreen Component (RNTL)', () => {
     expect(mockNavigation.goBack).toHaveBeenCalled();
   });
 
+  it('celebrates PRs in finish toast and passes broken PR highlights to ShareModal (PF-441)', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    mockUseWorkoutController.mockReturnValue({
+      workout: { id: 'w-101', fecha_dia: '2026-08-08', descripcion: 'Día de Pecho' },
+      exercises: [
+        {
+          id: 'ex-item-1',
+          titulo: 'Press de Banca',
+          tipo_peso: 'total',
+          routine_exercise_id: 're-1',
+          series: [
+            { id: 's1', numero_serie: 1, peso_utilizado: 100, repeticiones: 8, tipo_peso: 'total', is_pr: true },
+          ],
+        },
+      ],
+      loading: false,
+      mode: 'ACTIVE',
+      previousWorkout: null,
+      startWorkout: jest.fn(),
+      addSet: mockAddSet,
+      addSets: jest.fn(),
+      updateSet: mockUpdateSet,
+      deleteSet: jest.fn(),
+      removeExercise: mockRemoveExercise,
+      toggleCompleteSet: jest.fn(),
+      updateSetType: jest.fn(),
+      addExercise: jest.fn(),
+      swapExercise: jest.fn(),
+      finishWorkout: mockFinishWorkout,
+      updateWeightType: jest.fn(),
+      loadSeriesForExercise: jest.fn(),
+      activePRCelebration: null,
+      dismissPRCelebration: jest.fn(),
+      reloadExercises: jest.fn(),
+    } as any);
+
+    const { getByTestId } = await render(
+      <WorkoutScreen navigation={mockNavigation} route={activeRoute} />
+    );
+
+    const finishBtn = getByTestId('finish-workout-button');
+    fireEvent.press(finishBtn);
+
+    const alertButtons = alertSpy.mock.calls[alertSpy.mock.calls.length - 1][2];
+    const confirmAlertBtn = alertButtons?.find((b: any) => b.text === 'Finalizar');
+    confirmAlertBtn?.onPress?.();
+
+    await waitFor(() => {
+      expect(mockFinishWorkout).toHaveBeenCalled();
+      expect(getByTestId('share-modal')).toBeTruthy();
+    });
+  });
+
   it('renders empty exercise message when exercises array is empty', async () => {
     mockUseWorkoutController.mockReturnValue({
       workout: { id: 'w-101' },

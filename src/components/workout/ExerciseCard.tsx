@@ -40,7 +40,11 @@ export interface ExerciseCardProps {
     onAddSet: (exerciseId: string) => void;
     onSwapExercise?: (exercise: any) => void;
     onOpenPlateCalculator?: (weight: number, setId?: string, exerciseId?: string) => void;
-    onToggleCompleteSet?: (setId: string, isCompleted: boolean) => void;
+    onToggleCompleteSet?: (
+        setId: string,
+        isCompleted: boolean,
+        overrideValues?: { peso_utilizado?: number; repeticiones?: number }
+    ) => void;
     getGhostValue: (exerciseId: string, setNumber: number, field: 'weight' | 'reps' | 'rpe') => string | null;
     weightUnit?: WeightUnit;
 }

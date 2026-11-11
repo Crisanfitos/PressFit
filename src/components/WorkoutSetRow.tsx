@@ -53,7 +53,11 @@ export interface WorkoutSetRowProps {
     savedTimerSetIds?: Set<string>;
     onOpenPlateCalculator?: (weight: number, setId: string, exerciseId?: string) => void;
     onSelectSetType?: (setId: string, type: SetType) => void;
-    onToggleCompleteSet?: (setId: string, isCompleted: boolean) => void;
+    onToggleCompleteSet?: (
+        setId: string,
+        isCompleted: boolean,
+        overrideValues?: { peso_utilizado?: number; repeticiones?: number }
+    ) => void;
     onSetChange: (setId: string, field: string, value: string) => void;
     onDeleteSet?: (setId: string, exerciseId: string) => void;
     onDuplicateSet?: (setId: string, exerciseId: string) => void;
@@ -138,9 +142,13 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
             const currentWeight = Number(set.peso_utilizado || 0);
             const currentReps = Number(set.repeticiones || 0);
 
+            let effectiveWeight = currentWeight;
+            let effectiveReps = currentReps;
+
             if (currentWeight === 0 && ghostWeight && !isBodyweight) {
                 const parsedGhostWeight = parseFloat(ghostWeight.replace(/[^0-9.]/g, ''));
                 if (!isNaN(parsedGhostWeight) && parsedGhostWeight > 0) {
+                    effectiveWeight = parsedGhostWeight;
                     onSetChange(set.id, 'peso_utilizado', String(parsedGhostWeight));
                 }
             }
@@ -148,6 +156,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
             if (currentReps === 0 && ghostReps) {
                 const parsedGhostReps = parseInt(ghostReps.replace(/[^0-9]/g, ''), 10);
                 if (!isNaN(parsedGhostReps) && parsedGhostReps > 0) {
+                    effectiveReps = parsedGhostReps;
                     onSetChange(set.id, 'repeticiones', String(parsedGhostReps));
                 }
             }
