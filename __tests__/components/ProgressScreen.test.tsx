@@ -46,4 +46,22 @@ describe('ProgressScreen Component (RNTL)', () => {
         const chevrons = getAllByTestId('icon-arrow-forward-ios');
         expect(chevrons.length).toBe(5);
     });
+
+    it('renders interactive timeframe selector chips and updates selection (PF-439)', async () => {
+        const { getByTestId, getByText } = await render(
+            <ProgressScreen navigation={mockNavigation} />
+        );
+
+        expect(getByTestId('progress-timeframe-selector')).toBeTruthy();
+        expect(getByTestId('progress-timeframe-1M')).toBeTruthy();
+        expect(getByTestId('progress-timeframe-3M')).toBeTruthy();
+        expect(getByTestId('progress-timeframe-6M')).toBeTruthy();
+        expect(getByTestId('progress-timeframe-1Y')).toBeTruthy();
+        expect(getByTestId('progress-timeframe-ALL')).toBeTruthy();
+
+        // Switch timeframe to 3M
+        const chip3M = getByTestId('progress-timeframe-3M');
+        fireEvent.press(chip3M);
+        expect(getByText('3M')).toBeTruthy();
+    });
 });

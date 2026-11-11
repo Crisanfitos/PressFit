@@ -1,16 +1,24 @@
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { useProgressController } from '../controllers/useProgressController';
 import { PRGlowCard } from '../components/history/PRGlowCard';
 import { WeeklyLoadChart } from '../components/history/WeeklyLoadChart';
-import { findLatestPRSet, buildDailyLoad } from '../utils/progressHighlights';
+import {
+    findLatestPRSet,
+    buildDailyLoad,
+    filterSessionsByTimeframe,
+    type Timeframe,
+} from '../utils/progressHighlights';
 import { ShareService } from '../services/ShareService';
 import { LogService } from '../services/LogService';
+
+const TIMEFRAME_STORAGE_KEY = '@pressfit:progress_timeframe';
 
 type ProgressScreenProps = {
     navigation: any;
@@ -31,12 +39,33 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
     const user = authContext?.user;
     const { weeklyStats, fetchWeeklyProgress } = useProgressController(user?.id);
 
+    const [timeframe, setTimeframe] = useState<Timeframe>('1M');
+
     useEffect(() => {
         fetchWeeklyProgress();
     }, [fetchWeeklyProgress]);
 
-    const latestPR = useMemo(() => findLatestPRSet(weeklyStats), [weeklyStats]);
-    const dailyLoad = useMemo(() => buildDailyLoad(weeklyStats), [weeklyStats]);
+    useEffect(() => {
+        AsyncStorage.getItem(TIMEFRAME_STORAGE_KEY)
+            .then((saved) => {
+                if (saved && ['1M', '3M', '6M', '1Y', 'ALL'].includes(saved)) {
+                    setTimeframe(saved as Timeframe);
+                }
+            })
+            .catch(() => {});
+    }, []);
+
+    const handleSelectTimeframe = (tf: Timeframe) => {
+        setTimeframe(tf);
+        AsyncStorage.setItem(TIMEFRAME_STORAGE_KEY, tf).catch(() => {});
+    };
+
+    const filteredSessions = useMemo(() => {
+        return filterSessionsByTimeframe(weeklyStats, timeframe);
+    }, [weeklyStats, timeframe]);
+
+    const latestPR = useMemo(() => findLatestPRSet(filteredSessions), [filteredSessions]);
+    const dailyLoad = useMemo(() => buildDailyLoad(filteredSessions), [filteredSessions]);
 
     const handleSharePR = async () => {
         if (!latestPR) return;
@@ -66,14 +95,37 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
             StyleSheet.create({
                 container: { flex: 1, backgroundColor: colors.background },
                 header: {
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 16,
+                    paddingHorizontal: 16,
+                    paddingTop: 12,
                     paddingBottom: 12,
                     borderBottomWidth: 1,
                     borderBottomColor: colors.border,
                 },
-                headerText: { fontSize: 18, fontWeight: 'bold', color: colors.text },
+                headerText: { fontSize: 20, fontWeight: 'bold', color: colors.text, textAlign: 'center', marginBottom: 10 },
+                timeframeRow: {
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    gap: 8,
+                },
+                timeframeChip: {
+                    paddingVertical: 6,
+                    paddingHorizontal: 14,
+                    borderRadius: 20,
+                    backgroundColor: colors.surface,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                },
+                timeframeChipActive: {
+                    backgroundColor: colors.primary,
+                    borderColor: colors.primary,
+                },
+                timeframeText: {
+                    fontSize: 12,
+                    fontWeight: '700',
+                },
+                timeframeTextActive: {
+                    color: '#FFFFFF',
+                },
                 scrollView: { padding: 16 },
                 progressItem: {
                     flexDirection: 'row',
@@ -115,11 +167,33 @@ const ProgressScreen: React.FC<ProgressScreenProps> = ({ navigation }) => {
         <SafeAreaView style={styles.container} testID="progress-screen">
             <View style={styles.header}>
                 <Text style={styles.headerText}>{t('progress.title')}</Text>
+                <View style={styles.timeframeRow} testID="progress-timeframe-selector">
+                    {(['1M', '3M', '6M', '1Y', 'ALL'] as Timeframe[]).map((tf) => {
+                        const active = timeframe === tf;
+                        return (
+                            <TouchableOpacity
+                                key={tf}
+                                testID={`progress-timeframe-${tf}`}
+                                style={[styles.timeframeChip, active && styles.timeframeChipActive]}
+                                onPress={() => handleSelectTimeframe(tf)}
+                            >
+                                <Text
+                                    style={[
+                                        styles.timeframeText,
+                                        active ? styles.timeframeTextActive : { color: colors.textSecondary },
+                                    ]}
+                                >
+                                    {tf === 'ALL' ? t('common.all', 'Todo') : tf}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
             </View>
 
             <ScrollView style={styles.scrollView}>
                 {latestPR && <PRGlowCard pr={latestPR} onPressShare={handleSharePR} />}
-                {(weeklyStats?.length || 0) > 0 && <WeeklyLoadChart bars={dailyLoad} />}
+                {(filteredSessions?.length || 0) > 0 && <WeeklyLoadChart bars={dailyLoad} />}
                 {progressItems.map((item, index) => (
                     <TouchableOpacity
                         key={index}

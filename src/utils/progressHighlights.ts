@@ -165,4 +165,35 @@ export function buildDailyLoad(
     return bars;
 }
 
-export default { findLatestPRSet, summarizeSession, buildDailyLoad };
+export type Timeframe = '1M' | '3M' | '6M' | '1Y' | 'ALL';
+
+/**
+ * Filters workout sessions by a relative timeframe from now.
+ */
+export function filterSessionsByTimeframe(
+    sessions: WorkoutSession[] | null | undefined,
+    timeframe: Timeframe,
+    now = new Date()
+): WorkoutSession[] {
+    if (!sessions || sessions.length === 0) return [];
+    if (timeframe === 'ALL') return sessions;
+
+    const daysMap: Record<Exclude<Timeframe, 'ALL'>, number> = {
+        '1M': 30,
+        '3M': 90,
+        '6M': 180,
+        '1Y': 365,
+    };
+
+    const maxDays = daysMap[timeframe];
+    const cutoffMs = now.getTime() - maxDays * 24 * 60 * 60 * 1000;
+
+    return sessions.filter((s) => {
+        const ref = s.fecha_dia || s.hora_fin || s.hora_inicio;
+        if (!ref) return false;
+        const d = new Date(ref as string);
+        return !Number.isNaN(d.getTime()) && d.getTime() >= cutoffMs;
+    });
+}
+
+export default { findLatestPRSet, summarizeSession, buildDailyLoad, filterSessionsByTimeframe };

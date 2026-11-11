@@ -2,6 +2,7 @@ import {
     findLatestPRSet,
     summarizeSession,
     buildDailyLoad,
+    filterSessionsByTimeframe,
 } from '../../../src/utils/progressHighlights';
 import type { WorkoutSession } from '../../../src/services/HistoryService';
 
@@ -74,5 +75,42 @@ describe('progressHighlights (PF-396)', () => {
         expect(bars[6].workouts).toBe(1);
         expect(bars[0].tonnageKg).toBe(0);
         expect(bars).toHaveLength(7);
+    });
+
+    describe('filterSessionsByTimeframe (PF-439)', () => {
+        const fakeNow = new Date('2026-10-01T12:00:00Z');
+
+        it('returns all sessions when timeframe is ALL', () => {
+            const sessions = [
+                session({ fecha_dia: '2026-09-25' }),
+                session({ fecha_dia: '2025-01-01' }),
+            ];
+            expect(filterSessionsByTimeframe(sessions, 'ALL', fakeNow)).toHaveLength(2);
+        });
+
+        it('filters correctly for 1M (last 30 days)', () => {
+            const sessions = [
+                session({ fecha_dia: '2026-09-20' }), // 11 days ago -> kept
+                session({ fecha_dia: '2026-08-01' }), // 61 days ago -> dropped
+            ];
+            const filtered = filterSessionsByTimeframe(sessions, '1M', fakeNow);
+            expect(filtered).toHaveLength(1);
+            expect(filtered[0].fecha_dia).toBe('2026-09-20');
+        });
+
+        it('filters correctly for 3M (last 90 days)', () => {
+            const sessions = [
+                session({ fecha_dia: '2026-08-01' }), // 61 days ago -> kept
+                session({ fecha_dia: '2026-05-01' }), // ~150 days ago -> dropped
+            ];
+            const filtered = filterSessionsByTimeframe(sessions, '3M', fakeNow);
+            expect(filtered).toHaveLength(1);
+            expect(filtered[0].fecha_dia).toBe('2026-08-01');
+        });
+
+        it('returns empty array when input is null or empty', () => {
+            expect(filterSessionsByTimeframe(null, '1M', fakeNow)).toEqual([]);
+            expect(filterSessionsByTimeframe([], '1M', fakeNow)).toEqual([]);
+        });
     });
 });
