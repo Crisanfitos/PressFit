@@ -77,7 +77,11 @@ export interface UseWorkoutSetsReturn {
     addSet: (exerciseId: string, setType?: SetType) => Promise<void>;
     addSets: (exerciseId: string, count?: number, setType?: SetType) => Promise<void>;
     updateSet: (setId: string, field: string, value: string | number | boolean | SetType | null) => Promise<void>;
-    toggleCompleteSet: (setId: string, isCompleted: boolean) => Promise<void>;
+    toggleCompleteSet: (
+        setId: string,
+        isCompleted: boolean,
+        overrideValues?: { peso_utilizado?: number; repeticiones?: number }
+    ) => Promise<void>;
     updateSetType: (setId: string, newType: SetType) => Promise<void>;
     deleteSet: (setId: string, exerciseId: string) => Promise<void>;
     duplicateSet: (setId: string, exerciseId: string) => Promise<void>;
@@ -364,7 +368,11 @@ export const useWorkoutSets = ({
         }
     }, []);
 
-    const toggleCompleteSet = useCallback(async (setId: string, isCompleted: boolean) => {
+    const toggleCompleteSet = useCallback(async (
+        setId: string,
+        isCompleted: boolean,
+        overrideValues?: { peso_utilizado?: number; repeticiones?: number }
+    ) => {
         const canEdit = modeRef.current === 'ACTIVE' || modeRef.current === 'PREVIEW' || isEditingTemplateRef.current;
         if (!canEdit) return;
 
@@ -385,9 +393,16 @@ export const useWorkoutSets = ({
             }
 
             if (targetEx && targetSet) {
+                const effectiveWeight = overrideValues?.peso_utilizado !== undefined
+                    ? overrideValues.peso_utilizado
+                    : (targetSet.peso_utilizado || 0);
+                const effectiveReps = overrideValues?.repeticiones !== undefined
+                    ? overrideValues.repeticiones
+                    : (targetSet.repeticiones || 0);
+
                 const prResult = await onCheckPRRef.current(
                     { id: targetEx.id, titulo: targetEx.titulo },
-                    { id: targetSet.id, peso_utilizado: targetSet.peso_utilizado, repeticiones: targetSet.repeticiones }
+                    { id: targetSet.id, peso_utilizado: effectiveWeight, repeticiones: effectiveReps }
                 );
                 isPR = prResult.isPR;
             }

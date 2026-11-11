@@ -160,14 +160,29 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                     }, 0);
                     const totalSetsCount = exercises.reduce((acc: number, ex: any) => acc + (ex.series || ex.sets || []).length, 0);
 
+                    const brokenPrList = exercises.flatMap((ex: any) =>
+                        (ex.series || ex.sets || [])
+                            .filter((s: any) => Boolean(s.is_pr))
+                            .map((s: any) => ({
+                                exerciseTitle: ex.titulo || ex.nombre || '',
+                                metric: `${s.peso || s.peso_utilizado || 0} kg`,
+                                type: 'weight' as const,
+                            }))
+                    );
+
                     const success = await finishWorkout();
                     state.setSaving(false);
                     if (success) {
+                        const prCount = brokenPrList.length;
                         if (alertContext?.showToast) {
                             alertContext.showToast({
                                 type: 'success',
-                                title: t('workout.completedWorkout', 'Entrenamiento Completado'),
-                                message: t('workout.workoutSavedSuccessfully', 'Entrenamiento guardado con éxito'),
+                                title: prCount > 0
+                                    ? `🔥 ${t('workout.completedWorkout', 'Entrenamiento Completado')} (${prCount} ${prCount === 1 ? 'PR' : 'PRs'})`
+                                    : t('workout.completedWorkout', 'Entrenamiento Completado'),
+                                message: prCount > 0
+                                    ? t('workout.workoutWithPRsSaved', '¡Felicidades por tus nuevos récords personales!')
+                                    : t('workout.workoutSavedSuccessfully', 'Entrenamiento guardado con éxito'),
                                 position: 'top',
                                 duration: 8000,
                             });
@@ -182,6 +197,8 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                             completedSets: totalSetsCount,
                             totalVolume,
                             totalVolumeKg: totalVolume,
+                            personalRecords: brokenPrList,
+                            prs: brokenPrList,
                             userName: user?.user_metadata?.full_name || user?.email?.split('@')[0] || undefined,
                         };
                         setShareCardData(cardData);
