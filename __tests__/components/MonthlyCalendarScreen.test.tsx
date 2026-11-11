@@ -60,4 +60,42 @@ describe('MonthlyCalendarScreen Component (RNTL)', () => {
             expect(queryByTestId('status-legend')).toBeNull();
         });
     });
+
+    it('navigates to WorkoutDay when a future day is pressed (PF-436)', async () => {
+        const { findByTestId, getAllByTestId } = await render(
+            <AuthContext.Provider value={{ user: { id: 'user-1' } } as any}>
+                <MonthlyCalendarScreen navigation={mockNavigation} />
+            </AuthContext.Provider>
+        );
+
+        // Switch to monthly view to see full month cells
+        const monthlyToggle = await findByTestId('toggle-monthly-view');
+        fireEvent.press(monthlyToggle);
+
+        // Wait for monthly grid to render
+        await waitFor(() => {
+            expect(getAllByTestId('calendar-day-future').length).toBeGreaterThan(0);
+        });
+
+        const futureDays = getAllByTestId('calendar-day-future');
+        fireEvent.press(futureDays[0]);
+        expect(mockNavigation.navigate).toHaveBeenCalledWith(
+            'WorkoutDay',
+            expect.objectContaining({
+                routineId: 'r1',
+                isToday: false,
+            })
+        );
+    });
+
+    it('displays dynamic scheduled completion text in weekly list header (PF-436)', async () => {
+        const { findByText } = await render(
+            <AuthContext.Provider value={{ user: { id: 'user-1' } } as any}>
+                <MonthlyCalendarScreen navigation={mockNavigation} />
+            </AuthContext.Provider>
+        );
+
+        // Should render "X de Y completadas" with dynamic counts
+        expect(await findByText(/\d+ de \d+ completadas/i)).toBeTruthy();
+    });
 });
