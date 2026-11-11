@@ -134,6 +134,31 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
         if (isCompleted) {
             promptUnlockConfirmation();
         } else {
+            // Smart Ghost Completion (PF-438)
+            const currentWeight = Number(set.peso_utilizado || 0);
+            const currentReps = Number(set.repeticiones || 0);
+
+            if (currentWeight === 0 && ghostWeight && !isBodyweight) {
+                const parsedGhostWeight = parseFloat(ghostWeight.replace(/[^0-9.]/g, ''));
+                if (!isNaN(parsedGhostWeight) && parsedGhostWeight > 0) {
+                    onSetChange(set.id, 'peso_utilizado', String(parsedGhostWeight));
+                }
+            }
+
+            if (currentReps === 0 && ghostReps) {
+                const parsedGhostReps = parseInt(ghostReps.replace(/[^0-9]/g, ''), 10);
+                if (!isNaN(parsedGhostReps) && parsedGhostReps > 0) {
+                    onSetChange(set.id, 'repeticiones', String(parsedGhostReps));
+                }
+            }
+
+            if ((!set.rpe || set.rpe === 0) && ghostRpe) {
+                const parsedGhostRpe = parseFloat(ghostRpe.replace(/[^0-9.]/g, ''));
+                if (!isNaN(parsedGhostRpe) && parsedGhostRpe > 0) {
+                    onSetChange(set.id, 'rpe', String(parsedGhostRpe));
+                }
+            }
+
             if (HapticService.success) {
                 HapticService.success();
             } else if (HapticService.setCompleted) {

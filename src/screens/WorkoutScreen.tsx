@@ -54,6 +54,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         addSets,
         updateSet,
         deleteSet,
+        duplicateSet,
         removeExercise,
         finishWorkout,
         updateWeightType,
@@ -127,6 +128,12 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
             state.setSaving(false);
         });
     }, [deleteSet, state.setSaving]);
+
+    const handleDuplicateSet = useCallback(async (sId: string, eId: string) => {
+        state.setSaving(true);
+        await duplicateSet(sId, eId);
+        state.setSaving(false);
+    }, [duplicateSet, state.setSaving]);
 
     const handleAddSet = useCallback(async (id: string) => {
         state.setSaving(true);
@@ -242,6 +249,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                 onDeleteExercise={handleDeleteExercise}
                                 onSetChange={updateSet}
                                 onDeleteSet={handleDeleteSet}
+                                onDuplicateSet={handleDuplicateSet}
                                 onStartRestTimer={state.handleStartRestTimer}
                                 onAddSet={handleAddSet}
                                 onSwapExercise={(mode === 'ACTIVE' || isStructureEditable) ? handleSwapExercise : undefined}
