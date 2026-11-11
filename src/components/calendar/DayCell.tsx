@@ -9,6 +9,7 @@ export interface DayCellProps {
     isCurrentMonth: boolean;
     daySize: number;
     colors: any;
+    allowFuturePress?: boolean;
     onPress: (date: Date | null) => void;
 }
 
@@ -19,6 +20,7 @@ export const DayCell: React.FC<DayCellProps> = React.memo(({
     isCurrentMonth,
     daySize,
     colors,
+    allowFuturePress = true,
     onPress,
 }) => {
     const isFuture = dayStyle?.isFuture ?? false;
@@ -37,13 +39,14 @@ export const DayCell: React.FC<DayCellProps> = React.memo(({
     }
 
     const cellInnerSize = daySize - 8;
+    const isPressDisabled = !day.date || (!allowFuturePress && isFuture);
 
     return (
         <TouchableOpacity
             style={[styles.dayCell, { width: daySize, height: daySize }]}
             onPress={() => onPress(day.date)}
-            disabled={!day.date || isFuture}
-            activeOpacity={isFuture ? 1 : 0.7}
+            disabled={isPressDisabled}
+            activeOpacity={isPressDisabled ? 1 : 0.7}
             testID={testID}
         >
             {dayStyle?.inCurrentWeek && isCurrentMonth && (

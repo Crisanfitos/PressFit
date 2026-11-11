@@ -185,10 +185,10 @@ describe('Calendar Sub-components (PF-269)', () => {
             expect(mockPress).toHaveBeenCalledWith(dummyDay.date);
         });
 
-        it('disables press on future days', async () => {
+        it('disables press on future days when allowFuturePress is false and enables when true (PF-436)', async () => {
             const mockPress = jest.fn();
             const futureDay: CalendarDay = { date: new Date(2026, 11, 25), dayNumber: 25 };
-            const { findByTestId } = await render(
+            const { findByTestId, rerender } = await render(
                 <DayCell
                     day={futureDay}
                     index={24}
@@ -203,6 +203,7 @@ describe('Calendar Sub-components (PF-269)', () => {
                     isCurrentMonth={false}
                     daySize={40}
                     colors={mockColors}
+                    allowFuturePress={false}
                     onPress={mockPress}
                 />
             );
@@ -210,6 +211,29 @@ describe('Calendar Sub-components (PF-269)', () => {
             const cell = await findByTestId('calendar-day-future');
             fireEvent.press(cell);
             expect(mockPress).not.toHaveBeenCalled();
+
+            // When allowFuturePress is true (default), press is enabled
+            await rerender(
+                <DayCell
+                    day={futureDay}
+                    index={24}
+                    dayStyle={{
+                        isToday: false,
+                        isPast: false,
+                        isFuture: true,
+                        inCurrentWeek: false,
+                        isCompleted: false,
+                        isInProgress: false,
+                    }}
+                    isCurrentMonth={false}
+                    daySize={40}
+                    colors={mockColors}
+                    allowFuturePress={true}
+                    onPress={mockPress}
+                />
+            );
+            fireEvent.press(cell);
+            expect(mockPress).toHaveBeenCalledWith(futureDay.date);
         });
     });
 

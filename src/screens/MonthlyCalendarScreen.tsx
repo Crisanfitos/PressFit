@@ -234,10 +234,6 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
         const selectedDate = new Date(date);
         selectedDate.setHours(0, 0, 0, 0);
 
-        if (selectedDate > now) {
-            return;
-        }
-
         navigation.navigate('WorkoutDay', {
             date: formatLocalDateKey(date),
             routineId: selectedRoutine?.id,
@@ -308,10 +304,17 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
         const scheduledExercises = todayRoutineDay.ejercicios_programados || [];
         const exerciseCount = scheduledExercises.length;
         let totalSets = 0;
+        let calculatedLoad = 0;
         const muscleSet = new Set<string>();
 
         scheduledExercises.forEach((ex: any) => {
-            totalSets += ex.series?.length || 3;
+            const sets = ex.series || [];
+            totalSets += sets.length || 3;
+            sets.forEach((s: any) => {
+                const w = Number(s.peso || s.peso_kg || 0);
+                const r = Number(s.repeticiones || s.reps || 0);
+                calculatedLoad += (w * r);
+            });
             if (ex.ejercicio?.grupo_muscular) muscleSet.add(ex.ejercicio.grupo_muscular);
             else if (ex.ejercicio?.categoria) muscleSet.add(ex.ejercicio.categoria);
         });
@@ -320,13 +323,19 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
         const isInProgress = inProgressDays.has(todayKey);
         const status = isCompleted ? 'completed' : isInProgress ? 'in_progress' : todayRoutineDay.es_descanso ? 'rest' : 'scheduled';
 
+        const estimatedLoad = calculatedLoad > 0
+            ? `${calculatedLoad.toLocaleString()} kg`
+            : totalSets > 0
+                ? `${(totalSets * 250).toLocaleString()} kg`
+                : '0 kg';
+
         return {
             title: todayRoutineDay.nombre_dia || selectedRoutine?.nombre || 'Entrenamiento de Hoy',
             description: todayRoutineDay.descripcion || 'Enfoque de hipertrofia mecánica con énfasis en sobrecargas progresivas.',
             estimatedMinutes: todayRoutineDay.duracion_estimada || 55,
             exerciseCount: exerciseCount || 5,
             totalSets: totalSets || 16,
-            estimatedLoad: '4,850 kg',
+            estimatedLoad,
             targetRpe: '8.5 / 10',
             muscles: Array.from(muscleSet).slice(0, 3),
             status: status as any,
@@ -545,7 +554,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                                     Rutinas de la Semana
                                 </Text>
                                 <Text style={[styles.weeklyListCount, { color: colors.onSurfaceVariant || colors.textSecondary }]}>
-                                    {dayPills.filter((p) => p.status === 'completed').length} de 5 completadas
+                                    {dayPills.filter((p) => p.status === 'completed').length} de {dayPills.filter((p) => p.status !== 'rest').length || dayPills.length} completadas
                                 </Text>
                             </View>
 
@@ -567,6 +576,18 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                                 const title = matchDay?.nombre_dia || (isRest ? 'Descanso Activo / Movilidad' : `${dayName} - Fuerza`);
                                 const dateDisplay = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
 
+                                let dayVolume: number | null = null;
+                                if (isCompleted) {
+                                    const exList = matchDay?.ejercicios_programados || [];
+                                    let calcVol = 0;
+                                    exList.forEach((e: any) => {
+                                        (e.series || []).forEach((s: any) => {
+                                            calcVol += (Number(s.peso || 0) * Number(s.repeticiones || 0));
+                                        });
+                                    });
+                                    dayVolume = calcVol > 0 ? calcVol : (matchDay?.ejercicios_programados?.length || 4) * 800;
+                                }
+
                                 return (
                                     <WeeklyRoutineDayCard
                                         key={dateKey}
@@ -576,7 +597,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
                                         status={status}
                                         exerciseCount={matchDay?.ejercicios_programados?.length || (isRest ? 0 : 5)}
                                         durationMinutes={matchDay?.duracion_estimada || (isRest ? null : 60)}
-                                        totalVolumeKg={isCompleted ? 4850 : null}
+                                        totalVolumeKg={dayVolume}
                                         description={matchDay?.descripcion}
                                         onPress={() => handleDayPress(date)}
                                         colors={colors}
