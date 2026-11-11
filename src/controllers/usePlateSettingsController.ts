@@ -73,23 +73,23 @@ export const usePlateSettingsController = (userId?: string) => {
   }, [loadSettings]);
 
   const currentUnit: WeightUnit = settings?.unit ?? 'kg';
-  const barPresets = currentUnit === 'kg' ? BAR_PRESETS_KG : BAR_PRESETS_LB;
+  const barPresets = useMemo(() => currentUnit === 'kg' ? BAR_PRESETS_KG : BAR_PRESETS_LB, [currentUnit]);
 
   const currentPlates: PlateInventoryItem[] = useMemo(() => {
     if (!settings) return [];
     return currentUnit === 'kg' ? settings.platesKg : settings.platesLb;
   }, [settings, currentUnit]);
 
-  const handleUnitChange = async (unit: WeightUnit) => {
+  const handleUnitChange = useCallback(async (unit: WeightUnit) => {
     if (!settings || settings.unit === unit) return;
     HapticService.selection();
 
     const updated = await PlateSettingsService.updateUnit(unit, userId);
     setSettings(updated);
     checkIfCustom(updated.defaultBarWeight, unit);
-  };
+  }, [settings, userId, checkIfCustom]);
 
-  const handleBarPresetSelect = async (value: number) => {
+  const handleBarPresetSelect = useCallback(async (value: number) => {
     if (!settings) return;
     HapticService.light();
 
@@ -98,9 +98,9 @@ export const usePlateSettingsController = (userId?: string) => {
 
     const updated = await PlateSettingsService.updateBarWeight(value, currentUnit, userId);
     setSettings(updated);
-  };
+  }, [settings, currentUnit, userId]);
 
-  const handleCustomBarChange = (text: string) => {
+  const handleCustomBarChange = useCallback((text: string) => {
     setCustomBarText(text);
     const num = parseFloat(text);
     if (!isNaN(num) && num > 0 && settings) {
@@ -112,9 +112,9 @@ export const usePlateSettingsController = (userId?: string) => {
       setSettings(updated);
       PlateSettingsService.saveSettings(updated, userId);
     }
-  };
+  }, [settings, currentUnit, userId]);
 
-  const handleTogglePlate = async (weight: number, enabled: boolean) => {
+  const handleTogglePlate = useCallback(async (weight: number, enabled: boolean) => {
     if (!settings) return;
     HapticService.selection();
 
@@ -126,9 +126,9 @@ export const usePlateSettingsController = (userId?: string) => {
       userId
     );
     setSettings(updated);
-  };
+  }, [settings, currentUnit, userId]);
 
-  const handleAdjustPairs = async (plate: PlateInventoryItem, delta: number) => {
+  const handleAdjustPairs = useCallback(async (plate: PlateInventoryItem, delta: number) => {
     if (!settings) return;
     HapticService.light();
 
@@ -155,9 +155,9 @@ export const usePlateSettingsController = (userId?: string) => {
       userId
     );
     setSettings(updated);
-  };
+  }, [settings, currentUnit, userId]);
 
-  const handleSetUnlimited = async (weight: number) => {
+  const handleSetUnlimited = useCallback(async (weight: number) => {
     if (!settings) return;
     HapticService.light();
 
@@ -168,17 +168,17 @@ export const usePlateSettingsController = (userId?: string) => {
       userId
     );
     setSettings(updated);
-  };
+  }, [settings, currentUnit, userId]);
 
-  const resetToDefaults = async (): Promise<UserPlateSettings> => {
+  const resetToDefaults = useCallback(async (): Promise<UserPlateSettings> => {
     HapticService.medium();
     const defaults = await PlateSettingsService.resetToDefaults(userId);
     setSettings(defaults);
     checkIfCustom(defaults.defaultBarWeight, defaults.unit);
     return defaults;
-  };
+  }, [userId, checkIfCustom]);
 
-  const handleResetDefaults = (
+  const handleResetDefaults = useCallback((
     confirmTitle?: any,
     confirmMsg?: string,
     cancelText?: string,
@@ -206,9 +206,9 @@ export const usePlateSettingsController = (userId?: string) => {
         },
       ]
     );
-  };
+  }, [resetToDefaults]);
 
-  const handleSave = async (
+  const handleSave = useCallback(async (
     errorTitle?: any,
     errorMsg?: string
   ) => {
@@ -227,7 +227,7 @@ export const usePlateSettingsController = (userId?: string) => {
     } finally {
       setSaving(false);
     }
-  };
+  }, [settings, userId]);
 
   const previewCalculation: PlateCalculationResult | null = useMemo(() => {
     if (!settings) return null;
@@ -241,7 +241,7 @@ export const usePlateSettingsController = (userId?: string) => {
     });
   }, [settings, currentUnit, currentPlates]);
 
-  return {
+  return useMemo(() => ({
     loading,
     saving,
     savedSuccess,
@@ -264,5 +264,28 @@ export const usePlateSettingsController = (userId?: string) => {
     resetToDefaults,
     handleResetDefaults,
     handleSave,
-  };
+  }), [
+    loading,
+    saving,
+    savedSuccess,
+    settings,
+    isCustomBar,
+    customBarText,
+    currentUnit,
+    barPresets,
+    currentPlates,
+    previewCalculation,
+    setIsCustomBar,
+    setCustomBarText,
+    loadSettings,
+    handleUnitChange,
+    handleBarPresetSelect,
+    handleCustomBarChange,
+    handleTogglePlate,
+    handleAdjustPairs,
+    handleSetUnlimited,
+    resetToDefaults,
+    handleResetDefaults,
+    handleSave,
+  ]);
 };

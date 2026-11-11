@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     View,
     Text,
@@ -38,6 +38,60 @@ interface SelectedPointInfo {
     repeticiones: number;
     formula: 'brzycki' | 'epley';
 }
+
+interface ExerciseOptionItemProps {
+    item: ExerciseItem;
+    isSelected: boolean;
+    onSelect: (id: string) => void;
+    colors: any;
+    styles: any;
+}
+
+const ExerciseOptionItem = React.memo<ExerciseOptionItemProps>(({
+    item,
+    isSelected,
+    onSelect,
+    colors,
+    styles,
+}) => {
+    const title = item.titulo || item.nombre || '';
+    const handlePress = useCallback(() => {
+        onSelect(item.id);
+    }, [item.id, onSelect]);
+
+    return (
+        <TouchableOpacity
+            testID={`exercise-option-${item.id}`}
+            style={[
+                styles.exerciseItem,
+                isSelected && styles.exerciseItemActive,
+            ]}
+            onPress={handlePress}
+        >
+            <View>
+                <Text
+                    style={[
+                        styles.exerciseItemText,
+                        isSelected && styles.exerciseItemTextActive,
+                    ]}
+                >
+                    {title}
+                </Text>
+                {item.grupo_muscular && (
+                    <Text style={styles.exerciseGroup}>{item.grupo_muscular}</Text>
+                )}
+            </View>
+            {isSelected && (
+                <MaterialIcons
+                    name="check"
+                    size={20}
+                    color={colors.primary}
+                />
+            )}
+        </TouchableOpacity>
+    );
+});
+ExerciseOptionItem.displayName = 'ExerciseOptionItem';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -196,11 +250,11 @@ const AdvancedMetricsCard: React.FC<AdvancedMetricsCardProps> = ({
         };
     }, [historyData]);
 
-    const handleSelectExercise = (id: string) => {
+    const handleSelectExercise = useCallback((id: string) => {
         setSelectedExerciseId(id);
         setSelectorModalVisible(false);
         if (onExerciseChange) onExerciseChange(id);
-    };
+    }, [onExerciseChange]);
 
     const styles = useMemo(
         () =>
@@ -379,6 +433,22 @@ const AdvancedMetricsCard: React.FC<AdvancedMetricsCardProps> = ({
         [colors]
     );
 
+    const renderExerciseOption = useCallback(({ item }: { item: ExerciseItem }) => (
+        <ExerciseOptionItem
+            item={item}
+            isSelected={item.id === selectedExerciseId}
+            onSelect={handleSelectExercise}
+            colors={colors}
+            styles={styles}
+        />
+    ), [selectedExerciseId, handleSelectExercise, colors, styles]);
+
+    const getExerciseOptionItemLayout = useCallback((_: any, index: number) => ({
+        length: 56,
+        offset: 56 * index,
+        index,
+    }), []);
+
     return (
         <View style={styles.container} testID={testID}>
             {/* Header */}
@@ -541,41 +611,12 @@ const AdvancedMetricsCard: React.FC<AdvancedMetricsCardProps> = ({
                         <FlatList
                             data={exercises}
                             keyExtractor={(item) => item.id}
-                            renderItem={({ item }) => {
-                                const isSelected = item.id === selectedExerciseId;
-                                const title = item.titulo || item.nombre || '';
-                                return (
-                                    <TouchableOpacity
-                                        testID={`exercise-option-${item.id}`}
-                                        style={[
-                                            styles.exerciseItem,
-                                            isSelected && styles.exerciseItemActive,
-                                        ]}
-                                        onPress={() => handleSelectExercise(item.id)}
-                                    >
-                                        <View>
-                                            <Text
-                                                style={[
-                                                    styles.exerciseItemText,
-                                                    isSelected && styles.exerciseItemTextActive,
-                                                ]}
-                                            >
-                                                {title}
-                                            </Text>
-                                            {item.grupo_muscular && (
-                                                <Text style={styles.exerciseGroup}>{item.grupo_muscular}</Text>
-                                            )}
-                                        </View>
-                                        {isSelected && (
-                                            <MaterialIcons
-                                                name="check"
-                                                size={20}
-                                                color={colors.primary}
-                                            />
-                                        )}
-                                    </TouchableOpacity>
-                                );
-                            }}
+                            renderItem={renderExerciseOption}
+                            extraData={selectedExerciseId}
+                            initialNumToRender={10}
+                            maxToRenderPerBatch={10}
+                            windowSize={5}
+                            getItemLayout={getExerciseOptionItemLayout}
                         />
                     </View>
                 </TouchableOpacity>

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { WorkoutService } from '../../services/WorkoutService';
 import { RoutineService } from '../../services/RoutineService';
 import { LogService } from '../../services/LogService';
@@ -48,6 +48,23 @@ export const useWorkoutMode = ({
     const [workout, setWorkout] = useState<WorkoutData | null>(null);
     const [mode, setMode] = useState<WorkoutMode>('ACTIVE');
     const [loading, setLoading] = useState<boolean>(true);
+
+    const userIdRef = useRef(userId);
+    userIdRef.current = userId;
+    const routineDayIdRef = useRef(routineDayId);
+    routineDayIdRef.current = routineDayId;
+    const dayOfWeekRef = useRef(dayOfWeek);
+    dayOfWeekRef.current = dayOfWeek;
+    const loadExercisesRef = useRef(loadExercises);
+    loadExercisesRef.current = loadExercises;
+    const workoutRef = useRef(workout);
+    workoutRef.current = workout;
+    const modeRef = useRef(mode);
+    modeRef.current = mode;
+    const timerRef = useRef(timer);
+    timerRef.current = timer;
+    const stopTimerRef = useRef(stopTimer);
+    stopTimerRef.current = stopTimer;
 
     const initWorkout = useCallback(async () => {
         setLoading(true);
@@ -159,21 +176,21 @@ export const useWorkoutMode = ({
         }
     }, [initialWorkoutId, routineDayId, userId, dayOfWeek, isEditingTemplate, loadExercises, setTimer, setIsTimerRunning]);
 
-    const startWorkout = async () => {
+    const startWorkout = useCallback(async () => {
         setLoading(true);
         try {
             const now = new Date();
 
-            const { data: prevData } = await WorkoutService.getLastCompletedWorkoutForDay(userId, routineDayId);
+            const { data: prevData } = await WorkoutService.getLastCompletedWorkoutForDay(userIdRef.current, routineDayIdRef.current);
 
             let ghostSource = prevData;
             if (!ghostSource) {
-                const { data: templateDay } = await RoutineService.getRoutineDayById(routineDayId);
+                const { data: templateDay } = await RoutineService.getRoutineDayById(routineDayIdRef.current);
                 ghostSource = templateDay;
             }
 
             const { data: newWorkout } = await RoutineService.startDailyWorkout(
-                routineDayId,
+                routineDayIdRef.current,
                 now.toISOString(),
                 now.toISOString()
             );
@@ -184,35 +201,35 @@ export const useWorkoutMode = ({
             setWorkout(fullWorkout);
             setMode('ACTIVE');
             await saveActiveWorkoutParams({
-                routineDayId,
+                routineDayId: routineDayIdRef.current,
                 workoutId: newWorkout.id,
                 dayName: fullWorkout?.nombre_dia,
-                dayOfWeek,
+                dayOfWeek: dayOfWeekRef.current,
                 mode: 'ACTIVE',
             });
 
-            await loadExercises(routineDayId, newWorkout.id, ghostSource);
+            await loadExercisesRef.current(routineDayIdRef.current, newWorkout.id, ghostSource);
             setIsTimerRunning(true);
         } catch (error) {
             LogService.error('Error starting workout:', error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [setIsTimerRunning, setMode, setWorkout]);
 
-    const finishWorkout = async () => {
-        if (!workout || mode !== 'ACTIVE') return false;
-        stopTimer();
-        const durationMinutes = Math.floor(timer / 60);
+    const finishWorkout = useCallback(async () => {
+        if (!workoutRef.current || modeRef.current !== 'ACTIVE') return false;
+        stopTimerRef.current();
+        const durationMinutes = Math.floor(timerRef.current / 60);
         try {
-            await WorkoutService.completeWorkout(workout.id, durationMinutes);
+            await WorkoutService.completeWorkout(workoutRef.current.id, durationMinutes);
             await clearActiveWorkoutParams();
             return true;
         } catch (error) {
             LogService.error('Failed to finish workout', error);
             return false;
         }
-    };
+    }, []);
 
     return {
         workout,

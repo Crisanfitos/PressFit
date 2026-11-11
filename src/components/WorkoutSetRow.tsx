@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Pressable, StyleSheet, Alert, Keyboard } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -163,7 +163,15 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
         }
     };
 
-    const handleRpeChange = (val: string) => {
+    const handleWeightChange = useCallback((val: string) => {
+        onSetChange(set.id, 'weight', val);
+    }, [onSetChange, set.id]);
+
+    const handleRepsChange = useCallback((val: string) => {
+        onSetChange(set.id, 'reps', val);
+    }, [onSetChange, set.id]);
+
+    const handleRpeChange = useCallback((val: string) => {
         const result = validateRpe(val);
         if (result.clamped) {
             HapticService.warning();
@@ -174,7 +182,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
             const valStr = result.value % 1 === 0 ? String(result.value) : result.value.toFixed(1);
             onSetChange(set.id, 'rpe', valStr);
         }
-    };
+    }, [onSetChange, set.id]);
 
     const isActiveTimer = lastCompletedSetId === set.id && restTimerVisible;
     const hasSavedTimerValue = set.descanso_segundos && set.descanso_segundos > 0;
@@ -274,7 +282,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                             testID={`set-weight-input-${setIndex}`}
                             value={set.peso_utilizado > 0 ? set.peso_utilizado : ''}
                             placeholder={ghostWeight ?? '-'}
-                            onChange={(val) => onSetChange(set.id, 'weight', val)}
+                            onChange={handleWeightChange}
                             isEditable={effectiveInputEditable}
                             colors={colors}
                             maxLength={5}
@@ -288,7 +296,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                         testID={`set-reps-input-${setIndex}`}
                         value={set.repeticiones > 0 ? set.repeticiones : ''}
                         placeholder={ghostReps ?? '-'}
-                        onChange={(val) => onSetChange(set.id, 'reps', val)}
+                        onChange={handleRepsChange}
                         isEditable={effectiveInputEditable}
                         colors={colors}
                         maxLength={3}

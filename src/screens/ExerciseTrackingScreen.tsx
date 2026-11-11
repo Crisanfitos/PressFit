@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useMemo } from 'react';
+import React, { useState, useContext, useEffect, useMemo, useCallback } from 'react';
 import {
     View,
     Text,
@@ -15,6 +15,37 @@ import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { ExerciseService } from '../services/ExerciseService';
 import { LogService } from '../services/LogService';
+
+interface ExerciseTrackingListEmptyProps {
+    searchQuery: string;
+    colors: any;
+    styles: any;
+    t: any;
+}
+
+const ExerciseTrackingListEmpty = React.memo<ExerciseTrackingListEmptyProps>(({
+    searchQuery,
+    colors,
+    styles,
+    t,
+}) => (
+    <View style={styles.emptyContainer} testID="exercise-tracking-empty">
+        <View style={styles.emptyIconWrap}>
+            <MaterialIcons name="bar-chart" size={30} color={colors.onSurfaceVariant} />
+        </View>
+        <Text style={styles.emptyTitle}>
+            {searchQuery
+                ? t('progress.noSearchResults', 'Sin resultados')
+                : t('progress.noExercisesTracked', 'Sin ejercicios registrados')}
+        </Text>
+        <Text style={styles.emptySubtitle}>
+            {searchQuery
+                ? t('progress.tryAnotherSearch', 'Prueba con otro término de búsqueda')
+                : t('progress.logSetsPrompt', 'Registra series en un entrenamiento para ver tu progreso aquí')}
+        </Text>
+    </View>
+));
+ExerciseTrackingListEmpty.displayName = 'ExerciseTrackingListEmpty';
 
 type ExerciseTrackingScreenProps = { navigation: any };
 
@@ -171,7 +202,7 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
         [colors]
     );
 
-    const formatMuscle = (muscles: any): string => {
+    const formatMuscle = useCallback((muscles: any): string => {
         if (!muscles) return '';
         const raw = Array.isArray(muscles)
             ? muscles[0]
@@ -179,13 +210,17 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
         if (!raw) return '';
         const key = String(raw).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_').trim();
         return String(t(`muscleGroups.${key}`, raw));
-    };
+    }, [t]);
 
-    const renderItem = ({ item, index }: { item: any; index: number }) => (
+    const handleNavigateProgressDetail = useCallback((exerciseId: string) => {
+        navigation.navigate('ExerciseProgressDetail', { exerciseId });
+    }, [navigation]);
+
+    const renderItem = useCallback(({ item, index }: { item: any; index: number }) => (
         <TouchableOpacity
             style={styles.exerciseCard}
             testID={`exercise-tracking-item-${index}`}
-            onPress={() => navigation.navigate('ExerciseProgressDetail', { exerciseId: item.id })}
+            onPress={() => handleNavigateProgressDetail(item.id)}
             activeOpacity={0.75}
         >
             <View style={styles.exerciseIconWrap}>
@@ -208,25 +243,13 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
                 style={styles.arrowIcon}
             />
         </TouchableOpacity>
-    );
+    ), [styles, colors, handleNavigateProgressDetail, formatMuscle]);
 
-    const ListEmpty = () => (
-        <View style={styles.emptyContainer} testID="exercise-tracking-empty">
-            <View style={styles.emptyIconWrap}>
-                <MaterialIcons name="bar-chart" size={30} color={colors.onSurfaceVariant} />
-            </View>
-            <Text style={styles.emptyTitle}>
-                {searchQuery
-                    ? t('progress.noSearchResults', 'Sin resultados')
-                    : t('progress.noExercisesTracked', 'Sin ejercicios registrados')}
-            </Text>
-            <Text style={styles.emptySubtitle}>
-                {searchQuery
-                    ? t('progress.tryAnotherSearch', 'Prueba con otro término de búsqueda')
-                    : t('progress.logSetsPrompt', 'Registra series en un entrenamiento para ver tu progreso aquí')}
-            </Text>
-        </View>
-    );
+    const getItemLayout = useCallback((_: any, index: number) => ({
+        length: 76,
+        offset: 76 * index,
+        index,
+    }), []);
 
     return (
         <SafeAreaView style={styles.container} testID="exercise-tracking-screen">
@@ -286,7 +309,18 @@ const ExerciseTrackingScreen: React.FC<ExerciseTrackingScreenProps> = ({ navigat
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
-                    ListEmptyComponent={<ListEmpty />}
+                    getItemLayout={getItemLayout}
+                    initialNumToRender={12}
+                    maxToRenderPerBatch={10}
+                    windowSize={5}
+                    ListEmptyComponent={
+                        <ExerciseTrackingListEmpty
+                            searchQuery={searchQuery}
+                            colors={colors}
+                            styles={styles}
+                            t={t}
+                        />
+                    }
                 />
             )}
         </SafeAreaView>

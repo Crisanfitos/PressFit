@@ -171,6 +171,43 @@ export const AnalyticsService = {
         exerciseId: string
     ): Promise<ServiceResponse<OneRMHistoryEntry[]>> {
         try {
+            // Fast-path: Offloaded PostgreSQL RPC
+            if (typeof supabase.rpc === 'function') {
+                const { data: rpcData, error: rpcError } = (await supabase.rpc('get_exercise_1rm_history', {
+                    p_usuario_id: userId,
+                    p_ejercicio_id: exerciseId,
+                })) || {};
+
+                if (!rpcError && Array.isArray(rpcData)) {
+                    const mapped: OneRMHistoryEntry[] = rpcData.map((row: any) => ({
+                        fecha: row.fecha,
+                        estimated1RM: Number(row.estimated1RM),
+                        peso_utilizado: Number(row.peso_utilizado),
+                        repeticiones: Number(row.repeticiones),
+                        numero_serie: Number(row.numero_serie),
+                        formula: row.formula as 'brzycki' | 'epley',
+                        rutina_id: row.rutina_id,
+                    }));
+                    return { data: mapped, error: null };
+                }
+            }
+
+            LogService.warn('get_exercise_1rm_history RPC unavailable, falling back to client-side calculation');
+            return this.get1RMHistoryClientFallback(userId, exerciseId);
+        } catch (error) {
+            LogService.error('Error in get1RMHistory, falling back to client-side calculation:', error);
+            return this.get1RMHistoryClientFallback(userId, exerciseId);
+        }
+    },
+
+    /**
+     * Client-side fallback calculation for 1RM history progression.
+     */
+    async get1RMHistoryClientFallback(
+        userId: string,
+        exerciseId: string
+    ): Promise<ServiceResponse<OneRMHistoryEntry[]>> {
+        try {
             const { data, error } = await supabase
                 .from('series')
                 .select(`
@@ -264,7 +301,7 @@ export const AnalyticsService = {
 
             return { data: history, error: null };
         } catch (error) {
-            LogService.error('Error fetching 1RM history:', error);
+            LogService.error('Error fetching 1RM history (client fallback):', error);
             return { data: null, error };
         }
     },
@@ -426,26 +463,68 @@ export const AnalyticsService = {
         userId: string,
         options: GetWeeklyFatigueOptions = {}
     ): Promise<ServiceResponse<FatigueAnalysisResult>> {
+        const {
+            daysLookback = 7,
+            startDate,
+            endDate,
+        } = options;
+
+        let minDateStr = startDate;
+        let maxDateStr = endDate;
+
+        if (!minDateStr) {
+            const now = new Date();
+            const past = new Date(now);
+            past.setDate(now.getDate() - (daysLookback - 1));
+            minDateStr = formatLocalDateKey(past);
+        }
+        if (!maxDateStr) {
+            maxDateStr = formatLocalDateKey(new Date());
+        }
+
         try {
-            const {
-                daysLookback = 7,
-                startDate,
-                endDate,
-            } = options;
+            // Fast-path: Offloaded PostgreSQL RPC
+            if (typeof supabase.rpc === 'function') {
+                const { data: rpcData, error: rpcError } = (await supabase.rpc('get_weekly_fatigue_analysis', {
+                    p_usuario_id: userId,
+                    p_start_date: minDateStr,
+                    p_end_date: maxDateStr,
+                })) || {};
 
-            let minDateStr = startDate;
-            let maxDateStr = endDate;
-
-            if (!minDateStr) {
-                const now = new Date();
-                const past = new Date(now);
-                past.setDate(now.getDate() - (daysLookback - 1));
-                minDateStr = formatLocalDateKey(past);
+                if (!rpcError && rpcData && typeof rpcData === 'object' && ('fatigueLevel' in rpcData || 'averageRPE' in rpcData)) {
+                    return {
+                        data: {
+                            averageRPE: Number(rpcData.averageRPE) || 0,
+                            fatigueLevel: (rpcData.fatigueLevel as FatigueAnalysisResult['fatigueLevel']) || 'sin_datos',
+                            totalSeriesCount: Number(rpcData.totalSeriesCount) || 0,
+                            rpeSeriesCount: Number(rpcData.rpeSeriesCount) || 0,
+                            highIntensityCount: Number(rpcData.highIntensityCount) || 0,
+                            statusLabel: String(rpcData.statusLabel || 'Sin Datos'),
+                            statusColor: String(rpcData.statusColor || '#6B7280'),
+                            recommendation: String(rpcData.recommendation || ''),
+                        },
+                        error: null,
+                    };
+                }
             }
-            if (!maxDateStr) {
-                maxDateStr = formatLocalDateKey(new Date());
-            }
 
+            LogService.warn('get_weekly_fatigue_analysis RPC unavailable, falling back to client-side calculation');
+            return this.getWeeklyFatigueAnalysisClientFallback(userId, minDateStr, maxDateStr);
+        } catch (error) {
+            LogService.error('Error in getWeeklyFatigueAnalysis, falling back to client-side calculation:', error);
+            return this.getWeeklyFatigueAnalysisClientFallback(userId, minDateStr, maxDateStr);
+        }
+    },
+
+    /**
+     * Client-side fallback calculation for weekly fatigue analysis.
+     */
+    async getWeeklyFatigueAnalysisClientFallback(
+        userId: string,
+        minDateStr: string,
+        maxDateStr: string
+    ): Promise<ServiceResponse<FatigueAnalysisResult>> {
+        try {
             const { data, error } = await supabase
                 .from('series')
                 .select(`
@@ -494,7 +573,7 @@ export const AnalyticsService = {
 
             return { data: analysis, error: null };
         } catch (error) {
-            LogService.error('Error fetching weekly fatigue analysis:', error);
+            LogService.error('Error fetching weekly fatigue analysis (client fallback):', error);
             return { data: null, error };
         }
     },

@@ -18,6 +18,40 @@ import {
     FilterRowData,
 } from '../components/exercises';
 
+interface LibraryExerciseItemProps {
+    item: any;
+    isSelected: boolean;
+    onSelect: (id: string) => void;
+    onThumbnailPress: (videoId: string | null) => void;
+    colors: any;
+    navigation: any;
+}
+
+const LibraryExerciseItem = React.memo<LibraryExerciseItemProps>(({
+    item,
+    isSelected,
+    onSelect,
+    onThumbnailPress,
+    colors,
+    navigation,
+}) => {
+    const handleSelect = useCallback(() => {
+        onSelect(item.id);
+    }, [item.id, onSelect]);
+
+    return (
+        <ExerciseListItem
+            item={item}
+            isSelected={isSelected}
+            onSelect={handleSelect}
+            onThumbnailPress={onThumbnailPress}
+            colors={colors}
+            navigation={navigation}
+        />
+    );
+});
+LibraryExerciseItem.displayName = 'LibraryExerciseItem';
+
 type ExerciseLibraryScreenProps = {
     navigation: any;
     route: any;
@@ -78,26 +112,38 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
         else Alert.alert(t('common.error', 'Error'), t('exerciseCatalog.addExercisesError', 'No se pudieron añadir los ejercicios'));
     };
 
-    const openVideo = (videoId: string | null) => {
+    const openVideo = useCallback((videoId: string | null) => {
         if (videoId) {
             setCurrentVideoId(videoId);
             setVideoModalVisible(true);
         }
-    };
+    }, []);
+
+    const selectedSet = useMemo(() => new Set(selectedExercises), [selectedExercises]);
+
+    const handleToggleExercise = useCallback((id: string) => {
+        toggleSelection(id);
+    }, [toggleSelection]);
 
     const renderItem = useCallback(
         ({ item }: { item: any }) => (
-            <ExerciseListItem
+            <LibraryExerciseItem
                 item={item}
-                isSelected={selectedExercises.includes(item.id)}
-                onSelect={() => toggleSelection(item.id)}
+                isSelected={selectedSet.has(item.id)}
+                onSelect={handleToggleExercise}
                 onThumbnailPress={openVideo}
                 colors={colors}
                 navigation={navigation}
             />
         ),
-        [selectedExercises, colors, toggleSelection, navigation]
+        [selectedSet, handleToggleExercise, openVideo, colors, navigation]
     );
+
+    const getItemLayout = useCallback((_: any, index: number) => ({
+        length: 76,
+        offset: 76 * index,
+        index,
+    }), []);
 
     const isSelectionMode = selectedExercises.length > 0;
 
@@ -150,7 +196,9 @@ const ExerciseLibraryScreen: React.FC<ExerciseLibraryScreenProps> = ({ navigatio
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
-                    initialNumToRender={8}
+                    getItemLayout={getItemLayout}
+                    initialNumToRender={10}
+                    maxToRenderPerBatch={10}
                     windowSize={5}
                     removeClippedSubviews
                     extraData={selectedExercises}

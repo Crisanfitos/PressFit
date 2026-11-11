@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { useWorkoutTimer } from '../hooks/workout/useWorkoutTimer';
 import { useWorkoutPR, ActivePRCelebration } from '../hooks/workout/useWorkoutPR';
 import { useWorkoutSets, Set, Exercise, WorkoutData } from '../hooks/workout/useWorkoutSets';
@@ -58,7 +58,7 @@ export const useWorkoutController = (
         return () => stopTimer();
     }, [initWorkout, stopTimer]);
 
-    return {
+    return useMemo(() => ({
         workout: modeHook.workout,
         exercises: setsHook.exercises,
         loading: modeHook.loading,
@@ -81,5 +81,28 @@ export const useWorkoutController = (
         activePRCelebration: prHook.activePRCelebration,
         dismissPRCelebration: prHook.dismissPRCelebration,
         reloadExercises: setsHook.reloadExercises,
-    };
+    }), [
+        modeHook.workout,
+        setsHook.exercises,
+        modeHook.loading,
+        timerHook.timer,
+        modeHook.mode,
+        setsHook.previousWorkout,
+        modeHook.startWorkout,
+        setsHook.addSet,
+        setsHook.addSets,
+        setsHook.updateSet,
+        setsHook.updateSetType,
+        setsHook.toggleCompleteSet,
+        setsHook.deleteSet,
+        setsHook.removeExercise,
+        setsHook.addExercise,
+        setsHook.swapExercise,
+        modeHook.finishWorkout,
+        setsHook.updateWeightType,
+        setsHook.loadSeriesForExercise,
+        prHook.activePRCelebration,
+        prHook.dismissPRCelebration,
+        setsHook.reloadExercises,
+    ]);
 };

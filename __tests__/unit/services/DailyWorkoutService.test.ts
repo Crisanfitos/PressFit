@@ -4,6 +4,7 @@ import { supabase } from '../../../src/lib/supabase';
 jest.mock('../../../src/lib/supabase', () => ({
     supabase: {
         from: jest.fn(),
+        rpc: jest.fn(),
     },
 }));
 
@@ -125,6 +126,75 @@ describe('DailyWorkoutService', () => {
 
             expect(result.error).toBeNull();
             expect(result.data?.descripcion).toBe('Nueva desc');
+        });
+    });
+
+    describe('startDailyWorkout (RPC offloading & fallback)', () => {
+        it('instantiates workout via start_daily_workout RPC fast-path', async () => {
+            (supabase.rpc as jest.Mock).mockResolvedValue({
+                data: { id: 'rpc-workout-1', nombre_dia: 'Lunes', completada: false },
+                error: null,
+            });
+
+            // Mock getRoutineDayById internal query
+            const mockDay = {
+                id: 'rpc-workout-1',
+                nombre_dia: 'Lunes',
+                ejercicios_programados: [],
+            };
+            const mockSingle = jest.fn().mockResolvedValue({ data: mockDay, error: null });
+            const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
+            const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
+            (supabase.from as jest.Mock).mockReturnValue({ select: mockSelect });
+
+            const result = await DailyWorkoutService.startDailyWorkout('template-1', '2026-10-06', '12:00:00');
+
+            expect(supabase.rpc).toHaveBeenCalledWith('start_daily_workout', {
+                p_template_day_id: 'template-1',
+                p_workout_date: '2026-10-06',
+                p_start_time: '12:00:00',
+            });
+            expect(result.error).toBeNull();
+            expect(result.data?.id).toBe('rpc-workout-1');
+        });
+
+        it('falls back to client-side creation when RPC fails', async () => {
+            (supabase.rpc as jest.Mock).mockResolvedValue({
+                data: null,
+                error: { message: 'function start_daily_workout does not exist' },
+            });
+
+            const templateDay = {
+                id: 'template-1',
+                rutina_semanal_id: 'routine-1',
+                nombre_dia: 'Lunes',
+                ejercicios_programados: [],
+            };
+
+            const mockSingle = jest.fn()
+                .mockResolvedValueOnce({ data: templateDay, error: null }) // template lookup
+                .mockResolvedValueOnce({ data: { id: 'created-day-1', nombre_dia: 'Lunes' }, error: null }); // insert workout
+
+            const mockQuery = {
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                not: jest.fn().mockReturnThis(),
+                order: jest.fn().mockReturnThis(),
+                limit: jest.fn().mockResolvedValue({ data: [] }),
+                insert: jest.fn().mockReturnValue({
+                    select: jest.fn().mockReturnValue({
+                        single: mockSingle,
+                    }),
+                }),
+                single: mockSingle,
+            };
+
+            (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+
+            const result = await DailyWorkoutService.startDailyWorkout('template-1', '2026-10-06', '12:00:00');
+
+            expect(result.error).toBeNull();
+            expect(result.data?.id).toBe('created-day-1');
         });
     });
 });

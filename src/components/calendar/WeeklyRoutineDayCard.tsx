@@ -17,7 +17,7 @@ export interface WeeklyRoutineDayCardProps {
     testID?: string;
 }
 
-export const WeeklyRoutineDayCard: React.FC<WeeklyRoutineDayCardProps> = ({
+export const WeeklyRoutineDayCard: React.FC<WeeklyRoutineDayCardProps> = React.memo(({
     dayName,
     dateDisplay,
     routineTitle,
@@ -209,7 +209,7 @@ export const WeeklyRoutineDayCard: React.FC<WeeklyRoutineDayCardProps> = ({
             />
         </TouchableOpacity>
     );
-};
+});
 
 const styles = StyleSheet.create({
     card: {

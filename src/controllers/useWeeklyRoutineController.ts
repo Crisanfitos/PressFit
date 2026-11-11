@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { RoutineService } from '../services/RoutineService';
 import { LogService } from '../services/LogService';
 import { RoutineDay } from '../types/models';
@@ -39,7 +39,7 @@ export const useWeeklyRoutineController = (userId: string | undefined) => {
         if (userId) fetchRoutines();
     }, [userId, fetchRoutines]);
 
-    const getFilteredRoutines = (): WeeklyRoutine[] => {
+    const filteredRoutines = useMemo((): WeeklyRoutine[] => {
         switch (filter) {
             case 'active':
                 return routines.filter((r) => r.activa);
@@ -48,9 +48,9 @@ export const useWeeklyRoutineController = (userId: string | undefined) => {
             default:
                 return routines;
         }
-    };
+    }, [routines, filter]);
 
-    const createRoutine = async (
+    const createRoutine = useCallback(async (
         name: string,
         isTemplate = false,
         isActive = false,
@@ -77,9 +77,9 @@ export const useWeeklyRoutineController = (userId: string | undefined) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [userId]);
 
-    const updateRoutine = async (id: string, updates: Partial<WeeklyRoutine>) => {
+    const updateRoutine = useCallback(async (id: string, updates: Partial<WeeklyRoutine>) => {
         try {
             const { data, error: updateError } = await RoutineService.updateWeeklyRoutine(id, updates);
             if (updateError) throw updateError;
@@ -89,9 +89,9 @@ export const useWeeklyRoutineController = (userId: string | undefined) => {
             LogService.error('Error updating routine:', err);
             return false;
         }
-    };
+    }, []);
 
-    const deleteRoutine = async (id: string) => {
+    const deleteRoutine = useCallback(async (id: string) => {
         try {
             const routineToDelete = routines.find((r) => r.id === id);
             const wasActive = !!routineToDelete?.activa;
@@ -112,18 +112,18 @@ export const useWeeklyRoutineController = (userId: string | undefined) => {
             LogService.error('Error deleting routine:', err);
             return false;
         }
-    };
+    }, [routines]);
 
-    const toggleActiveStatus = async (routine: WeeklyRoutine) => {
+    const toggleActiveStatus = useCallback(async (routine: WeeklyRoutine) => {
         try {
             return await updateRoutine(routine.id, { activa: !routine.activa });
         } catch (err) {
             return false;
         }
-    };
+    }, [updateRoutine]);
 
-    return {
-        routines: getFilteredRoutines(),
+    return useMemo(() => ({
+        routines: filteredRoutines,
         allRoutines: routines,
         loading,
         error,
@@ -134,5 +134,16 @@ export const useWeeklyRoutineController = (userId: string | undefined) => {
         updateRoutine,
         deleteRoutine,
         toggleActiveStatus,
-    };
+    }), [
+        filteredRoutines,
+        routines,
+        loading,
+        error,
+        filter,
+        fetchRoutines,
+        createRoutine,
+        updateRoutine,
+        deleteRoutine,
+        toggleActiveStatus,
+    ]);
 };

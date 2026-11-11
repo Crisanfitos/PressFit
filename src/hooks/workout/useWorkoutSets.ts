@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { WorkoutService } from '../../services/WorkoutService';
 import { RoutineService } from '../../services/RoutineService';
@@ -103,6 +103,23 @@ export const useWorkoutSets = ({
     const [exercises, setExercises] = useState<Exercise[]>([]);
     const [previousWorkout, setPreviousWorkout] = useState<RoutineDay | null>(null);
 
+    const exercisesRef = useRef(exercises);
+    exercisesRef.current = exercises;
+    const workoutRef = useRef(workout);
+    workoutRef.current = workout;
+    const modeRef = useRef(mode);
+    modeRef.current = mode;
+    const isEditingTemplateRef = useRef(isEditingTemplate);
+    isEditingTemplateRef.current = isEditingTemplate;
+    const routineDayIdRef = useRef(routineDayId);
+    routineDayIdRef.current = routineDayId;
+    const onCheckPRRef = useRef(onCheckPR);
+    onCheckPRRef.current = onCheckPR;
+    const onPrefetchPRsRef = useRef(onPrefetchPRs);
+    onPrefetchPRsRef.current = onPrefetchPRs;
+    const setWorkoutRef = useRef(setWorkout);
+    setWorkoutRef.current = setWorkout;
+
     const loadExercises = useCallback(async (rDayId: string, wId: string | null, prevWorkout?: RoutineDay | null) => {
         let finalExercises: Exercise[] = [];
 
@@ -113,7 +130,7 @@ export const useWorkoutSets = ({
         if (wId) {
             const { data: workoutData } = await WorkoutService.getWorkoutDetails(wId);
             if (workoutData) {
-                setWorkout(workoutData);
+                setWorkoutRef.current(workoutData);
                 if (workoutData.ejercicios_programados) {
                     finalExercises = workoutData.ejercicios_programados.map((ex: ScheduledExercise) => ({
                         ...ex.ejercicio,
@@ -135,7 +152,7 @@ export const useWorkoutSets = ({
         } else {
             const { data: routineDay } = await RoutineService.getRoutineDayById(rDayId);
             if (routineDay) {
-                setWorkout(routineDay as unknown as WorkoutData);
+                setWorkoutRef.current(routineDay as unknown as WorkoutData);
                 if (routineDay.ejercicios_programados) {
                     finalExercises = routineDay.ejercicios_programados.map((re: ScheduledExercise) => {
                         let setsToUse: Set[] = re.series || [];
@@ -167,10 +184,10 @@ export const useWorkoutSets = ({
         }
 
         setExercises(finalExercises);
-        if (onPrefetchPRs) {
-            onPrefetchPRs(finalExercises);
+        if (onPrefetchPRsRef.current) {
+            onPrefetchPRsRef.current(finalExercises);
         }
-    }, [setWorkout, onPrefetchPRs]);
+    }, []);
 
     const loadSeriesForExercise = useCallback(async (targetWorkoutId: string, exerciseId: string) => {
         const { data: series } = await WorkoutService.getSeriesForExercise(targetWorkoutId, exerciseId);
@@ -192,14 +209,15 @@ export const useWorkoutSets = ({
         }
     }, []);
 
-    const addSets = async (exerciseId: string, count: number = 1, setType: SetType = 'normal') => {
-        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
-        if (!workout || !canEdit) return;
+    const addSets = useCallback(async (exerciseId: string, count: number = 1, setType: SetType = 'normal') => {
+        const canEdit = modeRef.current === 'ACTIVE' || modeRef.current === 'PREVIEW' || isEditingTemplateRef.current;
+        if (!workoutRef.current || !canEdit) return;
 
-        const exerciseIndex = exercises.findIndex((e) => e.id === exerciseId);
+        const currentExercises = exercisesRef.current;
+        const exerciseIndex = currentExercises.findIndex((e) => e.id === exerciseId);
         if (exerciseIndex === -1) return;
 
-        const exercise = exercises[exerciseIndex];
+        const exercise = currentExercises[exerciseIndex];
         const currentSets = exercise.sets || [];
 
         const limitValidation = checkSetLimits(currentSets, count, setType);
@@ -209,7 +227,7 @@ export const useWorkoutSets = ({
         }
 
         try {
-            const targetWorkoutId = workout.id;
+            const targetWorkoutId = workoutRef.current.id;
             const { data: existingSeries } = await WorkoutService.getSeriesForExercise(targetWorkoutId, exerciseId);
             const currentCount = existingSeries?.length || 0;
             const lastSeries = existingSeries && existingSeries.length > 0 ? existingSeries[existingSeries.length - 1] : null;
@@ -242,14 +260,14 @@ export const useWorkoutSets = ({
             LogService.error('Failed to add sets', error);
             Alert.alert('Error Add Sets', String(error));
         }
-    };
+    }, [loadSeriesForExercise]);
 
-    const addSet = async (exerciseId: string, setType: SetType = 'normal') => {
+    const addSet = useCallback(async (exerciseId: string, setType: SetType = 'normal') => {
         await addSets(exerciseId, 1, setType);
-    };
+    }, [addSets]);
 
-    const updateSet = async (setId: string, field: string, value: string | number | boolean | SetType | null) => {
-        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
+    const updateSet = useCallback(async (setId: string, field: string, value: string | number | boolean | SetType | null) => {
+        const canEdit = modeRef.current === 'ACTIVE' || modeRef.current === 'PREVIEW' || isEditingTemplateRef.current;
         if (!canEdit) return;
 
         let dbField = field;
@@ -299,19 +317,20 @@ export const useWorkoutSets = ({
         } catch (error) {
             LogService.error('Failed to update set', error);
         }
-    };
+    }, []);
 
-    const toggleCompleteSet = async (setId: string, isCompleted: boolean) => {
-        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
+    const toggleCompleteSet = useCallback(async (setId: string, isCompleted: boolean) => {
+        const canEdit = modeRef.current === 'ACTIVE' || modeRef.current === 'PREVIEW' || isEditingTemplateRef.current;
         if (!canEdit) return;
 
         let isPR = false;
 
-        if (isCompleted && onCheckPR) {
+        if (isCompleted && onCheckPRRef.current) {
             let targetEx: Exercise | undefined;
             let targetSet: Set | undefined;
 
-            for (const ex of exercises) {
+            const currentExercises = exercisesRef.current;
+            for (const ex of currentExercises) {
                 const s = ex.sets.find((item) => item.id === setId);
                 if (s) {
                     targetEx = ex;
@@ -321,7 +340,7 @@ export const useWorkoutSets = ({
             }
 
             if (targetEx && targetSet) {
-                const prResult = await onCheckPR(
+                const prResult = await onCheckPRRef.current(
                     { id: targetEx.id, titulo: targetEx.titulo },
                     { id: targetSet.id, peso_utilizado: targetSet.peso_utilizado, repeticiones: targetSet.repeticiones }
                 );
@@ -350,10 +369,10 @@ export const useWorkoutSets = ({
         } catch (error) {
             LogService.error('Failed to toggle set completion', error);
         }
-    };
+    }, []);
 
-    const updateSetType = async (setId: string, newType: SetType) => {
-        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
+    const updateSetType = useCallback(async (setId: string, newType: SetType) => {
+        const canEdit = modeRef.current === 'ACTIVE' || modeRef.current === 'PREVIEW' || isEditingTemplateRef.current;
         if (!canEdit) return;
 
         setExercises((prev) =>
@@ -368,13 +387,14 @@ export const useWorkoutSets = ({
         } catch (error) {
             LogService.error('Failed to update set type', error);
         }
-    };
+    }, []);
 
-    const deleteSet = async (setId: string, exerciseId: string) => {
-        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
+    const deleteSet = useCallback(async (setId: string, exerciseId: string) => {
+        const canEdit = modeRef.current === 'ACTIVE' || modeRef.current === 'PREVIEW' || isEditingTemplateRef.current;
         if (!canEdit) return;
 
-        const targetExercise = exercises.find(
+        const currentExercises = exercisesRef.current;
+        const targetExercise = currentExercises.find(
             (e) => e.id === exerciseId || e.routine_exercise_id === exerciseId
         );
         const originalSets = targetExercise?.sets || [];
@@ -403,39 +423,39 @@ export const useWorkoutSets = ({
             }
         } catch (error) {
             LogService.error('Failed to delete set', error);
-            if (workout) loadExercises(routineDayId, workout.id);
+            if (workoutRef.current) loadExercises(routineDayIdRef.current, workoutRef.current.id);
         }
-    };
+    }, [loadExercises]);
 
-    const removeExercise = async (exerciseId: string, routineExerciseId: string) => {
-        if (mode !== 'ACTIVE' && mode !== 'PREVIEW') return;
+    const removeExercise = useCallback(async (exerciseId: string, routineExerciseId: string) => {
+        if (modeRef.current !== 'ACTIVE' && modeRef.current !== 'PREVIEW') return;
         setExercises((prev) => prev.filter((e) => e.id !== exerciseId));
 
         try {
             if (routineExerciseId) {
                 await WorkoutService.removeExerciseFromRoutine(routineExerciseId);
-            } else if (workout) {
-                await WorkoutService.removeExerciseFromWorkout(workout.id, exerciseId);
+            } else if (workoutRef.current) {
+                await WorkoutService.removeExerciseFromWorkout(workoutRef.current.id, exerciseId);
             }
         } catch (error) {
             LogService.error('Failed to remove exercise', error);
-            if (workout) loadExercises(routineDayId, workout.id);
+            if (workoutRef.current) loadExercises(routineDayIdRef.current, workoutRef.current.id);
         }
-    };
+    }, [loadExercises]);
 
-    const addExercise = async (exerciseId: string) => {
-        if (!workout || (mode !== 'ACTIVE' && mode !== 'PREVIEW')) return;
+    const addExercise = useCallback(async (exerciseId: string) => {
+        if (!workoutRef.current || (modeRef.current !== 'ACTIVE' && modeRef.current !== 'PREVIEW')) return;
 
         try {
-            await WorkoutService.addExerciseToWorkout(workout.id, exerciseId);
-            loadExercises(routineDayId, workout.id);
+            await WorkoutService.addExerciseToWorkout(workoutRef.current.id, exerciseId);
+            loadExercises(routineDayIdRef.current, workoutRef.current.id);
         } catch (error) {
             LogService.error('Failed to add exercise', error);
         }
-    };
+    }, [loadExercises]);
 
-    const updateWeightType = async (routineExerciseId: string, exerciseId: string, tipoPeso: TipoPeso) => {
-        const canEdit = mode === 'ACTIVE' || mode === 'PREVIEW' || isEditingTemplate;
+    const updateWeightType = useCallback(async (routineExerciseId: string, exerciseId: string, tipoPeso: TipoPeso) => {
+        const canEdit = modeRef.current === 'ACTIVE' || modeRef.current === 'PREVIEW' || isEditingTemplateRef.current;
         if (!canEdit) return;
 
         setExercises((prev) =>
@@ -450,16 +470,16 @@ export const useWorkoutSets = ({
             await WorkoutService.updateWeightType(routineExerciseId, tipoPeso);
         } catch (error) {
             LogService.error('Failed to update weight type', error);
-            if (workout) loadExercises(routineDayId, workout.id);
+            if (workoutRef.current) loadExercises(routineDayIdRef.current, workoutRef.current.id);
         }
-    };
+    }, [loadExercises]);
 
-    const swapExercise = async (
+    const swapExercise = useCallback(async (
         oldRoutineExerciseId: string,
         newExercise: { id: string; titulo: string; grupo_muscular?: string; imagen_url?: string; tipo_peso?: TipoPeso },
         newSetsCount: number = 3
     ) => {
-        if (!workout) return false;
+        if (!workoutRef.current) return false;
 
         try {
             setExercises((prev) =>
@@ -487,24 +507,24 @@ export const useWorkoutSets = ({
             );
 
             const res = await WorkoutService.swapExerciseInWorkout(
-                workout.id,
+                workoutRef.current.id,
                 oldRoutineExerciseId,
                 newExercise.id,
                 newSetsCount
             );
 
-            await loadExercises(routineDayId, workout.id);
+            await loadExercises(routineDayIdRef.current, workoutRef.current.id);
             return !res.error;
         } catch (error) {
             LogService.error('Failed to swap exercise in controller:', error);
-            if (workout) await loadExercises(routineDayId, workout.id);
+            if (workoutRef.current) await loadExercises(routineDayIdRef.current, workoutRef.current.id);
             return false;
         }
-    };
+    }, [loadExercises]);
 
     const reloadExercises = useCallback(async () => {
-        await loadExercises(routineDayId, workout?.id || null);
-    }, [loadExercises, routineDayId, workout?.id]);
+        await loadExercises(routineDayIdRef.current, workoutRef.current?.id || null);
+    }, [loadExercises]);
 
     return {
         exercises,

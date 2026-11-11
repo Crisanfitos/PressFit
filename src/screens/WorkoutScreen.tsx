@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -81,21 +81,21 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
         navigation,
     });
 
-    const navigateToExerciseLibrary = () => {
+    const navigateToExerciseLibrary = useCallback(() => {
         state.needsRefreshRef.current = true;
         navigation.navigate('ExerciseLibrary', { routineDayId: workout?.id || routineDayId });
-    };
+    }, [navigation, workout?.id, routineDayId, state.needsRefreshRef]);
 
-    const handleSwapExercise = (exercise: any) => {
+    const handleSwapExercise = useCallback((exercise: any) => {
         state.needsRefreshRef.current = true;
         navigation.navigate('SwapExercise', {
             workoutId: workout?.id || initialWorkoutId,
             routineDayId: routineDayId || workout?.rutina_diaria_id,
             oldExercise: exercise,
         });
-    };
+    }, [navigation, workout?.id, initialWorkoutId, routineDayId, workout?.rutina_diaria_id, state.needsRefreshRef]);
 
-    const handleToggleCompleteSet = (setId: string, isCompleted: boolean) => {
+    const handleToggleCompleteSet = useCallback((setId: string, isCompleted: boolean) => {
         toggleCompleteSet(setId, isCompleted);
         if (isCompleted && alertContext?.showToast) {
             alertContext.showToast({
@@ -106,7 +106,37 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                 duration: 8000,
             });
         }
-    };
+    }, [toggleCompleteSet, alertContext, t]);
+
+    const handleNavigateDetail = useCallback((id: string) => {
+        navigation.navigate('ExerciseDetail', { exerciseId: id });
+    }, [navigation]);
+
+    const handleDeleteExercise = useCallback((id: string, name: string, reId: string) => {
+        confirmDeleteExercise(name, async () => {
+            state.setSaving(true);
+            await removeExercise(id, reId);
+            state.setSaving(false);
+        });
+    }, [removeExercise, state.setSaving]);
+
+    const handleDeleteSet = useCallback((sId: string, eId: string) => {
+        confirmDeleteSet(async () => {
+            state.setSaving(true);
+            await deleteSet(sId, eId);
+            state.setSaving(false);
+        });
+    }, [deleteSet, state.setSaving]);
+
+    const handleAddSet = useCallback(async (id: string) => {
+        state.setSaving(true);
+        await addSet(id);
+        state.setSaving(false);
+    }, [addSet, state.setSaving]);
+
+    const handleGetGhostValue = useCallback((eId: string, sNum: number, fld: 'weight' | 'reps' | 'rpe') => {
+        return getGhostValue(previousWorkout, eId, sNum, fld);
+    }, [previousWorkout]);
 
     const handleFinishWorkout = () => {
         Alert.alert(t('workout.finishWorkout', 'Finalizar Entrenamiento'), t('workout.finishWorkoutConfirm', '¿Deseas finalizar este entrenamiento?'), [
@@ -208,16 +238,16 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                 savedTimerSetIds={state.savedTimerSetIds}
                                 onToggleCollapse={state.toggleExerciseCollapsed}
                                 onUpdateWeightType={updateWeightType}
-                                onNavigateDetail={(id) => navigation.navigate('ExerciseDetail', { exerciseId: id })}
-                                onDeleteExercise={(id, name, reId) => confirmDeleteExercise(name, async () => { state.setSaving(true); await removeExercise(id, reId); state.setSaving(false); })}
+                                onNavigateDetail={handleNavigateDetail}
+                                onDeleteExercise={handleDeleteExercise}
                                 onSetChange={updateSet}
-                                onDeleteSet={(sId, eId) => confirmDeleteSet(async () => { state.setSaving(true); await deleteSet(sId, eId); state.setSaving(false); })}
+                                onDeleteSet={handleDeleteSet}
                                 onStartRestTimer={state.handleStartRestTimer}
-                                onAddSet={async (id) => { state.setSaving(true); await addSet(id); state.setSaving(false); }}
+                                onAddSet={handleAddSet}
                                 onSwapExercise={(mode === 'ACTIVE' || isStructureEditable) ? handleSwapExercise : undefined}
                                 onOpenPlateCalculator={state.handleOpenPlateCalculator}
                                 onToggleCompleteSet={handleToggleCompleteSet}
-                                getGhostValue={(eId, sNum, fld) => getGhostValue(previousWorkout, eId, sNum, fld)}
+                                getGhostValue={handleGetGhostValue}
                             />
                         ))
                     )}

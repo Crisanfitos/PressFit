@@ -334,7 +334,65 @@ describe('PersonalRecordService (PF-263)', () => {
             expect(res.data?.max1RM).toBeGreaterThan(95);
         });
 
+        it('fetches historical PRs via get_exercise_prs RPC fast-path', async () => {
+            (supabase.rpc as jest.Mock).mockResolvedValue({
+                data: {
+                    maxWeight: 140,
+                    maxVolume: 1400,
+                    max1RM: 160,
+                },
+                error: null,
+            });
+
+            const res = await PersonalRecordService.getHistoricalPRs(mockUserId, mockExerciseId);
+
+            expect(supabase.rpc).toHaveBeenCalledWith('get_exercise_prs', {
+                p_usuario_id: mockUserId,
+                p_ejercicio_id: mockExerciseId,
+            });
+            expect(res.error).toBeNull();
+            expect(res.data).toEqual({
+                maxWeight: 140,
+                maxVolume: 1400,
+                max1RM: 160,
+            });
+        });
+
+        it('falls back to client calculation when get_exercise_prs RPC returns error', async () => {
+            (supabase.rpc as jest.Mock).mockResolvedValueOnce({
+                data: null,
+                error: { message: 'function get_exercise_prs does not exist' },
+            });
+
+            const mockRows = [
+                { peso_utilizado: 90, repeticiones: 10 },
+            ];
+
+            const mockQuery = {
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                not: jest.fn().mockReturnThis(),
+            };
+            (mockQuery.not as jest.Mock).mockReturnValueOnce(mockQuery);
+            (mockQuery.not as jest.Mock).mockResolvedValueOnce({
+                data: mockRows,
+                error: null,
+            });
+
+            (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+
+            const res = await PersonalRecordService.getHistoricalPRs(mockUserId, mockExerciseId);
+
+            expect(res.error).toBeNull();
+            expect(res.data?.maxWeight).toBe(90);
+            expect(res.data?.maxVolume).toBe(900);
+            expect(res.data?.max1RM).toBeGreaterThan(90);
+        });
+
         it('returns zeroes defensively if an exception is caught', async () => {
+            (supabase.rpc as jest.Mock).mockImplementation(() => {
+                throw new Error('Database disconnected');
+            });
             (supabase.from as jest.Mock).mockImplementation(() => {
                 throw new Error('Database disconnected');
             });

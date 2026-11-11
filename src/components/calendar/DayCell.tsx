@@ -12,7 +12,7 @@ export interface DayCellProps {
     onPress: (date: Date | null) => void;
 }
 
-export const DayCell: React.FC<DayCellProps> = ({
+export const DayCell: React.FC<DayCellProps> = React.memo(({
     day,
     index,
     dayStyle,
@@ -101,7 +101,7 @@ export const DayCell: React.FC<DayCellProps> = ({
             </View>
         </TouchableOpacity>
     );
-};
+});
 
 const styles = StyleSheet.create({
     dayCell: {

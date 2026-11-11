@@ -32,7 +32,7 @@ const RANGE_LABELS: Record<TimeRange, string> = {
     'Todo': 'Todo',
 };
 
-const StrengthProgressChart: React.FC<StrengthProgressChartProps> = ({
+const StrengthProgressChart: React.FC<StrengthProgressChartProps> = React.memo(({
     data,
     selectedRange,
     onRangeChange,
@@ -262,6 +262,6 @@ const StrengthProgressChart: React.FC<StrengthProgressChartProps> = ({
             </View>
         </View>
     );
-};
+});
 
 export default StrengthProgressChart;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View,
     Text,
@@ -20,7 +20,7 @@ interface PersonalNoteButtonProps {
     exerciseId: string;
 }
 
-export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exerciseId }) => {
+const PersonalNoteButtonComponent: React.FC<PersonalNoteButtonProps> = ({ exerciseId }) => {
     const { theme, themeMode } = useTheme();
     const { colors } = theme;
     const { note, loading, saving, saveNote } = useExerciseNote(exerciseId);
@@ -35,7 +35,7 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
         }
     }, [note]);
 
-    const handleSave = async () => {
+    const handleSave = useCallback(async () => {
         Keyboard.dismiss();
         if (!tempNote.trim()) {
             setModalVisible(false);
@@ -49,7 +49,7 @@ export const PersonalNoteButton: React.FC<PersonalNoteButtonProps> = ({ exercise
             const errorMessage = typeof error === 'object' ? JSON.stringify(error) : String(error) || 'Error desconocido';
             Alert.alert('Error al guardar', errorMessage);
         }
-    };
+    }, [tempNote, saveNote]);
 
     if (loading && !note) return null;
 
@@ -276,4 +276,5 @@ const styles = StyleSheet.create({
     },
 });
 
+export const PersonalNoteButton = React.memo(PersonalNoteButtonComponent);
 export default PersonalNoteButton;

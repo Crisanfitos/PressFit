@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
+import React, { createContext, useState, useEffect, ReactNode, useContext, useCallback, useMemo } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 import { AuthService } from '../services/AuthService';
@@ -62,7 +62,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return () => authListener?.data?.subscription?.unsubscribe?.();
     }, []);
 
-    const signInWithGoogle = async () => {
+    const signInWithGoogle = useCallback(async () => {
         try {
             // Create the redirect URL for Expo
             const redirectUrl = AuthSession.makeRedirectUri({
@@ -115,21 +115,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             LogService.error('Google sign-in error:', error);
             throw error;
         }
-    };
+    }, []);
 
-    const signInWithEmail = async (email: string, password: string) => {
+    const signInWithEmail = useCallback(async (email: string, password: string) => {
         return await AuthService.signInWithEmail(email, password);
-    };
+    }, []);
 
-    const signUpWithEmail = async (email: string, password: string, fullName: string) => {
+    const signUpWithEmail = useCallback(async (email: string, password: string, fullName: string) => {
         return await AuthService.signUpWithEmail(email, password, fullName);
-    };
+    }, []);
 
-    const signOut = async () => {
+    const signOut = useCallback(async () => {
         await AuthService.signOut();
-    };
+    }, []);
 
-    const value: AuthContextType = {
+    const value: AuthContextType = useMemo(() => ({
         user,
         session,
         isLoading,
@@ -138,7 +138,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         signUpWithEmail,
         signOut,
         isAuthenticated: !!user,
-    };
+    }), [user, session, isLoading, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut]);
 
     return (
         <AuthContext.Provider value={value}>
