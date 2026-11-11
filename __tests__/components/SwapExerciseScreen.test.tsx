@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, cleanup, act } from '@testing-library/react-native';
 import { SwapExerciseScreen } from '../../src/screens/SwapExerciseScreen';
 import { useExerciseController } from '../../src/controllers/useExerciseController';
 import { WorkoutService } from '../../src/services/WorkoutService';
@@ -43,7 +43,13 @@ describe('SwapExerciseScreen Component (RNTL) (PF-310)', () => {
             loading: false,
             searchQuery: '',
             filters: { primaryMuscle: null, secondaryMuscle: null, category: null, difficulty: null },
-            filterOptions: { primaryMuscles: ['Pecho', 'Espalda'], secondaryMuscles: [], categories: [], difficulties: [] },
+            filterOptions: {
+                primaryMuscles: ['Pecho', 'Espalda'],
+                secondaryMuscles: [],
+                categories: [],
+                difficulties: [],
+                equipments: ['Mancuernas', 'Barra'],
+            },
             setSearchQuery: jest.fn(),
             setFilter: jest.fn(),
             clearFilter: jest.fn(),
@@ -56,6 +62,10 @@ describe('SwapExerciseScreen Component (RNTL) (PF-310)', () => {
             data: { id: 're-100', ejercicio_id: 'ex-new-1' },
             error: null,
         });
+    });
+
+    afterEach(() => {
+        cleanup();
     });
 
     it('renders header, sticky current exercise card and candidate list', async () => {
@@ -103,6 +113,84 @@ describe('SwapExerciseScreen Component (RNTL) (PF-310)', () => {
             expect(getByText('Paso 2 de 2: Revisar y ajustar')).toBeTruthy();
             expect(getByText('Comparativa de Ejercicios')).toBeTruthy();
         });
+    });
+
+    it('handles real-time search input and clear button (PF-440)', async () => {
+        const mockSetSearchQuery = jest.fn();
+        mockUseExerciseController.mockReturnValue({
+            exercises: mockExercises,
+            loading: false,
+            searchQuery: 'Press',
+            filters: { primaryMuscle: null, secondaryMuscle: null, category: null, difficulty: null, equipment: null },
+            filterOptions: { primaryMuscles: ['Pecho'], secondaryMuscles: [], categories: [], difficulties: [], equipments: ['Barra'] },
+            setSearchQuery: mockSetSearchQuery,
+            setFilter: jest.fn(),
+            clearFilter: jest.fn(),
+            clearAllFilters: jest.fn(),
+            hasActiveFilters: false,
+            refetchExercises: jest.fn(),
+        } as any);
+
+        const { getByTestId } = await render(
+            <SwapExerciseScreen navigation={mockNavigation} route={mockRoute} />
+        );
+
+        const searchInput = getByTestId('swap-exercise-search-input');
+        expect(searchInput.props.value).toBe('Press');
+
+        await act(async () => {
+            fireEvent.changeText(searchInput, 'Inclinado');
+        });
+        expect(mockSetSearchQuery).toHaveBeenCalledWith('Inclinado');
+
+        const clearButton = getByTestId('swap-exercise-clear-search');
+        await act(async () => {
+            fireEvent.press(clearButton);
+        });
+        expect(mockSetSearchQuery).toHaveBeenCalledWith('');
+    });
+
+    it('interacts with muscle and equipment quick filter chips (PF-440)', async () => {
+        const mockSetFilter = jest.fn();
+        const mockClearFilter = jest.fn();
+        mockUseExerciseController.mockReturnValue({
+            exercises: mockExercises,
+            loading: false,
+            searchQuery: '',
+            filters: { primaryMuscle: 'Pecho', secondaryMuscle: null, category: null, difficulty: null, equipment: null },
+            filterOptions: { primaryMuscles: ['Pecho', 'Espalda'], secondaryMuscles: [], categories: [], difficulties: [], equipments: ['Mancuernas', 'Barra'] },
+            setSearchQuery: jest.fn(),
+            setFilter: mockSetFilter,
+            clearFilter: mockClearFilter,
+            clearAllFilters: jest.fn(),
+            hasActiveFilters: true,
+            refetchExercises: jest.fn(),
+        } as any);
+
+        const { getByTestId } = await render(
+            <SwapExerciseScreen navigation={mockNavigation} route={mockRoute} />
+        );
+
+        // Active muscle chip 'Pecho' pressed -> clearFilter
+        const pechoChip = getByTestId('filter-chip-muscle-pecho');
+        await act(async () => {
+            fireEvent.press(pechoChip);
+        });
+        expect(mockClearFilter).toHaveBeenCalledWith('primaryMuscle');
+
+        // Inactive muscle chip 'Espalda' pressed -> setFilter
+        const espaldaChip = getByTestId('filter-chip-muscle-espalda');
+        await act(async () => {
+            fireEvent.press(espaldaChip);
+        });
+        expect(mockSetFilter).toHaveBeenCalledWith('primaryMuscle', 'Espalda');
+
+        // Equipment chip 'Mancuernas' pressed -> setFilter
+        const mancuernasChip = getByTestId('filter-chip-equipment-mancuernas');
+        await act(async () => {
+            fireEvent.press(mancuernasChip);
+        });
+        expect(mockSetFilter).toHaveBeenCalledWith('equipment', 'Mancuernas');
     });
 
     it('allows adjusting sets count with increment and decrement buttons on step 2', async () => {

@@ -74,11 +74,14 @@ const SwapCandidateItem = React.memo<SwapCandidateItemProps>(({
                         {item.titulo}
                     </Text>
                     <Text style={[styles.candidateSubtitle, { color: colors.textSecondary }]}>
-                        {item.musculos_primarios
-                            ? Array.isArray(item.musculos_primarios)
-                                ? item.musculos_primarios.join(', ')
-                                : item.musculos_primarios
-                            : t('swapExercise.generalMuscle', 'General')}
+                        {[
+                            item.musculos_primarios
+                                ? Array.isArray(item.musculos_primarios)
+                                    ? item.musculos_primarios.join(', ')
+                                    : item.musculos_primarios
+                                : item.grupo_muscular || t('swapExercise.generalMuscle', 'General'),
+                            item.equipamiento,
+                        ].filter(Boolean).join(' • ')}
                     </Text>
                 </View>
                 {isCurrent ? (
@@ -158,7 +161,10 @@ export const SwapExerciseStep1: React.FC<SwapExerciseStep1Props> = ({
                         onChangeText={setSearchQuery}
                     />
                     {searchQuery.length > 0 && (
-                        <TouchableOpacity onPress={() => setSearchQuery('')}>
+                        <TouchableOpacity
+                            testID="swap-exercise-clear-search"
+                            onPress={() => setSearchQuery('')}
+                        >
                             <MaterialIcons name="close" size={20} color={colors.textSecondary} />
                         </TouchableOpacity>
                     )}
@@ -169,6 +175,7 @@ export const SwapExerciseStep1: React.FC<SwapExerciseStep1Props> = ({
             <View style={styles.filtersWrapper}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterChipsContainer}>
                     <TouchableOpacity
+                        testID="filter-chip-muscle-all"
                         onPress={() => clearFilter('primaryMuscle')}
                         style={[
                             styles.filterChip,
@@ -187,11 +194,12 @@ export const SwapExerciseStep1: React.FC<SwapExerciseStep1Props> = ({
                             {t('common.all', 'Todos')}
                         </Text>
                     </TouchableOpacity>
-                    {filterOptions.primaryMuscles.map((muscle: string) => {
+                    {(filterOptions.primaryMuscles || []).map((muscle: string) => {
                         const isActive = filters.primaryMuscle === muscle;
                         return (
                             <TouchableOpacity
                                 key={muscle}
+                                testID={`filter-chip-muscle-${muscle.toLowerCase().replace(/\s+/g, '-')}`}
                                 onPress={() => (isActive ? clearFilter('primaryMuscle') : setFilter('primaryMuscle', muscle))}
                                 style={[
                                     styles.filterChip,
@@ -214,6 +222,60 @@ export const SwapExerciseStep1: React.FC<SwapExerciseStep1Props> = ({
                     })}
                 </ScrollView>
             </View>
+
+            {/* Equipment Quick Filter Chips */}
+            {filterOptions.equipments && filterOptions.equipments.length > 0 && (
+                <View style={styles.filtersWrapper}>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterChipsContainer}>
+                        <TouchableOpacity
+                            testID="filter-chip-equipment-all"
+                            onPress={() => clearFilter('equipment')}
+                            style={[
+                                styles.filterChip,
+                                {
+                                    backgroundColor: !filters.equipment ? colors.primary : colors.surface,
+                                    borderColor: !filters.equipment ? colors.primary : colors.border,
+                                },
+                            ]}
+                        >
+                            <Text
+                                style={[
+                                    styles.filterChipText,
+                                    { color: !filters.equipment ? '#ffffff' : colors.textSecondary },
+                                ]}
+                            >
+                                {t('common.allEquipment', 'Cualquier equipo')}
+                            </Text>
+                        </TouchableOpacity>
+                        {filterOptions.equipments.map((eq: string) => {
+                            const isActive = filters.equipment === eq;
+                            return (
+                                <TouchableOpacity
+                                    key={eq}
+                                    testID={`filter-chip-equipment-${eq.toLowerCase().replace(/\s+/g, '-')}`}
+                                    onPress={() => (isActive ? clearFilter('equipment') : setFilter('equipment', eq))}
+                                    style={[
+                                        styles.filterChip,
+                                        {
+                                            backgroundColor: isActive ? colors.primary : colors.surface,
+                                            borderColor: isActive ? colors.primary : colors.border,
+                                        },
+                                    ]}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.filterChipText,
+                                            { color: isActive ? '#ffffff' : colors.textSecondary },
+                                        ]}
+                                    >
+                                        {eq}
+                                    </Text>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </ScrollView>
+                </View>
+            )}
 
             {/* Exercise List */}
             {loading ? (

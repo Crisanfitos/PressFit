@@ -362,6 +362,7 @@ describe('useExerciseController & useExerciseDetailController (PF-262)', () => {
                 secondaryMuscle: null,
                 category: null,
                 difficulty: null,
+                equipment: null,
             });
         });
     });

@@ -6,13 +6,14 @@ export { Exercise };
 
 export type CatalogTab = 'all' | 'officials' | 'community';
 
-export type FilterKey = 'primaryMuscle' | 'secondaryMuscle' | 'category' | 'difficulty';
+export type FilterKey = 'primaryMuscle' | 'secondaryMuscle' | 'category' | 'difficulty' | 'equipment';
 
 export interface FilterState {
     primaryMuscle: string | null;
     secondaryMuscle: string | null;
     category: string | null;
     difficulty: string | null;
+    equipment?: string | null;
 }
 
 export interface FilterOptions {
@@ -20,6 +21,7 @@ export interface FilterOptions {
     secondaryMuscles: string[];
     categories: string[];
     difficulties: string[];
+    equipments?: string[];
 }
 
 /** Parse a field that may be a string (comma-separated) or string array into a flat array of trimmed values. */
@@ -41,6 +43,7 @@ const INITIAL_FILTERS: FilterState = {
     secondaryMuscle: null,
     category: null,
     difficulty: null,
+    equipment: null,
 };
 
 export const useExerciseController = (routineDayId: string | undefined, userId: string | undefined) => {
@@ -74,12 +77,14 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
         const secondarySet = new Set<string>();
         const categorySet = new Set<string>();
         const difficultySet = new Set<string>();
+        const equipmentSet = new Set<string>();
 
         exercises.forEach((ex) => {
-            parseField(ex.musculos_primarios).forEach((v) => primarySet.add(v));
+            parseField(ex.musculos_primarios || ex.grupo_muscular || ex.grupo_muscular_principal).forEach((v) => primarySet.add(v));
             parseField(ex.musculos_secundarios).forEach((v) => secondarySet.add(v));
             if (ex.categoria?.trim()) categorySet.add(ex.categoria.trim());
             if (ex.dificultad?.trim()) difficultySet.add(ex.dificultad.trim());
+            if (ex.equipamiento?.trim()) equipmentSet.add(ex.equipamiento.trim());
         });
 
         return {
@@ -87,6 +92,7 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
             secondaryMuscles: [...secondarySet].sort(),
             categories: [...categorySet].sort(),
             difficulties: [...difficultySet].sort(),
+            equipments: [...equipmentSet].sort(),
         };
     }, [exercises]);
 
@@ -106,7 +112,9 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
 
         // Apply filter dimensions with AND logic
         if (filters.primaryMuscle) {
-            filtered = filtered.filter((ex) => fieldContains(ex.musculos_primarios, filters.primaryMuscle!));
+            filtered = filtered.filter((ex) =>
+                fieldContains(ex.musculos_primarios || ex.grupo_muscular || ex.grupo_muscular_principal, filters.primaryMuscle!)
+            );
         }
         if (filters.secondaryMuscle) {
             filtered = filtered.filter((ex) => fieldContains(ex.musculos_secundarios, filters.secondaryMuscle!));
@@ -116,6 +124,9 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
         }
         if (filters.difficulty) {
             filtered = filtered.filter((ex) => ex.dificultad?.trim() === filters.difficulty);
+        }
+        if (filters.equipment) {
+            filtered = filtered.filter((ex) => ex.equipamiento?.trim() === filters.equipment);
         }
 
         // Apply catalog tab filtering (PF-251)
