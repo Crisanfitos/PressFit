@@ -35,6 +35,7 @@ export interface ExerciseCardProps {
     onDeleteExercise: (exerciseId: string, exerciseName: string, routineExerciseId: string) => void;
     onSetChange: (setId: string, field: string, value: string) => void;
     onDeleteSet: (setId: string, exerciseId: string) => void;
+    onDuplicateSet?: (setId: string, exerciseId: string) => void;
     onStartRestTimer: (setId: string) => void;
     onAddSet: (exerciseId: string) => void;
     onSwapExercise?: (exercise: any) => void;
@@ -63,6 +64,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     onDeleteExercise,
     onSetChange,
     onDeleteSet,
+    onDuplicateSet,
     onStartRestTimer,
     onAddSet,
     onSwapExercise,
@@ -284,6 +286,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                                 savedTimerSetIds={savedTimerSetIds}
                                 onSetChange={onSetChange}
                                 onDeleteSet={onDeleteSet}
+                                onDuplicateSet={onDuplicateSet}
                                 onStartRestTimer={onStartRestTimer}
                                 onOpenPlateCalculator={onOpenPlateCalculator}
                                 onToggleCompleteSet={onToggleCompleteSet}

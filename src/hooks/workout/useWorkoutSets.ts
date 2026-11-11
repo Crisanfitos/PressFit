@@ -80,6 +80,7 @@ export interface UseWorkoutSetsReturn {
     toggleCompleteSet: (setId: string, isCompleted: boolean) => Promise<void>;
     updateSetType: (setId: string, newType: SetType) => Promise<void>;
     deleteSet: (setId: string, exerciseId: string) => Promise<void>;
+    duplicateSet: (setId: string, exerciseId: string) => Promise<void>;
     removeExercise: (exerciseId: string, routineExerciseId: string) => Promise<void>;
     addExercise: (exerciseId: string) => Promise<void>;
     updateWeightType: (routineExerciseId: string, exerciseId: string, tipoPeso: TipoPeso) => Promise<void>;
@@ -265,6 +266,50 @@ export const useWorkoutSets = ({
     const addSet = useCallback(async (exerciseId: string, setType: SetType = 'normal') => {
         await addSets(exerciseId, 1, setType);
     }, [addSets]);
+
+    const duplicateSet = useCallback(async (setId: string, exerciseId: string) => {
+        const canEdit = modeRef.current === 'ACTIVE' || modeRef.current === 'PREVIEW' || isEditingTemplateRef.current;
+        if (!workoutRef.current || !canEdit) return;
+
+        const currentExercises = exercisesRef.current;
+        const exercise = currentExercises.find((e) => e.id === exerciseId);
+        if (!exercise) return;
+
+        const currentSets = exercise.sets || [];
+        const sourceSet = currentSets.find((s) => s.id === setId);
+        if (!sourceSet) return;
+
+        const limitValidation = checkSetLimits(currentSets, 1, sourceSet.tipo_serie || 'normal');
+        if (!limitValidation.allowed) {
+            Alert.alert('Límite de series', limitValidation.reason || 'No se pueden añadir más series.');
+            return;
+        }
+
+        try {
+            const targetWorkoutId = workoutRef.current.id;
+            const targetSetNumber = currentSets.length + 1;
+            const weight = Number(sourceSet.peso_utilizado || 0);
+            const reps = Number(sourceSet.repeticiones || 0);
+            const setType = sourceSet.tipo_serie || 'normal';
+
+            await WorkoutService.addSet(
+                targetWorkoutId,
+                exerciseId,
+                targetSetNumber,
+                weight,
+                reps,
+                setType
+            );
+
+            await loadSeriesForExercise(targetWorkoutId, exerciseId);
+            if (HapticService.success) {
+                HapticService.success();
+            }
+        } catch (error: unknown) {
+            LogService.error('Failed to duplicate set', error);
+            Alert.alert('Error Duplicate Set', String(error));
+        }
+    }, [loadSeriesForExercise]);
 
     const updateSet = useCallback(async (setId: string, field: string, value: string | number | boolean | SetType | null) => {
         const canEdit = modeRef.current === 'ACTIVE' || modeRef.current === 'PREVIEW' || isEditingTemplateRef.current;
@@ -539,6 +584,7 @@ export const useWorkoutSets = ({
         toggleCompleteSet,
         updateSetType,
         deleteSet,
+        duplicateSet,
         removeExercise,
         addExercise,
         updateWeightType,

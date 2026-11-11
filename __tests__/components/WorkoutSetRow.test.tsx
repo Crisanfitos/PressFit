@@ -1033,6 +1033,71 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             expect(areWorkoutSetRowPropsEqual(baseProps, nextProps)).toBe(false);
         });
     });
+
+    describe('Smart Ghost Completion & Duplication (PF-438)', () => {
+        it('adopts ghost weight, reps, and rpe when marking an empty set complete', async () => {
+            const mockToggle = jest.fn();
+            const emptySet = {
+                id: 'set-empty',
+                numero_serie: 1,
+                peso_utilizado: 0,
+                repeticiones: 0,
+                rpe: 0,
+                is_completed: false,
+            };
+
+            const { getByTestId } = await render(
+                <WorkoutSetRow
+                    set={emptySet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    ghostWeight="60 kg"
+                    ghostReps="10"
+                    ghostRpe="8"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                    onToggleCompleteSet={mockToggle}
+                />
+            );
+
+            const completeCheckbox = getByTestId('set-complete-checkbox-0');
+            fireEvent.press(completeCheckbox);
+
+            expect(mockOnSetChange).toHaveBeenCalledWith('set-empty', 'peso_utilizado', '60');
+            expect(mockOnSetChange).toHaveBeenCalledWith('set-empty', 'repeticiones', '10');
+            expect(mockOnSetChange).toHaveBeenCalledWith('set-empty', 'rpe', '8');
+            expect(mockOnSetChange).toHaveBeenCalledWith('set-empty', 'is_completed', 'true');
+            expect(mockToggle).toHaveBeenCalledWith('set-empty', true);
+        });
+
+        it('calls onDuplicateSet from contextual action modal', async () => {
+            const mockOnDuplicate = jest.fn();
+            const { getByTestId, findByTestId } = await render(
+                <WorkoutSetRow
+                    set={defaultSet}
+                    setIndex={0}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={true}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                    onDuplicateSet={mockOnDuplicate}
+                />
+            );
+
+            const row = getByTestId('set-row-0');
+            fireEvent(row, 'longPress');
+
+            const duplicateBtn = await findByTestId('action-duplicate-set');
+            fireEvent.press(duplicateBtn);
+
+            expect(mockOnDuplicate).toHaveBeenCalledWith(defaultSet.id, 'ex-1');
+        });
+    });
 });
 
 
