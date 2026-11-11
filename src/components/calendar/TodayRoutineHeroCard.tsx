@@ -20,7 +20,7 @@ export interface TodayRoutineHeroCardProps {
     testID?: string;
 }
 
-export const TodayRoutineHeroCard: React.FC<TodayRoutineHeroCardProps> = ({
+export const TodayRoutineHeroCard: React.FC<TodayRoutineHeroCardProps> = React.memo(({
     dayName = 'HOY',
     routineTitle,
     description,
@@ -282,7 +282,7 @@ export const TodayRoutineHeroCard: React.FC<TodayRoutineHeroCardProps> = ({
             </TouchableOpacity>
         </View>
     );
-};
+});
 
 const styles = StyleSheet.create({
     card: {

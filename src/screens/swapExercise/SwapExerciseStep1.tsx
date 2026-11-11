@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
     View,
     Text,
@@ -30,6 +30,82 @@ export interface SwapExerciseStep1Props {
     handleContinueToStep2: () => void;
 }
 
+interface SwapCandidateItemProps {
+    item: Exercise;
+    isCurrent: boolean;
+    isSelected: boolean;
+    onSelect: (item: Exercise) => void;
+    colors: any;
+    t: any;
+}
+
+const SwapCandidateItem = React.memo<SwapCandidateItemProps>(({
+    item,
+    isCurrent,
+    isSelected,
+    onSelect,
+    colors,
+    t,
+}) => {
+    const handlePress = useCallback(() => {
+        if (!isCurrent) {
+            onSelect(item);
+        }
+    }, [isCurrent, onSelect, item]);
+
+    return (
+        <TouchableOpacity
+            testID={`swap-candidate-${item.id}`}
+            activeOpacity={0.7}
+            onPress={handlePress}
+            style={[
+                styles.candidateCard,
+                {
+                    backgroundColor: colors.surface,
+                    borderColor: isSelected ? colors.primary : colors.border,
+                    borderWidth: isSelected ? 2 : 1,
+                    opacity: isCurrent ? 0.5 : 1,
+                },
+            ]}
+        >
+            <View style={styles.candidateHeader}>
+                <View style={{ flex: 1 }}>
+                    <Text style={[styles.candidateTitle, { color: colors.text }]} numberOfLines={1}>
+                        {item.titulo}
+                    </Text>
+                    <Text style={[styles.candidateSubtitle, { color: colors.textSecondary }]}>
+                        {item.musculos_primarios
+                            ? Array.isArray(item.musculos_primarios)
+                                ? item.musculos_primarios.join(', ')
+                                : item.musculos_primarios
+                            : t('swapExercise.generalMuscle', 'General')}
+                    </Text>
+                </View>
+                {isCurrent ? (
+                    <View style={[styles.badge, { backgroundColor: colors.border }]}>
+                        <Text style={[styles.badgeText, { color: colors.textSecondary }]}>
+                            {t('swapExercise.currentBadge', 'Actual')}
+                        </Text>
+                    </View>
+                ) : (
+                    <View
+                        style={[
+                            styles.radioCircle,
+                            {
+                                borderColor: isSelected ? colors.primary : colors.border,
+                                backgroundColor: isSelected ? colors.primary : 'transparent',
+                            },
+                        ]}
+                    >
+                        {isSelected && <MaterialIcons name="check" size={14} color="#ffffff" />}
+                    </View>
+                )}
+            </View>
+        </TouchableOpacity>
+    );
+});
+SwapCandidateItem.displayName = 'SwapCandidateItem';
+
 export const SwapExerciseStep1: React.FC<SwapExerciseStep1Props> = ({
     colors,
     exercises,
@@ -47,61 +123,25 @@ export const SwapExerciseStep1: React.FC<SwapExerciseStep1Props> = ({
 }) => {
     const { t } = useTranslation();
 
-    const renderCandidateItem = ({ item }: { item: Exercise }) => {
-        const isCurrent = item.id === oldExercise?.id;
-        const isSelected = selectedCandidate?.id === item.id;
+    const renderCandidateItem = useCallback(
+        ({ item }: { item: Exercise }) => (
+            <SwapCandidateItem
+                item={item}
+                isCurrent={item.id === oldExercise?.id}
+                isSelected={selectedCandidate?.id === item.id}
+                onSelect={handleSelectExercise}
+                colors={colors}
+                t={t}
+            />
+        ),
+        [oldExercise?.id, selectedCandidate?.id, handleSelectExercise, colors, t]
+    );
 
-        return (
-            <TouchableOpacity
-                testID={`swap-candidate-${item.id}`}
-                activeOpacity={0.7}
-                onPress={() => !isCurrent && handleSelectExercise(item)}
-                style={[
-                    styles.candidateCard,
-                    {
-                        backgroundColor: colors.surface,
-                        borderColor: isSelected ? colors.primary : colors.border,
-                        borderWidth: isSelected ? 2 : 1,
-                        opacity: isCurrent ? 0.5 : 1,
-                    },
-                ]}
-            >
-                <View style={styles.candidateHeader}>
-                    <View style={{ flex: 1 }}>
-                        <Text style={[styles.candidateTitle, { color: colors.text }]} numberOfLines={1}>
-                            {item.titulo}
-                        </Text>
-                        <Text style={[styles.candidateSubtitle, { color: colors.textSecondary }]}>
-                            {item.musculos_primarios
-                                ? Array.isArray(item.musculos_primarios)
-                                    ? item.musculos_primarios.join(', ')
-                                    : item.musculos_primarios
-                                : t('swapExercise.generalMuscle', 'General')}
-                        </Text>
-                    </View>
-                    {isCurrent ? (
-                        <View style={[styles.badge, { backgroundColor: colors.border }]}>
-                            <Text style={[styles.badgeText, { color: colors.textSecondary }]}>
-                                {t('swapExercise.currentBadge', 'Actual')}
-                            </Text>
-                        </View>
-                    ) : (
-                        <View
-                            style={[
-                                styles.radioCircle,
-                                {
-                                    borderColor: isSelected ? colors.primary : colors.border,
-                                    backgroundColor: isSelected ? colors.primary : 'transparent',
-                                },
-                            ]}
-                        >
-                            {isSelected && <MaterialIcons name="check" size={14} color="#ffffff" />}
-                        </View>
-                    )}
-                </View>
-            </TouchableOpacity>
-        );
-    };
+    const getItemLayout = useCallback((_: any, index: number) => ({
+        length: 76,
+        offset: 76 * index,
+        index,
+    }), []);
 
     return (
         <View style={styles.contentFlex}>
@@ -185,8 +225,12 @@ export const SwapExerciseStep1: React.FC<SwapExerciseStep1Props> = ({
                     data={exercises}
                     keyExtractor={(item) => item.id}
                     renderItem={renderCandidateItem}
-                    extraData={selectedCandidate}
+                    extraData={selectedCandidate?.id}
                     contentContainerStyle={styles.listContent}
+                    getItemLayout={getItemLayout}
+                    initialNumToRender={10}
+                    maxToRenderPerBatch={8}
+                    windowSize={5}
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
                             <MaterialIcons name="fitness-center" size={48} color={colors.textSecondary} />

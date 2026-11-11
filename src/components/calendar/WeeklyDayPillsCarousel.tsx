@@ -20,7 +20,7 @@ export interface WeeklyDayPillsCarouselProps {
     testID?: string;
 }
 
-export const WeeklyDayPillsCarousel: React.FC<WeeklyDayPillsCarouselProps> = ({
+export const WeeklyDayPillsCarousel: React.FC<WeeklyDayPillsCarouselProps> = React.memo(({
     days,
     onSelectDay,
     colors,
@@ -63,7 +63,7 @@ export const WeeklyDayPillsCarousel: React.FC<WeeklyDayPillsCarouselProps> = ({
                                 {
                                     backgroundColor: pillBg,
                                     borderColor: pillBorder,
-                                },
+                                    },
                                 isActive && styles.activePill,
                                 isRest && styles.restPill,
                             ]}
@@ -136,7 +136,7 @@ export const WeeklyDayPillsCarousel: React.FC<WeeklyDayPillsCarouselProps> = ({
             </ScrollView>
         </View>
     );
-};
+});
 
 const styles = StyleSheet.create({
     wrapper: {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { HapticService } from '../../services/HapticService';
 import { checkActiveRestTimer, saveActiveWorkoutParams, getActiveWorkoutParams } from '../../services/TimerNotificationService';
 
@@ -36,6 +36,8 @@ export const useWorkoutScreenState = ({
 
     const hasInitializedCollapse = useRef(false);
     const needsRefreshRef = useRef(false);
+    const exercisesRef = useRef(exercises);
+    exercisesRef.current = exercises;
 
     useEffect(() => {
         if (!controllerLoading && exercises.length > 0 && !hasInitializedCollapse.current) {
@@ -74,23 +76,23 @@ export const useWorkoutScreenState = ({
         });
     }, [navigation, reloadExercises]);
 
-    const handleConfirmAddSets = async () => {
+    const handleConfirmAddSets = useCallback(async () => {
         if (!selectedExerciseId) return;
         setModalVisible(false);
         setSaving(true);
         await addSets(selectedExerciseId, setsToAdd);
         setSaving(false);
         setSelectedExerciseId(null);
-    };
+    }, [selectedExerciseId, setsToAdd, addSets]);
 
-    const handleStartRestTimer = (setId: string) => {
+    const handleStartRestTimer = useCallback((setId: string) => {
         HapticService.setCompleted();
         setLastCompletedSetId(setId);
         saveActiveWorkoutParams({ activeSetId: setId });
         setRestTimerVisible(true);
-    };
+    }, []);
 
-    const handleRestTimerStop = async (seconds: number) => {
+    const handleRestTimerStop = useCallback(async (seconds: number) => {
         const savedParams = await getActiveWorkoutParams();
         const targetSetId = lastCompletedSetId || savedParams?.activeSetId;
         if (targetSetId && seconds > 0) {
@@ -99,34 +101,36 @@ export const useWorkoutScreenState = ({
         }
         setLastCompletedSetId(null);
         await saveActiveWorkoutParams({ activeSetId: null });
-    };
+    }, [lastCompletedSetId, updateSet]);
 
-    const handleRestTimerDismiss = async () => {
+    const handleRestTimerDismiss = useCallback(async () => {
         setRestTimerVisible(false);
         setLastCompletedSetId(null);
         await saveActiveWorkoutParams({ activeSetId: null });
-    };
+    }, []);
 
-    const toggleExerciseCollapsed = (id: string) => {
+    const toggleExerciseCollapsed = useCallback((id: string) => {
         setCollapsedExercises((prev) => ({ ...prev, [id]: !prev[id] }));
-    };
+    }, []);
 
-    const handleOpenPlateCalculator = (weight: number, setId?: string, exerciseId?: string) => {
+    const handleOpenPlateCalculator = useCallback((weight: number, setId?: string, exerciseId?: string) => {
         setPlateCalculatorWeight(weight > 0 ? weight : 20);
         setActivePlateSetId(setId || null);
 
         let targetExId = exerciseId || null;
         if (!targetExId && setId) {
-            const found = exercises.find((ex) => (ex.sets || ex.series)?.some((s: any) => s.id === setId));
+            const currentExercises = exercisesRef.current;
+            const found = currentExercises.find((ex) => (ex.sets || ex.series)?.some((s: any) => s.id === setId));
             if (found) targetExId = found.id || found.routine_exercise_id;
         }
         setActivePlateExerciseId(targetExId);
         setPlateCalculatorVisible(true);
-    };
+    }, []);
 
-    const handleApplyPlateCalculatorWeight = async (weight: number) => {
-        const targetEx = exercises.find((ex) => (activePlateExerciseId && (ex.id === activePlateExerciseId || ex.routine_exercise_id === activePlateExerciseId)))
-            || (activePlateSetId ? exercises.find((ex) => (ex.sets || ex.series)?.some((s: any) => s.id === activePlateSetId)) : null);
+    const handleApplyPlateCalculatorWeight = useCallback(async (weight: number) => {
+        const currentExercises = exercisesRef.current;
+        const targetEx = currentExercises.find((ex) => (activePlateExerciseId && (ex.id === activePlateExerciseId || ex.routine_exercise_id === activePlateExerciseId)))
+            || (activePlateSetId ? currentExercises.find((ex) => (ex.sets || ex.series)?.some((s: any) => s.id === activePlateSetId)) : null);
 
         const targetSets = targetEx?.sets || targetEx?.series || [];
 
@@ -141,15 +145,15 @@ export const useWorkoutScreenState = ({
         setPlateCalculatorVisible(false);
         setActivePlateSetId(null);
         setActivePlateExerciseId(null);
-    };
+    }, [activePlateExerciseId, activePlateSetId, updateSet]);
 
-    const handleClosePlateCalculator = () => {
+    const handleClosePlateCalculator = useCallback(() => {
         setPlateCalculatorVisible(false);
         setActivePlateSetId(null);
         setActivePlateExerciseId(null);
-    };
+    }, []);
 
-    return {
+    return useMemo(() => ({
         collapsedExercises,
         saving,
         setSaving,
@@ -177,5 +181,26 @@ export const useWorkoutScreenState = ({
         handleRestTimerStop,
         handleRestTimerDismiss,
         toggleExerciseCollapsed,
-    };
+    }), [
+        collapsedExercises,
+        saving,
+        modalVisible,
+        setsToAdd,
+        selectedExerciseId,
+        restTimerVisible,
+        lastCompletedSetId,
+        savedTimerSetIds,
+        plateCalculatorVisible,
+        plateCalculatorWeight,
+        activePlateSetId,
+        activePlateExerciseId,
+        handleOpenPlateCalculator,
+        handleApplyPlateCalculatorWeight,
+        handleClosePlateCalculator,
+        handleConfirmAddSets,
+        handleStartRestTimer,
+        handleRestTimerStop,
+        handleRestTimerDismiss,
+        toggleExerciseCollapsed,
+    ]);
 };

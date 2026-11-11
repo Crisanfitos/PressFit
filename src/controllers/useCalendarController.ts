@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { RoutineService } from '../services/RoutineService';
 import { LogService } from '../services/LogService';
 import { RoutineDay, WeeklyRoutine } from '../types/models';
@@ -34,6 +34,49 @@ interface DayStatus {
     color: string;
 }
 
+// Pure date utility functions (module level)
+const getMondayOfWeek = (weekOffset: number): Date => {
+    const now = new Date();
+    const currentDay = now.getDay();
+    const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + diffToMonday + weekOffset * 7);
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+};
+
+const getSundayOfWeek = (monday: Date): Date => {
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    return sunday;
+};
+
+const formatDateKey = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+const formatDateDisplay = (date: Date): string => {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    return `${day}/${month}`;
+};
+
+const formatWeekHeader = (monday: Date): string => {
+    const sunday = getSundayOfWeek(monday);
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const startDay = monday.getDate();
+    const endDay = sunday.getDate();
+    const startMonth = months[monday.getMonth()];
+    const endMonth = months[sunday.getMonth()];
+    if (startMonth === endMonth) {
+        return `${startDay} - ${endDay} ${endMonth}`;
+    }
+    return `${startDay} ${startMonth} - ${endDay} ${endMonth}`;
+};
+
 export const useCalendarController = (userId: string | undefined, routineId: string | null = null) => {
     const [calendarDays, setCalendarDays] = useState<CalendarDay[]>([]);
     const [workoutStats, setWorkoutStats] = useState<Record<string, WorkoutStats>>({});
@@ -43,49 +86,6 @@ export const useCalendarController = (userId: string | undefined, routineId: str
     const [loadingMore, setLoadingMore] = useState(false);
     const [weekRange, setWeekRange] = useState({ min: -1, max: 3 });
     const todayIndexRef = useRef(0);
-
-    // Helper: Get Monday of a week offset from current week
-    const getMondayOfWeek = (weekOffset: number): Date => {
-        const now = new Date();
-        const currentDay = now.getDay();
-        const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay;
-        const monday = new Date(now);
-        monday.setDate(now.getDate() + diffToMonday + weekOffset * 7);
-        monday.setHours(0, 0, 0, 0);
-        return monday;
-    };
-
-    const getSundayOfWeek = (monday: Date): Date => {
-        const sunday = new Date(monday);
-        sunday.setDate(monday.getDate() + 6);
-        return sunday;
-    };
-
-    const formatDateKey = (date: Date): string => {
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
-    const formatDateDisplay = (date: Date): string => {
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        return `${day}/${month}`;
-    };
-
-    const formatWeekHeader = (monday: Date): string => {
-        const sunday = getSundayOfWeek(monday);
-        const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-        const startDay = monday.getDate();
-        const endDay = sunday.getDate();
-        const startMonth = months[monday.getMonth()];
-        const endMonth = months[sunday.getMonth()];
-        if (startMonth === endMonth) {
-            return `${startDay} - ${endDay} ${endMonth}`;
-        }
-        return `${startDay} ${startMonth} - ${endDay} ${endMonth}`;
-    };
 
     const generateDaysForWeekRange = useCallback((minWeek: number, maxWeek: number): CalendarDay[] => {
         const days: CalendarDay[] = [];
@@ -214,13 +214,13 @@ export const useCalendarController = (userId: string | undefined, routineId: str
         }
     }, [weekRange, fetchRoutineTemplates, generateDaysForWeekRange, fetchStatsForRange]);
 
-    const onRefresh = async () => {
+    const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await initialize();
         setRefreshing(false);
-    };
+    }, [initialize]);
 
-    const loadPreviousWeeks = async (count = 2) => {
+    const loadPreviousWeeks = useCallback(async (count = 2) => {
         setLoadingMore(true);
         try {
             const newMin = weekRange.min - count;
@@ -233,9 +233,9 @@ export const useCalendarController = (userId: string | undefined, routineId: str
         } finally {
             setLoadingMore(false);
         }
-    };
+    }, [weekRange.min, weekRange.max, generateDaysForWeekRange, fetchStatsForRange, routineTemplates]);
 
-    const loadNextWeeks = async (count = 2) => {
+    const loadNextWeeks = useCallback(async (count = 2) => {
         setLoadingMore(true);
         try {
             const newMax = weekRange.max + count;
@@ -248,18 +248,18 @@ export const useCalendarController = (userId: string | undefined, routineId: str
         } finally {
             setLoadingMore(false);
         }
-    };
+    }, [weekRange.min, weekRange.max, generateDaysForWeekRange, fetchStatsForRange, routineTemplates]);
 
-    const getRoutineDayForName = (dayName: string) => {
+    const getRoutineDayForName = useCallback((dayName: string) => {
         for (const routine of routineTemplates) {
             if (!routine.rutinas_diarias) continue;
             const rd = routine.rutinas_diarias.find((r: RoutineDay) => r.nombre_dia === dayName);
             if (rd) return { routine, routineDay: rd };
         }
         return null;
-    };
+    }, [routineTemplates]);
 
-    const getDayStatus = (stats: WorkoutStats | undefined, isToday: boolean, isPast: boolean): DayStatus => {
+    const getDayStatus = useCallback((stats: WorkoutStats | undefined, isToday: boolean, isPast: boolean): DayStatus => {
         if (!stats) {
             if (isPast) {
                 return { status: 'MISSED', label: 'No Realizado', icon: 'close', color: 'error' };
@@ -284,13 +284,15 @@ export const useCalendarController = (userId: string | undefined, routineId: str
         }
 
         return { status: 'PENDING', label: 'Empezar', icon: 'play-arrow', color: 'primary' };
-    };
+    }, []);
+
+    const refreshData = useCallback((silent?: boolean) => initialize(silent), [initialize]);
 
     useEffect(() => {
         if (userId) initialize();
     }, [userId, initialize]);
 
-    return {
+    return useMemo(() => ({
         calendarDays,
         workoutStats,
         routineTemplates,
@@ -299,10 +301,23 @@ export const useCalendarController = (userId: string | undefined, routineId: str
         loadingMore,
         todayIndex: todayIndexRef.current,
         onRefresh,
-        refreshData: (silent?: boolean) => initialize(silent),
+        refreshData,
         loadPreviousWeeks,
         loadNextWeeks,
         getRoutineDayForName,
         getDayStatus,
-    };
+    }), [
+        calendarDays,
+        workoutStats,
+        routineTemplates,
+        loading,
+        refreshing,
+        loadingMore,
+        onRefresh,
+        refreshData,
+        loadPreviousWeeks,
+        loadNextWeeks,
+        getRoutineDayForName,
+        getDayStatus,
+    ]);
 };

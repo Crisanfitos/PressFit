@@ -39,11 +39,20 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
     const [editingDayId, setEditingDayId] = useState<string | null>(null);
     const [editDescription, setEditDescription] = useState('');
 
+    const loadRoutine = useCallback(async () => {
+        setLoading(true);
+        const { data } = await RoutineService.getWeeklyRoutineWithDays(routineId);
+        if (data) {
+            setRoutine(data);
+        }
+        setLoading(false);
+    }, [routineId]);
+
     useEffect(() => {
         if (routineId) {
             loadRoutine();
         }
-    }, [routineId]);
+    }, [routineId, loadRoutine]);
 
     // Reload data when screen gains focus (navigating back from day detail)
     useFocusEffect(
@@ -51,51 +60,61 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
             if (routineId) {
                 loadRoutine();
             }
-        }, [routineId])
+        }, [routineId, loadRoutine])
     );
 
-    const loadRoutine = async () => {
-        setLoading(true);
-        const { data } = await RoutineService.getWeeklyRoutineWithDays(routineId);
-        if (data) {
-            setRoutine(data);
+    const dayDataMap = useMemo(() => {
+        if (!routine?.rutinas_diarias) return new Map<string, any>();
+
+        const map = new Map<string, any>();
+        const instancesByDay = new Map<string, any[]>();
+        for (const d of routine.rutinas_diarias) {
+            const dayName = d.nombre_dia;
+            if (!dayName) continue;
+            if (!d.fecha_dia) {
+                if (!map.has(dayName) || map.get(dayName).fecha_dia) {
+                    map.set(dayName, d);
+                }
+            } else {
+                let list = instancesByDay.get(dayName);
+                if (!list) {
+                    list = [];
+                    instancesByDay.set(dayName, list);
+                }
+                list.push(d);
+            }
         }
-        setLoading(false);
-    };
 
-    const getDayData = (dayName: string) => {
-        if (!routine?.rutinas_diarias) return null;
+        for (const [dayName, list] of instancesByDay.entries()) {
+            if (!map.has(dayName)) {
+                list.sort((a, b) => new Date(b.fecha_dia).getTime() - new Date(a.fecha_dia).getTime());
+                map.set(dayName, list[0]);
+            }
+        }
 
-        // First try to find a template (no fecha_dia)
-        const template = routine.rutinas_diarias.find(
-            (d: any) => d.nombre_dia === dayName && !d.fecha_dia
-        );
-        if (template) return template;
+        return map;
+    }, [routine?.rutinas_diarias]);
 
-        // If no template, find the most recent instance with this day name
-        const instances = routine.rutinas_diarias
-            .filter((d: any) => d.nombre_dia === dayName && d.fecha_dia)
-            .sort((a: any, b: any) => new Date(b.fecha_dia).getTime() - new Date(a.fecha_dia).getTime());
+    const getDayData = useCallback((dayName: string) => {
+        return dayDataMap.get(dayName) || null;
+    }, [dayDataMap]);
 
-        return instances[0] || null;
-    };
-
-    const getDayExerciseCount = (dayName: string) => {
-        const day = getDayData(dayName);
+    const getDayExerciseCount = useCallback((dayName: string) => {
+        const day = dayDataMap.get(dayName);
         return day?.ejercicios_programados?.length || 0;
-    };
+    }, [dayDataMap]);
 
-    const getDayId = (dayName: string) => {
-        const day = getDayData(dayName);
+    const getDayId = useCallback((dayName: string) => {
+        const day = dayDataMap.get(dayName);
         return day?.id;
-    };
+    }, [dayDataMap]);
 
-    const getDayDescription = (dayName: string) => {
-        const day = getDayData(dayName);
+    const getDayDescription = useCallback((dayName: string) => {
+        const day = dayDataMap.get(dayName);
         return day?.descripcion || '';
-    };
+    }, [dayDataMap]);
 
-    const handleEditDescription = async (dayName: string) => {
+    const handleEditDescription = useCallback(async (dayName: string) => {
         let dayId = getDayId(dayName);
         if (!dayId && userId) {
             const dayIndex = (DAY_NAMES as readonly string[]).indexOf(dayName);
@@ -109,9 +128,9 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
         if (!dayId) return;
         setEditingDayId(dayId);
         setEditDescription(getDayDescription(dayName));
-    };
+    }, [getDayId, userId, loadRoutine, getDayDescription]);
 
-    const handleSaveDescription = async () => {
+    const handleSaveDescription = useCallback(async () => {
         if (!editingDayId) return;
         const { error } = await RoutineService.updateRoutineDayDescription(
             editingDayId,
@@ -124,21 +143,21 @@ const RoutineDetailScreen: React.FC<RoutineDetailScreenProps> = ({ navigation, r
         }
         setEditingDayId(null);
         setEditDescription('');
-    };
+    }, [editingDayId, editDescription, t, loadRoutine]);
 
     // Calculate weekly summary metrics
     const { activeDaysCount, totalExercisesCount } = useMemo(() => {
         let activeDays = 0;
         let totalExercises = 0;
         DAY_NAMES.forEach((dayName) => {
-            const count = getDayExerciseCount(dayName);
+            const count = dayDataMap.get(dayName)?.ejercicios_programados?.length || 0;
             if (count > 0) {
                 activeDays += 1;
                 totalExercises += count;
             }
         });
         return { activeDaysCount: activeDays, totalExercisesCount: totalExercises };
-    }, [routine]);
+    }, [dayDataMap]);
 
     const styles = useMemo(() => createStyles(colors), [colors]);
 

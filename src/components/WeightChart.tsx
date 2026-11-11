@@ -24,7 +24,7 @@ interface SelectedPoint {
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
+const WeightChart: React.FC<WeightChartProps> = React.memo(({ data, colors }) => {
     const { t, i18n } = useTranslation();
     const [selectedPoint, setSelectedPoint] = useState<SelectedPoint | null>(null);
 
@@ -208,7 +208,7 @@ const WeightChart: React.FC<WeightChartProps> = ({ data, colors }) => {
             )}
         </View>
     );
-};
+});
 
 const styles = StyleSheet.create({
     container: {

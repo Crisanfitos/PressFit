@@ -294,6 +294,42 @@ export const DailyWorkoutService = {
             return { data: mockStore.startWorkout(routineDayId) as any, error: null };
         }
         try {
+            // Fast-path: Single-transaction PostgreSQL RPC (ACID, eliminates 15-20 sequential roundtrips)
+            if (typeof supabase.rpc === 'function') {
+                const { data: rpcData, error: rpcError } = (await supabase.rpc('start_daily_workout', {
+                    p_template_day_id: routineDayId,
+                    p_workout_date: date,
+                    p_start_time: startTime,
+                })) || {};
+
+                if (!rpcError && rpcData && typeof rpcData === 'object' && ('id' in rpcData || (typeof rpcData === 'string' && (rpcData as string).length > 0))) {
+                    const workoutId = typeof rpcData === 'object' && 'id' in rpcData ? (rpcData as any).id : rpcData;
+                    // Fetch full structured routine day with sorted exercises & series
+                    const { data: completeWorkout } = await this.getRoutineDayById(workoutId);
+                    return {
+                        data: completeWorkout || (rpcData as unknown as RoutineDay),
+                        error: null,
+                    };
+                }
+            }
+
+            LogService.warn('start_daily_workout RPC unavailable, falling back to multi-step client creation');
+            return this.startDailyWorkoutClientFallback(routineDayId, date, startTime);
+        } catch (error) {
+            LogService.error('Error in startDailyWorkout, falling back to client-side creation:', error);
+            return this.startDailyWorkoutClientFallback(routineDayId, date, startTime);
+        }
+    },
+
+    /**
+     * Client-side fallback routine day session instantiation.
+     */
+    async startDailyWorkoutClientFallback(
+        routineDayId: string,
+        date: string,
+        startTime: string
+    ): Promise<ServiceResponse<RoutineDay>> {
+        try {
             const { data: templateDay, error: templateError } = await supabase
                 .from('rutinas_diarias')
                 .select(`

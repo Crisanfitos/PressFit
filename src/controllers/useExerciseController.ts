@@ -154,7 +154,7 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
         });
     }, []);
 
-    const saveSelection = async () => {
+    const saveSelection = useCallback(async () => {
         if (selectedExercises.length === 0 || !routineDayId || !userId) return false;
 
         setSaving(true);
@@ -168,7 +168,9 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
         } finally {
             setSaving(false);
         }
-    };
+    }, [selectedExercises, routineDayId, userId]);
+
+    const clearSelection = useCallback(() => setSelectedExercises([]), []);
 
     const createCustomExercise = useCallback(async (input: CustomExerciseInput) => {
         setSaving(true);
@@ -185,7 +187,7 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
         }
     }, [fetchExercises]);
 
-    return {
+    return useMemo(() => ({
         exercises: filteredExercises,
         loading,
         saving,
@@ -202,8 +204,26 @@ export const useExerciseController = (routineDayId: string | undefined, userId: 
         selectedExercises,
         toggleSelection,
         saveSelection,
-        clearSelection: () => setSelectedExercises([]),
+        clearSelection,
         createCustomExercise,
         refetchExercises: fetchExercises,
-    };
+    }), [
+        filteredExercises,
+        loading,
+        saving,
+        searchQuery,
+        catalogTab,
+        filters,
+        setFilter,
+        clearFilter,
+        clearAllFilters,
+        hasActiveFilters,
+        filterOptions,
+        selectedExercises,
+        toggleSelection,
+        saveSelection,
+        clearSelection,
+        createCustomExercise,
+        fetchExercises,
+    ]);
 };

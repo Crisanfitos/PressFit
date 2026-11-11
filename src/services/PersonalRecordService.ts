@@ -93,8 +93,45 @@ export const PersonalRecordService = {
 
     /**
      * Fetch historical PRs (max weight, max single-set volume, max 1RM) for a specific exercise and user.
+     * Uses the Supabase RPC function `get_exercise_prs` as primary fast path,
+     * falling back to client-side calculation if RPC is unavailable.
      */
     async getHistoricalPRs(
+        userId: string,
+        exerciseId: string
+    ): Promise<ServiceResponse<ExercisePRs>> {
+        try {
+            // Fast-path: Offloaded PostgreSQL RPC
+            if (typeof supabase.rpc === 'function') {
+                const { data: rpcData, error: rpcError } = (await supabase.rpc('get_exercise_prs', {
+                    p_usuario_id: userId,
+                    p_ejercicio_id: exerciseId,
+                })) || {};
+
+                if (!rpcError && rpcData && typeof rpcData === 'object' && ('maxWeight' in rpcData || 'maxVolume' in rpcData || 'max1RM' in rpcData)) {
+                    return {
+                        data: {
+                            maxWeight: Number(rpcData.maxWeight) || 0,
+                            maxVolume: Number(rpcData.maxVolume) || 0,
+                            max1RM: Number(rpcData.max1RM) || 0,
+                        },
+                        error: null,
+                    };
+                }
+            }
+
+            LogService.warn('get_exercise_prs RPC unavailable, falling back to client-side calculation');
+            return this.getHistoricalPRsClientFallback(userId, exerciseId);
+        } catch (error) {
+            LogService.error('Error in getHistoricalPRs, falling back to client-side calculation:', error);
+            return this.getHistoricalPRsClientFallback(userId, exerciseId);
+        }
+    },
+
+    /**
+     * Client-side fallback calculation for historical PRs.
+     */
+    async getHistoricalPRsClientFallback(
         userId: string,
         exerciseId: string
     ): Promise<ServiceResponse<ExercisePRs>> {

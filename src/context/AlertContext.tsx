@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode, useCallback, useRef } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useCallback, useRef, useMemo } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from './ThemeContext';
@@ -111,7 +111,7 @@ export const AlertProvider: React.FC<AlertProviderProps> = ({ children }) => {
         }
     };
 
-    const styles = StyleSheet.create({
+    const styles = useMemo(() => StyleSheet.create({
         overlay: {
             flex: 1,
             backgroundColor: 'rgba(0,0,0,0.7)',
@@ -183,17 +183,24 @@ export const AlertProvider: React.FC<AlertProviderProps> = ({ children }) => {
         destructiveButtonText: {
             color: '#fff',
         },
-    });
+    }), [colors]);
 
-    const handleButtonPress = (button: AlertButton) => {
+    const handleButtonPress = useCallback((button: AlertButton) => {
         hideAlert();
         if (button.onPress) {
             button.onPress();
         }
-    };
+    }, [hideAlert]);
+
+    const value = useMemo<AlertContextType>(() => ({
+        showAlert,
+        hideAlert,
+        showToast,
+        hideToast,
+    }), [showAlert, hideAlert, showToast, hideToast]);
 
     return (
-        <AlertContext.Provider value={{ showAlert, hideAlert, showToast, hideToast }}>
+        <AlertContext.Provider value={value}>
             {children}
             <Toast
                 visible={toastVisible}

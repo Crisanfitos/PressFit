@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { useColorScheme, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as NavigationBar from 'expo-navigation-bar';
@@ -45,14 +45,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }, []);
 
     // Determine actual theme based on mode
-    const getResolvedTheme = (): Theme => {
+    const resolvedTheme = useMemo((): Theme => {
         if (themeMode === 'system') {
             return systemColorScheme === 'light' ? themes.light : themes.dark;
         }
         return themes[themeMode];
-    };
-
-    const resolvedTheme = getResolvedTheme();
+    }, [themeMode, systemColorScheme]);
 
     // Sync Android navigation bar color with the active theme background
     useEffect(() => {
@@ -69,26 +67,26 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         }
     }, [resolvedTheme.colors.background, themeMode, systemColorScheme]);
 
-    const setThemeMode = async (mode: ThemeMode) => {
+    const setThemeMode = useCallback(async (mode: ThemeMode) => {
         setThemeModeState(mode);
         try {
             await AsyncStorage.setItem(THEME_STORAGE_KEY, mode);
         } catch (error) {
             LogService.error('Error saving theme:', error);
         }
-    };
+    }, []);
 
-    const toggleTheme = () => {
+    const toggleTheme = useCallback(() => {
         const newMode = themeMode === 'dark' ? 'light' : 'dark';
         setThemeMode(newMode);
-    };
+    }, [themeMode, setThemeMode]);
 
-    const value: ThemeContextType = {
+    const value: ThemeContextType = useMemo(() => ({
         theme: resolvedTheme,
         themeMode,
         setThemeMode,
         toggleTheme,
-    };
+    }), [resolvedTheme, themeMode, setThemeMode, toggleTheme]);
 
     // Don't render until theme is loaded to prevent flash
     if (!isLoaded) {

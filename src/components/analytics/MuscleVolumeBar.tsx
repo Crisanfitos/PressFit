@@ -15,7 +15,7 @@ export interface MuscleVolumeBarProps {
     testID?: string;
 }
 
-export const MuscleVolumeBar: React.FC<MuscleVolumeBarProps> = ({
+export const MuscleVolumeBar: React.FC<MuscleVolumeBarProps> = React.memo(({
     muscle,
     effectiveSets,
     testID,
@@ -266,6 +266,6 @@ export const MuscleVolumeBar: React.FC<MuscleVolumeBarProps> = ({
             </Text>
         </View>
     );
-};
+});
 
 export default MuscleVolumeBar;

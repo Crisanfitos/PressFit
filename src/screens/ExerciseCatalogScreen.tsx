@@ -25,6 +25,45 @@ import {
 import { ExerciseService } from '../services/ExerciseService';
 import { LogService } from '../services/LogService';
 
+interface CatalogItemProps {
+  item: Exercise;
+  onSelect: (exerciseId: string) => void;
+  onThumbnailPress: (videoId: string | null) => void;
+  colors: any;
+  navigation: any;
+  onEdit: (item: any) => void;
+  onDelete: (item: any) => void;
+}
+
+const CatalogItem = React.memo<CatalogItemProps>(({
+  item,
+  onSelect,
+  onThumbnailPress,
+  colors,
+  navigation,
+  onEdit,
+  onDelete,
+}) => {
+  const handleSelect = useCallback(() => {
+    onSelect(item.id);
+  }, [item.id, onSelect]);
+
+  return (
+    <ExerciseListItem
+      item={item}
+      isSelected={false}
+      selectionMode={false}
+      onSelect={handleSelect}
+      onThumbnailPress={onThumbnailPress}
+      colors={colors}
+      navigation={navigation}
+      onEdit={onEdit}
+      onDelete={onDelete}
+    />
+  );
+});
+CatalogItem.displayName = 'CatalogItem';
+
 type ExerciseCatalogScreenProps = {
   navigation: any;
 };
@@ -120,25 +159,27 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
     { key: 'difficulty', label: t('exerciseCatalog.difficulty', 'Dificultad'), options: filterOptions.difficulties },
   ], [filterOptions, t]);
 
-  const openVideo = (videoId: string | null) => {
+  const openVideo = useCallback((videoId: string | null) => {
     if (videoId) {
       setCurrentVideoId(videoId);
       setVideoModalVisible(true);
     }
-  };
+  }, []);
 
-  const closeVideo = () => {
+  const closeVideo = useCallback(() => {
     setVideoModalVisible(false);
     setCurrentVideoId(null);
-  };
+  }, []);
+
+  const handleSelectExercise = useCallback((exerciseId: string) => {
+    navigation.navigate('ExerciseDetail', { exerciseId });
+  }, [navigation]);
 
   const renderItem = useCallback(
     ({ item }: { item: Exercise }) => (
-      <ExerciseListItem
+      <CatalogItem
         item={item}
-        isSelected={false}
-        selectionMode={false}
-        onSelect={() => navigation.navigate('ExerciseDetail', { exerciseId: item.id })}
+        onSelect={handleSelectExercise}
         onThumbnailPress={openVideo}
         colors={colors}
         navigation={navigation}
@@ -146,7 +187,7 @@ const ExerciseCatalogScreen: React.FC<ExerciseCatalogScreenProps> = ({ navigatio
         onDelete={handleDeleteExercise}
       />
     ),
-    [colors, navigation, handleEditExercise, handleDeleteExercise]
+    [colors, navigation, handleSelectExercise, openVideo, handleEditExercise, handleDeleteExercise]
   );
 
   const screenStyles = useMemo(
