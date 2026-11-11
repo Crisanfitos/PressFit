@@ -4,6 +4,7 @@ import { HapticService } from '../../src/services/HapticService';
 describe('HapticService', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        HapticService.setVibrationEnabled(true);
     });
 
     describe('Basic Feedback Methods', () => {
@@ -93,6 +94,40 @@ describe('HapticService', () => {
         it('gracefully handles error in error() without throwing', async () => {
             (Haptics.notificationAsync as jest.Mock).mockRejectedValueOnce(new Error('Hardware unsupported'));
             await expect(HapticService.error()).resolves.toBeUndefined();
+        });
+    });
+
+    describe('Gym Preferences Vibration Toggle (PF-437)', () => {
+        beforeEach(() => {
+            HapticService.setVibrationEnabled(true);
+        });
+
+        it('disables all haptic calls when vibration is set to false', async () => {
+            HapticService.setVibrationEnabled(false);
+            expect(HapticService.isVibrationEnabled()).toBe(false);
+
+            await HapticService.light();
+            await HapticService.medium();
+            await HapticService.heavy();
+            await HapticService.selection();
+            await HapticService.success();
+            await HapticService.warning();
+            await HapticService.error();
+            await HapticService.setCompleted();
+            await HapticService.timerFinished();
+
+            expect(Haptics.impactAsync).not.toHaveBeenCalled();
+            expect(Haptics.selectionAsync).not.toHaveBeenCalled();
+            expect(Haptics.notificationAsync).not.toHaveBeenCalled();
+        });
+
+        it('re-enables haptic calls when vibration is toggled back to true', async () => {
+            HapticService.setVibrationEnabled(false);
+            HapticService.setVibrationEnabled(true);
+            expect(HapticService.isVibrationEnabled()).toBe(true);
+
+            await HapticService.light();
+            expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Light);
         });
     });
 });

@@ -19,6 +19,7 @@ import {
     addSecondsToRestTimer,
 } from '../../services/TimerNotificationService';
 import { HapticService } from '../../services/HapticService';
+import { loadGymPreferences } from '../../utils/gymPreferences';
 
 export interface RestTimerFloatingBarProps {
     visible?: boolean;
@@ -48,6 +49,21 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
     const [seconds, setSeconds] = useState(0);
     const [timerActive, setTimerActive] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
+    const [targetSeconds, setTargetSeconds] = useState(_propTargetSeconds || 90);
+
+    useEffect(() => {
+        if (_propTargetSeconds) {
+            setTargetSeconds(_propTargetSeconds);
+        } else {
+            loadGymPreferences()
+                .then((prefs) => {
+                    if (prefs && prefs.defaultRestSec) {
+                        setTargetSeconds(prefs.defaultRestSec);
+                    }
+                })
+                .catch(() => {});
+        }
+    }, [_propTargetSeconds]);
 
     const isMountedRef = useRef(true);
     const slideAnim = useRef(new Animated.Value(100)).current;
@@ -369,7 +385,10 @@ export const RestTimerFloatingBar: React.FC<RestTimerFloatingBarProps> = ({
                     <View
                         style={[
                             styles.indicatorLine,
-                            { backgroundColor: isPaused ? '#eab308' : colors.primary },
+                            {
+                                width: `${Math.min(100, Math.round((seconds / Math.max(1, targetSeconds)) * 100))}%`,
+                                backgroundColor: isPaused ? '#eab308' : (seconds >= targetSeconds ? '#22c55e' : colors.primary),
+                            },
                         ]}
                     />
                 </View>

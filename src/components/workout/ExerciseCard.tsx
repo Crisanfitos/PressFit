@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ThemeColors } from '../../types/theme';
@@ -6,6 +6,7 @@ import { WeightTypeBadge } from '../WeightTypeBadge';
 import { PersonalNoteButton } from '../PersonalNoteButton';
 import WorkoutSetRow from '../WorkoutSetRow';
 import { TipoPeso, TIPO_PESO_SHORT_LABELS } from '../../types/setTypes';
+import { loadGymPreferences, type WeightUnit } from '../../utils/gymPreferences';
 import { MAX_TOTAL_SETS_PER_EXERCISE } from '../../utils/setLimits';
 
 export interface ExerciseCardProps {
@@ -40,6 +41,7 @@ export interface ExerciseCardProps {
     onOpenPlateCalculator?: (weight: number, setId?: string, exerciseId?: string) => void;
     onToggleCompleteSet?: (setId: string, isCompleted: boolean) => void;
     getGhostValue: (exerciseId: string, setNumber: number, field: 'weight' | 'reps' | 'rpe') => string | null;
+    weightUnit?: WeightUnit;
 }
 
 const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
@@ -67,7 +69,22 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     onOpenPlateCalculator,
     onToggleCompleteSet,
     getGhostValue,
+    weightUnit: weightUnitProp,
 }) => {
+    const [activeWeightUnit, setActiveWeightUnit] = useState<WeightUnit>(weightUnitProp || 'kg');
+
+    useEffect(() => {
+        if (weightUnitProp) {
+            setActiveWeightUnit(weightUnitProp);
+        } else {
+            loadGymPreferences()
+                .then((prefs) => {
+                    if (prefs?.weightUnit) setActiveWeightUnit(prefs.weightUnit);
+                })
+                .catch(() => {});
+        }
+    }, [weightUnitProp]);
+
     const setsList = exercise.sets || exercise.series || [];
     const isAtTotalLimit = setsList.length >= MAX_TOTAL_SETS_PER_EXERCISE;
     const canDeleteSets = isStructureEditable || mode === 'ACTIVE';
@@ -219,7 +236,11 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                         </Text>
                         <View style={[styles.inputGroup, { maxWidth: 80 }]}>
                             <Text style={[styles.referenceText, { color: colors.primary }]}>
-                                {TIPO_PESO_SHORT_LABELS[exercise.tipo_peso || 'total'] || 'KG'}
+                                {exercise.tipo_peso === 'corporal'
+                                    ? 'BW'
+                                    : exercise.tipo_peso === 'mancuerna'
+                                    ? (activeWeightUnit === 'lb' ? 'LBS/L' : 'KG/L')
+                                    : (activeWeightUnit === 'lb' ? 'LB' : 'KG')}
                             </Text>
                         </View>
                         <View style={[styles.inputGroup, { maxWidth: 80 }]}>

@@ -12,6 +12,7 @@ import LogoutConfirmationModal from '../components/LogoutConfirmationModal';
 import { AthleteHeroCard } from '../components/profile/AthleteHeroCard';
 import { GymPreferencesCard } from '../components/profile/GymPreferencesCard';
 import { HistoryService } from '../services/HistoryService';
+import { HapticService } from '../services/HapticService';
 import {
     loadGymPreferences,
     saveGymPreferences,
@@ -68,6 +69,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         setGymPrefs((prev) => {
             const next = { ...prev, ...patch };
             saveGymPreferences(next);
+            if (typeof next.restVibration === 'boolean') {
+                HapticService.setVibrationEnabled(next.restVibration);
+            }
             return next;
         });
     };
