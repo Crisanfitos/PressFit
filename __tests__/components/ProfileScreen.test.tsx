@@ -127,6 +127,16 @@ describe('ProfileScreen Component (RNTL)', () => {
         expect(mockNavigation.navigate).toHaveBeenCalledWith('PlateSettings');
     });
 
+    it('navigates to DataManagement screen when Gestor de Datos row is pressed (PF-442)', async () => {
+        const { getByTestId } = await renderProfileScreen();
+
+        const dataManagementBtn = getByTestId('open-data-management-button');
+        expect(dataManagementBtn).toBeTruthy();
+
+        fireEvent.press(dataManagementBtn);
+        expect(mockNavigation.navigate).toHaveBeenCalledWith('DataManagement');
+    });
+
     it('renders translated theme toggle status in ES and EN (PF-410)', async () => {
         const { getByTestId } = await renderProfileScreen();
 
