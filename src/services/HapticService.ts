@@ -1,4 +1,16 @@
 import * as Haptics from 'expo-haptics';
+import { loadGymPreferences } from '../utils/gymPreferences';
+
+let isVibrationEnabled = true;
+
+// Initialize from stored preferences
+loadGymPreferences()
+    .then((prefs) => {
+        if (prefs && typeof prefs.restVibration === 'boolean') {
+            isVibrationEnabled = prefs.restVibration;
+        }
+    })
+    .catch(() => {});
 
 /**
  * HapticService
@@ -7,9 +19,24 @@ import * as Haptics from 'expo-haptics';
  */
 export const HapticService = {
     /**
+     * Configure vibration enabled state globally (PF-437)
+     */
+    setVibrationEnabled(enabled: boolean): void {
+        isVibrationEnabled = enabled;
+    },
+
+    /**
+     * Check current vibration enabled state
+     */
+    isVibrationEnabled(): boolean {
+        return isVibrationEnabled;
+    },
+
+    /**
      * Trigger light impact feedback.
      */
     async light(): Promise<void> {
+        if (!isVibrationEnabled) return;
         try {
             await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         } catch (error) {
@@ -21,6 +48,7 @@ export const HapticService = {
      * Trigger medium impact feedback.
      */
     async medium(): Promise<void> {
+        if (!isVibrationEnabled) return;
         try {
             await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         } catch (error) {
@@ -32,6 +60,7 @@ export const HapticService = {
      * Trigger heavy impact feedback.
      */
     async heavy(): Promise<void> {
+        if (!isVibrationEnabled) return;
         try {
             await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
         } catch (error) {
@@ -43,6 +72,7 @@ export const HapticService = {
      * Trigger selection change feedback.
      */
     async selection(): Promise<void> {
+        if (!isVibrationEnabled) return;
         try {
             await Haptics.selectionAsync();
         } catch (error) {
@@ -54,6 +84,7 @@ export const HapticService = {
      * Trigger success notification feedback.
      */
     async success(): Promise<void> {
+        if (!isVibrationEnabled) return;
         try {
             await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         } catch (error) {
@@ -65,6 +96,7 @@ export const HapticService = {
      * Trigger warning notification feedback.
      */
     async warning(): Promise<void> {
+        if (!isVibrationEnabled) return;
         try {
             await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
         } catch (error) {
@@ -76,6 +108,7 @@ export const HapticService = {
      * Trigger error notification feedback.
      */
     async error(): Promise<void> {
+        if (!isVibrationEnabled) return;
         try {
             await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         } catch (error) {

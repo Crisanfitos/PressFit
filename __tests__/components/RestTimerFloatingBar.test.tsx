@@ -189,4 +189,23 @@ describe('RestTimerFloatingBar Component', () => {
         expect(await findByText('0:45')).toBeTruthy();
         expect(await findByText('Pausado')).toBeTruthy();
     });
+
+    it('adapts progress and targetSeconds from gym preferences (PF-437)', async () => {
+        (TimerNotificationService.checkActiveRestTimer as jest.Mock).mockResolvedValue({
+            active: true,
+            elapsedSeconds: 120,
+            paused: false,
+        });
+
+        const { findByText } = await render(
+            <ThemeProvider>
+                <RestTimerFloatingBar
+                    visible={true}
+                    targetSeconds={120}
+                />
+            </ThemeProvider>
+        );
+
+        expect(await findByText('2:00')).toBeTruthy();
+    });
 });
