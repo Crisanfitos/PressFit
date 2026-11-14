@@ -244,5 +244,41 @@ describe('routineRebalancePlanner (PF-446)', () => {
             expect(pecho?.deltaSets).toBe(0);
             expect(pecho?.projectedSets).toBe(24);
         });
+
+        it('ignores historical logged days (fecha_dia != null) and duplicate template day names', () => {
+            const routine = makeRoutine();
+            routine.rutinas_diarias!.push({
+                id: 'day-push-logged-history',
+                rutina_semanal_id: 'routine-1',
+                nombre_dia: 'Lunes - Empuje',
+                fecha_dia: '2026-11-01',
+                ejercicios_programados: [
+                    {
+                        id: 'se-hist-1',
+                        rutina_diaria_id: 'day-push-logged-history',
+                        ejercicio_id: 'ex-press-banca',
+                        orden_ejecucion: 1,
+                        tipo_peso: 'total',
+                        ejercicio: { id: 'ex-press-banca', nombre: 'Press Banca', grupo_muscular: 'Pecho' } as any,
+                        series: [{ id: 'sh-1', ejercicio_programado_id: 'se-hist-1', numero_serie: 1, repeticiones: 10, peso_utilizado: 80 }],
+                    },
+                ],
+            });
+
+            const volumeSummary: EffectiveSetsSummary = {
+                totalSeriesEfectivas: 24,
+                porGrupoMuscular: { Pecho: 24 },
+                distribucion: [{ grupo_muscular: 'Pecho', series_efectivas: 24, porcentaje: 100 }],
+            };
+
+            const plan = buildRoutineRebalancePlan({
+                activeRoutine: routine,
+                volumeSummary,
+                referenceDate: fixedDate,
+            });
+
+            expect(plan.operations.some((op) => op.dayId === 'day-push-logged-history')).toBe(false);
+            expect(plan.operations.some((op) => op.scheduledExerciseId === 'se-hist-1')).toBe(false);
+        });
     });
 });

@@ -143,6 +143,26 @@ function computeTargetDelta(
 }
 
 /**
+ * Keeps only weekly template days (fecha_dia == null), excluding historical logged workout
+ * days that share the same rutina_semanal_id, and deduplicates by day name.
+ */
+export function extractTemplateDays(days?: RoutineDay[]): RoutineDay[] {
+    if (!days || days.length === 0) return [];
+    const seen = new Set<string>();
+    const result: RoutineDay[] = [];
+    for (const day of days) {
+        if (day.fecha_dia !== null && day.fecha_dia !== undefined && day.fecha_dia !== '') {
+            continue;
+        }
+        const key = (day.nombre_dia || '').trim().toLowerCase() || day.id;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        result.push(day);
+    }
+    return result;
+}
+
+/**
  * Generates a deterministic routine rebalance plan from weekly hypertrophy volume data
  * and the user's active weekly routine.
  */
@@ -174,7 +194,7 @@ export function buildRoutineRebalancePlan(params: {
     }
 
     const suggestedName = buildRebalancedRoutineName(activeRoutine.nombre, referenceDate);
-    const activeDays = (activeRoutine.rutinas_diarias || []).filter((d) => !isRestDay(d));
+    const activeDays = extractTemplateDays(activeRoutine.rutinas_diarias).filter((d) => !isRestDay(d));
 
     // Collect muscle volume map from summary + muscles present in active routine
     const muscleMap = new Map<string, { label: string; effectiveSets: number }>();

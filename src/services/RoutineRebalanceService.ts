@@ -2,7 +2,11 @@ import { supabase } from '../lib/supabase';
 import { LogService } from './LogService';
 import { RoutineService } from './RoutineService';
 import { RoutineDay, ScheduledExercise, Serie, ServiceResponse, WeeklyRoutine } from '../types/models';
-import { RebalanceOperation, RebalancePlan } from '../utils/routineRebalancePlanner';
+import {
+    extractTemplateDays,
+    RebalanceOperation,
+    RebalancePlan,
+} from '../utils/routineRebalancePlanner';
 import { formatLocalDateKey, getStartOfWeek } from '../utils/dateUtils';
 
 export interface CloneRebalanceOptions {
@@ -121,7 +125,7 @@ export const RoutineRebalanceService = {
                 }
             }
 
-            const sourceDays = activeRoutine.rutinas_diarias || [];
+            const sourceDays = extractTemplateDays(activeRoutine.rutinas_diarias);
             if (sourceDays.length > 0) {
                 const daysToInsert = sourceDays.map((day: RoutineDay) => ({
                     rutina_semanal_id: newRoutine.id,
