@@ -4,10 +4,33 @@ import HypertrophyVolumeScreen from '../../src/screens/HypertrophyVolumeScreen';
 import { AuthContext } from '../../src/context/AuthContext';
 import { ThemeProvider } from '../../src/context/ThemeContext';
 import { AnalyticsService } from '../../src/services/AnalyticsService';
+import { RoutineService } from '../../src/services/RoutineService';
+import { ExerciseService } from '../../src/services/ExerciseService';
+import { RoutineRebalanceService } from '../../src/services/RoutineRebalanceService';
+import { AlertContext } from '../../src/context/AlertContext';
 
 jest.mock('../../src/services/AnalyticsService', () => ({
     AnalyticsService: {
         getEffectiveSetsByMuscleGroup: jest.fn(),
+    },
+}));
+
+jest.mock('../../src/services/RoutineService', () => ({
+    RoutineService: {
+        getUserRoutines: jest.fn(),
+        getWeeklyRoutineWithDays: jest.fn(),
+    },
+}));
+
+jest.mock('../../src/services/ExerciseService', () => ({
+    ExerciseService: {
+        getExercises: jest.fn(),
+    },
+}));
+
+jest.mock('../../src/services/RoutineRebalanceService', () => ({
+    RoutineRebalanceService: {
+        cloneAndApplyRebalancePlan: jest.fn(),
     },
 }));
 
@@ -160,5 +183,93 @@ describe('HypertrophyVolumeScreen Component', () => {
 
         expect(getByTestId('hypertrophy-empty-state')).toBeTruthy();
         expect(getByText('Sin registros esta semana')).toBeTruthy();
+    });
+
+    it('opens RoutineRebalanceModal and clones active routine on confirm (PF-449)', async () => {
+        const mockShowToast = jest.fn();
+        const mockAlertContext = {
+            showAlert: jest.fn(),
+            hideAlert: jest.fn(),
+            showToast: mockShowToast,
+            hideToast: jest.fn(),
+        };
+
+        (AnalyticsService.getEffectiveSetsByMuscleGroup as jest.Mock).mockResolvedValue({
+            data: {
+                totalSeriesEfectivas: 30,
+                porGrupoMuscular: { Pecho: 24, Bíceps: 4 },
+                distribucion: [
+                    { grupo_muscular: 'Pecho', series_efectivas: 24, porcentaje: 80 },
+                    { grupo_muscular: 'Bíceps', series_efectivas: 4, porcentaje: 20 },
+                ],
+            },
+            error: null,
+        });
+
+        const activeRoutine = {
+            id: 'routine-1',
+            user_id: 'test-user-id-123',
+            nombre: 'Push Pull Legs',
+            activa: true,
+            rutinas_diarias: [
+                {
+                    id: 'day-1',
+                    rutina_semanal_id: 'routine-1',
+                    dia_semana: 1,
+                    nombre_dia: 'Empuje',
+                    fecha_dia: null,
+                    ejercicios_programados: [
+                        {
+                            id: 'se-1',
+                            dia_rutina_id: 'day-1',
+                            ejercicio_id: 'ex-1',
+                            orden: 1,
+                            series_objetivo: 4,
+                            repeticiones_objetivo: 10,
+                            ejercicio: { id: 'ex-1', nombre: 'Press Banca', grupo_muscular: 'Pecho' },
+                        },
+                    ],
+                },
+            ],
+        };
+
+        (RoutineService.getUserRoutines as jest.Mock).mockResolvedValue({
+            data: [activeRoutine],
+            error: null,
+        });
+        (RoutineService.getWeeklyRoutineWithDays as jest.Mock).mockResolvedValue({
+            data: activeRoutine,
+            error: null,
+        });
+        (ExerciseService.getExercises as jest.Mock).mockResolvedValue({
+            data: [{ id: 'ex-2', nombre: 'Curl Bíceps', grupo_muscular: 'Bíceps' }],
+            error: null,
+        });
+        (RoutineRebalanceService.cloneAndApplyRebalancePlan as jest.Mock).mockResolvedValue({
+            data: { id: 'routine-2', nombre: 'Adj. Push Pull Legs (14/11)', activa: true },
+            error: null,
+        });
+
+        const { getByTestId } = await render(
+            <AuthContext.Provider value={mockAuthContext}>
+                <AlertContext.Provider value={mockAlertContext}>
+                    <ThemeProvider>
+                        <HypertrophyVolumeScreen navigation={mockNavigation} />
+                    </ThemeProvider>
+                </AlertContext.Provider>
+            </AuthContext.Provider>
+        );
+
+        await fireEvent.press(getByTestId('hypertrophy-rebalance-button'));
+
+        expect(RoutineService.getUserRoutines).toHaveBeenCalledWith('test-user-id-123');
+        expect(getByTestId('routine-rebalance-modal')).toBeTruthy();
+
+        await fireEvent.press(getByTestId('rebalance-confirm-button'));
+
+        expect(RoutineRebalanceService.cloneAndApplyRebalancePlan).toHaveBeenCalledTimes(1);
+        expect(mockShowToast).toHaveBeenCalledWith(
+            expect.objectContaining({ type: 'success' })
+        );
     });
 });
