@@ -688,5 +688,31 @@
     "purgeConfirmMsg": "Do you want to clear temporary cached data? Your cloud-synced workouts will remain safe.",
     "confirmPurge": "Purge Cache",
     "purgeSuccess": "Local cache cleared successfully."
+  },
+  "rebalance": {
+    "openButton": "Plan active routine adjustment",
+    "modalTitle": "Rebalance Plan",
+    "basedOnWeek": "Based on week: {{week}}",
+    "analyzing": "Analyzing your active routine and weekly volume...",
+    "noActiveTitle": "No active weekly routine",
+    "noActiveDesc": "Activate a weekly routine in My Routines to generate an optimized copy.",
+    "balancedTitle": "Your routine is already balanced",
+    "balancedDesc": "All analyzed muscle groups are currently within the optimal adaptation range (MAV).",
+    "newRoutineNameLabel": "New copy name",
+    "muscleSummaryTitle": "Summary by muscle group",
+    "effectiveSetsUnit": "sets",
+    "actionBoost": "Increase",
+    "actionReduce": "Reduce",
+    "actionKeep": "Keep",
+    "dayChangesTitle": "Proposed adjustments by day",
+    "opAddExercise": "New exercise · {{sets}} sets",
+    "opAddSets": "+{{delta}} sets ({{from}} → {{to}})",
+    "opRemoveSets": "{{delta}} sets ({{from}} → {{to}})",
+    "activateImmediately": "Activate new routine immediately",
+    "confirmAndActivate": "Create & Activate",
+    "confirmSaveOnly": "Save Copy",
+    "loadError": "Could not analyze your active routine right now.",
+    "saveError": "Could not save the rebalanced routine.",
+    "successToast": "Routine \"{{name}}\" created successfully"
   }
 }
