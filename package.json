@@ -131,6 +131,8 @@
     "test:e2e:PF-355": "npm run test:e2e:us075",
     "test:e2e:us076": "node e2e/run-maestro.js e2e/maestro/us_076_toggle_exercise_weight_type.yaml",
     "test:e2e:us077": "node e2e/run-maestro.js e2e/maestro/us_077_language_switch.yaml",
+    "test:e2e:us078": "node e2e/run-maestro.js e2e/maestro/us_078_hypertrophy_rebalance_routine.yaml",
+    "test:e2e:PF-451": "npm run test:e2e:us078",
     "test:e2e:PF-420": "npm run test:e2e:us017",
     "test:e2e:PF-421": "npm run test:e2e:us001",
     "test:e2e:PF-422": "npm run test:e2e:us024",
