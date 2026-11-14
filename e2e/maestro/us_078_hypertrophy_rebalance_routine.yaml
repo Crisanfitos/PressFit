@@ -1,0 +1,114 @@
+appId: com.crisanfitos.PressFit_Expo
+---
+- launchApp:
+    clearState: true
+
+# Seleccionar servidor Metro de Expo
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# Manejar posible menú de desarrollador
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 60000
+
+- runFlow:
+    when:
+      visible: ".*developer menu.*"
+    commands:
+      - back
+
+# Iniciar Sesión
+- tapOn:
+    id: "login-button"
+
+- assertVisible:
+    id: "email-input"
+
+- tapOn:
+    id: "email-input"
+
+- inputText: ${E2E_TEST_EMAIL}
+
+- tapOn:
+    id: "password-input"
+
+- inputText: ${E2E_TEST_PASSWORD}
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+# Verificar inicio de sesión exitoso
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 20000
+
+# Navegar a la pestaña Progreso en la barra inferior
+- tapOn: "Progreso"
+
+- extendedWaitUntil:
+    visible:
+      id: "progress-screen"
+    timeout: 10000
+
+# Navegar a Volumen de Hipertrofia
+- scrollUntilVisible:
+    element:
+      id: "progress-item-hypertrophy"
+    direction: DOWN
+
+- tapOn:
+    id: "progress-item-hypertrophy"
+
+- extendedWaitUntil:
+    visible:
+      id: "hypertrophy-volume-screen"
+    timeout: 15000
+
+# Abrir el planificador de rebalanceo desde Volumen de Hipertrofia
+- scrollUntilVisible:
+    element:
+      id: "hypertrophy-rebalance-button"
+    direction: DOWN
+    optional: true
+
+- runFlow:
+    when:
+      visible:
+        id: "hypertrophy-rebalance-button"
+    commands:
+      - tapOn:
+          id: "hypertrophy-rebalance-button"
+      - extendedWaitUntil:
+          visible:
+            id: "routine-rebalance-modal"
+          timeout: 10000
+      - assertVisible:
+          id: "routine-rebalance-modal"
+      - runFlow:
+          when:
+            visible:
+              id: "rebalance-routine-name-input"
+          commands:
+            - assertVisible:
+                id: "rebalance-confirm-button"
+            - tapOn:
+                id: "rebalance-close-button"
+      - runFlow:
+          when:
+            visible:
+              id: "rebalance-close-button"
+          commands:
+            - tapOn:
+                id: "rebalance-close-button"
