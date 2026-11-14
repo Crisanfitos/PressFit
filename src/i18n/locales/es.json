@@ -688,5 +688,31 @@
     "purgeConfirmMsg": "¿Deseas vaciar la memoria caché y datos temporales guardados localmente? Tus datos sincronizados en la nube se mantendrán a salvo.",
     "confirmPurge": "Purgar Caché",
     "purgeSuccess": "Caché local purgada con éxito."
+  },
+  "rebalance": {
+    "openButton": "Planificar ajuste de rutina activa",
+    "modalTitle": "Plan de Rebalanceo",
+    "basedOnWeek": "Basado en semana: {{week}}",
+    "analyzing": "Analizando tu rutina activa y volumen semanal...",
+    "noActiveTitle": "No hay rutina semanal activa",
+    "noActiveDesc": "Activa una rutina semanal en Mis Rutinas para poder generar una copia optimizada.",
+    "balancedTitle": "Tu rutina ya está equilibrada",
+    "balancedDesc": "Todos los grupos musculares analizados se encuentran en rango óptimo de adaptación (MAV).",
+    "newRoutineNameLabel": "Nombre de la nueva copia",
+    "muscleSummaryTitle": "Resumen por grupo muscular",
+    "effectiveSetsUnit": "series",
+    "actionBoost": "Subir",
+    "actionReduce": "Bajar",
+    "actionKeep": "Mantener",
+    "dayChangesTitle": "Ajustes propuestos por día",
+    "opAddExercise": "Nuevo ejercicio · {{sets}} series",
+    "opAddSets": "+{{delta}} series ({{from}} → {{to}})",
+    "opRemoveSets": "{{delta}} series ({{from}} → {{to}})",
+    "activateImmediately": "Activar nueva rutina inmediatamente",
+    "confirmAndActivate": "Crear y Activar",
+    "confirmSaveOnly": "Guardar Copia",
+    "loadError": "No se pudo analizar tu rutina activa en este momento.",
+    "saveError": "No se pudo guardar la rutina reequilibrada.",
+    "successToast": "Rutina \"{{name}}\" creada correctamente"
   }
 }
