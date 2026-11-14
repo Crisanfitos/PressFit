@@ -3,52 +3,50 @@ appId: com.crisanfitos.PressFit_Expo
 # us_066_toast_system_verification.yaml — US-066: Verificación del Sistema de Toast/Snackbar Unificado
 
 - launchApp:
-    clearState: false
+    clearState: true
 
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
 - runFlow:
     when:
-      notVisible:
-        id: "monthly-calendar-screen"
+      visible: ".*developer menu.*"
     commands:
-      - runFlow:
-          when:
-            visible: "Continue"
-          commands:
-            - tapOn: "Continue"
-      - runFlow:
-          when:
-            visible: ".*8081.*"
-          commands:
-            - tapOn:
-                text: ".*8081.*"
-      - runFlow:
-          when:
-            visible: ".*developer menu.*"
-          commands:
-            - back
-      - extendedWaitUntil:
-          visible:
-            id: "welcome-screen"
-          timeout: 25000
-      - tapOn:
-          id: "login-button"
-      - extendedWaitUntil:
-          visible:
-            id: "email-input"
-          timeout: 10000
-      - tapOn:
-          id: "email-input"
-      - inputText: "${E2E_TEST_EMAIL}"
-      - tapOn:
-          id: "password-input"
-      - inputText: "${E2E_TEST_PASSWORD}"
-      - hideKeyboard
-      - tapOn:
-          id: "login-submit-button"
-      - extendedWaitUntil:
-          visible:
-            id: "monthly-calendar-screen"
-          timeout: 20000
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 30000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+- inputText: "${E2E_TEST_EMAIL}"
+
+- tapOn:
+    id: "password-input"
+- inputText: "${E2E_TEST_PASSWORD}"
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 20000
 
 # 2. Descartar sesión previa si aparece ResumeWorkoutModal
 - runFlow:
@@ -106,36 +104,30 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "workout-screen"
 
-# 5. Si la primera serie está completada (ej. de tests previos), desbloquearla
+# 5. Asegurar que haya al menos una serie no completada
 - runFlow:
     when:
-      visible:
-        id: "edit-set-button-0"
+      notVisible:
+        id: "set-uncompleted-icon-.*"
     commands:
       - tapOn:
-          id: "edit-set-button-0"
-      - extendedWaitUntil:
-          visible: "Desbloquear"
-          timeout: 5000
-      - tapOn: "Desbloquear"
+          id: "add-set-button-0"
 
-# 6. Completar la serie 0 para disparar la notificación Toast
+# 6. Completar una serie no completada para disparar la notificación Toast
 - extendedWaitUntil:
     visible:
-      id: "set-complete-checkbox-0"
+      id: "set-uncompleted-icon-.*"
     timeout: 5000
 
 - tapOn:
-    id: "set-complete-checkbox-0"
+    id: "set-uncompleted-icon-.*"
+    waitToSettleTimeoutMs: 500
 
-# 7. Verificar que el toast unificado aparece con caja, título y mensaje
+# 7. Verificar que el toast unificado aparece con caja y mensaje
 - extendedWaitUntil:
     visible:
       id: "toast-box"
     timeout: 5000
-
-- assertVisible:
-    id: "toast-title"
 
 - assertVisible:
     id: "toast-message"

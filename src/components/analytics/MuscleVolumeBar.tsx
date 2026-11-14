@@ -268,4 +268,6 @@ export const MuscleVolumeBar: React.FC<MuscleVolumeBarProps> = React.memo(({
     );
 });
 
+MuscleVolumeBar.displayName = 'MuscleVolumeBar';
+
 export default MuscleVolumeBar;

@@ -290,4 +290,6 @@ const styles = StyleSheet.create({
     },
 });
 
+WeeklyRoutineDayCard.displayName = 'WeeklyRoutineDayCard';
+
 export default WeeklyRoutineDayCard;

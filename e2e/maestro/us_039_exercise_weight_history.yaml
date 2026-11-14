@@ -122,9 +122,6 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "exercise-progress-recommendation"
 
-- assertVisible:
-    id: "exercise-progress-history-list"
-
 # 5. Alternar pestaña de gráfica a Volumen Total
 - tapOn:
     id: "exercise-progress-toggle-volume"
@@ -132,7 +129,17 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "exercise-progress-toggle-volume"
 
-# 6. Regresar a Progreso por Ejercicio
+# 6. Desplazar hacia abajo y verificar historial de sesiones
+- scrollUntilVisible:
+    element:
+      id: "exercise-progress-history-list"
+    direction: DOWN
+    timeout: 10000
+
+- assertVisible:
+    id: "exercise-progress-history-list"
+
+# 7. Regresar a Progreso por Ejercicio
 - tapOn:
     id: "exercise-progress-detail-back-button"
 

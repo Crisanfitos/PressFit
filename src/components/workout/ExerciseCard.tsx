@@ -244,7 +244,7 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                             <Text style={[styles.referenceText, { color: colors.primary }]}>
                                 {exercise.tipo_peso === 'corporal'
                                     ? 'BW'
-                                    : exercise.tipo_peso === 'mancuerna'
+                                    : exercise.tipo_peso === 'por_lado'
                                     ? (activeWeightUnit === 'lb' ? 'LBS/L' : 'KG/L')
                                     : (activeWeightUnit === 'lb' ? 'LB' : 'KG')}
                             </Text>
@@ -542,7 +542,10 @@ export const areExerciseCardPropsEqual = (
             p.peso_utilizado !== n.peso_utilizado ||
             p.repeticiones !== n.repeticiones ||
             p.rpe !== n.rpe ||
-            p.descanso_segundos !== n.descanso_segundos
+            p.descanso_segundos !== n.descanso_segundos ||
+            p.tipo_serie !== n.tipo_serie ||
+            Boolean(p.is_completed || p.completada) !== Boolean(n.is_completed || n.completada) ||
+            Boolean(p.is_pr) !== Boolean(n.is_pr)
         ) {
             return false;
         }

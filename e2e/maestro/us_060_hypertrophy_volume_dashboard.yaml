@@ -4,10 +4,9 @@ appId: com.crisanfitos.PressFit_Expo
     clearState: true
 
 # Seleccionar servidor Metro de Expo
-- assertVisible:
-    text: ".*8081.*"
 - tapOn:
     text: ".*8081.*"
+    optional: true
 
 # Manejar posible menú de desarrollador
 - runFlow:

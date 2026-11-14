@@ -84,7 +84,7 @@ export const ImportService = {
                 const { data: existingExercises } = await supabase
                     .from('ejercicios')
                     .select('id, nombre, titulo')
-                    .or(`user_id.eq.${targetUserId},created_by.eq.${targetUserId}`);
+                    .or(`created_by.eq.${targetUserId}`);
 
                 const existingMap = new Map<string, string>();
                 for (const ex of existingExercises || []) {
@@ -111,7 +111,6 @@ export const ImportService = {
                             categoria: ex.categoria || 'fuerza',
                             descripcion: ex.descripcion || null,
                             es_custom: true,
-                            user_id: targetUserId,
                             created_by: targetUserId,
                         })
                         .select('id')

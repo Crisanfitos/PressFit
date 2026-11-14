@@ -270,6 +270,7 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
                                     },
                         ]}
                         onPress={handleOpenSetTypePicker}
+                        onLongPress={handleLongPress}
                         disabled={!canEditSetType}
                         activeOpacity={0.7}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}

@@ -165,8 +165,9 @@ export const Toast: React.FC<ToastProps> = ({ visible, config, onDismiss }) => {
       position: 'absolute',
       left: 16,
       right: 16,
-      [position]: 24,
-      zIndex: 9999,
+      [position]: 50,
+      zIndex: 99999,
+      elevation: 99999,
       alignItems: 'center',
     },
     toastBox: {

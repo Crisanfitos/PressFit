@@ -129,3 +129,5 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
 });
+
+DayCell.displayName = 'DayCell';

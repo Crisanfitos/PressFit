@@ -77,6 +77,8 @@ appId: com.crisanfitos.PressFit_Expo
 - tapOn:
     id: "edit-day-desc-input"
 
+- eraseText: 100
+
 - inputText: "Fuerza Pecho y Tríceps"
 
 - hideKeyboard
@@ -87,11 +89,11 @@ appId: com.crisanfitos.PressFit_Expo
 # 3. Aserción de la nueva descripción actualizada en la tarjeta del Lunes
 - extendedWaitUntil:
     visible:
-      text: "Fuerza Pecho y Tríceps"
+      text: ".*Fuerza Pecho y Tríceps.*"
     timeout: 5000
 
 - assertVisible:
-    text: "Fuerza Pecho y Tríceps"
+    text: ".*Fuerza Pecho y Tríceps.*"
 
 # 4. Navegación de retorno al Calendario
 - tapOn:

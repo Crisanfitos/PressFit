@@ -417,4 +417,6 @@ const styles = StyleSheet.create({
     },
 });
 
+TodayRoutineHeroCard.displayName = 'TodayRoutineHeroCard';
+
 export default TodayRoutineHeroCard;

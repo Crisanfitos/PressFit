@@ -65,8 +65,18 @@ appId: com.crisanfitos.PressFit_Expo
     text: ".*@pressfit.com"
 
 # 3. Aserción de secciones principales
+- scrollUntilVisible:
+    element:
+      id: "profile-physical-data-card"
+    direction: DOWN
+
 - assertVisible:
     id: "profile-physical-data-card"
+
+- scrollUntilVisible:
+    element:
+      id: "profile-appearance-card"
+    direction: DOWN
 
 - assertVisible:
     id: "profile-appearance-card"

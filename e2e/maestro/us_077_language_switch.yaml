@@ -195,7 +195,7 @@ appId: com.crisanfitos.PressFit_Expo
 
 # 8. Aserciones de que los nombres de las pestañas están en Inglés
 - assertVisible:
-    text: "Week"
+    text: ".*(Routines|Week).*"
 
 - assertVisible:
     text: "Progress"
@@ -286,13 +286,22 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     text: "Weekly Progress"
 
-# 11. Viajar a la pestaña "Week" y comprobar leyenda en Inglés
-- tapOn: "Week"
+# 11. Viajar a la pestaña "Routines" y comprobar leyenda en Inglés
+- tapOn:
+    id: "tab-semana"
 
 - extendedWaitUntil:
     visible:
       id: "monthly-calendar-screen"
     timeout: 10000
+
+- tapOn:
+    id: "toggle-monthly-view"
+
+- scrollUntilVisible:
+    element:
+      id: "legend-today"
+    direction: DOWN
 
 - assertVisible:
     text: "Today"

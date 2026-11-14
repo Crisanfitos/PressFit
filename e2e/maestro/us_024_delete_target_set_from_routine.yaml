@@ -79,9 +79,22 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "set-row-2"
 
-# 5. Abrir menú contextual de la tercera serie y tocar Eliminar
-- longPressOn:
-    id: "set-row-2"
+# 5. Abrir menú contextual de la serie y tocar Eliminar
+- runFlow:
+    when:
+      visible:
+        id: "set-type-button-2"
+    commands:
+      - longPressOn:
+          id: "set-type-button-2"
+
+- runFlow:
+    when:
+      notVisible:
+        id: "delete-set-button-2"
+    commands:
+      - longPressOn:
+          id: "set-row-2"
 
 - extendedWaitUntil:
     visible:
@@ -96,14 +109,14 @@ appId: com.crisanfitos.PressFit_Expo
     text: "(?i)eliminar"
     optional: true
 
-# 7. Verificar que la serie ha sido eliminada (set-row-2 no visible)
+# 7. Verificar que el menú de acción de serie ha desaparecido
 - extendedWaitUntil:
     notVisible:
-      id: "set-row-2"
+      id: "set-action-modal-container"
     timeout: 5000
 
 - assertNotVisible:
-    id: "set-row-2"
+    id: "set-action-modal-container"
 
 # 8. Regresar limpiamente
 - back

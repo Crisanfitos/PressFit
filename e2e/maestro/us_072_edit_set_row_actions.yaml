@@ -126,10 +126,13 @@ appId: com.crisanfitos.PressFit_Expo
     commands:
       - tapOn:
           id: "edit-set-button-0"
+          waitToSettleTimeoutMs: 500
       - extendedWaitUntil:
-          visible: "Desbloquear"
+          visible: "(Desbloquear|DESBLOQUEAR)"
           timeout: 5000
-      - tapOn: "Desbloquear"
+      - tapOn:
+          text: "(Desbloquear|DESBLOQUEAR)"
+          waitToSettleTimeoutMs: 500
 
 # 6. Interactuar con los inputs de la primera serie
 - tapOn:
@@ -142,6 +145,7 @@ appId: com.crisanfitos.PressFit_Expo
 # 7. Completar la serie mediante el checkbox
 - tapOn:
     id: "set-complete-checkbox-0"
+    waitToSettleTimeoutMs: 500
 
 # Descartar modal de celebración de PR si se rompió récord personal
 - tapOn:
@@ -160,20 +164,23 @@ appId: com.crisanfitos.PressFit_Expo
 # 9. Pulsar el botón de edición y verificar diálogo de confirmación para desbloquear
 - tapOn:
     id: "edit-set-button-0"
+    waitToSettleTimeoutMs: 500
 
 - extendedWaitUntil:
-    visible: "Desbloquear"
+    visible: "(Desbloquear|DESBLOQUEAR)"
     timeout: 5000
 
-- assertVisible: "Desbloquear"
+- assertVisible: "(Desbloquear|DESBLOQUEAR)"
 
 # 10. Desbloquear la serie y verificar que el botón de edición se oculta
-- tapOn: "Desbloquear"
+- tapOn:
+    text: "(Desbloquear|DESBLOQUEAR)"
+    waitToSettleTimeoutMs: 500
 
 - extendedWaitUntil:
     notVisible:
       id: "edit-set-button-0"
-    timeout: 5000
+    timeout: 10000
 
 - assertNotVisible:
     id: "edit-set-button-0"

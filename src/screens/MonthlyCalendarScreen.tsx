@@ -533,7 +533,7 @@ const MonthlyCalendarScreen: React.FC<MonthlyCalendarScreenProps> = ({ navigatio
 
                         {/* Bento Hero Card 'Rutina de Hoy' */}
                         <TodayRoutineHeroCard
-                            dayName={`HOY • ${todayDayName}`}
+                            dayName={`${t('calendar.todayUpper', 'HOY')} • ${todayDayName}`}
                             routineTitle={heroMetrics.title}
                             description={heroMetrics.description}
                             estimatedMinutes={heroMetrics.estimatedMinutes}

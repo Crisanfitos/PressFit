@@ -209,4 +209,6 @@ const styles = StyleSheet.create({
     },
 });
 
+WeeklyDayPillsCarousel.displayName = 'WeeklyDayPillsCarousel';
+
 export default WeeklyDayPillsCarousel;

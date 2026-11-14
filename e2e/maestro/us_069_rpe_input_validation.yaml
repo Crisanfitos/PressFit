@@ -6,11 +6,6 @@ appId: com.crisanfitos.PressFit_Expo
     clearState: true
 
 # If Expo Dev Launcher screen appears, tap on dev server
-- extendedWaitUntil:
-    visible: ".*8081.*"
-    timeout: 25000
-    optional: true
-
 - tapOn:
     text: ".*8081.*"
     optional: true
@@ -22,21 +17,11 @@ appId: com.crisanfitos.PressFit_Expo
     commands:
       - back
 
-- tapOn:
-    text: "Continue"
-    optional: true
-
-- runFlow:
-    when:
-      visible: ".*developer menu.*"
-    commands:
-      - back
-
 # 1. Esperar bienvenida y navegar a Login
 - extendedWaitUntil:
     visible:
       id: "welcome-screen"
-    timeout: 30000
+    timeout: 60000
 
 - tapOn:
     id: "login-button"
@@ -101,8 +86,27 @@ appId: com.crisanfitos.PressFit_Expo
 - assertVisible:
     id: "workout-screen"
 
-- assertVisible:
-    id: "set-rpe-input-0"
+# Si la serie 0 está completada, desbloquearla para habilitar edición
+- runFlow:
+    when:
+      visible:
+        id: "set-completed-icon-0"
+    commands:
+      - tapOn:
+          id: "set-complete-checkbox-0"
+      - extendedWaitUntil:
+          visible: "(?i)desbloquear"
+          timeout: 5000
+      - tapOn:
+          text: "(?i)desbloquear"
+      - extendedWaitUntil:
+          notVisible: "(?i)desbloquear"
+          timeout: 5000
+
+- extendedWaitUntil:
+    visible:
+      id: "set-rpe-input-0"
+    timeout: 5000
 
 # 5. Caso 1: Entrada fuera de rango > 10 (input "12" -> clampeado a "10")
 - tapOn:

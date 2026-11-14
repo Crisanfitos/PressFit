@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import { WorkoutService } from '../../services/WorkoutService';
 import { RoutineService } from '../../services/RoutineService';
 import { LogService } from '../../services/LogService';
+import { HapticService } from '../../services/HapticService';
 import { TipoPeso, SetType } from '../../types/setTypes';
 import { validateRpe } from '../../utils/rpeValidation';
 import { checkSetLimits } from '../../utils/setLimits';

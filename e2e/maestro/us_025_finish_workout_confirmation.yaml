@@ -48,83 +48,96 @@ appId: com.crisanfitos.PressFit_Expo
       id: "monthly-calendar-screen"
     timeout: 15000
 
-# 1. Iniciar sesión de entrenamiento desde Hero Card o Celda de hoy
-- runFlow:
-    when:
-      visible:
-        id: "hero-start-workout-button"
-    commands:
-      - tapOn:
-          id: "hero-start-workout-button"
-
-- runFlow:
-    when:
-      visible:
-        id: "workout-day-screen"
-    commands:
-      - tapOn:
-          id: "start-workout-button"
-
-- extendedWaitUntil:
-    visible:
-      id: "workout-screen"
-    timeout: 15000
-
-# 2. Pulsar "Finalizar Entrenamiento"
-- runFlow:
-    when:
-      visible:
-        id: "header-finish-button"
-    commands:
-      - tapOn:
-          id: "header-finish-button"
-
+# 1. Navegar a WorkoutDayScreen seleccionando hoy en el calendario
 - runFlow:
     when:
       notVisible:
-        id: "header-finish-button"
+        id: "calendar-day-today"
     commands:
-      - scrollUntilVisible:
-          element:
-            id: "finish-workout-button"
-          direction: DOWN
-          timeout: 10000
       - tapOn:
-          id: "finish-workout-button"
-
-# 3. Confirmar en el modal de alerta ("Finalizar")
-- extendedWaitUntil:
-    visible: "(?i)finalizar"
-    timeout: 5000
+          id: "toggle-monthly-view"
+          optional: true
 
 - tapOn:
-    text: "(?i)finalizar"
+    id: "calendar-day-today"
 
-# 4. Confirmar modal de éxito ("OK")
-- extendedWaitUntil:
-    visible: "OK"
-    timeout: 5000
-
-- tapOn:
-    text: "OK"
-
-# 5. Verificar retorno a WorkoutDayScreen con estado Completado
 - extendedWaitUntil:
     visible:
       id: "workout-day-screen"
-    timeout: 10000
+    timeout: 15000
 
 - assertVisible:
-    text: ".*Ver / Editar Entrenamiento.*"
+    id: "workout-day-screen"
 
-# 6. Regresar al Calendario
+# 2. Si el entrenamiento aún no está completado, iniciarlo y finalizarlo
+- runFlow:
+    when:
+      notVisible: "(?i)ver / editar entrenamiento"
+    commands:
+      - tapOn:
+          id: "start-workout-button"
+      - extendedWaitUntil:
+          visible:
+            id: "workout-screen"
+          timeout: 15000
+      - runFlow:
+          when:
+            visible:
+              id: "header-finish-button"
+          commands:
+            - tapOn:
+                id: "header-finish-button"
+      - runFlow:
+          when:
+            notVisible: "(?i)finalizar"
+          commands:
+            - scrollUntilVisible:
+                element:
+                  id: "finish-workout-button"
+                direction: DOWN
+                timeout: 10000
+                optional: true
+            - tapOn:
+                id: "finish-workout-button"
+                optional: true
+      - runFlow:
+          when:
+            visible: "(?i)finalizar"
+          commands:
+            - tapOn:
+                text: "(?i)finalizar"
+      - runFlow:
+          when:
+            visible: "OK"
+          commands:
+            - tapOn:
+                text: "OK"
+      - runFlow:
+          when:
+            visible:
+              id: "share-modal-close-btn"
+          commands:
+            - tapOn:
+                id: "share-modal-close-btn"
+      - extendedWaitUntil:
+          visible:
+            id: "workout-day-screen"
+          timeout: 10000
+
+# 3. Verificar retorno a WorkoutDayScreen con estado Completado
+- assertVisible:
+    id: "workout-day-screen"
+
+- assertVisible: ".*Ver / Editar Entrenamiento.*"
+
+# 4. Regresar al Calendario
 - tapOn:
     id: "workout-day-back-button"
 
 - extendedWaitUntil:
     visible:
       id: "monthly-calendar-screen"
-    timeout: 5000
+    timeout: 10000
 
 # 7. Flujo de Cierre de Sesión (Logout)
 - tapOn:

@@ -98,32 +98,42 @@ appId: com.crisanfitos.PressFit_Expo
     id: "swap-exercise-current-card"
 
 # 6. Seleccionar ejercicio del catálogo y continuar
+- extendedWaitUntil:
+    visible:
+      id: "swap-candidate-.*"
+    timeout: 10000
+
 - tapOn:
-    text: ".*"
-    optional: true
+    id: "swap-candidate-.*"
+
+- extendedWaitUntil:
+    visible:
+      id: "swap-exercise-continue-button"
+    timeout: 5000
 
 - tapOn:
     id: "swap-exercise-continue-button"
-    optional: true
 
 # 7. Verificar paso 2 de comparativa y series
 - extendedWaitUntil:
     visible:
       id: "swap-exercise-step-2"
-    timeout: 5000
-    optional: true
+    timeout: 10000
+
+- assertVisible:
+    id: "swap-exercise-step-2"
 
 - tapOn:
     id: "swap-exercise-sets-increment"
-    optional: true
 
 - tapOn:
     id: "swap-exercise-finish-button"
-    optional: true
 
 # 8. Retorno a pantalla de entrenamiento
 - extendedWaitUntil:
     visible:
       id: "workout-screen"
-    timeout: 10000
-    optional: true
+    timeout: 15000
+
+- assertVisible:
+    id: "workout-screen"

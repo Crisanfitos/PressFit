@@ -21,6 +21,14 @@ interface CatalogExerciseItem {
     [key: string]: unknown;
 }
 
+export const normalizeDifficulty = (diff?: string): 'beginner' | 'intermediate' | 'advanced' => {
+    if (!diff) return 'intermediate';
+    const lower = diff.toLowerCase().trim();
+    if (lower === 'principiante' || lower === 'beginner') return 'beginner';
+    if (lower === 'avanzado' || lower === 'advanced') return 'advanced';
+    return 'intermediate';
+};
+
 export const enrichExerciseOwnership = (
     ex: Record<string, any>,
     currentUserId: string | null = null
@@ -128,12 +136,10 @@ export const ExerciseService = {
                     categoria: exerciseData.grupo_muscular,
                     musculos_primarios: [exerciseData.musculos_primarios || exerciseData.grupo_muscular],
                     musculos_secundarios: exerciseData.musculos_secundarios || [],
-                    dificultad: exerciseData.dificultad || 'intermediate',
+                    dificultad: normalizeDifficulty(exerciseData.dificultad),
                     url_video: videoUrl,
-                    video_url: videoUrl,
                     is_custom: true,
                     created_by: currentUserId,
-                    user_id: currentUserId,
                 })
                 .select()
                 .single();
@@ -172,7 +178,7 @@ export const ExerciseService = {
             // Check ownership and official status
             const { data: existing, error: checkError } = await supabase
                 .from('ejercicios')
-                .select('id, is_custom, created_by, user_id')
+                .select('id, is_custom, created_by')
                 .eq('id', id)
                 .single();
 
@@ -180,12 +186,12 @@ export const ExerciseService = {
                 return { data: null, error: checkError || new Error('Exercise not found') };
             }
 
-            const isCustom = Boolean(existing.is_custom === true || existing.created_by || existing.user_id);
+            const isCustom = Boolean(existing.is_custom === true || existing.created_by);
             if (!isCustom) {
                 return { data: null, error: new Error('No se pueden modificar ejercicios oficiales de la aplicación') };
             }
 
-            const creatorId = existing.created_by || existing.user_id;
+            const creatorId = existing.created_by;
             if (currentUserId && creatorId && creatorId !== currentUserId) {
                 return { data: null, error: new Error('No tienes permisos para modificar este ejercicio') };
             }
@@ -198,11 +204,10 @@ export const ExerciseService = {
                 updatePayload.musculos_primarios = [exerciseData.musculos_primarios || exerciseData.grupo_muscular];
             }
             if (exerciseData.musculos_secundarios) updatePayload.musculos_secundarios = exerciseData.musculos_secundarios;
-            if (exerciseData.dificultad) updatePayload.dificultad = exerciseData.dificultad;
+            if (exerciseData.dificultad) updatePayload.dificultad = normalizeDifficulty(exerciseData.dificultad);
             const videoUrl = exerciseData.url_video !== undefined ? exerciseData.url_video : exerciseData.video_url;
             if (videoUrl !== undefined) {
                 updatePayload.url_video = videoUrl;
-                updatePayload.video_url = videoUrl;
             }
 
             const { data, error } = await supabase
@@ -240,7 +245,7 @@ export const ExerciseService = {
             // Check ownership and official status
             const { data: existing, error: checkError } = await supabase
                 .from('ejercicios')
-                .select('id, is_custom, created_by, user_id')
+                .select('id, is_custom, created_by')
                 .eq('id', id)
                 .single();
 
@@ -248,12 +253,12 @@ export const ExerciseService = {
                 return { data: false, error: checkError || new Error('Exercise not found') };
             }
 
-            const isCustom = Boolean(existing.is_custom === true || existing.created_by || existing.user_id);
+            const isCustom = Boolean(existing.is_custom === true || existing.created_by);
             if (!isCustom) {
                 return { data: false, error: new Error('No se pueden eliminar ejercicios oficiales de la aplicación') };
             }
 
-            const creatorId = existing.created_by || existing.user_id;
+            const creatorId = existing.created_by;
             if (currentUserId && creatorId && creatorId !== currentUserId) {
                 return { data: false, error: new Error('No tienes permisos para eliminar este ejercicio') };
             }

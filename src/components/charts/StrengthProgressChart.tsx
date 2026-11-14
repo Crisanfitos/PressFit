@@ -264,4 +264,6 @@ const StrengthProgressChart: React.FC<StrengthProgressChartProps> = React.memo((
     );
 });
 
+StrengthProgressChart.displayName = 'StrengthProgressChart';
+
 export default StrengthProgressChart;

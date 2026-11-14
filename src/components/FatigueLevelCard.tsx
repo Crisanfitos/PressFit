@@ -136,6 +136,7 @@ const FatigueLevelCard: React.FC<FatigueLevelCardProps> = ({
                 rpeFill: {
                     height: '100%',
                     borderRadius: 5,
+                    minWidth: 4,
                 },
                 kpiRow: {
                     flexDirection: 'row',

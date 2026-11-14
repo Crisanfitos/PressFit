@@ -296,4 +296,6 @@ const styles = StyleSheet.create({
     },
 });
 
+WeightChart.displayName = 'WeightChart';
+
 export default WeightChart;

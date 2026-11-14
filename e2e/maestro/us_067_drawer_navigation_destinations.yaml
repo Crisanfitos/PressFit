@@ -3,52 +3,50 @@ appId: com.crisanfitos.PressFit_Expo
 # us_067_drawer_navigation_destinations.yaml — US-067: Navegación Completa del Drawer Lateral a Destinos
 
 - launchApp:
-    clearState: false
+    clearState: true
 
+# If Expo Dev Launcher screen appears, tap on dev server
+- tapOn:
+    text: ".*8081.*"
+    optional: true
+
+# If Expo Developer Menu onboarding modal appears, dismiss it with back button
 - runFlow:
     when:
-      notVisible:
-        id: "monthly-calendar-screen"
+      visible: ".*developer menu.*"
     commands:
-      - runFlow:
-          when:
-            visible: "Continue"
-          commands:
-            - tapOn: "Continue"
-      - runFlow:
-          when:
-            visible: ".*8081.*"
-          commands:
-            - tapOn:
-                text: ".*8081.*"
-      - runFlow:
-          when:
-            visible: ".*developer menu.*"
-          commands:
-            - back
-      - extendedWaitUntil:
-          visible:
-            id: "welcome-screen"
-          timeout: 25000
-      - tapOn:
-          id: "login-button"
-      - extendedWaitUntil:
-          visible:
-            id: "email-input"
-          timeout: 10000
-      - tapOn:
-          id: "email-input"
-      - inputText: "${E2E_TEST_EMAIL}"
-      - tapOn:
-          id: "password-input"
-      - inputText: "${E2E_TEST_PASSWORD}"
-      - hideKeyboard
-      - tapOn:
-          id: "login-submit-button"
-      - extendedWaitUntil:
-          visible:
-            id: "monthly-calendar-screen"
-          timeout: 20000
+      - back
+
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 30000
+
+- tapOn:
+    id: "login-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "email-input"
+    timeout: 10000
+
+- tapOn:
+    id: "email-input"
+- inputText: "${E2E_TEST_EMAIL}"
+
+- tapOn:
+    id: "password-input"
+- inputText: "${E2E_TEST_PASSWORD}"
+
+- hideKeyboard
+
+- tapOn:
+    id: "login-submit-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "monthly-calendar-screen"
+    timeout: 20000
 
 # 2. Descartar sesión previa si aparece ResumeWorkoutModal
 - runFlow:
@@ -148,8 +146,7 @@ appId: com.crisanfitos.PressFit_Expo
     id: "monthly-calendar-screen"
 
 # 10. Limpieza (Logout final para dejar estado limpio)
-- tapOn:
-    id: "tab-perfil"
+- tapOn: "Perfil"
 
 - scroll
 - scrollUntilVisible:

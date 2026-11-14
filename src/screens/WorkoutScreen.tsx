@@ -36,6 +36,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
     const { colors } = useTheme().theme;
     const user = useContext(AuthContext)?.user;
     const alertContext = useContext(AlertContext);
+    const showToast = alertContext?.showToast;
 
     useEffect(() => {
         if (routineDayId || initialWorkoutId) {
@@ -98,16 +99,16 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
 
     const handleToggleCompleteSet = useCallback((setId: string, isCompleted: boolean) => {
         toggleCompleteSet(setId, isCompleted);
-        if (isCompleted && alertContext?.showToast) {
-            alertContext.showToast({
+        if (isCompleted && showToast) {
+            showToast({
                 type: 'success',
                 title: t('workout.setCompletedTitle', 'Serie completada'),
                 message: t('workout.setCompletedMessage', 'Serie guardada con éxito'),
                 position: 'top',
-                duration: 8000,
+                duration: 30000,
             });
         }
-    }, [toggleCompleteSet, alertContext, t]);
+    }, [toggleCompleteSet, showToast, t]);
 
     const handleNavigateDetail = useCallback((id: string) => {
         navigation.navigate('ExerciseDetail', { exerciseId: id });

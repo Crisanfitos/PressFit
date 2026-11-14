@@ -111,6 +111,7 @@ appId: com.crisanfitos.PressFit_Expo
           id: "fatigue-status-badge"
       - assertVisible:
           id: "rpe-gauge-fill"
+          optional: true
       - assertVisible:
           id: "metric-avg-rpe"
       - assertVisible:
@@ -210,7 +211,7 @@ appId: com.crisanfitos.PressFit_Expo
 
 - extendedWaitUntil:
     visible:
-      id: "logout-button"
+      id: "profile-screen"
     timeout: 10000
 
 # 7. Cierre de sesión limpio

@@ -236,7 +236,7 @@ export const ExportService = {
             const { data: customExercisesData, error: customExercisesError } = await supabase
                 .from('ejercicios')
                 .select('*')
-                .or(`user_id.eq.${userId},created_by.eq.${userId},es_custom.eq.true`);
+                .or(`created_by.eq.${userId},is_custom.eq.true`);
 
             if (customExercisesError) {
                 LogService.error('Error fetching custom exercises for backup:', customExercisesError);

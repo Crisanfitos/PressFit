@@ -85,8 +85,6 @@ export const styles = StyleSheet.create({
   previewContainer: {
     flexGrow: 0,
     flexShrink: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     paddingVertical: 8,
     paddingHorizontal: 16,
   },
