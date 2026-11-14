@@ -12,12 +12,22 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AuthContext } from '../context/AuthContext';
+import { AlertContext } from '../context/AlertContext';
 import { useTheme } from '../context/ThemeContext';
 import { AnalyticsService } from '../services/AnalyticsService';
 import { LogService } from '../services/LogService';
+import { RoutineService } from '../services/RoutineService';
+import { ExerciseService } from '../services/ExerciseService';
+import { RoutineRebalanceService } from '../services/RoutineRebalanceService';
 import { MuscleVolumeBar } from '../components/analytics/MuscleVolumeBar';
 import { ScienceCoachCallout } from '../components/analytics/ScienceCoachCallout';
+import { RoutineRebalanceModal } from '../components/analytics/RoutineRebalanceModal';
 import { buildScienceRecommendation } from '../utils/scienceRecommendation';
+import {
+    buildRoutineRebalancePlan,
+    RebalancePlan,
+} from '../utils/routineRebalancePlanner';
+import { WeeklyRoutine } from '../types/models';
 import {
     formatLocalDateKey,
     getStartOfWeek,
@@ -40,6 +50,7 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
     const { theme } = useTheme();
     const { colors } = theme;
     const authContext = useContext(AuthContext);
+    const alertContext = useContext(AlertContext);
     const user = authContext?.user;
 
     const [referenceDate, setReferenceDate] = useState<Date>(new Date());
@@ -47,6 +58,11 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [summary, setSummary] = useState<EffectiveSetsSummary | null>(null);
     const [showLegend, setShowLegend] = useState<boolean>(false);
+    const [rebalanceVisible, setRebalanceVisible] = useState<boolean>(false);
+    const [rebalanceLoading, setRebalanceLoading] = useState<boolean>(false);
+    const [rebalanceSaving, setRebalanceSaving] = useState<boolean>(false);
+    const [rebalancePlan, setRebalancePlan] = useState<RebalancePlan | null>(null);
+    const [activeRoutineRef, setActiveRoutineRef] = useState<WeeklyRoutine | null>(null);
 
     // Compute week date boundaries
     const { startOfWeek, endOfWeek, startDateStr, endDateStr, isCurrentWeek, weekLabel } =
@@ -175,22 +191,116 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
         [summary]
     );
 
-    const handleAdjustVolume = useCallback(() => {
-        try {
-            const parent = navigation?.getParent?.();
-            if (parent?.navigate) {
-                parent.navigate('Semana');
-                return;
-            }
-            if (navigation?.navigate) {
-                navigation.navigate('Semana');
-                return;
-            }
-        } catch {
-            // fall through to goBack
+    const handleAdjustVolume = useCallback(async () => {
+        if (!user?.id || !summary) {
+            return;
         }
-        navigation?.goBack?.();
-    }, [navigation]);
+
+        setRebalanceVisible(true);
+        setRebalanceLoading(true);
+        setRebalancePlan(null);
+
+        try {
+            const routinesRes = await RoutineService.getUserRoutines(user.id);
+            const active = routinesRes.data?.find((r) => r.activa);
+
+            if (!active) {
+                setActiveRoutineRef(null);
+                setRebalancePlan(
+                    buildRoutineRebalancePlan({
+                        activeRoutine: null,
+                        volumeSummary: summary,
+                        catalogExercises: [],
+                        referenceDate: new Date(),
+                    })
+                );
+                return;
+            }
+
+            const [fullRes, exercisesRes] = await Promise.all([
+                RoutineService.getWeeklyRoutineWithDays(active.id),
+                ExerciseService.getExercises(),
+            ]);
+
+            const fullRoutine = fullRes.data || active;
+            setActiveRoutineRef(fullRoutine);
+
+            const plan = buildRoutineRebalancePlan({
+                activeRoutine: fullRoutine,
+                volumeSummary: summary,
+                catalogExercises: exercisesRes.data || [],
+                referenceDate: new Date(),
+            });
+            setRebalancePlan(plan);
+        } catch (err) {
+            LogService.error('[HypertrophyVolumeScreen] Error building rebalance plan:', err);
+            setRebalanceVisible(false);
+            alertContext?.showToast?.({
+                message: t(
+                    'rebalance.loadError',
+                    'No se pudo analizar tu rutina activa en este momento.'
+                ),
+                type: 'error',
+            });
+        } finally {
+            setRebalanceLoading(false);
+        }
+    }, [user?.id, summary, alertContext, t]);
+
+    const handleConfirmRebalance = useCallback(
+        async (params: {
+            plan: RebalancePlan;
+            customName: string;
+            activateImmediately: boolean;
+        }) => {
+            if (!user?.id || !activeRoutineRef) return;
+
+            setRebalanceSaving(true);
+            try {
+                const res = await RoutineRebalanceService.cloneAndApplyRebalancePlan(
+                    user.id,
+                    activeRoutineRef,
+                    params.plan,
+                    {
+                        customName: params.customName,
+                        activateImmediately: params.activateImmediately,
+                    }
+                );
+
+                if (res.error || !res.data) {
+                    const errObj = res.error as { message?: string } | string | null;
+                    const errorMessage =
+                        typeof errObj === 'string'
+                            ? errObj
+                            : errObj?.message ||
+                              t('rebalance.saveError', 'No se pudo guardar la rutina reequilibrada.');
+                    alertContext?.showToast?.({
+                        message: errorMessage,
+                        type: 'error',
+                    });
+                    return;
+                }
+
+                setRebalanceVisible(false);
+                alertContext?.showToast?.({
+                    message: t('rebalance.successToast', {
+                        name: res.data.nombre,
+                        defaultValue: `Rutina "${res.data.nombre}" creada correctamente`,
+                    }),
+                    type: 'success',
+                });
+            } catch (err) {
+                LogService.error('[HypertrophyVolumeScreen] Error saving rebalanced routine:', err);
+                alertContext?.showToast?.({
+                    message: t('rebalance.saveError', 'No se pudo guardar la rutina reequilibrada.'),
+                    type: 'error',
+                });
+            } finally {
+                setRebalanceSaving(false);
+            }
+        },
+        [user?.id, activeRoutineRef, alertContext, t]
+    );
 
     const styles = useMemo(
         () =>
@@ -390,6 +500,23 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
                     alignItems: 'center',
                     justifyContent: 'center',
                 },
+                rebalanceCtaButton: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: colors.primary,
+                    marginHorizontal: 16,
+                    marginBottom: 16,
+                    paddingVertical: 13,
+                    paddingHorizontal: 16,
+                    borderRadius: 12,
+                    gap: 8,
+                },
+                rebalanceCtaText: {
+                    color: '#FFFFFF',
+                    fontSize: 14,
+                    fontWeight: '700',
+                },
             }),
         [colors, isCurrentWeek]
     );
@@ -526,40 +653,52 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
                     </View>
                 </View>
 
-                {/* Scientific Coach Callout */}
+                {/* Scientific Coach Callout & Rebalance CTA */}
                 {!loading && summary && summary.distribucion.length > 0 && (
-                    <ScienceCoachCallout
-                        title={recommendation.title}
-                        message={recommendation.message}
-                        ctaLabel={recommendation.ctaLabel}
-                        titleKey={recommendation.titleKey}
-                        messageKey={recommendation.messageKey}
-                        messageParams={
-                            recommendation.messageParams
-                                ? {
-                                      ...recommendation.messageParams,
-                                      ...(recommendation.messageParams.muscle
-                                          ? {
-                                                muscle: t(
-                                                    `muscleGroups.${normalizeMuscleKey(String(recommendation.messageParams.muscle))}`,
-                                                    String(recommendation.messageParams.muscle)
-                                                ),
-                                            }
-                                          : {}),
-                                      ...(recommendation.messageParams.optimalRef
-                                          ? {
-                                                optimalRef: t(
-                                                    `muscleGroups.${normalizeMuscleKey(String(recommendation.messageParams.optimalRef))}`,
-                                                    String(recommendation.messageParams.optimalRef)
-                                                ),
-                                            }
-                                          : {}),
-                                  }
-                                : undefined
-                        }
-                        ctaLabelKey={recommendation.ctaLabelKey}
-                        onPressCta={handleAdjustVolume}
-                    />
+                    <>
+                        <ScienceCoachCallout
+                            title={recommendation.title}
+                            message={recommendation.message}
+                            ctaLabel={recommendation.ctaLabel}
+                            titleKey={recommendation.titleKey}
+                            messageKey={recommendation.messageKey}
+                            messageParams={
+                                recommendation.messageParams
+                                    ? {
+                                          ...recommendation.messageParams,
+                                          ...(recommendation.messageParams.muscle
+                                              ? {
+                                                    muscle: t(
+                                                        `muscleGroups.${normalizeMuscleKey(String(recommendation.messageParams.muscle))}`,
+                                                        String(recommendation.messageParams.muscle)
+                                                    ),
+                                                }
+                                              : {}),
+                                          ...(recommendation.messageParams.optimalRef
+                                              ? {
+                                                    optimalRef: t(
+                                                        `muscleGroups.${normalizeMuscleKey(String(recommendation.messageParams.optimalRef))}`,
+                                                        String(recommendation.messageParams.optimalRef)
+                                                    ),
+                                                }
+                                              : {}),
+                                      }
+                                    : undefined
+                            }
+                            ctaLabelKey={recommendation.ctaLabelKey}
+                            onPressCta={handleAdjustVolume}
+                        />
+                        <TouchableOpacity
+                            style={styles.rebalanceCtaButton}
+                            onPress={handleAdjustVolume}
+                            testID="hypertrophy-rebalance-button"
+                        >
+                            <MaterialIcons name="auto-fix-high" size={18} color="#FFFFFF" />
+                            <Text style={styles.rebalanceCtaText}>
+                                {t('rebalance.openButton', 'Planificar ajuste de rutina activa')}
+                            </Text>
+                        </TouchableOpacity>
+                    </>
                 )}
 
                 {/* Scientific Legend */}
@@ -669,6 +808,16 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
                     </View>
                 )}
             </ScrollView>
+
+            <RoutineRebalanceModal
+                visible={rebalanceVisible}
+                plan={rebalancePlan}
+                weekLabel={weekLabel}
+                loading={rebalanceLoading}
+                saving={rebalanceSaving}
+                onClose={() => setRebalanceVisible(false)}
+                onConfirm={handleConfirmRebalance}
+            />
         </SafeAreaView>
     );
 };
