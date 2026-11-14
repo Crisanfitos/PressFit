@@ -25,6 +25,7 @@ import { RoutineRebalanceModal } from '../components/analytics/RoutineRebalanceM
 import { buildScienceRecommendation } from '../utils/scienceRecommendation';
 import {
     buildRoutineRebalancePlan,
+    extractTemplateDays,
     RebalancePlan,
 } from '../utils/routineRebalancePlanner';
 import { WeeklyRoutine } from '../types/models';
@@ -222,7 +223,11 @@ export const HypertrophyVolumeScreen: React.FC<HypertrophyVolumeScreenProps> = (
                 ExerciseService.getExercises(),
             ]);
 
-            const fullRoutine = fullRes.data || active;
+            const rawRoutine = fullRes.data || active;
+            const fullRoutine: WeeklyRoutine = {
+                ...rawRoutine,
+                rutinas_diarias: extractTemplateDays(rawRoutine.rutinas_diarias),
+            };
             setActiveRoutineRef(fullRoutine);
 
             const plan = buildRoutineRebalancePlan({

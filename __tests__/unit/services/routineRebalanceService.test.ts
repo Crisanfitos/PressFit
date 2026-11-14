@@ -191,4 +191,75 @@ describe('RoutineRebalanceService (PF-447)', () => {
         expect(res.error).toBeTruthy();
         expect(deleteEqMock).toHaveBeenCalledWith('id', 'partial-routine');
     });
+
+    it('filters out historical logged days (fecha_dia != null) when cloning template days', async () => {
+        const routineInsertMock = jest.fn().mockReturnValue({
+            select: jest.fn().mockReturnValue({
+                single: jest.fn().mockResolvedValue({
+                    data: { id: 'new-routine', nombre: 'Adj. Push Pull Legs (14/11)', activa: false },
+                    error: null,
+                }),
+            }),
+        });
+        const daysInsertMock = jest.fn().mockReturnValue({
+            select: jest.fn().mockResolvedValue({
+                data: [{ id: 'new-day-1', nombre_dia: 'Empuje' }],
+                error: null,
+            }),
+        });
+        const exInsertMock = jest.fn().mockReturnValue({
+            select: jest.fn().mockResolvedValue({
+                data: [
+                    { id: 'new-se-1', ejercicio_id: 'ex-1' },
+                    { id: 'new-se-2', ejercicio_id: 'ex-gemelos' },
+                ],
+                error: null,
+            }),
+        });
+        const seriesInsertMock = jest.fn().mockResolvedValue({ error: null });
+
+        (supabase.from as jest.Mock).mockImplementation((table: string) => {
+            if (table === 'rutinas_semanales') return { insert: routineInsertMock };
+            if (table === 'rutinas_diarias') return { insert: daysInsertMock };
+            if (table === 'ejercicios_programados') return { insert: exInsertMock };
+            if (table === 'series') return { insert: seriesInsertMock };
+            return {};
+        });
+
+        const routineWithHistory: WeeklyRoutine = {
+            ...activeRoutine,
+            rutinas_diarias: [
+                ...activeRoutine.rutinas_diarias!,
+                {
+                    id: 'day-history-1',
+                    rutina_semanal_id: 'orig-routine',
+                    nombre_dia: 'Empuje',
+                    fecha_dia: '2026-11-01',
+                    ejercicios_programados: [
+                        {
+                            id: 'se-hist-1',
+                            rutina_diaria_id: 'day-history-1',
+                            ejercicio_id: 'ex-1',
+                            orden_ejecucion: 1,
+                            tipo_peso: 'total',
+                            series: [],
+                        },
+                    ],
+                },
+            ],
+        };
+
+        const res = await RoutineRebalanceService.cloneAndApplyRebalancePlan(
+            'user-1',
+            routineWithHistory,
+            plan
+        );
+
+        expect(res.error).toBeNull();
+        expect(daysInsertMock).toHaveBeenCalledWith([
+            expect.objectContaining({ nombre_dia: 'Empuje' }),
+        ]);
+        expect(exInsertMock).toHaveBeenCalledTimes(1);
+        expect(exInsertMock.mock.calls[0][0]).toHaveLength(2);
+    });
 });
