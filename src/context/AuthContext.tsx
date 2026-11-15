@@ -3,6 +3,7 @@ import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 import { AuthService } from '../services/AuthService';
 import { LogService } from '../services/LogService';
+import { SentryService } from '../services/SentryService';
 import { parseOAuthCallbackUrl } from '../utils/parseOAuthCallbackUrl';
 import { Session, User } from '@supabase/supabase-js';
 
@@ -40,6 +41,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 const session = await AuthService.getSession();
                 setSession(session);
                 setUser(session?.user ?? null);
+                SentryService.setUser(session?.user ? { id: session.user.id } : null);
             } catch (error) {
                 LogService.error('Error initializing auth:', error);
             } finally {
@@ -57,6 +59,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const authListener = AuthService.onAuthStateChange((_event, session) => {
             setSession(session);
             setUser(session?.user ?? null);
+            SentryService.setUser(session?.user ? { id: session.user.id } : null);
         });
 
         return () => authListener?.data?.subscription?.unsubscribe?.();

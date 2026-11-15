@@ -6,12 +6,17 @@ export const SentryService = {
 
     init() {
         const dsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
+        const environment =
+            process.env.EXPO_PUBLIC_APP_ENV || (__DEV__ ? 'development' : 'production');
         try {
             Sentry.init({
                 dsn: dsn || '',
                 enabled: !!dsn,
                 debug: __DEV__,
-                tracesSampleRate: 1.0,
+                environment,
+                tracesSampleRate: __DEV__ ? 1.0 : 0.2,
+                attachStacktrace: true,
+                sendDefaultPii: false,
             });
             this.isInitialized = true;
             if (!dsn) {
