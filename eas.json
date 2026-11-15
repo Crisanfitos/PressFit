@@ -7,18 +7,27 @@
     "development": {
       "node": "22.13.0",
       "developmentClient": false,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      }
     },
     "preview": {
       "node": "22.13.0",
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     },
     "production": {
       "node": "22.13.0",
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      }
     }
   },
   "submit": {
