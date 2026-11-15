@@ -40,6 +40,7 @@ export default defineConfig([
       'ios/**',
       'dist/**',
       '.agents/**',
+      'supabase/functions/**',
     ],
   },
 ]);
