@@ -13,6 +13,25 @@ jest.mock('../../src/lib/supabase', () => ({
     supabase: require('../helpers/mockSupabase').mockSupabase,
 }));
 
+jest.mock('../../src/services/NetworkService', () => ({
+    NetworkService: {
+        isOffline: jest.fn().mockResolvedValue(false),
+        getNetworkState: jest.fn().mockResolvedValue({
+            isConnected: true,
+            isInternetReachable: true,
+            isOffline: false,
+            type: 'WIFI',
+        }),
+        refreshNetworkState: jest.fn().mockResolvedValue({
+            isConnected: true,
+            isInternetReachable: true,
+            isOffline: false,
+            type: 'WIFI',
+        }),
+        addNetworkListener: jest.fn().mockReturnValue(jest.fn()),
+    },
+}));
+
 describe('Series — WorkoutService CRUD', () => {
     beforeEach(() => {
         resetMocks();
