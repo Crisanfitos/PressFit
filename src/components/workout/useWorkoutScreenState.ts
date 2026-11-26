@@ -1,6 +1,12 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { HapticService } from '../../services/HapticService';
-import { checkActiveRestTimer, saveActiveWorkoutParams, getActiveWorkoutParams } from '../../services/TimerNotificationService';
+import {
+    checkActiveRestTimer,
+    saveActiveWorkoutParams,
+    getActiveWorkoutParams,
+    finishActiveRestTimer,
+    discardActiveRestTimer,
+} from '../../services/TimerNotificationService';
 
 export interface UseWorkoutScreenStateParams {
     controllerLoading: boolean;
@@ -38,6 +44,10 @@ export const useWorkoutScreenState = ({
     const needsRefreshRef = useRef(false);
     const exercisesRef = useRef(exercises);
     exercisesRef.current = exercises;
+    const restTimerVisibleRef = useRef(restTimerVisible);
+    restTimerVisibleRef.current = restTimerVisible;
+    const lastCompletedSetIdRef = useRef(lastCompletedSetId);
+    lastCompletedSetIdRef.current = lastCompletedSetId;
 
     useEffect(() => {
         if (!controllerLoading && exercises.length > 0 && !hasInitializedCollapse.current) {
@@ -86,10 +96,47 @@ export const useWorkoutScreenState = ({
     }, [selectedExerciseId, setsToAdd, addSets]);
 
     const handleStartRestTimer = useCallback((setId: string) => {
-        HapticService.setCompleted();
+        if (
+            restTimerVisibleRef.current &&
+            lastCompletedSetIdRef.current &&
+            lastCompletedSetIdRef.current !== setId
+        ) {
+            return;
+        }
+        HapticService.setCompleted?.();
         setLastCompletedSetId(setId);
         saveActiveWorkoutParams({ activeSetId: setId });
         setRestTimerVisible(true);
+    }, []);
+
+    const handleCompleteActiveRestTimer = useCallback(async () => {
+        const savedParams = await getActiveWorkoutParams();
+        const targetSetId = lastCompletedSetIdRef.current || savedParams?.activeSetId;
+        const elapsed = finishActiveRestTimer ? await finishActiveRestTimer() : 0;
+        if (targetSetId && elapsed > 0) {
+            await updateSet(targetSetId, 'descanso_segundos', elapsed);
+            setSavedTimerSetIds((prev) => new Set(prev).add(targetSetId));
+        }
+        setRestTimerVisible(false);
+        setLastCompletedSetId(null);
+        await saveActiveWorkoutParams({ activeSetId: null });
+    }, [updateSet]);
+
+    const handleDiscardActiveRestTimer = useCallback(async () => {
+        if (discardActiveRestTimer) {
+            await discardActiveRestTimer();
+        }
+        setRestTimerVisible(false);
+        setLastCompletedSetId(null);
+        await saveActiveWorkoutParams({ activeSetId: null });
+    }, []);
+
+    const hasActiveRestTimerForOtherSet = useCallback((setId: string): boolean => {
+        return Boolean(
+            restTimerVisibleRef.current &&
+            lastCompletedSetIdRef.current &&
+            lastCompletedSetIdRef.current !== setId
+        );
     }, []);
 
     const handleRestTimerStop = useCallback(async (seconds: number) => {
@@ -180,6 +227,9 @@ export const useWorkoutScreenState = ({
         handleStartRestTimer,
         handleRestTimerStop,
         handleRestTimerDismiss,
+        handleCompleteActiveRestTimer,
+        handleDiscardActiveRestTimer,
+        hasActiveRestTimerForOtherSet,
         toggleExerciseCollapsed,
     }), [
         collapsedExercises,
@@ -201,6 +251,9 @@ export const useWorkoutScreenState = ({
         handleStartRestTimer,
         handleRestTimerStop,
         handleRestTimerDismiss,
+        handleCompleteActiveRestTimer,
+        handleDiscardActiveRestTimer,
+        hasActiveRestTimerForOtherSet,
         toggleExerciseCollapsed,
     ]);
 };

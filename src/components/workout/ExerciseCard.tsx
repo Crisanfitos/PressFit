@@ -37,6 +37,9 @@ export interface ExerciseCardProps {
     onDeleteSet: (setId: string, exerciseId: string) => void;
     onDuplicateSet?: (setId: string, exerciseId: string) => void;
     onStartRestTimer: (setId: string) => void;
+    onCompleteActiveRestTimer?: () => void | Promise<void>;
+    onDiscardActiveRestTimer?: () => void | Promise<void>;
+    hasActiveRestTimerForOtherSet?: (setId: string) => boolean;
     onAddSet: (exerciseId: string) => void;
     onSwapExercise?: (exercise: any) => void;
     onOpenPlateCalculator?: (weight: number, setId?: string, exerciseId?: string) => void;
@@ -70,6 +73,9 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
     onDeleteSet,
     onDuplicateSet,
     onStartRestTimer,
+    onCompleteActiveRestTimer,
+    onDiscardActiveRestTimer,
+    hasActiveRestTimerForOtherSet,
     onAddSet,
     onSwapExercise,
     onOpenPlateCalculator,
@@ -292,6 +298,9 @@ const ExerciseCardComponent: React.FC<ExerciseCardProps> = ({
                                 onDeleteSet={onDeleteSet}
                                 onDuplicateSet={onDuplicateSet}
                                 onStartRestTimer={onStartRestTimer}
+                                onCompleteActiveRestTimer={onCompleteActiveRestTimer}
+                                onDiscardActiveRestTimer={onDiscardActiveRestTimer}
+                                hasActiveRestTimerForOtherSet={hasActiveRestTimerForOtherSet}
                                 onOpenPlateCalculator={onOpenPlateCalculator}
                                 onToggleCompleteSet={onToggleCompleteSet}
                             />

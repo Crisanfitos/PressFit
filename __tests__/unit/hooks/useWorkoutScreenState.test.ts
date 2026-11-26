@@ -1,9 +1,15 @@
 import { renderHook, act } from '@testing-library/react-native';
 import { useWorkoutScreenState } from '../../../src/components/workout/useWorkoutScreenState';
+import {
+  saveActiveWorkoutParams,
+  finishActiveRestTimer,
+  discardActiveRestTimer,
+} from '../../../src/services/TimerNotificationService';
 
 jest.mock('../../../src/services/HapticService', () => ({
   HapticService: {
     selection: jest.fn(),
+    setCompleted: jest.fn(),
   },
 }));
 
@@ -12,6 +18,8 @@ jest.mock('../../../src/services/TimerNotificationService', () => ({
   saveActiveWorkoutParams: jest.fn().mockResolvedValue(undefined),
   getActiveWorkoutParams: jest.fn().mockResolvedValue(null),
   clearActiveWorkoutParams: jest.fn().mockResolvedValue(undefined),
+  finishActiveRestTimer: jest.fn().mockResolvedValue(75),
+  discardActiveRestTimer: jest.fn().mockResolvedValue(undefined),
 }));
 
 describe('useWorkoutScreenState Hook (PF-331)', () => {
@@ -132,5 +140,70 @@ describe('useWorkoutScreenState Hook (PF-331)', () => {
     expect(hook.result.current.plateCalculatorVisible).toBe(false);
     expect(hook.result.current.activePlateSetId).toBeNull();
     expect(hook.result.current.activePlateExerciseId).toBeNull();
+  });
+
+  it('handleStartRestTimer does not overwrite an already active timer for a different set (PF-453)', async () => {
+    const hook = await setupHook();
+
+    await act(async () => {
+      hook.result.current.handleStartRestTimer('set-1');
+    });
+
+    expect(hook.result.current.restTimerVisible).toBe(true);
+    expect(hook.result.current.lastCompletedSetId).toBe('set-1');
+    expect(hook.result.current.hasActiveRestTimerForOtherSet('set-2')).toBe(true);
+    expect(hook.result.current.hasActiveRestTimerForOtherSet('set-1')).toBe(false);
+
+    (saveActiveWorkoutParams as jest.Mock).mockClear();
+
+    await act(async () => {
+      hook.result.current.handleStartRestTimer('set-2');
+    });
+
+    expect(hook.result.current.lastCompletedSetId).toBe('set-1');
+    expect(saveActiveWorkoutParams).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await hook.result.current.handleDiscardActiveRestTimer();
+    });
+
+    expect(hook.result.current.hasActiveRestTimerForOtherSet('set-2')).toBe(false);
+  });
+
+  it('handleCompleteActiveRestTimer saves elapsed rest on the active set and clears timer state (PF-453)', async () => {
+    const hook = await setupHook();
+
+    await act(async () => {
+      hook.result.current.handleStartRestTimer('set-1');
+    });
+
+    await act(async () => {
+      await hook.result.current.handleCompleteActiveRestTimer();
+    });
+
+    expect(finishActiveRestTimer).toHaveBeenCalledTimes(1);
+    expect(mockUpdateSet).toHaveBeenCalledWith('set-1', 'descanso_segundos', 75);
+    expect(hook.result.current.savedTimerSetIds.has('set-1')).toBe(true);
+    expect(hook.result.current.restTimerVisible).toBe(false);
+    expect(hook.result.current.lastCompletedSetId).toBeNull();
+    expect(saveActiveWorkoutParams).toHaveBeenLastCalledWith({ activeSetId: null });
+  });
+
+  it('handleDiscardActiveRestTimer discards active timer without updating set rest duration (PF-453)', async () => {
+    const hook = await setupHook();
+
+    await act(async () => {
+      hook.result.current.handleStartRestTimer('set-1');
+    });
+
+    await act(async () => {
+      await hook.result.current.handleDiscardActiveRestTimer();
+    });
+
+    expect(discardActiveRestTimer).toHaveBeenCalledTimes(1);
+    expect(mockUpdateSet).not.toHaveBeenCalled();
+    expect(hook.result.current.restTimerVisible).toBe(false);
+    expect(hook.result.current.lastCompletedSetId).toBeNull();
+    expect(saveActiveWorkoutParams).toHaveBeenLastCalledWith({ activeSetId: null });
   });
 });

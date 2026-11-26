@@ -119,7 +119,11 @@
     "noWorkoutDay": "Sin entrenar",
     "noMuscleGroup": "Sin grupo",
     "noSetsRecorded": "No se registraron series.",
-    "finishError": "No se pudo finalizar el entrenamiento"
+    "finishError": "No se pudo finalizar el entrenamiento",
+    "activeTimerWarningTitle": "Cronómetro activo",
+    "activeTimerWarningMessage": "Ya tienes un cronómetro de descanso activo en otra serie. Complétalo o deténlo antes de completar una nueva serie.",
+    "activeTimerComplete": "Completar descanso",
+    "activeTimerDiscard": "Detener cronómetro"
   },
   "calendar": {
     "today": "Hoy",

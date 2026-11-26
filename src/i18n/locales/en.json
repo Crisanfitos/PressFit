@@ -119,7 +119,11 @@
     "noWorkoutDay": "Not trained",
     "noMuscleGroup": "No group",
     "noSetsRecorded": "No sets recorded.",
-    "finishError": "Could not finish workout"
+    "finishError": "Could not finish workout",
+    "activeTimerWarningTitle": "Active rest timer",
+    "activeTimerWarningMessage": "You already have an active rest timer running for another set. Complete or stop it before completing a new set.",
+    "activeTimerComplete": "Complete rest",
+    "activeTimerDiscard": "Stop timer"
   },
   "calendar": {
     "today": "Today",
