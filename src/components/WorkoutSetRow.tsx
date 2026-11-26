@@ -62,6 +62,9 @@ export interface WorkoutSetRowProps {
     onDeleteSet?: (setId: string, exerciseId: string) => void;
     onDuplicateSet?: (setId: string, exerciseId: string) => void;
     onStartRestTimer?: (setId: string) => void;
+    onCompleteActiveRestTimer?: () => void | Promise<void>;
+    onDiscardActiveRestTimer?: () => void | Promise<void>;
+    hasActiveRestTimerForOtherSet?: (setId: string) => boolean;
 }
 
 const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
@@ -88,6 +91,9 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
     onDeleteSet,
     onDuplicateSet,
     onStartRestTimer,
+    onCompleteActiveRestTimer,
+    onDiscardActiveRestTimer,
+    hasActiveRestTimerForOtherSet,
 }) => {
     const { t } = useTranslation();
     const isBodyweight = tipoPeso === 'corporal';
@@ -138,6 +144,47 @@ const WorkoutSetRow: React.FC<WorkoutSetRowProps> = ({
         if (isCompleted) {
             promptUnlockConfirmation();
         } else {
+            const hasActiveTimerOnOtherSet = hasActiveRestTimerForOtherSet
+                ? hasActiveRestTimerForOtherSet(set.id)
+                : Boolean(restTimerVisible && lastCompletedSetId && lastCompletedSetId !== set.id);
+            if (hasActiveTimerOnOtherSet) {
+                HapticService.warning?.();
+                const alertButtons: {
+                    text: string;
+                    style?: 'cancel' | 'destructive' | 'default';
+                    onPress?: () => void;
+                }[] = [{ text: t('common.cancel', 'Cancelar'), style: 'cancel' }];
+
+                if (onDiscardActiveRestTimer) {
+                    alertButtons.push({
+                        text: t('workout.activeTimerDiscard', 'Detener cronómetro'),
+                        style: 'destructive',
+                        onPress: () => {
+                            onDiscardActiveRestTimer();
+                        },
+                    });
+                }
+
+                if (onCompleteActiveRestTimer) {
+                    alertButtons.push({
+                        text: t('workout.activeTimerComplete', 'Completar descanso'),
+                        onPress: () => {
+                            onCompleteActiveRestTimer();
+                        },
+                    });
+                }
+
+                Alert.alert(
+                    t('workout.activeTimerWarningTitle', 'Cronómetro activo'),
+                    t(
+                        'workout.activeTimerWarningMessage',
+                        'Ya tienes un cronómetro de descanso activo en otra serie. Complétalo o deténlo antes de completar una nueva serie.'
+                    ),
+                    alertButtons
+                );
+                return;
+            }
+
             // Smart Ghost Completion (PF-438)
             const currentWeight = Number(set.peso_utilizado || 0);
             const currentReps = Number(set.repeticiones || 0);
@@ -556,7 +603,10 @@ export const areWorkoutSetRowPropsEqual = (
         prevProps.onOpenPlateCalculator !== nextProps.onOpenPlateCalculator ||
         prevProps.onSelectSetType !== nextProps.onSelectSetType ||
         prevProps.onToggleCompleteSet !== nextProps.onToggleCompleteSet ||
-        prevProps.onDuplicateSet !== nextProps.onDuplicateSet
+        prevProps.onDuplicateSet !== nextProps.onDuplicateSet ||
+        prevProps.hasActiveRestTimerForOtherSet !== nextProps.hasActiveRestTimerForOtherSet ||
+        prevProps.onCompleteActiveRestTimer !== nextProps.onCompleteActiveRestTimer ||
+        prevProps.onDiscardActiveRestTimer !== nextProps.onDiscardActiveRestTimer
     ) {
         return false;
     }

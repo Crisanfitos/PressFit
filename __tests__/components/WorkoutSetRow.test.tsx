@@ -1098,6 +1098,123 @@ describe('WorkoutSetRow Component (RNTL)', () => {
             expect(mockOnDuplicate).toHaveBeenCalledWith(defaultSet.id, 'ex-1');
         });
     });
+
+    describe('Active Rest Timer Completion Guard (PF-453)', () => {
+        it('blocks completing a different set and shows warning alert when a rest timer is active', async () => {
+            const alertSpy = jest.spyOn(Alert, 'alert');
+            const mockToggle = jest.fn();
+            const mockCompleteActiveTimer = jest.fn();
+            const mockDiscardActiveTimer = jest.fn();
+
+            const { getByTestId } = await render(
+                <WorkoutSetRow
+                    set={{ ...defaultSet, id: 'set-2', is_completed: false }}
+                    setIndex={1}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    restTimerVisible={true}
+                    lastCompletedSetId="set-1"
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                    onToggleCompleteSet={mockToggle}
+                    onStartRestTimer={mockOnStartRestTimer}
+                    onCompleteActiveRestTimer={mockCompleteActiveTimer}
+                    onDiscardActiveRestTimer={mockDiscardActiveTimer}
+                />
+            );
+
+            fireEvent.press(getByTestId('set-complete-checkbox-1'));
+
+            expect(HapticService.warning).toHaveBeenCalledTimes(1);
+            expect(mockToggle).not.toHaveBeenCalled();
+            expect(mockOnSetChange).not.toHaveBeenCalled();
+            expect(mockOnStartRestTimer).not.toHaveBeenCalled();
+
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Cronómetro activo',
+                expect.stringContaining('cronómetro de descanso activo'),
+                expect.any(Array)
+            );
+
+            const alertButtons = alertSpy.mock.calls[0][2] || [];
+            const completeBtn = alertButtons.find((b) => b.text === 'Completar descanso');
+            const discardBtn = alertButtons.find((b) => b.text === 'Detener cronómetro');
+
+            expect(completeBtn).toBeDefined();
+            expect(discardBtn).toBeDefined();
+
+            completeBtn?.onPress?.();
+            expect(mockCompleteActiveTimer).toHaveBeenCalledTimes(1);
+
+            discardBtn?.onPress?.();
+            expect(mockDiscardActiveTimer).toHaveBeenCalledTimes(1);
+        });
+
+        it('allows completing set normally when restTimerVisible is false', async () => {
+            const alertSpy = jest.spyOn(Alert, 'alert');
+            const mockToggle = jest.fn();
+
+            const { getByTestId } = await render(
+                <WorkoutSetRow
+                    set={{ ...defaultSet, id: 'set-2', is_completed: false }}
+                    setIndex={1}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    restTimerVisible={false}
+                    lastCompletedSetId={null}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                    onToggleCompleteSet={mockToggle}
+                    onStartRestTimer={mockOnStartRestTimer}
+                />
+            );
+
+            fireEvent.press(getByTestId('set-complete-checkbox-1'));
+
+            expect(alertSpy).not.toHaveBeenCalled();
+            expect(mockToggle).toHaveBeenCalledWith('set-2', true);
+            expect(mockOnStartRestTimer).toHaveBeenCalledWith('set-2');
+        });
+
+        it('blocks completion via hasActiveRestTimerForOtherSet callback even when row memoized props stay false/null', async () => {
+            const alertSpy = jest.spyOn(Alert, 'alert');
+            const mockToggle = jest.fn();
+            const mockHasActiveTimer = jest.fn((id: string) => id === 'set-2');
+
+            const { getByTestId } = await render(
+                <WorkoutSetRow
+                    set={{ ...defaultSet, id: 'set-2', is_completed: false }}
+                    setIndex={1}
+                    exerciseId="ex-1"
+                    tipoPeso="total"
+                    isInputEditable={true}
+                    isStructureEditable={false}
+                    restTimerVisible={false}
+                    lastCompletedSetId={null}
+                    colors={mockColors}
+                    onSetChange={mockOnSetChange}
+                    onToggleCompleteSet={mockToggle}
+                    onStartRestTimer={mockOnStartRestTimer}
+                    hasActiveRestTimerForOtherSet={mockHasActiveTimer}
+                />
+            );
+
+            fireEvent.press(getByTestId('set-complete-checkbox-1'));
+
+            expect(mockHasActiveTimer).toHaveBeenCalledWith('set-2');
+            expect(mockToggle).not.toHaveBeenCalled();
+            expect(mockOnStartRestTimer).not.toHaveBeenCalled();
+            expect(alertSpy).toHaveBeenCalledWith(
+                'Cronómetro activo',
+                expect.stringContaining('cronómetro de descanso activo'),
+                expect.any(Array)
+            );
+        });
+    });
 });
 
 

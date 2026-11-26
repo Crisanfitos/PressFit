@@ -269,6 +269,9 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ navigation, route }) => {
                                 onDeleteSet={handleDeleteSet}
                                 onDuplicateSet={handleDuplicateSet}
                                 onStartRestTimer={state.handleStartRestTimer}
+                                onCompleteActiveRestTimer={state.handleCompleteActiveRestTimer}
+                                onDiscardActiveRestTimer={state.handleDiscardActiveRestTimer}
+                                hasActiveRestTimerForOtherSet={state.hasActiveRestTimerForOtherSet}
                                 onAddSet={handleAddSet}
                                 onSwapExercise={(mode === 'ACTIVE' || isStructureEditable) ? handleSwapExercise : undefined}
                                 onOpenPlateCalculator={state.handleOpenPlateCalculator}
