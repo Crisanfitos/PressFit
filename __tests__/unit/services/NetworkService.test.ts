@@ -52,4 +52,30 @@ describe('NetworkService Pure JS Unit Tests (PF-BUG-064)', () => {
 
     unsubscribe();
   });
+
+  it('refreshNetworkState performs a fresh check and notifies subscribed listeners', async () => {
+    global.fetch = jest.fn().mockRejectedValue(new TypeError('Offline'));
+    const listener = jest.fn();
+    const unsubscribe = NetworkService.addNetworkListener(listener);
+
+    await new Promise((r) => setTimeout(r, 50));
+    listener.mockClear();
+
+    global.fetch = jest.fn().mockResolvedValue({
+      status: 204,
+      ok: true,
+    } as Response);
+
+    const refreshed = await NetworkService.refreshNetworkState();
+    expect(refreshed.isConnected).toBe(true);
+    expect(refreshed.isOffline).toBe(false);
+    expect(listener).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isConnected: true,
+        isOffline: false,
+      })
+    );
+
+    unsubscribe();
+  });
 });

@@ -714,5 +714,11 @@
     "loadError": "Could not analyze your active routine right now.",
     "saveError": "Could not save the rebalanced routine.",
     "successToast": "Routine \"{{name}}\" created successfully"
+  },
+  "network": {
+    "offlineBanner": "Offline Mode — Changes will be saved locally",
+    "restoredBanner": "Connection restored — Syncing changes",
+    "retry": "Retry",
+    "retryConnection": "Retry connection"
   }
 }

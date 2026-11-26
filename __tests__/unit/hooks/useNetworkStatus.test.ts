@@ -92,4 +92,35 @@ describe('useNetworkStatus Hook', () => {
 
     expect(unsubscribeMock).toHaveBeenCalledTimes(1);
   });
+
+  it('exposes refresh() which triggers NetworkService.refreshNetworkState and updates status', async () => {
+    mockNetworkService.refreshNetworkState = jest.fn().mockResolvedValue({
+      type: 'NONE',
+      isConnected: false,
+      isInternetReachable: false,
+      isOffline: true,
+    });
+
+    let latestStatus: any = null;
+
+    await act(async () => {
+      TestRenderer.create(
+        React.createElement(() => {
+          latestStatus = useNetworkStatus();
+          return null;
+        })
+      );
+    });
+
+    expect(typeof latestStatus.refresh).toBe('function');
+
+    await act(async () => {
+      const refreshed = await latestStatus.refresh();
+      expect(refreshed.isOffline).toBe(true);
+    });
+
+    expect(mockNetworkService.refreshNetworkState).toHaveBeenCalledTimes(1);
+    expect(latestStatus.isOffline).toBe(true);
+    expect(latestStatus.isConnected).toBe(false);
+  });
 });
