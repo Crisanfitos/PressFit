@@ -1,8 +1,7 @@
 import { LogService } from '../../../src/services/LogService';
-import { SentryService } from '../../../src/services/SentryService';
 
-jest.mock('../../../src/services/SentryService', () => ({
-    SentryService: {
+jest.mock('../../../src/services/ErrorReportingService', () => ({
+    ErrorReportingService: {
         init: jest.fn(),
         captureException: jest.fn(),
         captureMessage: jest.fn(),
@@ -84,18 +83,17 @@ describe('LogService', () => {
             process.env.NODE_ENV = originalNodeEnv || 'test';
         });
 
-        it('forwards warning to SentryService.captureMessage in production', () => {
-            // Re-evaluate module with production environment
+        it('forwards warning to ErrorReportingService.captureMessage in production', () => {
             jest.isolateModules(() => {
                 const originalDev = (global as any).__DEV__;
                 (global as any).__DEV__ = false;
                 process.env.NODE_ENV = 'production';
 
                 const { LogService: ProdLogService } = require('../../../src/services/LogService');
-                const { SentryService: ProdSentryService } = require('../../../src/services/SentryService');
+                const { ErrorReportingService: ProdErrorService } = require('../../../src/services/ErrorReportingService');
 
                 ProdLogService.warn('Network degraded', { attempts: 3 });
-                expect(ProdSentryService.captureMessage).toHaveBeenCalledWith(
+                expect(ProdErrorService.captureMessage).toHaveBeenCalledWith(
                     expect.stringContaining('Network degraded {"attempts":3}'),
                     'warning'
                 );
@@ -109,19 +107,19 @@ describe('LogService', () => {
             });
         });
 
-        it('forwards error to SentryService.captureException in production', () => {
+        it('forwards error to ErrorReportingService.captureException in production', () => {
             jest.isolateModules(() => {
                 const originalDev = (global as any).__DEV__;
                 (global as any).__DEV__ = false;
                 process.env.NODE_ENV = 'production';
 
                 const { LogService: ProdLogService } = require('../../../src/services/LogService');
-                const { SentryService: ProdSentryService } = require('../../../src/services/SentryService');
+                const { ErrorReportingService: ProdErrorService } = require('../../../src/services/ErrorReportingService');
 
                 const testError = new Error('Fatal mutation error');
                 ProdLogService.error('Failed to sync', testError, { syncId: 's-1' });
 
-                expect(ProdSentryService.captureException).toHaveBeenCalledWith(
+                expect(ProdErrorService.captureException).toHaveBeenCalledWith(
                     testError,
                     expect.objectContaining({
                         message: 'Failed to sync',
@@ -133,18 +131,18 @@ describe('LogService', () => {
             });
         });
 
-        it('wraps non-Error error into Error instance for Sentry in production', () => {
+        it('wraps non-Error error into Error instance for ErrorReportingService in production', () => {
             jest.isolateModules(() => {
                 const originalDev = (global as any).__DEV__;
                 (global as any).__DEV__ = false;
                 process.env.NODE_ENV = 'production';
 
                 const { LogService: ProdLogService } = require('../../../src/services/LogService');
-                const { SentryService: ProdSentryService } = require('../../../src/services/SentryService');
+                const { ErrorReportingService: ProdErrorService } = require('../../../src/services/ErrorReportingService');
 
                 ProdLogService.error('String failure', 'Network timeout string');
 
-                expect(ProdSentryService.captureException).toHaveBeenCalledWith(
+                expect(ProdErrorService.captureException).toHaveBeenCalledWith(
                     expect.any(Error),
                     expect.objectContaining({
                         message: 'String failure',

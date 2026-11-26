@@ -1,4 +1,4 @@
-import { SentryService } from './SentryService';
+import { ErrorReportingService } from './ErrorReportingService';
 
 const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production';
 
@@ -32,7 +32,7 @@ export const LogService = {
     },
 
     /**
-     * Warnings: printed to console in dev, forwarded to Sentry as warning message in prod.
+     * Warnings: printed to console in dev, forwarded to ErrorReportingService in prod.
      */
     warn(message: string, context?: any): void {
         if (isDev) {
@@ -44,12 +44,12 @@ export const LogService = {
         } else {
             const contextStr = context !== undefined ? (typeof context === 'object' ? JSON.stringify(context) : String(context)) : '';
             const fullMessage = contextStr ? `${message} ${contextStr}` : message;
-            SentryService.captureMessage(fullMessage, 'warning');
+            ErrorReportingService.captureMessage(fullMessage, 'warning');
         }
     },
 
     /**
-     * Errors: printed to console in dev, forwarded to Sentry as captured exception in prod.
+     * Errors: printed to console in dev, forwarded to ErrorReportingService as captured exception in prod.
      */
     error(message: string, error?: any, context?: any): void {
         if (isDev) {
@@ -67,7 +67,7 @@ export const LogService = {
                 ...(typeof context === 'object' && context !== null ? context : (context !== undefined ? { context } : {})),
                 ...(error !== undefined && !(error instanceof Error) ? { rawError: error } : {}),
             };
-            SentryService.captureException(errObj, extra);
+            ErrorReportingService.captureException(errObj, extra);
         }
     },
 };

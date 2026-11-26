@@ -6,13 +6,13 @@ import { AuthProvider } from './src/context/AuthContext';
 import { ThemeProvider } from './src/context/ThemeContext';
 import { AlertProvider } from './src/context/AlertContext';
 import RootNavigator from './src/navigation/RootNavigator';
-import { SentryService } from './src/services/SentryService';
+import { ErrorReportingService } from './src/services/ErrorReportingService';
 import { OfflineBanner } from './src/components/OfflineBanner';
 import { checkActiveRestTimer, cancelTimerNotification } from './src/services/TimerNotificationService';
 import { OfflineStorageService } from './src/services/OfflineStorageService';
 import { SyncService } from './src/services/SyncService';
 
-SentryService.init();
+ErrorReportingService.init();
 
 
 function App() {
@@ -46,4 +46,4 @@ function App() {
   );
 }
 
-export default SentryService.wrap(App);
+export default App;

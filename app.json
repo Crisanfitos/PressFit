@@ -45,8 +45,7 @@
           "iosDisplayInForeground": true
         }
       ],
-      "expo-font",
-      "@sentry/react-native"
+      "expo-font"
     ],
     "extra": {
       "eas": {

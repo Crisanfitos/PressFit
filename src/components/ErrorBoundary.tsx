@@ -2,7 +2,7 @@ import React, { ErrorInfo, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
-import { SentryService } from '../services/SentryService';
+import { ErrorReportingService } from '../services/ErrorReportingService';
 
 interface Props {
     children: ReactNode;
@@ -25,7 +25,7 @@ class ErrorBoundary extends React.Component<Props, State> {
     }
 
     public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        SentryService.captureException(error, { errorInfo });
+        ErrorReportingService.captureException(error, { errorInfo }, { handled: false, level: 'fatal' });
     }
 
     private handleRetry = () => {
