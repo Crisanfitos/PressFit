@@ -9,6 +9,25 @@ import { WorkoutService } from '../../src/services/WorkoutService';
 import { supabase } from '../../src/lib/supabase';
 import { formatLocalDateKey } from '../../src/utils/dateUtils';
 
+jest.mock('../../src/services/NetworkService', () => ({
+    NetworkService: {
+        isOffline: jest.fn().mockResolvedValue(false),
+        getNetworkState: jest.fn().mockResolvedValue({
+            isConnected: true,
+            isInternetReachable: true,
+            isOffline: false,
+            type: 'WIFI',
+        }),
+        refreshNetworkState: jest.fn().mockResolvedValue({
+            isConnected: true,
+            isInternetReachable: true,
+            isOffline: false,
+            type: 'WIFI',
+        }),
+        addNetworkListener: jest.fn().mockReturnValue(jest.fn()),
+    },
+}));
+
 // ─── Mock chain reutilizable ──────────────────────────────────────────────────
 const mockChain: any = {
     select: jest.fn().mockReturnThis(),
