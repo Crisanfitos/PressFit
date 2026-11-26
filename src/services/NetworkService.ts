@@ -83,6 +83,13 @@ export const NetworkService = {
     return state;
   },
 
+  async refreshNetworkState(): Promise<NetworkState> {
+    const newState = await fetchNetworkState();
+    lastKnownState = newState;
+    networkListeners.forEach((listener) => listener(newState));
+    return newState;
+  },
+
   async isOffline(): Promise<boolean> {
     const state = await this.getNetworkState();
     return state.isOffline;

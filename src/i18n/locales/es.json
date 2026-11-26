@@ -714,5 +714,11 @@
     "loadError": "No se pudo analizar tu rutina activa en este momento.",
     "saveError": "No se pudo guardar la rutina reequilibrada.",
     "successToast": "Rutina \"{{name}}\" creada correctamente"
+  },
+  "network": {
+    "offlineBanner": "Modo Offline — Los cambios se guardarán localmente",
+    "restoredBanner": "Conexión restablecida — Sincronizando cambios",
+    "retry": "Reintentar",
+    "retryConnection": "Reintentar conexión"
   }
 }
